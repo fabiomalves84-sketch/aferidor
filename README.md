@@ -142,13 +142,16 @@ em aviso no topo.
 
 ## Limites conhecidos
 
-O confronto de texto não distingue prescrever um fármaco de o nomear para o
-excluir. No caso `ATB-FAR-004`, um modelo que responda corretamente e acrescente
-"a amoxicilina está contraindicada" é marcado como errado. A mitigação atual é
-manter essa nota fora da resposta de referência. A correção verdadeira exige um
-critério que olhe para a prescrição e não para o texto todo, e fica para depois.
+O critério `nao_prescreve` distingue receitar um fármaco de o nomear para o
+excluir, e fá-lo com uma heurística: procura uma expressão de exclusão explícita
+a uma distância curta do nome do fármaco. Erra nas duas direções. Dá por excluído
+um fármaco quando a expressão de exclusão ali perto pertence a outro, e dá por
+receitado um fármaco quando a exclusão está escrita de uma forma que a lista não
+contém. É melhor do que tratar toda a menção como prescrição, que era o
+comportamento anterior e que marcava como errada uma resposta certa por ela
+acrescentar um aviso. Não é compreensão de texto e não se apresenta como tal.
 
-Nenhuma das dez fontes foi ainda confirmada por uma pessoa. Até isso acontecer,
+Nenhuma das catorze fontes foi ainda confirmada por uma pessoa. Até isso acontecer,
 qualquer resultado deste banco mede o modelo contra valores transcritos por uma
 ferramenta automática. Ver `casos/VERIFICACAO.md`.
 
@@ -162,7 +165,7 @@ ferramenta automática. Ver `casos/VERIFICACAO.md`.
 
 Roteiro concluído. 14 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 102 testes,
+por tipo de falha e por risco, relatório legível e documentação. 108 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as

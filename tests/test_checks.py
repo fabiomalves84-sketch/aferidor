@@ -87,6 +87,53 @@ class TestContemTodos(unittest.TestCase):
         self.assertNotIn("'ceftriaxona'", result.evidence)
 
 
+class TestNaoPrescreve(unittest.TestCase):
+    """The distinction plain matching could not make: giving a drug versus ruling it out."""
+
+    def crit(self):
+        return criterion(
+            "nao_prescreve", "amoxicilina", failure=FailureType.CONTRAINDICACAO_OMITIDA
+        )
+
+    def test_not_mentioning_the_drug_passes(self):
+        self.assertTrue(check(self.crit(), "Azitromicina 500 mg, 5 dias").passed)
+
+    def test_naming_the_drug_to_rule_it_out_passes(self):
+        for text in (
+            "Azitromicina 500 mg. A amoxicilina esta contraindicada nesta situacao.",
+            "Prescrever azitromicina. Nao usar amoxicilina.",
+            "A amoxicilina deve ser evitada. Dar azitromicina.",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(check(self.crit(), text).passed)
+
+    def test_actually_prescribing_the_drug_fails(self):
+        result = check(self.crit(), "Na hipersensibilidade tipo I, dar amoxicilina 500 mg.")
+        self.assertFalse(result.passed)
+        self.assertIn("prescreve", result.evidence)
+
+    def test_the_question_wording_alone_does_not_excuse_a_prescription(self):
+        """The words 'alergia' and 'hipersensibilidade' appear in every case of this
+        kind, so they must not count as ruling the drug out."""
+        text = "Doente com alergia e hipersensibilidade tipo I: prescrever amoxicilina."
+        self.assertFalse(check(self.crit(), text).passed)
+
+    def test_one_excluded_mention_does_not_cover_a_second_prescribing_one(self):
+        text = (
+            "A amoxicilina esta contraindicada. "
+            + "x" * 200
+            + " Comecar amoxicilina 1000 mg de 8 em 8 horas."
+        )
+        self.assertFalse(check(self.crit(), text).passed)
+
+    def test_a_second_term_is_checked_too(self):
+        crit = criterion(
+            "nao_prescreve", "amoxicilina", "cefuroxima",
+            failure=FailureType.CONTRAINDICACAO_OMITIDA,
+        )
+        self.assertFalse(check(crit, "Dar cefuroxima 250 mg.").passed)
+
+
 class TestValorNumerico(unittest.TestCase):
     def test_the_exact_value_passes(self):
         self.assertTrue(check(criterion("valor_numerico", "6", "mg"), "dexametasona 6 mg").passed)

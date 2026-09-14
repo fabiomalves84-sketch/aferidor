@@ -42,7 +42,7 @@ class Criterion:
     failure: FailureType
     description: str = ""
 
-    KINDS = ("contem", "nao_contem", "contem_todos", "valor_numerico")
+    KINDS = ("contem", "nao_contem", "contem_todos", "valor_numerico", "nao_prescreve")
 
     def __post_init__(self) -> None:
         if self.kind not in self.KINDS:

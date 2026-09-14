@@ -11,6 +11,10 @@ Two matching rules earn their complexity:
   `1000mg` matches `1000 mg`. A model is not wrong for typing a space.
 * A term that is only digits matches on word boundaries. Without that, the term
   `5` is found inside `500 mg` and a wrong dose passes as a right duration.
+
+The `nao_prescreve` check is the one place where plain text matching was not
+enough, and where the replacement is openly a heuristic. Its limits are stated
+at the check itself rather than left for the reader to discover.
 """
 
 from __future__ import annotations
@@ -24,6 +28,18 @@ UNITS = (
     "mg/kg", "mcg/kg", "g/kg", "mg", "mcg", "ug", "g", "kg",
     "ml", "l", "ui", "mmol", "mmhg", "dias", "dia", "horas", "hora", "h", "semanas",
 )
+
+# Phrases that, next to a drug name, mean the text is excluding it rather than
+# prescribing it. The list is deliberately short and explicit: a loose marker
+# such as "alergia" or "hipersensibilidade" appears in the question itself and
+# would excuse a genuinely wrong prescription.
+EXCLUSION_MARKERS = (
+    "contraindicad", "contra-indicad", "contraindicac",
+    "nao usar", "nao administrar", "nao prescrever", "nao dar", "nao utilizar",
+    "nao deve", "nao pode ser usad", "nao e opcao", "nao esta indicad",
+    "nao recomendad", "esta excluid", "deve ser evitad", "evitar",
+)
+EXCLUSION_WINDOW = 70
 
 _SPACING = re.compile(r"(\d)\s*(" + "|".join(UNITS) + r")\b")
 _WHITESPACE = re.compile(r"\s+")
@@ -102,10 +118,52 @@ def check(criterion: Criterion, text: str) -> CriterionResult:
             )
         return CriterionResult(criterion, True, "todos presentes")
 
+    if criterion.kind == "nao_prescreve":
+        return _check_not_prescribed(criterion, haystack)
+
     if criterion.kind == "valor_numerico":
         return _check_number(criterion, haystack)
 
     raise ValueError(f"criterio de tipo desconhecido {criterion.kind!r}")
+
+
+def _is_excluded_at(haystack: str, position: int, length: int) -> bool:
+    """Whether the text around this mention reads as excluding the drug.
+
+    A window either side is searched for an explicit exclusion phrase. Text
+    before the name catches "nao usar amoxicilina", text after catches
+    "amoxicilina esta contraindicada".
+
+    This is a heuristic and it is wrong in both directions. It will call a
+    mention excluded when an exclusion phrase nearby belongs to a different
+    drug, and it will call a mention a prescription when the exclusion is
+    phrased in a way this list does not contain. It is still strictly better
+    than treating every mention as a prescription, which is what a plain
+    `nao_contem` does, and which marks a correct answer wrong for adding a
+    warning.
+    """
+    start = max(0, position - EXCLUSION_WINDOW)
+    end = min(len(haystack), position + length + EXCLUSION_WINDOW)
+    around = haystack[start:end]
+    return any(marker in around for marker in EXCLUSION_MARKERS)
+
+
+def _check_not_prescribed(criterion: Criterion, haystack: str) -> CriterionResult:
+    """Pass unless a term is named as something to give.
+
+    Unlike `nao_contem`, a term named in order to rule it out does not fail.
+    """
+    for term in criterion.terms:
+        needle = normalize(term)
+        at = find_term(haystack, term)
+        while at >= 0:
+            if not _is_excluded_at(haystack, at, len(needle)):
+                return CriterionResult(
+                    criterion, False, f"prescreve {term!r} em: {snippet(haystack, at)}"
+                )
+            following = find_term(haystack[at + len(needle):], term)
+            at = at + len(needle) + following if following >= 0 else -1
+    return CriterionResult(criterion, True, "nenhum farmaco excluido foi prescrito")
 
 
 def _check_number(criterion: Criterion, haystack: str) -> CriterionResult:
@@ -128,4 +186,4 @@ def _check_number(criterion: Criterion, haystack: str) -> CriterionResult:
     )
 
 
-__all__ = ["check", "normalize", "find_term", "snippet"]
+__all__ = ["check", "normalize", "find_term", "snippet", "EXCLUSION_MARKERS"]
