@@ -83,7 +83,7 @@ demonstração.
 - [x] **Fase 2** Conjunto inicial de casos com fontes verificadas
 - [x] **Fase 3** Executor: envia ao modelo, recolhe, guarda
 - [x] **Fase 4** Classificadores e taxonomia de falhas
-- [ ] **Fase 5** Relatório e métricas por categoria de risco
+- [x] **Fase 5** Relatório e métricas por categoria de risco
 - [ ] **Fase 6** Documentação e apresentação
 
 ## Como correr
@@ -96,6 +96,7 @@ python -m aferidor verificar                     # os casos passam nos proprios 
 python -m aferidor executar --fornecedor falso   # ensaio a seco, sem chave nem custo
 python -m aferidor executar --fornecedor openai --modelo gpt-4o
 python -m aferidor classificar                   # avalia as respostas guardadas
+python -m aferidor relatorio                     # escreve relatorios/relatorio.md
 ```
 
 As chaves vêm do ambiente, `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`, e nunca do
@@ -124,6 +125,21 @@ contra os critérios desse mesmo caso. Um caso cuja própria referência não pa
 está errado, e está errado na direção que mais custa: dá como errado um modelo
 que acertou. A verificação corre também na bateria de testes.
 
+## Relatório
+
+`python -m aferidor relatorio` escreve um documento em Markdown para quem não lê
+código. A ordem do documento é uma decisão, não um acaso: o número de falhas
+críticas vem primeiro e a percentagem de respostas certas vem depois, porque uma
+percentagem sozinha é exatamente o número que esconde o que importa.
+
+Cada resposta errada aparece com a pergunta, a resposta de referência, a fonte,
+o que o modelo respondeu e o critério que falhou. Quem discordar de um veredito
+tem de conseguir ver o que o corretor viu e contestá-lo.
+
+Casos que ficaram sem resposta são nomeados e não entram em nenhuma contagem.
+Enquanto as fontes não forem confirmadas por uma pessoa, o relatório diz isso
+em aviso no topo.
+
 ## Limites conhecidos
 
 O confronto de texto não distingue prescrever um fármaco de o nomear para o
@@ -138,7 +154,7 @@ ferramenta automática. Ver `casos/VERIFICACAO.md`.
 
 ## Estado
 
-Fases 1 a 4 concluídas: 10 casos com fonte, executor com dois adaptadores
+Fases 1 a 5 concluídas: 10 casos com fonte, executor com dois adaptadores
 reais e um fornecedor falso, correção por critérios com contagem separada por
-tipo de falha e por risco, 87 testes, todos a passar. Fase 5, o relatório, a
-seguir.
+tipo de falha e por risco, e relatório legível, 102 testes, todos a passar.
+Falta a Fase 6, a documentação e a apresentação, e falta confirmar as fontes.

@@ -11,6 +11,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from . import report
 from .grading import grade_all, self_check, tally_by_model
 from .providers import AnthropicProvider, FakeProvider, OpenAIProvider, Provider, ProviderError
 from .runner import RunConfig, run
@@ -19,6 +20,7 @@ from .storage import read_answers, read_cases, write_verdicts
 DEFAULT_CASES = Path("casos/casos.json")
 DEFAULT_OUTPUT = Path("data/respostas.jsonl")
 DEFAULT_VERDICTS = Path("data/vereditos.json")
+DEFAULT_REPORT = Path("relatorios/relatorio.md")
 
 
 def build_provider(kind: str, model: str | None) -> Provider:
@@ -59,6 +61,16 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     classificar.add_argument("--casos", type=Path, default=DEFAULT_CASES)
     classificar.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
     classificar.add_argument("--saida", type=Path, default=DEFAULT_VERDICTS)
+
+    relatorio = sub.add_parser("relatorio", help="escrever o relatorio legivel")
+    relatorio.add_argument("--casos", type=Path, default=DEFAULT_CASES)
+    relatorio.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
+    relatorio.add_argument("--saida", type=Path, default=DEFAULT_REPORT)
+    relatorio.add_argument(
+        "--fontes-confirmadas",
+        action="store_true",
+        help="omitir o aviso de fontes por confirmar (so depois de as confirmar)",
+    )
 
     return parser.parse_args(argv)
 
@@ -148,6 +160,27 @@ def comando_verificar(args: argparse.Namespace) -> int:
     return 1 if broken else 0
 
 
+def comando_relatorio(args: argparse.Namespace) -> int:
+    cases = read_cases(args.casos)
+    if not args.respostas.exists():
+        print(f"erro: nao ha respostas em {args.respostas}", file=sys.stderr)
+        return 2
+
+    answers = read_answers(args.respostas)
+    verdicts, missing = grade_all(cases, answers)
+    text = report.build(
+        cases,
+        answers,
+        verdicts,
+        missing=missing,
+        sources_verified=args.fontes_confirmadas,
+    )
+    args.saida.parent.mkdir(parents=True, exist_ok=True)
+    args.saida.write_text(text, encoding="utf-8")
+    print(f"relatorio em {args.saida} ({len(text.splitlines())} linhas)")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(list(sys.argv[1:] if argv is None else argv))
     if args.comando == "executar":
@@ -156,6 +189,8 @@ def main(argv: list[str] | None = None) -> int:
         return comando_verificar(args)
     if args.comando == "classificar":
         return comando_classificar(args)
+    if args.comando == "relatorio":
+        return comando_relatorio(args)
     return 2
 
 
