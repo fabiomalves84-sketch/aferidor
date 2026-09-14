@@ -84,7 +84,17 @@ Resolvido: a pergunta passou a nomear o esquema sem bismuto. Um caso ambíguo
 não mede o modelo, mede a sorte dele em adivinhar qual das respostas certas se
 queria.
 
-## O caso que corre mais risco de estar desatualizado
+## O caso que estava desatualizado, e já não está
+
+**AJU-MET-018. RESOLVIDO em 14/09/2026 pela primeira execução real.** O aviso
+abaixo estava certo e serviu para o que devia servir: o caso foi dado como
+falhado, a divergência foi investigada, e o errado era a referência. A circular
+de 2016 dava 1500 mg/dia entre 60 e 30 ml/min; o RCM harmonizado europeu dá
+2000 mg/dia entre 45 e 59 e 1000 mg/dia entre 30 e 44. O caso foi reescrito
+contra a fonte em vigor e a fonte antiga foi substituída. Continua a precisar de
+confirmação humana, como todos os outros.
+
+O aviso original, mantido como registo:
 
 **AJU-MET-018.** A circular do Infarmed sobre metformina e função renal é de
 janeiro de 2016, e a orientação europeia sobre metformina em doença renal crónica

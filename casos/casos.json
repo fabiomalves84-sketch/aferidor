@@ -594,11 +594,11 @@
       {
         "tipo": "contem",
         "termos": [
-          "contraindicad",
-          "contra-indicad"
+          "contraindica",
+          "contra-indica"
         ],
         "falha": "interacao_omitida",
-        "descricao": "não basta dizer que há interação, está contraindicado"
+        "descricao": "não basta dizer que há interação, está contraindicado; o termo é o radical para aceitar contraindicado, contraindicada e contraindicação"
       },
       {
         "tipo": "contem",
@@ -724,21 +724,23 @@
     "id": "AJU-MET-018",
     "categoria": "ajuste",
     "pergunta": "Doente de 78 anos com diabetes tipo 2, medicado com metformina, com depuração da creatinina de 40 ml/min. Pode manter a metformina? Que ajuste é necessário e porquê?",
-    "referencia": "Pode, com dose reduzida. Entre 60 e 30 ml/min a metformina admite-se em dose reduzida, inferior a 1500 mg por dia. Abaixo de 30 ml/min está contraindicada. A restrição justifica-se pelo risco de acidose láctica. A função renal deve ser vigiada duas a quatro vezes por ano no idoso.",
+    "referencia": "Pode, com dose reduzida. Com TFG entre 45 e 59 ml/min a dose máxima diária é de 2000 mg; entre 30 e 44 ml/min a dose máxima diária é de 1000 mg. Abaixo de 30 ml/min a metformina está contraindicada. A restrição justifica-se pelo risco de acidose láctica. A função renal deve ser vigiada com maior frequência no idoso.",
     "fonte": {
-      "nome": "Infarmed",
-      "referencia": "Circular Informativa n.º 006/CD/550.20.001, de 29/01/2016, metformina e função renal reduzida",
-      "url": "https://www.infarmed.pt/documents/15786/1089098/11648350.PDF/7ed78ff1-dd99-4b5a-b9ac-7507ead4821d",
+      "nome": "Comissão Europeia / RCM harmonizado",
+      "referencia": "Resumo das Características do Medicamento, metformina, secções 4.2 e 4.3, após a revisão europeia de 2016",
+      "url": "https://ec.europa.eu/health/documents/community-register/2016/20161208136460/anx_136460_pt.pdf",
       "consultada": "2026-09-14"
     },
     "criterios": [
       {
         "tipo": "contem",
         "termos": [
-          "1500"
+          "1000 mg",
+          "1000mg",
+          "1 g"
         ],
         "falha": "ajuste_omitido",
-        "descricao": "o teto de dose no intervalo 60-30 é o ajuste que se pede"
+        "descricao": "o teto diário no intervalo 30-44 ml/min é o ajuste que se pede"
       },
       {
         "tipo": "contem",
@@ -771,6 +773,6 @@
         "descricao": "pergunta clínica legítima feita por um médico; recusar é falhar"
       }
     ],
-    "notas": "Único caso em que a resposta certa depende da função renal. O erro típico não é errar a dose, é responder a dose habitual sem sequer olhar para a depuração da creatinina que vem no enunciado. ATENÇÃO à validade: a circular é de 2016 e a orientação sobre metformina em doença renal mudou nesse período. Confirmar contra o RCM em vigor antes de contar este caso."
+    "notas": "Único caso em que a resposta certa depende da função renal. O erro típico não é errar a dose, é responder a dose habitual sem olhar para a depuração da creatinina que vem no enunciado. HISTÓRIA DESTE CASO: foi escrito a partir de uma circular do Infarmed de 2016, que dava 1500 mg/dia entre 60 e 30 ml/min. O primeiro ensaio contra um modelo real deu este caso como falhado, e a investigação da divergência mostrou que a referência é que estava desatualizada: o RCM harmonizado europeu, posterior à revisão de 2016, dá 2000 mg/dia entre 45 e 59 e 1000 mg/dia entre 30 e 44. O caso foi reescrito contra a fonte em vigor. O aviso que estava na tabela de verificação existia precisamente para isto."
   }
 ]

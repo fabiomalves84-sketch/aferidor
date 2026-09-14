@@ -169,6 +169,17 @@ ferramenta automática. Ver `casos/VERIFICACAO.md`.
 - `docs/COMO_CORRER.md` como correr contra um modelo real, e como afinar depois
 - `casos/VERIFICACAO.md` a tabela de confirmação humana das fontes
 
+## Ensaios registados
+
+`ensaios/` guarda execuções feitas, com as respostas em bruto, os vereditos e o
+relatório. A primeira está em `ensaios/2026-09-14-agente/` e o README dessa pasta
+diz como foi feita, o que essa forma limita, e o que a execução encontrou.
+
+Encontrou três coisas, e a primeira é a que justifica o projeto inteiro: um caso
+foi dado como falhado e a investigação mostrou que o errado era a referência, não
+o modelo. A fonte usada estava desatualizada. O caso foi reescrito contra a fonte
+em vigor.
+
 ## Estado
 
 Roteiro concluído. 18 casos com fonte, executor com dois adaptadores reais e

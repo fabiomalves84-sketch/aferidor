@@ -7,3 +7,6 @@ data/*.jsonl
 relatorios/
 .env
 _to_delete/
+
+# os ensaios registados são evidência, não produto descartável
+!ensaios/
