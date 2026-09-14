@@ -38,23 +38,27 @@ portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
 
 ## Estado honesto, hoje
 
-- 10 casos clínicos, cada um com fonte pública identificada até à página
+- 14 casos clínicos, cada um com fonte pública identificada até à página, vários
+  deles em pares que medem uma distinção que um modelo pode não fazer: pneumonia
+  com e sem comorbilidades, exacerbação de DPOC ligeira e grave, faringite com
+  hipersensibilidade tipo I e não tipo I
 - Executor com adaptadores para OpenAI e Anthropic, e um fornecedor falso
 - Correção determinista por critérios, com taxonomia de oito tipos de falha
 - Relatório legível, com as falhas críticas antes da percentagem
-- 102 testes automáticos, todos a passar
+- 108 testes automáticos, todos a passar
 - Sem dependências externas, só biblioteca padrão do Python
 
 E o que falta, dito com a mesma clareza:
 
-- **As dez fontes ainda não foram confirmadas por uma pessoa.** Foram lidas por
+- **As catorze fontes ainda não foram confirmadas por uma pessoa.** Foram lidas por
   ferramenta automática, e uma ferramenta automática transcreve mal um número.
   Até essa confirmação, qualquer resultado mede o modelo contra valores não
   verificados. A tabela de confirmação está em `casos/VERIFICACAO.md`.
 - **Nenhum modelo real foi ainda executado.** O que existe foi provado de ponta
   a ponta com o fornecedor falso.
-- **O confronto de texto não distingue prescrever um fármaco de o nomear para o
-  excluir.** Está documentado em Limites conhecidos no README.
+- **A distinção entre receitar um fármaco e o nomear para o excluir é feita por
+  heurística, não por compreensão de texto.** Erra nas duas direções, e o README
+  diz como e porquê, em Limites conhecidos.
 
 Estas três linhas estão aqui de propósito. Um instrumento de medida que esconde
 os seus próprios limites não serve como instrumento de medida.
@@ -87,8 +91,8 @@ próprio.
 ## Como ver em cinco minutos
 
 ```
-python -m unittest discover -s tests   # 102 testes
-python -m aferidor verificar           # 10/10 casos coerentes
+python -m unittest discover -s tests   # 108 testes
+python -m aferidor verificar           # 14/14 casos coerentes
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```
