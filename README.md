@@ -84,7 +84,7 @@ demonstração.
 - [x] **Fase 3** Executor: envia ao modelo, recolhe, guarda
 - [x] **Fase 4** Classificadores e taxonomia de falhas
 - [x] **Fase 5** Relatório e métricas por categoria de risco
-- [ ] **Fase 6** Documentação e apresentação
+- [x] **Fase 6** Documentação e apresentação
 
 ## Como correr
 
@@ -152,9 +152,19 @@ Nenhuma das dez fontes foi ainda confirmada por uma pessoa. Até isso acontecer,
 qualquer resultado deste banco mede o modelo contra valores transcritos por uma
 ferramenta automática. Ver `casos/VERIFICACAO.md`.
 
+## Documentos
+
+- `docs/APRESENTACAO.md` o projeto em cinco minutos, para quem não abre o código
+- `docs/ARQUITETURA.md` os módulos, as fronteiras entre eles e a razão de cada uma
+- `casos/VERIFICACAO.md` a tabela de confirmação humana das fontes
+
 ## Estado
 
-Fases 1 a 5 concluídas: 10 casos com fonte, executor com dois adaptadores
-reais e um fornecedor falso, correção por critérios com contagem separada por
-tipo de falha e por risco, e relatório legível, 102 testes, todos a passar.
-Falta a Fase 6, a documentação e a apresentação, e falta confirmar as fontes.
+Roteiro concluído. 10 casos com fonte, executor com dois adaptadores reais e
+um fornecedor falso, correção determinista por critérios com contagem separada
+por tipo de falha e por risco, relatório legível e documentação. 102 testes,
+todos a passar. Sem dependências externas.
+
+Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as
+dez fontes com os olhos numa pessoa (`casos/VERIFICACAO.md`) e correr contra um
+modelo real.
