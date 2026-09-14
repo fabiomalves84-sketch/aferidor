@@ -97,7 +97,14 @@ python -m aferidor executar --fornecedor falso   # ensaio a seco, sem chave nem 
 python -m aferidor executar --fornecedor openai --modelo gpt-4o
 python -m aferidor classificar                   # avalia as respostas guardadas
 python -m aferidor relatorio                     # escreve relatorios/relatorio.md
+
+python -m aferidor modelos --fornecedor openai   # que modelos existem hoje
+python -m aferidor ensaio --fornecedor openai --modelo <nome>   # tudo de uma vez
 ```
+
+`docs/COMO_CORRER.md` explica o que fazer no dia em que houver chave de API,
+incluindo a parte que vai dar trabalho: afinar critérios contra respostas reais
+sem cair na tentação de os alargar até o modelo passar.
 
 As chaves vêm do ambiente, `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`, e nunca do
 repositório. As respostas são escritas em `data/respostas.jsonl`, uma por
@@ -159,6 +166,7 @@ ferramenta automática. Ver `casos/VERIFICACAO.md`.
 
 - `docs/APRESENTACAO.md` o projeto em cinco minutos, para quem não abre o código
 - `docs/ARQUITETURA.md` os módulos, as fronteiras entre eles e a razão de cada uma
+- `docs/COMO_CORRER.md` como correr contra um modelo real, e como afinar depois
 - `casos/VERIFICACAO.md` a tabela de confirmação humana das fontes
 
 ## Estado

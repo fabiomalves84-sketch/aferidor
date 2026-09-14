@@ -45,6 +45,15 @@ class Provider(ABC):
     def ask(self, prompt: str) -> str:
         """Send one prompt and return the reply text."""
 
+    def available_models(self) -> list[str]:
+        """Model identifiers this provider currently offers.
+
+        Asked of the provider rather than written down. A list of model names in
+        documentation is wrong within months, and a bench that points at a
+        retired model fails for a reason that has nothing to do with the bench.
+        """
+        raise ProviderError(f"{self.name} nao sabe listar modelos")
+
 
 class FakeProvider(Provider):
     """A provider that answers from a script. For tests and dry runs.
@@ -78,11 +87,16 @@ class FakeProvider(Provider):
         return self.default
 
 
-def _post_json(url: str, headers: dict[str, str], payload: dict, timeout: float) -> dict:
-    """POST JSON and return the decoded reply, classifying every failure."""
-    body = json.dumps(payload).encode("utf-8")
-    request = urllib.request.Request(url, data=body, method="POST")
-    request.add_header("content-type", "application/json")
+def _request_json(
+    url: str, headers: dict[str, str], payload: dict | None, timeout: float
+) -> dict:
+    """Call an endpoint and return the decoded reply, classifying every failure."""
+    body = json.dumps(payload).encode("utf-8") if payload is not None else None
+    request = urllib.request.Request(
+        url, data=body, method="POST" if body is not None else "GET"
+    )
+    if body is not None:
+        request.add_header("content-type", "application/json")
     request.add_header("user-agent", USER_AGENT)
     for key, value in headers.items():
         request.add_header(key, value)
@@ -102,6 +116,10 @@ def _post_json(url: str, headers: dict[str, str], payload: dict, timeout: float)
         raise ProviderError(f"{url} excedeu {timeout}s", retryable=True) from None
     except json.JSONDecodeError:
         raise ProviderError(f"{url} devolveu algo que nao e JSON", retryable=True) from None
+
+
+def _post_json(url: str, headers: dict[str, str], payload: dict, timeout: float) -> dict:
+    return _request_json(url, headers, payload, timeout)
 
 
 def _key_from_env(variable: str, given: str | None) -> str:
@@ -151,6 +169,15 @@ class OpenAIProvider(Provider):
         except (KeyError, IndexError, TypeError):
             raise ProviderError(f"resposta da OpenAI sem texto: {str(data)[:300]}") from None
 
+    def available_models(self) -> list[str]:
+        data = _request_json(
+            "https://api.openai.com/v1/models",
+            {"authorization": f"Bearer {self.api_key}"},
+            None,
+            self.timeout,
+        )
+        return sorted(str(m.get("id", "")) for m in data.get("data", []) if m.get("id"))
+
 
 class AnthropicProvider(Provider):
     """Anthropic messages."""
@@ -191,6 +218,15 @@ class AnthropicProvider(Provider):
             return "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
         except (KeyError, TypeError):
             raise ProviderError(f"resposta da Anthropic sem texto: {str(data)[:300]}") from None
+
+    def available_models(self) -> list[str]:
+        data = _request_json(
+            "https://api.anthropic.com/v1/models?limit=100",
+            {"x-api-key": self.api_key, "anthropic-version": self.VERSION},
+            None,
+            self.timeout,
+        )
+        return sorted(str(m.get("id", "")) for m in data.get("data", []) if m.get("id"))
 
 
 __all__ = [

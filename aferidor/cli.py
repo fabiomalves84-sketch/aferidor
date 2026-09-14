@@ -62,6 +62,27 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     classificar.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
     classificar.add_argument("--saida", type=Path, default=DEFAULT_VERDICTS)
 
+    ensaio = sub.add_parser(
+        "ensaio", help="executar, classificar e escrever o relatorio de uma vez"
+    )
+    ensaio.add_argument(
+        "--fornecedor", choices=("falso", "openai", "anthropic"), default="falso"
+    )
+    ensaio.add_argument("--modelo", default=None)
+    ensaio.add_argument("--casos", type=Path, default=DEFAULT_CASES)
+    ensaio.add_argument("--saida", type=Path, default=DEFAULT_OUTPUT)
+    ensaio.add_argument("--vereditos", type=Path, default=DEFAULT_VERDICTS)
+    ensaio.add_argument("--relatorio", type=Path, default=DEFAULT_REPORT)
+    ensaio.add_argument("--limite", type=int, default=0)
+    ensaio.add_argument("--tentativas", type=int, default=3)
+    ensaio.add_argument("--recomecar", action="store_true")
+    ensaio.add_argument("--fontes-confirmadas", action="store_true")
+
+    modelos = sub.add_parser(
+        "modelos", help="perguntar ao fornecedor que modelos tem disponiveis"
+    )
+    modelos.add_argument("--fornecedor", choices=("openai", "anthropic"), required=True)
+
     relatorio = sub.add_parser("relatorio", help="escrever o relatorio legivel")
     relatorio.add_argument("--casos", type=Path, default=DEFAULT_CASES)
     relatorio.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
@@ -181,6 +202,62 @@ def comando_relatorio(args: argparse.Namespace) -> int:
     return 0
 
 
+def comando_modelos(args: argparse.Namespace) -> int:
+    try:
+        provider = build_provider(args.fornecedor, None)
+        nomes = provider.available_models()
+    except ProviderError as error:
+        print(f"erro: {error}", file=sys.stderr)
+        return 2
+    for nome in nomes:
+        print(nome)
+    print(f"\n{len(nomes)} modelos em {args.fornecedor}", file=sys.stderr)
+    return 0
+
+
+def comando_ensaio(args: argparse.Namespace) -> int:
+    """Os tres passos de uma vez, parando ao primeiro que falhe.
+
+    A verificacao de coerencia dos casos corre primeiro e de proposito. Perguntar
+    a um modelo custa dinheiro; descobrir depois que um caso estava partido custa
+    o dinheiro outra vez.
+    """
+    cases = read_cases(args.casos)
+    broken = self_check(cases)
+    if broken:
+        for case, _ in broken:
+            print(f"erro: {case.case_id} nao passa nos proprios criterios", file=sys.stderr)
+        print("corrige os casos antes de gastar uma execucao", file=sys.stderr)
+        return 2
+
+    executar_args = argparse.Namespace(
+        fornecedor=args.fornecedor, modelo=args.modelo, casos=args.casos,
+        saida=args.saida, limite=args.limite, tentativas=args.tentativas,
+        recomecar=args.recomecar,
+    )
+    codigo = comando_executar(executar_args)
+    if codigo == 2:
+        return codigo
+
+    classificar_args = argparse.Namespace(
+        casos=args.casos, respostas=args.saida, saida=args.vereditos
+    )
+    comando_classificar(classificar_args)
+
+    relatorio_args = argparse.Namespace(
+        casos=args.casos, respostas=args.saida, saida=args.relatorio,
+        fontes_confirmadas=args.fontes_confirmadas,
+    )
+    comando_relatorio(relatorio_args)
+
+    if codigo == 1:
+        print(
+            "\naviso: houve casos sem resposta; o relatorio nomeia-os e nao os conta",
+            file=sys.stderr,
+        )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(list(sys.argv[1:] if argv is None else argv))
     if args.comando == "executar":
@@ -191,6 +268,10 @@ def main(argv: list[str] | None = None) -> int:
         return comando_classificar(args)
     if args.comando == "relatorio":
         return comando_relatorio(args)
+    if args.comando == "ensaio":
+        return comando_ensaio(args)
+    if args.comando == "modelos":
+        return comando_modelos(args)
     return 2
 
 
