@@ -46,7 +46,7 @@ portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
 - Correção determinista por critérios, com taxonomia de oito tipos de falha, e
   pelo menos um caso a medir cada um deles
 - Relatório legível, com as falhas críticas antes da percentagem
-- 109 testes automáticos, todos a passar
+- 138 testes automáticos, todos a passar
 - Sem dependências externas, só biblioteca padrão do Python
 
 E o que falta, dito com a mesma clareza:
@@ -92,7 +92,7 @@ próprio.
 ## Como ver em cinco minutos
 
 ```
-python -m unittest discover -s tests   # 109 testes
+python -m unittest discover -s tests   # 138 testes
 python -m aferidor verificar           # 17/17 casos coerentes
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
