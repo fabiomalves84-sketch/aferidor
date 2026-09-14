@@ -26,10 +26,15 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 | COV-DEX-008 | DGS Norma 005/2022 | Quadro 3 | Dexametasona 6 mg/dia, 10 dias | bate | [ ] |
 | COV-TOC-009 | DGS Norma 005/2022 | Quadro 3 | Tocilizumab 8 mg/kg, máximo 800 mg | bate | [ ] |
 | COV-JAN-010 | DGS Norma 005/2022 | Ponto 3, alínea c | Antivírico nos primeiros 5 dias de sintomas | bate | [ ] |
+| ATB-PAC-011 | APMGF Guia ATB 1.3 | 17 | Amoxicilina 1000 mg 8/8h 5-7 dias + azitromicina 500 mg 24/24h 3 dias | bate | [ ] |
+| ATB-DPOC-012 | APMGF Guia ATB 1.3 | 19 | Amoxicilina + ácido clavulânico 500+125 mg 8/8h, 5 dias | bate | [ ] |
+| ATB-FAR-013 | APMGF Guia ATB 1.3 | 13 | Amoxicilina 50 mg/kg/dia, máximo 1000 mg/dia, 12/12h, 10 dias | bate | [ ] |
+| ATB-FAR-014 | APMGF Guia ATB 1.3 | 13 | Cefuroxima 250 mg 12/12h, 10 dias, na hipersensibilidade não tipo I | bate | [ ] |
 
 A coluna **2.ª leitura** registou uma releitura dos dois documentos por uma via
-automática diferente da que produziu os casos, a 14 de setembro de 2026. Os dez
-valores coincidiram, incluindo a página. Isso reduz a hipótese de erro de
+automática diferente da que produziu os casos, a 14 de setembro de 2026. Todos os
+valores coincidiram, incluindo a página. Os quatro casos acrescentados depois dessa
+releitura saíram da mesma transcrição, e por isso contam como uma leitura só. Isso reduz a hipótese de erro de
 transcrição, mas não fecha o assunto: continuam a ser duas máquinas a ler o
 mesmo PDF. A coluna **Pessoa** é a que conta, e é a que ainda está por
 preencher.
@@ -60,9 +65,10 @@ caso próprio.
 
 **ATB-HP-007.** O guia tem dois esquemas, o quádruplo sem bismuto durante
 14 dias e o quádruplo com bismuto durante 10 dias. A referência corresponde ao
-primeiro. Um modelo que responda o segundo não está errado em absoluto, e o
-caso hoje dá-lhe errado. A decidir se o caso é reescrito ou se passa a aceitar
-os dois.
+primeiro, e um modelo que respondesse o segundo levava errado sem merecer.
+Resolvido: a pergunta passou a nomear o esquema sem bismuto. Um caso ambíguo
+não mede o modelo, mede a sorte dele em adivinhar qual das respostas certas se
+queria.
 
 ## Nota sobre validade
 

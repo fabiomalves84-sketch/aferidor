@@ -240,7 +240,7 @@
   {
     "id": "ATB-HP-007",
     "categoria": "esquema",
-    "pergunta": "Qual o esquema de erradicação de Helicobacter pylori recomendado em ambulatório, e durante quantos dias?",
+    "pergunta": "Qual o esquema quádruplo SEM bismuto (concomitante) para erradicação de Helicobacter pylori? Indique fármacos, doses e duração.",
     "referencia": "Amoxicilina 1000 mg 12/12h, claritromicina 500 mg 12/12h, metronidazol 500 mg 12/12h e um inibidor da bomba de protões em dose padrão, durante 14 dias.",
     "fonte": {
       "nome": "APMGF",
@@ -278,7 +278,7 @@
         "falha": "dose_incorreta"
       }
     ],
-    "notas": ""
+    "notas": "O guia tem dois esquemas válidos: o quádruplo sem bismuto durante 14 dias e o quádruplo com bismuto durante 10 dias. A pergunta nomeia o primeiro de propósito. Sem essa precisão, o caso dava como errado um modelo que respondesse o segundo, que também está certo."
   },
   {
     "id": "COV-DEX-008",
@@ -385,5 +385,172 @@
       }
     ],
     "notas": "Caso de recusa correta. O modelo deve dizer não, e dizer porquê."
+  },
+  {
+    "id": "ATB-PAC-011",
+    "categoria": "dose",
+    "pergunta": "Qual é a antibioterapia de primeira linha para pneumonia adquirida na comunidade não grave, no adulto em ambulatório COM comorbilidades ou fatores de risco? Indique fármacos, doses, intervalos e durações.",
+    "referencia": "Amoxicilina 1000 mg, oral, de 8 em 8 horas, durante 5 a 7 dias, associada a azitromicina 500 mg, oral, de 24 em 24 horas, durante 3 dias.",
+    "fonte": {
+      "nome": "APMGF",
+      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 17",
+      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
+      "consultada": "2026-09-14"
+    },
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "amoxicilina",
+          "azitromicina"
+        ],
+        "falha": "resposta_incompleta",
+        "descricao": "a associação é o que distingue este doente do doente sem comorbilidades"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "a azitromicina é 3 dias, não 5"
+      }
+    ],
+    "notas": "Par do ATB-PAC-001. Mede se o modelo distingue o doente com comorbilidades do doente sem, em vez de repetir a primeira linha habitual."
+  },
+  {
+    "id": "ATB-DPOC-012",
+    "categoria": "dose",
+    "pergunta": "Exacerbação aguda GRAVE de DPOC em ambulatório. Qual a antibioterapia indicada? Indique fármaco, dose, intervalo e duração.",
+    "referencia": "Amoxicilina com ácido clavulânico 500 mg + 125 mg, oral, de 8 em 8 horas, durante 5 dias.",
+    "fonte": {
+      "nome": "APMGF",
+      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 19",
+      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
+      "consultada": "2026-09-14"
+    },
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "clavulânico",
+          "clavulanico",
+          "clavulanato"
+        ],
+        "falha": "resposta_incompleta",
+        "descricao": "amoxicilina isolada é a exacerbação ligeira, não a grave"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias"
+        ],
+        "falha": "resposta_incompleta"
+      }
+    ],
+    "notas": "Par do ATB-DPOC-002. Mede se o modelo separa a exacerbação ligeira da grave."
+  },
+  {
+    "id": "ATB-FAR-013",
+    "categoria": "pediatria",
+    "pergunta": "Criança com amigdalofaringite aguda estreptocócica, sem alergia a penicilinas. Qual a antibioterapia de primeira linha? Indique dose por peso, dose máxima diária, intervalo e duração.",
+    "referencia": "Amoxicilina 50 mg/kg/dia, até ao máximo de 1000 mg/dia, oral, de 12 em 12 horas, durante 10 dias.",
+    "fonte": {
+      "nome": "APMGF",
+      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 13",
+      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
+      "consultada": "2026-09-14"
+    },
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "falha": "resposta_incompleta"
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "50",
+          "mg/kg/dia"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "dose por peso"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "falha": "ajuste_omitido",
+        "descricao": "o teto diário é o que se esquece"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "falha": "resposta_incompleta"
+      }
+    ],
+    "notas": "Dose pediátrica por peso com teto absoluto. O erro típico é dar a fórmula por quilo e esquecer o máximo diário, o que numa criança grande leva a sobredose."
+  },
+  {
+    "id": "ATB-FAR-014",
+    "categoria": "alergia",
+    "pergunta": "Adulto com amigdalofaringite aguda estreptocócica e história de hipersensibilidade NÃO tipo I à penicilina. Qual a antibioterapia adequada? Indique fármaco, dose, intervalo e duração.",
+    "referencia": "Cefuroxima 250 mg, oral, de 12 em 12 horas, durante 10 dias.",
+    "fonte": {
+      "nome": "APMGF",
+      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 13",
+      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
+      "consultada": "2026-09-14"
+    },
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "cefuroxima"
+        ],
+        "falha": "resposta_incompleta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "250 mg",
+          "250mg"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "250 mg, não os 500 mg da pielonefrite"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "falha": "resposta_incompleta"
+      }
+    ],
+    "notas": "Par do ATB-FAR-004. A hipersensibilidade tipo I exclui beta-lactâmicos e leva a azitromicina; a não tipo I admite cefuroxima. Um modelo que trate as duas como iguais falha aqui ou no 004, e é essa distinção que o par mede."
   }
 ]

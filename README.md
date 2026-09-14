@@ -160,7 +160,7 @@ ferramenta automática. Ver `casos/VERIFICACAO.md`.
 
 ## Estado
 
-Roteiro concluído. 10 casos com fonte, executor com dois adaptadores reais e
+Roteiro concluído. 14 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
 por tipo de falha e por risco, relatório legível e documentação. 102 testes,
 todos a passar. Sem dependências externas.
