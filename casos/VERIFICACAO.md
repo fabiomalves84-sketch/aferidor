@@ -14,18 +14,25 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 
 ## Estado
 
-| Caso | Fonte | Página | Valor a confirmar | Verificado |
-|---|---|---|---|---|
-| ATB-PAC-001 | APMGF Guia ATB 1.3 | 17 | Amoxicilina 1000 mg 8/8h, 5-7 dias | [ ] |
-| ATB-DPOC-002 | APMGF Guia ATB 1.3 | 19 | Amoxicilina 500 mg 8/8h, 5 dias | [ ] |
-| ATB-CIST-003 | APMGF Guia ATB 1.3 | 26 | Nitrofurantoína 100 mg 6/6h 5 dias; fosfomicina 3000 mg toma única | [ ] |
-| ATB-FAR-004 | APMGF Guia ATB 1.3 | 13 | Azitromicina 500 mg 24/24h, 5 dias, na hipersensibilidade tipo I | [ ] |
-| ATB-FAR-005 | APMGF Guia ATB 1.3 | 13 | Amoxicilina 500 mg 12/12h, 10 dias | [ ] |
-| ATB-PIEL-006 | APMGF Guia ATB 1.3 | 28 | Ceftriaxona 1000 mg toma única, depois cefuroxima 500 mg 12/12h 7 dias | [ ] |
-| ATB-HP-007 | APMGF Guia ATB 1.3 | 22 | Quádruplo com IBP, 14 dias | [ ] |
-| COV-DEX-008 | DGS Norma 005/2022 | Quadro 3 | Dexametasona 6 mg/dia, 10 dias | [ ] |
-| COV-TOC-009 | DGS Norma 005/2022 | - | Tocilizumab 8 mg/kg, máximo 800 mg | [ ] |
-| COV-JAN-010 | DGS Norma 005/2022 | - | Antivírico nos primeiros 5 dias de sintomas | [ ] |
+| Caso | Fonte | Página | Valor a confirmar | 2.ª leitura | Pessoa |
+|---|---|---|---|---|---|
+| ATB-PAC-001 | APMGF Guia ATB 1.3 | 17 | Amoxicilina 1000 mg 8/8h, 5-7 dias | bate | [ ] |
+| ATB-DPOC-002 | APMGF Guia ATB 1.3 | 19 | Amoxicilina 500 mg 8/8h, 5 dias | bate | [ ] |
+| ATB-CIST-003 | APMGF Guia ATB 1.3 | 26 | Nitrofurantoína 100 mg 6/6h 5 dias; fosfomicina 3000 mg toma única | bate | [ ] |
+| ATB-FAR-004 | APMGF Guia ATB 1.3 | 13 | Azitromicina 500 mg 24/24h, 5 dias, na hipersensibilidade tipo I | bate | [ ] |
+| ATB-FAR-005 | APMGF Guia ATB 1.3 | 13 | Amoxicilina 500 mg 12/12h, 10 dias | bate | [ ] |
+| ATB-PIEL-006 | APMGF Guia ATB 1.3 | 28 | Ceftriaxona 1000 mg toma única, depois cefuroxima 500 mg 12/12h 7 dias | bate | [ ] |
+| ATB-HP-007 | APMGF Guia ATB 1.3 | 22 | Quádruplo com IBP, 14 dias | bate | [ ] |
+| COV-DEX-008 | DGS Norma 005/2022 | Quadro 3 | Dexametasona 6 mg/dia, 10 dias | bate | [ ] |
+| COV-TOC-009 | DGS Norma 005/2022 | Quadro 3 | Tocilizumab 8 mg/kg, máximo 800 mg | bate | [ ] |
+| COV-JAN-010 | DGS Norma 005/2022 | Ponto 3, alínea c | Antivírico nos primeiros 5 dias de sintomas | bate | [ ] |
+
+A coluna **2.ª leitura** registou uma releitura dos dois documentos por uma via
+automática diferente da que produziu os casos, a 14 de setembro de 2026. Os dez
+valores coincidiram, incluindo a página. Isso reduz a hipótese de erro de
+transcrição, mas não fecha o assunto: continuam a ser duas máquinas a ler o
+mesmo PDF. A coluna **Pessoa** é a que conta, e é a que ainda está por
+preencher.
 
 ## Documentos
 
@@ -34,9 +41,34 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 - DGS, *Norma n.º 005/2022 de 28/05/2022, atualizada a 04/01/2023, Terapêutica Farmacológica para a COVID-19*
   https://www.dgs.pt/normas-orientacoes-e-informacoes/normas-e-circulares-normativas/norma-n-0052022-de-28052022-pdf.aspx
 
+## Observações da 2.ª leitura
+
+**COV-JAN-010.** A norma tem uma nota de rodapé que admite início até ao 7.º
+dia em imunossupressão grave selecionada. O caso usa 8 dias de sintomas, pelo
+que fica fora da janela mesmo com a exceção, e a resposta de referência
+mantém-se. Fica registado porque um modelo que mencione a exceção não está a
+inventar nada.
+
+**COV-DEX-008.** A norma acrescenta ajuste pediátrico de 0,15 mg/kg/dia, até
+6 mg. O caso pergunta pelo adulto internado e não é afetado.
+
+**ATB-PAC-001.** O guia distingue doente sem comorbilidades de doente com
+comorbilidades, e neste último acrescenta azitromicina 500 mg 24/24h durante
+3 dias. O caso pergunta pelo doente sem critérios de gravidade e a referência
+corresponde ao primeiro. Vale a pena, mais tarde, acrescentar o segundo como
+caso próprio.
+
+**ATB-HP-007.** O guia tem dois esquemas, o quádruplo sem bismuto durante
+14 dias e o quádruplo com bismuto durante 10 dias. A referência corresponde ao
+primeiro. Um modelo que responda o segundo não está errado em absoluto, e o
+caso hoje dá-lhe errado. A decidir se o caso é reescrito ou se passa a aceitar
+os dois.
+
 ## Nota sobre validade
 
 O guia da APMGF é de novembro de 2025 e a norma da DGS tem última atualização
 de janeiro de 2023. Uma orientação clínica desatualizada deixa de ser
 referência. Antes de qualquer execução que se pretenda apresentar, confirmar
-que nenhum dos dois documentos foi entretanto substituído.
+que nenhum dos dois documentos foi entretanto substituído. A 2.ª leitura de
+setembro de 2026 obteve os dois documentos nos mesmos endereços, mas não
+confirma que sejam a versão em vigor.
