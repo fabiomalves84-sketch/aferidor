@@ -80,7 +80,7 @@ demonstração.
 ## Roteiro
 
 - [x] **Fase 1** Modelo de caso, critérios de aceitação e armazenamento
-- [ ] **Fase 2** Conjunto inicial de casos com fontes verificadas
+- [x] **Fase 2** Conjunto inicial de casos com fontes verificadas
 - [ ] **Fase 3** Executor: envia ao modelo, recolhe, guarda
 - [ ] **Fase 4** Classificadores e taxonomia de falhas
 - [ ] **Fase 5** Relatório e métricas por categoria de risco
@@ -88,4 +88,5 @@ demonstração.
 
 ## Estado
 
-Fase 1 concluída: 23 testes, todos a passar. Fase 2 a seguir.
+Fases 1 e 2 concluídas: 10 casos com fonte, 29 testes, todos a passar.
+As fontes aguardam confirmação humana (ver `casos/VERIFICACAO.md`). Fase 3 a seguir.
