@@ -1,0 +1,32 @@
+name: testes
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Bateria de testes
+        run: python -m unittest discover -s tests -v
+
+      - name: Os casos passam nos próprios critérios
+        run: python -m aferidor verificar
+
+      - name: Execução a seco e relatório
+        run: |
+          python -m aferidor executar --fornecedor falso
+          python -m aferidor classificar
+          python -m aferidor relatorio

@@ -1,0 +1,19 @@
+[project]
+name = "aferidor"
+version = "0.1.0"
+description = "Banco de ensaio para respostas clínicas de modelos de linguagem em português europeu"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Fábio Alves" }]
+dependencies = []
+
+[project.scripts]
+aferidor = "aferidor.cli:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["aferidor*"]
