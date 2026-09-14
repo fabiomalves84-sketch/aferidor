@@ -151,7 +151,7 @@ contém. É melhor do que tratar toda a menção como prescrição, que era o
 comportamento anterior e que marcava como errada uma resposta certa por ela
 acrescentar um aviso. Não é compreensão de texto e não se apresenta como tal.
 
-Nenhuma das catorze fontes foi ainda confirmada por uma pessoa. Até isso acontecer,
+Nenhuma das dezassete fontes foi ainda confirmada por uma pessoa. Até isso acontecer,
 qualquer resultado deste banco mede o modelo contra valores transcritos por uma
 ferramenta automática. Ver `casos/VERIFICACAO.md`.
 
@@ -163,11 +163,11 @@ ferramenta automática. Ver `casos/VERIFICACAO.md`.
 
 ## Estado
 
-Roteiro concluído. 14 casos com fonte, executor com dois adaptadores reais e
+Roteiro concluído. 17 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 108 testes,
+por tipo de falha e por risco, relatório legível e documentação. 109 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as
-dez fontes com os olhos numa pessoa (`casos/VERIFICACAO.md`) e correr contra um
+fontes com os olhos numa pessoa (`casos/VERIFICACAO.md`) e correr contra um
 modelo real.

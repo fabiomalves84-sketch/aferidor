@@ -30,6 +30,9 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 | ATB-DPOC-012 | APMGF Guia ATB 1.3 | 19 | Amoxicilina + ácido clavulânico 500+125 mg 8/8h, 5 dias | bate | [ ] |
 | ATB-FAR-013 | APMGF Guia ATB 1.3 | 13 | Amoxicilina 50 mg/kg/dia, máximo 1000 mg/dia, 12/12h, 10 dias | bate | [ ] |
 | ATB-FAR-014 | APMGF Guia ATB 1.3 | 13 | Cefuroxima 250 mg 12/12h, 10 dias, na hipersensibilidade não tipo I | bate | [ ] |
+| INT-CLA-015 | RCM Claritromicina | 4.3 e 4.5 | Claritromicina com sinvastatina ou lovastatina: contraindicado, risco de rabdomiólise | bate | [ ] |
+| INT-COL-016 | RCM Claritromicina | 4.3 e 4.4 | Claritromicina com colquicina: não administrar, toxicidade por colquicina | bate | [ ] |
+| FMT-CIST-017 | APMGF Guia ATB 1.3 | 26 | Nitrofurantoína 100 mg 6/6h 5 dias (mesma matéria do 003, formato imposto) | bate | [ ] |
 
 A coluna **2.ª leitura** registou uma releitura dos dois documentos por uma via
 automática diferente da que produziu os casos, a 14 de setembro de 2026. Todos os
@@ -43,6 +46,13 @@ preencher.
 
 - APMGF, *Guia de Bolso de Antibioterapia em Ambulatório*, edição 1.3, novembro 2025
   https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf
+- Infarmed, *Resumo das Características do Medicamento, Claritromicina 500 mg*,
+  aprovado em julho de 2022, secções 4.3, 4.4 e 4.5
+  https://towapharmaceutical.pt/wp-content/uploads/2024/06/RCM_15_Claritromicina-toLife-500mg.pdf
+  **Atenção na confirmação:** este endereço é uma cópia alojada pelo titular da
+  autorização, não pelo Infarmed. O RCM em vigor consulta-se no Infomed, no sítio
+  do Infarmed, e é aí que a confirmação humana tem de ser feita. Se a versão em
+  vigor divergir, é a do Infomed que manda.
 - DGS, *Norma n.º 005/2022 de 28/05/2022, atualizada a 04/01/2023, Terapêutica Farmacológica para a COVID-19*
   https://www.dgs.pt/normas-orientacoes-e-informacoes/normas-e-circulares-normativas/norma-n-0052022-de-28052022-pdf.aspx
 

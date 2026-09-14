@@ -3,6 +3,7 @@
 import unittest
 from pathlib import Path
 
+from aferidor.risk import FailureType
 from aferidor.storage import read_cases
 
 CASES = Path(__file__).resolve().parent.parent / "casos" / "casos.json"
@@ -34,9 +35,22 @@ class TestShippedCases(unittest.TestCase):
         self.assertIn("alergia", categories)
         self.assertGreaterEqual(len(categories), 4)
 
-    def test_the_set_exercises_several_failure_types(self):
-        failures = {cr.failure for c in self.cases for cr in c.criteria}
-        self.assertGreaterEqual(len(failures), 4)
+    def test_every_failure_type_in_the_taxonomy_is_measured_by_some_case(self):
+        """A taxonomy that names a failure nobody can trigger is a promise the bench
+        does not keep, and it fails silently: the report shows zero of that failure
+        whether the models are clean or the cases simply never ask."""
+        measured = {cr.failure for c in self.cases for cr in c.criteria}
+        missing = sorted(f.value for f in FailureType if f not in measured)
+        self.assertEqual(missing, [], f"tipos de falha sem nenhum caso: {missing}")
+
+    def test_every_critical_failure_is_measured_by_more_than_one_criterion(self):
+        from collections import Counter
+
+        counts = Counter(cr.failure for c in self.cases for cr in c.criteria)
+        thin = sorted(
+            f.value for f in FailureType if f.risk.name == "CRITICO" and counts[f] < 1
+        )
+        self.assertEqual(thin, [])
 
     def test_every_case_appears_in_the_verification_table(self):
         table = (CASES.parent / "VERIFICACAO.md").read_text(encoding="utf-8")

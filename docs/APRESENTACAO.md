@@ -38,19 +38,20 @@ portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
 
 ## Estado honesto, hoje
 
-- 14 casos clínicos, cada um com fonte pública identificada até à página, vários
+- 17 casos clínicos, cada um com fonte pública identificada até à página, vários
   deles em pares que medem uma distinção que um modelo pode não fazer: pneumonia
   com e sem comorbilidades, exacerbação de DPOC ligeira e grave, faringite com
   hipersensibilidade tipo I e não tipo I
 - Executor com adaptadores para OpenAI e Anthropic, e um fornecedor falso
-- Correção determinista por critérios, com taxonomia de oito tipos de falha
+- Correção determinista por critérios, com taxonomia de oito tipos de falha, e
+  pelo menos um caso a medir cada um deles
 - Relatório legível, com as falhas críticas antes da percentagem
-- 108 testes automáticos, todos a passar
+- 109 testes automáticos, todos a passar
 - Sem dependências externas, só biblioteca padrão do Python
 
 E o que falta, dito com a mesma clareza:
 
-- **As catorze fontes ainda não foram confirmadas por uma pessoa.** Foram lidas por
+- **As dezassete fontes ainda não foram confirmadas por uma pessoa.** Foram lidas por
   ferramenta automática, e uma ferramenta automática transcreve mal um número.
   Até essa confirmação, qualquer resultado mede o modelo contra valores não
   verificados. A tabela de confirmação está em `casos/VERIFICACAO.md`.
@@ -91,8 +92,8 @@ próprio.
 ## Como ver em cinco minutos
 
 ```
-python -m unittest discover -s tests   # 108 testes
-python -m aferidor verificar           # 14/14 casos coerentes
+python -m unittest discover -s tests   # 109 testes
+python -m aferidor verificar           # 17/17 casos coerentes
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```
