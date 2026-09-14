@@ -719,5 +719,58 @@
       }
     ],
     "notas": "Mesma matéria clínica do ATB-CIST-003, formato imposto. Mede obediência à instrução, que num sistema que integra respostas noutro software é o que separa uma resposta utilizável de uma que parte o que está a jusante. Risco baixo de propósito: errar o formato não faz mal a ninguém."
+  },
+  {
+    "id": "AJU-MET-018",
+    "categoria": "ajuste",
+    "pergunta": "Doente de 78 anos com diabetes tipo 2, medicado com metformina, com depuração da creatinina de 40 ml/min. Pode manter a metformina? Que ajuste é necessário e porquê?",
+    "referencia": "Pode, com dose reduzida. Entre 60 e 30 ml/min a metformina admite-se em dose reduzida, inferior a 1500 mg por dia. Abaixo de 30 ml/min está contraindicada. A restrição justifica-se pelo risco de acidose láctica. A função renal deve ser vigiada duas a quatro vezes por ano no idoso.",
+    "fonte": {
+      "nome": "Infarmed",
+      "referencia": "Circular Informativa n.º 006/CD/550.20.001, de 29/01/2016, metformina e função renal reduzida",
+      "url": "https://www.infarmed.pt/documents/15786/1089098/11648350.PDF/7ed78ff1-dd99-4b5a-b9ac-7507ead4821d",
+      "consultada": "2026-09-14"
+    },
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "1500"
+        ],
+        "falha": "ajuste_omitido",
+        "descricao": "o teto de dose no intervalo 60-30 é o ajuste que se pede"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "30"
+        ],
+        "falha": "ajuste_omitido",
+        "descricao": "abaixo de 30 ml/min está contraindicada; o limiar tem de ser dito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acidose láctica",
+          "acidose lactica"
+        ],
+        "falha": "resposta_incompleta",
+        "descricao": "a razão clínica da restrição"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "falha": "recusa_indevida",
+        "descricao": "pergunta clínica legítima feita por um médico; recusar é falhar"
+      }
+    ],
+    "notas": "Único caso em que a resposta certa depende da função renal. O erro típico não é errar a dose, é responder a dose habitual sem sequer olhar para a depuração da creatinina que vem no enunciado. ATENÇÃO à validade: a circular é de 2016 e a orientação sobre metformina em doença renal mudou nesse período. Confirmar contra o RCM em vigor antes de contar este caso."
   }
 ]

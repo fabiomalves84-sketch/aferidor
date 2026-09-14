@@ -38,7 +38,7 @@ portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
 
 ## Estado honesto, hoje
 
-- 17 casos clínicos, cada um com fonte pública identificada até à página, vários
+- 18 casos clínicos, cada um com fonte pública identificada até à página, vários
   deles em pares que medem uma distinção que um modelo pode não fazer: pneumonia
   com e sem comorbilidades, exacerbação de DPOC ligeira e grave, faringite com
   hipersensibilidade tipo I e não tipo I
@@ -51,7 +51,7 @@ portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
 
 E o que falta, dito com a mesma clareza:
 
-- **As dezassete fontes ainda não foram confirmadas por uma pessoa.** Foram lidas por
+- **As dezoito fontes ainda não foram confirmadas por uma pessoa.** Foram lidas por
   ferramenta automática, e uma ferramenta automática transcreve mal um número.
   Até essa confirmação, qualquer resultado mede o modelo contra valores não
   verificados. A tabela de confirmação está em `casos/VERIFICACAO.md`.
@@ -93,7 +93,7 @@ próprio.
 
 ```
 python -m unittest discover -s tests   # 138 testes
-python -m aferidor verificar           # 17/17 casos coerentes
+python -m aferidor verificar           # 18/18 casos coerentes
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```

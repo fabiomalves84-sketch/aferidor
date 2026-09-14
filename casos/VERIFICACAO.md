@@ -33,6 +33,7 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 | INT-CLA-015 | RCM Claritromicina | 4.3 e 4.5 | Claritromicina com sinvastatina ou lovastatina: contraindicado, risco de rabdomiólise | bate | [ ] |
 | INT-COL-016 | RCM Claritromicina | 4.3 e 4.4 | Claritromicina com colquicina: não administrar, toxicidade por colquicina | bate | [ ] |
 | FMT-CIST-017 | APMGF Guia ATB 1.3 | 26 | Nitrofurantoína 100 mg 6/6h 5 dias (mesma matéria do 003, formato imposto) | bate | [ ] |
+| AJU-MET-018 | Infarmed Circular 006/CD/2016 | toda | Metformina: dose reduzida <1500 mg/dia entre 60 e 30 ml/min, contraindicada abaixo de 30 | bate, **mas ver nota** | [ ] |
 
 A coluna **2.ª leitura** registou uma releitura dos dois documentos por uma via
 automática diferente da que produziu os casos, a 14 de setembro de 2026. Todos os
@@ -53,6 +54,9 @@ preencher.
   autorização, não pelo Infarmed. O RCM em vigor consulta-se no Infomed, no sítio
   do Infarmed, e é aí que a confirmação humana tem de ser feita. Se a versão em
   vigor divergir, é a do Infomed que manda.
+- Infarmed, *Circular Informativa n.º 006/CD/550.20.001*, de 29/01/2016,
+  metformina em doentes com função renal reduzida
+  https://www.infarmed.pt/documents/15786/1089098/11648350.PDF/7ed78ff1-dd99-4b5a-b9ac-7507ead4821d
 - DGS, *Norma n.º 005/2022 de 28/05/2022, atualizada a 04/01/2023, Terapêutica Farmacológica para a COVID-19*
   https://www.dgs.pt/normas-orientacoes-e-informacoes/normas-e-circulares-normativas/norma-n-0052022-de-28052022-pdf.aspx
 
@@ -79,6 +83,22 @@ primeiro, e um modelo que respondesse o segundo levava errado sem merecer.
 Resolvido: a pergunta passou a nomear o esquema sem bismuto. Um caso ambíguo
 não mede o modelo, mede a sorte dele em adivinhar qual das respostas certas se
 queria.
+
+## O caso que corre mais risco de estar desatualizado
+
+**AJU-MET-018.** A circular do Infarmed sobre metformina e função renal é de
+janeiro de 2016, e a orientação europeia sobre metformina em doença renal crónica
+mudou por essa altura. O que está transcrito corresponde ao que a circular diz,
+mas a circular pode já não corresponder ao RCM em vigor.
+
+Este caso precisa de uma confirmação mais exigente do que os outros: não basta
+abrir a circular e ver que os números batem. É preciso abrir o RCM atual da
+metformina no Infomed e confirmar que os limiares continuam a ser 60, 30 e
+1500 mg/dia. Se divergirem, o caso é reescrito ou retirado.
+
+Fica aqui escrito e não escondido, porque uma orientação clínica desatualizada
+deixa de ser referência, e um banco de ensaio construído sobre ela mede o modelo
+contra uma regra que já ninguém segue.
 
 ## Nota sobre validade
 
