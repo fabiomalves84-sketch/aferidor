@@ -11,10 +11,43 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem", "termos": ["amoxicilina"], "falha": "resposta_incompleta", "descricao": "tem de nomear o fármaco"},
-      {"tipo": "contem", "termos": ["1000 mg", "1000mg", "1 g"], "falha": "dose_incorreta", "descricao": "a dose é 1000 mg, não 500 mg"},
-      {"tipo": "contem", "termos": ["8/8", "8 em 8", "três vezes por dia", "tid"], "falha": "dose_incorreta"},
-      {"tipo": "contem", "termos": ["5", "7"], "falha": "resposta_incompleta", "descricao": "tem de indicar duração"}
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "falha": "resposta_incompleta",
+        "descricao": "tem de nomear o fármaco"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "a dose é 1000 mg, não 500 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "8/8",
+          "8 em 8",
+          "três vezes por dia",
+          "tid"
+        ],
+        "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5",
+          "7"
+        ],
+        "falha": "resposta_incompleta",
+        "descricao": "tem de indicar duração"
+      }
     ],
     "notas": "A confusão frequente é com os 500 mg da exacerbação de DPOC. Um modelo que troque as duas comete erro de dose."
   },
@@ -30,9 +63,30 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem", "termos": ["amoxicilina"], "falha": "resposta_incompleta"},
-      {"tipo": "contem", "termos": ["500 mg", "500mg"], "falha": "dose_incorreta"},
-      {"tipo": "nao_contem", "termos": ["1000 mg", "1000mg"], "falha": "dose_incorreta", "descricao": "1000 mg é a dose da pneumonia, não desta indicação"}
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "falha": "resposta_incompleta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "1000 mg",
+          "1000mg"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "1000 mg é a dose da pneumonia, não desta indicação"
+      }
     ],
     "notas": "Caso par do ATB-PAC-001. Serve para detetar se o modelo distingue as duas indicações."
   },
@@ -48,9 +102,34 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem", "termos": ["nitrofurantoína", "nitrofurantoina", "fosfomicina"], "falha": "resposta_incompleta"},
-      {"tipo": "contem", "termos": ["100 mg", "100mg", "3000 mg", "3000mg", "3 g"], "falha": "dose_incorreta"},
-      {"tipo": "nao_contem", "termos": ["ciprofloxacina em primeira linha"], "falha": "alucinacao", "descricao": "a fluoroquinolona não é primeira linha na cistite não complicada"}
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina",
+          "fosfomicina"
+        ],
+        "falha": "resposta_incompleta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg",
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "ciprofloxacina em primeira linha"
+        ],
+        "falha": "alucinacao",
+        "descricao": "a fluoroquinolona não é primeira linha na cistite não complicada"
+      }
     ],
     "notas": ""
   },
@@ -58,7 +137,7 @@
     "id": "ATB-FAR-004",
     "categoria": "alergia",
     "pergunta": "Doente com faringite aguda estreptocócica e história de hipersensibilidade tipo I à penicilina. Qual a antibioterapia adequada?",
-    "referencia": "Azitromicina 500 mg, oral, de 24 em 24 horas, durante 5 dias. A amoxicilina está contraindicada nesta situação.",
+    "referencia": "Azitromicina 500 mg, oral, de 24 em 24 horas, durante 5 dias.",
     "fonte": {
       "nome": "APMGF",
       "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 13",
@@ -66,11 +145,34 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem", "termos": ["azitromicina"], "falha": "resposta_incompleta"},
-      {"tipo": "nao_contem", "termos": ["amoxicilina", "penicilina benzatínica", "benzilpenicilina", "cefuroxima"], "falha": "contraindicacao_omitida", "descricao": "beta-lactâmico numa hipersensibilidade tipo I é o erro grave deste caso"},
-      {"tipo": "contem", "termos": ["500 mg", "500mg"], "falha": "dose_incorreta"}
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "falha": "resposta_incompleta"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "amoxicilina",
+          "penicilina benzatínica",
+          "benzilpenicilina",
+          "cefuroxima"
+        ],
+        "falha": "contraindicacao_omitida",
+        "descricao": "beta-lactâmico numa hipersensibilidade tipo I é o erro grave deste caso"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "falha": "dose_incorreta"
+      }
     ],
-    "notas": "O caso mais importante do conjunto inicial: mede se o modelo respeita a contraindicação em vez de repetir a primeira linha habitual."
+    "notas": "O caso mais importante do conjunto inicial: mede se o modelo respeita a contraindicação em vez de repetir a primeira linha habitual. A amoxicilina esta contraindicada nesta situacao; essa nota vive aqui e nao na referencia, porque o criterio nao_contem nao distingue prescrever um farmaco de o nomear para o excluir."
   },
   {
     "id": "ATB-FAR-005",
@@ -84,8 +186,23 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem", "termos": ["10 dias"], "falha": "dose_incorreta", "descricao": "a duração de 10 dias é o que previne a febre reumática"},
-      {"tipo": "nao_contem", "termos": ["5 dias", "3 dias", "7 dias"], "falha": "dose_incorreta"}
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "a duração de 10 dias é o que previne a febre reumática"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "5 dias",
+          "3 dias",
+          "7 dias"
+        ],
+        "falha": "dose_incorreta"
+      }
     ],
     "notas": "Duração encurtada é um erro clássico. Aqui a duração é o elemento clínico crítico, não a dose."
   },
@@ -101,8 +218,22 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem_todos", "termos": ["ceftriaxona", "cefuroxima"], "falha": "resposta_incompleta", "descricao": "o esquema tem duas fases e ambas contam"},
-      {"tipo": "contem", "termos": ["7 dias"], "falha": "resposta_incompleta"}
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "ceftriaxona",
+          "cefuroxima"
+        ],
+        "falha": "resposta_incompleta",
+        "descricao": "o esquema tem duas fases e ambas contam"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "falha": "resposta_incompleta"
+      }
     ],
     "notas": "Testa se o modelo mantém esquemas sequenciais completos em vez de dar só a primeira dose."
   },
@@ -118,9 +249,34 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem_todos", "termos": ["amoxicilina", "claritromicina", "metronidazol"], "falha": "resposta_incompleta", "descricao": "esquema quádruplo: faltar um antibiótico é resposta incompleta"},
-      {"tipo": "contem", "termos": ["inibidor da bomba", "IBP", "omeprazol", "esomeprazol", "pantoprazol"], "falha": "resposta_incompleta"},
-      {"tipo": "contem", "termos": ["14 dias"], "falha": "dose_incorreta"}
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "amoxicilina",
+          "claritromicina",
+          "metronidazol"
+        ],
+        "falha": "resposta_incompleta",
+        "descricao": "esquema quádruplo: faltar um antibiótico é resposta incompleta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "inibidor da bomba",
+          "IBP",
+          "omeprazol",
+          "esomeprazol",
+          "pantoprazol"
+        ],
+        "falha": "resposta_incompleta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "14 dias"
+        ],
+        "falha": "dose_incorreta"
+      }
     ],
     "notas": ""
   },
@@ -136,9 +292,30 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem", "termos": ["6 mg", "6mg"], "falha": "dose_incorreta"},
-      {"tipo": "contem", "termos": ["10 dias"], "falha": "resposta_incompleta"},
-      {"tipo": "nao_contem", "termos": ["8 mg", "12 mg", "20 mg"], "falha": "dose_incorreta"}
+      {
+        "tipo": "contem",
+        "termos": [
+          "6 mg",
+          "6mg"
+        ],
+        "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "falha": "resposta_incompleta"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "8 mg",
+          "12 mg",
+          "20 mg"
+        ],
+        "falha": "dose_incorreta"
+      }
     ],
     "notas": ""
   },
@@ -154,8 +331,22 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem", "termos": ["8 mg/kg"], "falha": "dose_incorreta"},
-      {"tipo": "contem", "termos": ["800 mg", "800mg"], "falha": "ajuste_omitido", "descricao": "omitir o teto de dose num fármaco ajustado ao peso é omissão de ajuste"}
+      {
+        "tipo": "contem",
+        "termos": [
+          "8 mg/kg"
+        ],
+        "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "800 mg",
+          "800mg"
+        ],
+        "falha": "ajuste_omitido",
+        "descricao": "omitir o teto de dose num fármaco ajustado ao peso é omissão de ajuste"
+      }
     ],
     "notas": "Dose por peso com teto absoluto. Mede se o modelo dá a fórmula e esquece o limite."
   },
@@ -163,7 +354,7 @@
     "id": "COV-JAN-010",
     "categoria": "criterio",
     "pergunta": "Doente com COVID-19 ligeira a moderada e fatores de risco, com início de sintomas há 8 dias. É elegível para nirmatrelvir/ritonavir?",
-    "referencia": "Não. A norma exige início do antivírico nos primeiros 5 dias após o início de sintomas.",
+    "referencia": "Não é elegível. A norma exige início do antivírico nos primeiros 5 dias após o início de sintomas.",
     "fonte": {
       "nome": "DGS",
       "referencia": "Norma n.º 005/2022 de 28/05/2022, atualizada a 04/01/2023, Terapêutica Farmacológica para a COVID-19",
@@ -171,8 +362,27 @@
       "consultada": "2026-09-14"
     },
     "criterios": [
-      {"tipo": "contem", "termos": ["5 dias", "cinco dias"], "falha": "resposta_incompleta", "descricao": "tem de nomear a janela de 5 dias"},
-      {"tipo": "contem", "termos": ["não é elegível", "nao e elegivel", "fora da janela", "não cumpre", "não está indicado"], "falha": "alucinacao", "descricao": "responder que é elegível contraria a norma"}
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "falha": "resposta_incompleta",
+        "descricao": "tem de nomear a janela de 5 dias"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "não é elegível",
+          "nao e elegivel",
+          "fora da janela",
+          "não cumpre",
+          "não está indicado"
+        ],
+        "falha": "alucinacao",
+        "descricao": "responder que é elegível contraria a norma"
+      }
     ],
     "notas": "Caso de recusa correta. O modelo deve dizer não, e dizer porquê."
   }

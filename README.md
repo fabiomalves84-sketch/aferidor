@@ -82,7 +82,7 @@ demonstração.
 - [x] **Fase 1** Modelo de caso, critérios de aceitação e armazenamento
 - [x] **Fase 2** Conjunto inicial de casos com fontes verificadas
 - [x] **Fase 3** Executor: envia ao modelo, recolhe, guarda
-- [ ] **Fase 4** Classificadores e taxonomia de falhas
+- [x] **Fase 4** Classificadores e taxonomia de falhas
 - [ ] **Fase 5** Relatório e métricas por categoria de risco
 - [ ] **Fase 6** Documentação e apresentação
 
@@ -91,10 +91,11 @@ demonstração.
 Sem dependências externas. Python 3.10 ou superior, biblioteca padrão apenas.
 
 ```
-python -m unittest discover -s tests          # testes
+python -m unittest discover -s tests             # testes
+python -m aferidor verificar                     # os casos passam nos proprios criterios?
 python -m aferidor executar --fornecedor falso   # ensaio a seco, sem chave nem custo
 python -m aferidor executar --fornecedor openai --modelo gpt-4o
-python -m aferidor executar --fornecedor anthropic --limite 3
+python -m aferidor classificar                   # avalia as respostas guardadas
 ```
 
 As chaves vêm do ambiente, `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`, e nunca do
@@ -106,9 +107,38 @@ O prompt enviado ao modelo leva a pergunta e mais nada. A resposta de
 referência, os critérios de aceitação e a fonte ficam deste lado da parede. Um
 banco que mostra ao modelo o que conta como certo não está a medir o modelo.
 
+## Correção
+
+A correção é textual e determinista. Um banco de ensaio cujo corretor é ele
+próprio um modelo de linguagem tem dois sistemas em avaliação e nenhuma forma
+de saber qual deles errou. O preço é que cada critério tem de ser escrito com
+cuidado, e esse preço paga-se uma vez, quando o caso é escrito.
+
+Dois cuidados no confronto de texto: acentos e espaçamento são normalizados,
+para `1000mg` valer o mesmo que `1000 mg`; e um termo que é só um número tem de
+aparecer isolado, senão o termo `5` seria encontrado dentro de `500 mg` e uma
+dose errada passaria por uma duração certa.
+
+`python -m aferidor verificar` avalia a resposta de referência de cada caso
+contra os critérios desse mesmo caso. Um caso cuja própria referência não passa
+está errado, e está errado na direção que mais custa: dá como errado um modelo
+que acertou. A verificação corre também na bateria de testes.
+
+## Limites conhecidos
+
+O confronto de texto não distingue prescrever um fármaco de o nomear para o
+excluir. No caso `ATB-FAR-004`, um modelo que responda corretamente e acrescente
+"a amoxicilina está contraindicada" é marcado como errado. A mitigação atual é
+manter essa nota fora da resposta de referência. A correção verdadeira exige um
+critério que olhe para a prescrição e não para o texto todo, e fica para depois.
+
+Nenhuma das dez fontes foi ainda confirmada por uma pessoa. Até isso acontecer,
+qualquer resultado deste banco mede o modelo contra valores transcritos por uma
+ferramenta automática. Ver `casos/VERIFICACAO.md`.
+
 ## Estado
 
-Fases 1 a 3 concluídas: 10 casos com fonte, executor com dois adaptadores
-reais e um fornecedor falso, 48 testes, todos a passar.
-As fontes aguardam confirmação humana (ver `casos/VERIFICACAO.md`). Fase 4,
-os classificadores, a seguir.
+Fases 1 a 4 concluídas: 10 casos com fonte, executor com dois adaptadores
+reais e um fornecedor falso, correção por critérios com contagem separada por
+tipo de falha e por risco, 87 testes, todos a passar. Fase 5, o relatório, a
+seguir.
