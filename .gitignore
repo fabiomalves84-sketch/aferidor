@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 data/*.csv
 data/*.json
+data/*.jsonl
 relatorios/
 .env
 _to_delete/

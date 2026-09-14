@@ -81,12 +81,34 @@ demonstração.
 
 - [x] **Fase 1** Modelo de caso, critérios de aceitação e armazenamento
 - [x] **Fase 2** Conjunto inicial de casos com fontes verificadas
-- [ ] **Fase 3** Executor: envia ao modelo, recolhe, guarda
+- [x] **Fase 3** Executor: envia ao modelo, recolhe, guarda
 - [ ] **Fase 4** Classificadores e taxonomia de falhas
 - [ ] **Fase 5** Relatório e métricas por categoria de risco
 - [ ] **Fase 6** Documentação e apresentação
 
+## Como correr
+
+Sem dependências externas. Python 3.10 ou superior, biblioteca padrão apenas.
+
+```
+python -m unittest discover -s tests          # testes
+python -m aferidor executar --fornecedor falso   # ensaio a seco, sem chave nem custo
+python -m aferidor executar --fornecedor openai --modelo gpt-4o
+python -m aferidor executar --fornecedor anthropic --limite 3
+```
+
+As chaves vêm do ambiente, `OPENAI_API_KEY` e `ANTHROPIC_API_KEY`, e nunca do
+repositório. As respostas são escritas em `data/respostas.jsonl`, uma por
+linha, à medida que chegam: uma execução interrompida retoma onde ficou em vez
+de voltar a pagar as perguntas já feitas. `--recomecar` força tudo de novo.
+
+O prompt enviado ao modelo leva a pergunta e mais nada. A resposta de
+referência, os critérios de aceitação e a fonte ficam deste lado da parede. Um
+banco que mostra ao modelo o que conta como certo não está a medir o modelo.
+
 ## Estado
 
-Fases 1 e 2 concluídas: 10 casos com fonte, 29 testes, todos a passar.
-As fontes aguardam confirmação humana (ver `casos/VERIFICACAO.md`). Fase 3 a seguir.
+Fases 1 a 3 concluídas: 10 casos com fonte, executor com dois adaptadores
+reais e um fornecedor falso, 48 testes, todos a passar.
+As fontes aguardam confirmação humana (ver `casos/VERIFICACAO.md`). Fase 4,
+os classificadores, a seguir.

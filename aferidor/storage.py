@@ -151,6 +151,18 @@ def write_answers(answers: list[Answer], path: Path) -> int:
     return len(answers)
 
 
+def append_answer(answer: Answer, path: Path) -> None:
+    """Add one answer to the file as soon as it arrives.
+
+    A run interrupted halfway leaves every answer it already got, so it is
+    resumed instead of paid for twice.
+    """
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(answer_to_dict(answer), ensure_ascii=False) + "\n")
+
+
 def read_answers(path: Path) -> list[Answer]:
     answers: list[Answer] = []
     with Path(path).open(encoding="utf-8") as handle:
@@ -192,6 +204,7 @@ __all__ = [
     "write_cases",
     "read_answers",
     "write_answers",
+    "append_answer",
     "write_verdicts",
     "case_from_dict",
     "case_to_dict",
