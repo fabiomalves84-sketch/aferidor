@@ -125,7 +125,28 @@ python -m aferidor ensaio --fornecedor anthropic --modelo <nome>
 A tabela mostra a taxa de acerto e as falhas críticas lado a lado. Ler a segunda
 coluna antes da primeira.
 
-## 9. Recomeçar do zero
+## 9. Ensaio de comparação
+
+O ensaio completo, para uma candidatura ou uma decisão a sério: três modelos,
+cinco amostras por caso, a temperatura que esconde menos variabilidade.
+
+```
+python -m aferidor ensaio --fornecedor openai --modelo <nome-a> --repeticoes 5 --temperatura 1.0
+python -m aferidor ensaio --fornecedor openai --modelo <nome-b> --repeticoes 5 --temperatura 1.0
+python -m aferidor ensaio --fornecedor anthropic --modelo <nome-c> --repeticoes 5 --temperatura 1.0
+python -m aferidor relatorio --formato html
+```
+
+**Custo aproximado: 27 casos × 5 repetições × 3 modelos = 405 pedidos.** Nos
+modelos correntes isto continua em cêntimos ou poucos euros, não em dezenas,
+mas é bom saber o número antes de o correr, não depois.
+
+O último comando escreve `relatorios/relatorio.html`, um ficheiro só que abre
+com duplo clique: a grelha de casos por modelo, com o estado de cada um,
+estável certo, estável errado ou instável, é mais fácil de ler ali do que na
+tabela em Markdown.
+
+## 10. Recomeçar do zero
 
 ```
 python -m aferidor ensaio --fornecedor openai --modelo <nome> --recomecar
