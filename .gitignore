@@ -10,3 +10,11 @@ _to_delete/
 
 # os ensaios registados são evidência, não produto descartável
 !ensaios/
+
+# passagem de testemunho entre sessões; instruções, não código
+BRIEFING.md
+GUIA.md
+demo.py
+
+# definições do editor; pessoais, não do projeto
+.vscode/
