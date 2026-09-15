@@ -44,11 +44,12 @@ portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
   hipersensibilidade tipo I e não tipo I, um só critério de ajuste de apixabano
   contra dois. Cobrem também pediatria por peso, gravidez e ajuste de
   anticoagulante, as áreas onde um erro de consulta rápida custa mais
-- Executor com adaptadores para OpenAI e Anthropic, e um fornecedor falso
+- Executor com adaptadores para OpenAI, Anthropic e modelos locais pelo
+  Ollama, e um fornecedor falso para ensaiar sem custo
 - Correção determinista por critérios, com taxonomia de oito tipos de falha, e
   pelo menos um caso a medir cada um deles
 - Relatório legível, com as falhas críticas antes da percentagem
-- 171 testes automáticos, todos a passar
+- 181 testes automáticos, todos a passar
 - Sem dependências externas, só biblioteca padrão do Python
 
 E o que falta, dito com a mesma clareza:
@@ -97,7 +98,7 @@ próprio.
 ## Como ver em cinco minutos
 
 ```
-python -m unittest discover -s tests   # 171 testes
+python -m unittest discover -s tests   # 181 testes
 python -m aferidor verificar           # 27/27 casos coerentes
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md

@@ -130,21 +130,41 @@ coluna antes da primeira.
 O ensaio completo, para uma candidatura ou uma decisão a sério: três modelos,
 cinco amostras por caso, a temperatura que esconde menos variabilidade.
 
+**Caminho principal: modelos locais, pelo Ollama.** Não se paga nada, nada sai
+da máquina, e é repetível quantas vezes for preciso. Instala o Ollama
+(ollama.com), descarrega os modelos, confirma que está aberto
+(`ollama list`), e corre:
+
 ```
-python -m aferidor ensaio --fornecedor openai --modelo <nome-a> --repeticoes 5 --temperatura 1.0
-python -m aferidor ensaio --fornecedor openai --modelo <nome-b> --repeticoes 5 --temperatura 1.0
-python -m aferidor ensaio --fornecedor anthropic --modelo <nome-c> --repeticoes 5 --temperatura 1.0
+python -m aferidor ensaio --fornecedor local --modelo <nome-a> --repeticoes 5 --temperatura 1.0
+python -m aferidor ensaio --fornecedor local --modelo <nome-b> --repeticoes 5 --temperatura 1.0
+python -m aferidor ensaio --fornecedor local --modelo <nome-c> --repeticoes 5 --temperatura 1.0
 python -m aferidor relatorio --formato html
 ```
 
-**Custo aproximado: 27 casos × 5 repetições × 3 modelos = 405 pedidos.** Nos
-modelos correntes isto continua em cêntimos ou poucos euros, não em dezenas,
-mas é bom saber o número antes de o correr, não depois.
+**O custo aqui é zero em dinheiro; o custo é tempo.** Um modelo local num
+portátil demora muito mais por resposta do que uma API. 27 casos × 5
+repetições × 3 modelos são 405 pedidos; a duração real varia com o hardware e
+o tamanho do modelo, por isso o tempo total gasto deve ficar escrito no
+README do ensaio, não só o número de pedidos.
 
 O último comando escreve `relatorios/relatorio.html`, um ficheiro só que abre
 com duplo clique: a grelha de casos por modelo, com o estado de cada um,
 estável certo, estável errado ou instável, é mais fácil de ler ali do que na
 tabela em Markdown.
+
+**Opção: as APIs pagas.** Se preferires medir os modelos que o utilizador
+final vai mesmo usar, e não uma versão aberta equivalente, troca
+`--fornecedor local` por `--fornecedor openai` ou `--fornecedor anthropic`.
+Aqui o custo é o inverso do local: dinheiro em vez de tempo.
+
+```
+python -m aferidor ensaio --fornecedor openai --modelo <nome> --repeticoes 5 --temperatura 1.0
+```
+
+**Custo aproximado desta opção: 27 casos × 5 repetições × 3 modelos = 405
+pedidos.** Nos modelos correntes isto fica em cêntimos ou poucos euros, não
+em dezenas, mas é bom saber o número antes de o correr, não depois.
 
 ## 10. Recomeçar do zero
 

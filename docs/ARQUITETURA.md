@@ -12,7 +12,7 @@ flowchart LR
     D --> E[vereditos.json<br/>certo, errado, que falha]
     E --> F[report<br/>documento em Markdown]
     E --> G[html_report<br/>documento em HTML]
-    B -.fala com.-> P[providers<br/>OpenAI, Anthropic, falso]
+    B -.fala com.-> P[providers<br/>OpenAI, Anthropic, local via Ollama, falso]
 ```
 
 ## Os módulos

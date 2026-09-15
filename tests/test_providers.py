@@ -7,6 +7,7 @@ import unittest
 from aferidor.providers import (
     AnthropicProvider,
     FakeProvider,
+    LocalProvider,
     OpenAIProvider,
     ProviderError,
 )
@@ -53,6 +54,40 @@ class TestProviderIdentity(unittest.TestCase):
         self.assertEqual(
             AnthropicProvider(model="claude-x", api_key="k").name, "anthropic:claude-x"
         )
+        self.assertEqual(LocalProvider(model="llama3").name, "local:llama3")
+
+
+class TestLocalProvider(unittest.TestCase):
+    def test_no_key_is_needed(self):
+        LocalProvider()  # nao levanta
+
+    def test_the_default_address_is_ollamas_own_port(self):
+        self.assertEqual(LocalProvider().base_url, "http://localhost:11434")
+
+    def test_the_address_can_be_overridden_directly(self):
+        self.assertEqual(
+            LocalProvider(base_url="http://outra-maquina:11434").base_url,
+            "http://outra-maquina:11434",
+        )
+
+    def test_a_trailing_slash_on_the_address_is_tolerated(self):
+        self.assertEqual(
+            LocalProvider(base_url="http://localhost:11434/").base_url,
+            "http://localhost:11434",
+        )
+
+    def test_the_address_can_come_from_the_environment(self):
+        import os
+
+        guardado = os.environ.get(LocalProvider.ENV_URL)
+        os.environ[LocalProvider.ENV_URL] = "http://outra:11434"
+        try:
+            self.assertEqual(LocalProvider().base_url, "http://outra:11434")
+        finally:
+            if guardado is None:
+                os.environ.pop(LocalProvider.ENV_URL, None)
+            else:
+                os.environ[LocalProvider.ENV_URL] = guardado
 
 
 if __name__ == "__main__":

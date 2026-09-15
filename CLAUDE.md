@@ -52,7 +52,7 @@ demonstra.
 ## Como correr
 
 ```
-python3 -m unittest discover -s tests   # 171 testes
+python3 -m unittest discover -s tests   # 181 testes
 python3 -m aferidor verificar           # 27/27 casos coerentes
 python3 -m aferidor ensaio --fornecedor falso
 ```

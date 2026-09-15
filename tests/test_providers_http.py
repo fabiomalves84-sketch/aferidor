@@ -17,7 +17,7 @@ import unittest
 import urllib.error
 from unittest import mock
 
-from aferidor.providers import AnthropicProvider, OpenAIProvider, ProviderError
+from aferidor.providers import AnthropicProvider, LocalProvider, OpenAIProvider, ProviderError
 
 
 class FakeResponse(io.BytesIO):
@@ -126,6 +126,55 @@ class TestAnthropicReplies(unittest.TestCase):
         payload = {"data": [{"id": "b"}, {"id": "a"}]}
         with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
             self.assertEqual(provider.available_models(), ["a", "b"])
+
+
+class TestLocalReplies(unittest.TestCase):
+    def test_it_speaks_the_same_shape_as_openai(self):
+        provider = LocalProvider(model="llama3")
+        payload = {"choices": [{"message": {"content": "1000 mg de 8 em 8 horas"}}]}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
+            self.assertEqual(provider.ask("p"), "1000 mg de 8 em 8 horas")
+
+    def test_no_authorization_header_is_sent(self):
+        provider = LocalProvider(model="llama3")
+        captured = {}
+
+        def fake_urlopen(request, timeout):
+            captured["headers"] = dict(request.header_items())
+            return FakeResponse(
+                json.dumps({"choices": [{"message": {"content": "x"}}]}).encode()
+            )
+
+        with mock.patch("aferidor.providers.urllib.request.urlopen", fake_urlopen):
+            provider.ask("p")
+        self.assertNotIn("Authorization", captured["headers"])
+
+    def test_listing_models_reads_ollamas_own_tags_endpoint(self):
+        provider = LocalProvider(model="llama3")
+        payload = {"models": [{"name": "mixtral"}, {"name": "gemma"}, {"sem": "nome"}]}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
+            self.assertEqual(provider.available_models(), ["gemma", "mixtral"])
+
+    def test_the_server_not_running_gets_one_clear_message(self):
+        provider = LocalProvider(model="llama3", base_url="http://localhost:11434")
+        with mock.patch(
+            "aferidor.providers.urllib.request.urlopen",
+            failing(urllib.error.URLError("[Errno 61] Connection refused")),
+        ):
+            with self.assertRaises(ProviderError) as caught:
+                provider.ask("p")
+        self.assertIn("o Ollama nao responde em http://localhost:11434", str(caught.exception))
+        self.assertFalse(caught.exception.retryable)
+
+    def test_a_model_error_that_is_not_a_connection_problem_is_not_rewritten(self):
+        provider = LocalProvider(model="llama3")
+        with mock.patch(
+            "aferidor.providers.urllib.request.urlopen",
+            failing(http_error(404, "model not found")),
+        ):
+            with self.assertRaises(ProviderError) as caught:
+                provider.ask("p")
+        self.assertIn("model not found", str(caught.exception))
 
 
 if __name__ == "__main__":

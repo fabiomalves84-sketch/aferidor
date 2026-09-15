@@ -136,6 +136,39 @@ def _key_from_env(variable: str, given: str | None) -> str:
     return key.strip()
 
 
+def _chat_completion(
+    endpoint: str,
+    headers: dict[str, str],
+    model: str,
+    prompt: str,
+    temperature: float,
+    max_tokens: int,
+    timeout: float,
+    who: str,
+) -> str:
+    """One call to any endpoint that speaks the OpenAI chat completions shape.
+
+    OpenAI's own API and Ollama's compatibility layer both take this payload
+    and answer with the same `choices[0].message.content` shape, so the two
+    providers that talk to them share this instead of each repeating it.
+    """
+    data = _post_json(
+        endpoint,
+        headers,
+        {
+            "model": model,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "messages": [{"role": "user", "content": prompt}],
+        },
+        timeout,
+    )
+    try:
+        return data["choices"][0]["message"]["content"] or ""
+    except (KeyError, IndexError, TypeError):
+        raise ProviderError(f"resposta {who} sem texto: {str(data)[:300]}") from None
+
+
 class OpenAIProvider(Provider):
     """OpenAI chat completions."""
 
@@ -158,21 +191,16 @@ class OpenAIProvider(Provider):
         self.timeout = timeout
 
     def ask(self, prompt: str) -> str:
-        data = _post_json(
+        return _chat_completion(
             self.ENDPOINT,
             {"authorization": f"Bearer {self.api_key}"},
-            {
-                "model": self.model,
-                "temperature": self.temperature,
-                "max_tokens": self.max_tokens,
-                "messages": [{"role": "user", "content": prompt}],
-            },
+            self.model,
+            prompt,
+            self.temperature,
+            self.max_tokens,
             self.timeout,
+            "da OpenAI",
         )
-        try:
-            return data["choices"][0]["message"]["content"] or ""
-        except (KeyError, IndexError, TypeError):
-            raise ProviderError(f"resposta da OpenAI sem texto: {str(data)[:300]}") from None
 
     def available_models(self) -> list[str]:
         data = _request_json(
@@ -234,10 +262,86 @@ class AnthropicProvider(Provider):
         return sorted(str(m.get("id", "")) for m in data.get("data", []) if m.get("id"))
 
 
+def _unreachable(base_url: str, error: ProviderError) -> bool:
+    """Whether `error` looks like the Ollama server itself is not running.
+
+    `_request_json` marks a `URLError` (connection refused, name not resolved,
+    ...) retryable and folds its message with "inacessivel". Retrying that
+    against a local server that is simply not started wastes every attempt on
+    the same failure, so it is turned into one clear, non-retryable message.
+    """
+    return "inacessivel" in str(error)
+
+
+class LocalProvider(Provider):
+    """A model running on this machine through Ollama.
+
+    Nothing leaves the machine: no key, and the only address ever contacted is
+    `base_url`, which defaults to Ollama's own local port. This is the shape a
+    health organisation would actually run if the model, and every question
+    sent to it, has to stay on its own infrastructure.
+
+    Ollama exposes an OpenAI-compatible chat completions endpoint, so asking
+    it reuses `_chat_completion`; listing models does not; that one is
+    Ollama's own `/api/tags`.
+    """
+
+    ENV_URL = "AFERIDOR_LOCAL_URL"
+    DEFAULT_URL = "http://localhost:11434"
+
+    def __init__(
+        self,
+        model: str = "llama3",
+        base_url: str | None = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        timeout: float = 300.0,
+    ) -> None:
+        self.name = f"local:{model}"
+        self.model = model
+        self.base_url = (base_url or os.environ.get(self.ENV_URL) or self.DEFAULT_URL).rstrip("/")
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.timeout = timeout
+
+    def _not_running(self) -> ProviderError:
+        return ProviderError(
+            f"o Ollama nao responde em {self.base_url}; esta instalado e aberto?",
+            retryable=False,
+        )
+
+    def ask(self, prompt: str) -> str:
+        try:
+            return _chat_completion(
+                f"{self.base_url}/v1/chat/completions",
+                {},
+                self.model,
+                prompt,
+                self.temperature,
+                self.max_tokens,
+                self.timeout,
+                "do Ollama",
+            )
+        except ProviderError as error:
+            if _unreachable(self.base_url, error):
+                raise self._not_running() from None
+            raise
+
+    def available_models(self) -> list[str]:
+        try:
+            data = _request_json(f"{self.base_url}/api/tags", {}, None, self.timeout)
+        except ProviderError as error:
+            if _unreachable(self.base_url, error):
+                raise self._not_running() from None
+            raise
+        return sorted(str(m.get("name", "")) for m in data.get("models", []) if m.get("name"))
+
+
 __all__ = [
     "Provider",
     "ProviderError",
     "FakeProvider",
     "OpenAIProvider",
     "AnthropicProvider",
+    "LocalProvider",
 ]
