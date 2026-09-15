@@ -38,10 +38,12 @@ portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
 
 ## Estado honesto, hoje
 
-- 18 casos clínicos, cada um com fonte pública identificada até à página, vários
+- 27 casos clínicos, cada um com fonte pública identificada até à página, vários
   deles em pares que medem uma distinção que um modelo pode não fazer: pneumonia
   com e sem comorbilidades, exacerbação de DPOC ligeira e grave, faringite com
-  hipersensibilidade tipo I e não tipo I
+  hipersensibilidade tipo I e não tipo I, um só critério de ajuste de apixabano
+  contra dois. Cobrem também pediatria por peso, gravidez e ajuste de
+  anticoagulante, as áreas onde um erro de consulta rápida custa mais
 - Executor com adaptadores para OpenAI e Anthropic, e um fornecedor falso
 - Correção determinista por critérios, com taxonomia de oito tipos de falha, e
   pelo menos um caso a medir cada um deles
@@ -51,7 +53,7 @@ portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
 
 E o que falta, dito com a mesma clareza:
 
-- **As dezoito fontes ainda não foram confirmadas por uma pessoa.** Foram lidas por
+- **As vinte e sete fontes ainda não foram confirmadas por uma pessoa.** Foram lidas por
   ferramenta automática, e uma ferramenta automática transcreve mal um número.
   Até essa confirmação, qualquer resultado mede o modelo contra valores não
   verificados. A tabela de confirmação está em `casos/VERIFICACAO.md`.
@@ -96,7 +98,7 @@ próprio.
 
 ```
 python -m unittest discover -s tests   # 138 testes
-python -m aferidor verificar           # 18/18 casos coerentes
+python -m aferidor verificar           # 27/27 casos coerentes
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```

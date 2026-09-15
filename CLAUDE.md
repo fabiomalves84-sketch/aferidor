@@ -28,7 +28,7 @@ página indicada e confirmar o valor com os próprios olhos.** A tabela é
 
 **Um caso cuja própria referência não passa nos seus critérios está partido**, e
 está partido na direção que mais custa: dá como errado um modelo que acertou.
-`python3 -m aferidor verificar` tem de dar 18 em 18 antes de qualquer execução
+`python3 -m aferidor verificar` tem de dar 27 em 27 antes de qualquer execução
 paga, e corre também na bateria de testes.
 
 **Alargar um critério porque ele castiga uma forma diferente de dizer a mesma
@@ -53,7 +53,7 @@ demonstra.
 
 ```
 python3 -m unittest discover -s tests   # 138 testes
-python3 -m aferidor verificar           # 18/18 casos coerentes
+python3 -m aferidor verificar           # 27/27 casos coerentes
 python3 -m aferidor ensaio --fornecedor falso
 ```
 

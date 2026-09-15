@@ -49,7 +49,7 @@ Um comando faz tudo: pergunta, corrige e escreve o relatório.
 python -m aferidor ensaio --fornecedor openai --modelo <nome-da-lista>
 ```
 
-Antes de gastar um cêntimo, ele confirma que os 17 casos passam nos próprios
+Antes de gastar um cêntimo, ele confirma que os 27 casos passam nos próprios
 critérios. Se algum estiver partido, para e não pergunta nada. Descobrir um caso
 errado depois de pagar a execução obriga a pagá-la outra vez.
 
@@ -61,7 +61,7 @@ python -m aferidor ensaio --fornecedor openai --modelo <nome> --limite 3
 
 ## 5. Custo
 
-Dezassete perguntas curtas com respostas de um ou dois parágrafos. Nos modelos
+Vinte e sete perguntas curtas com respostas de um ou dois parágrafos. Nos modelos
 correntes isto fica em cêntimos, não em euros. O que custa dinheiro é repetir a
 execução muitas vezes, e o projeto foi feito para não precisar disso: as
 respostas ficam guardadas em `data/respostas.jsonl` e uma segunda execução salta
