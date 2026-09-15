@@ -105,7 +105,10 @@ def _request_json(
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
-        detail = error.read().decode("utf-8", "replace")[:400]
+        try:
+            detail = error.read().decode("utf-8", "replace")[:400]
+        finally:
+            error.close()
         raise ProviderError(
             f"{url} respondeu {error.code}: {detail}",
             retryable=error.code == 429 or error.code >= 500,
