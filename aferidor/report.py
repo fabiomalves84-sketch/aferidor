@@ -23,6 +23,7 @@ from .grading import (
     Tally,
     consistency_by_case,
     consistency_by_model,
+    match_answers,
     tally_by_model,
 )
 from .models import Answer, Case, Verdict
@@ -119,9 +120,7 @@ def build(
 ) -> str:
     """Write the whole report as Markdown."""
     by_case = {c.case_id: c for c in cases}
-    known_ids = {c.case_id for c in cases}
-    matched_answers = [a for a in answers if a.case_id in known_ids]
-    pairs = list(zip(matched_answers, verdicts))
+    pairs = match_answers(cases, answers, verdicts)
     per_model = tally_by_model(verdicts)
     consistency = consistency_by_case(cases, answers, verdicts)
     consistency_per_model = consistency_by_model(consistency)

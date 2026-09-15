@@ -151,10 +151,10 @@ class Consistency:
     state: ConsistencyState
 
 
-def consistency_by_case(
+def match_answers(
     cases: list[Case], answers: list[Answer], verdicts: list[Verdict]
-) -> dict[tuple[str, str], Consistency]:
-    """Group verdicts by (case, model), reading sample numbers off `answers`.
+) -> list[tuple[Answer, Verdict]]:
+    """Pair every answer with its verdict, in the order `grade_all` produced them.
 
     `verdicts` must be exactly what `grade_all(cases, answers)` returned for
     this same `answers` list: its order lines up with the answers whose case
@@ -166,13 +166,25 @@ def consistency_by_case(
         raise ValueError(
             "answers e verdicts fora de sincronia; volta a correr grade_all(cases, answers)"
         )
+    return list(zip(matched, verdicts))
 
+
+def pairs_by_case(
+    cases: list[Case], answers: list[Answer], verdicts: list[Verdict]
+) -> dict[tuple[str, str], list[tuple[Answer, Verdict]]]:
+    """Every (answer, verdict) asked of one case by one model, sample order kept."""
     grouped: dict[tuple[str, str], list[tuple[Answer, Verdict]]] = {}
-    for answer, verdict in zip(matched, verdicts):
+    for answer, verdict in match_answers(cases, answers, verdicts):
         grouped.setdefault((answer.case_id, answer.model), []).append((answer, verdict))
+    return grouped
 
+
+def consistency_by_case(
+    cases: list[Case], answers: list[Answer], verdicts: list[Verdict]
+) -> dict[tuple[str, str], Consistency]:
+    """Group verdicts by (case, model), reading sample numbers off `answers`."""
     result: dict[tuple[str, str], Consistency] = {}
-    for (case_id, model), pairs in grouped.items():
+    for (case_id, model), pairs in pairs_by_case(cases, answers, verdicts).items():
         samples = len(pairs)
         passed = sum(1 for _, v in pairs if v.passed)
         failures = [f for _, v in pairs for f in v.failures]
@@ -264,6 +276,8 @@ __all__ = [
     "tally_by_model",
     "self_check",
     "Tally",
+    "match_answers",
+    "pairs_by_case",
     "ConsistencyState",
     "Consistency",
     "consistency_by_case",

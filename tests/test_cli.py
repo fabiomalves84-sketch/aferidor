@@ -155,6 +155,62 @@ class TestEnsaio(unittest.TestCase):
             self.assertEqual(len(linhas), 2)
 
 
+class TestRelatorioHtml(unittest.TestCase):
+    def test_the_default_format_stays_markdown(self):
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            run(
+                "ensaio", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                "--limite", "2", "--saida", str(f / "respostas.jsonl"),
+                "--vereditos", str(f / "vereditos.json"), "--relatorio", str(f / "relatorio.md"),
+            )
+            code, out, _ = run(
+                "relatorio", "--casos", str(REAL_CASES),
+                "--respostas", str(f / "respostas.jsonl"), "--saida", str(f / "saida"),
+            )
+            self.assertEqual(code, 0)
+            self.assertTrue((f / "saida").exists())
+            self.assertIn("Relatório do Aferidor", (f / "saida").read_text(encoding="utf-8"))
+
+    def test_formato_html_writes_a_default_html_file(self):
+        import os
+
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            respostas = f / "respostas.jsonl"
+            run(
+                "executar", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                "--limite", "2", "--saida", str(respostas),
+            )
+            before = os.getcwd()
+            os.chdir(folder)
+            try:
+                code, out, _ = run(
+                    "relatorio", "--casos", str(REAL_CASES), "--respostas", str(respostas),
+                    "--formato", "html",
+                )
+            finally:
+                os.chdir(before)
+            self.assertEqual(code, 0)
+            self.assertTrue((f / "relatorios" / "relatorio.html").exists())
+
+    def test_formato_html_with_an_explicit_output_path(self):
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            respostas = f / "respostas.jsonl"
+            run(
+                "executar", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                "--limite", "2", "--saida", str(respostas),
+            )
+            code, _, _ = run(
+                "relatorio", "--casos", str(REAL_CASES), "--respostas", str(respostas),
+                "--formato", "html", "--saida", str(f / "r.html"),
+            )
+            self.assertEqual(code, 0)
+            text = (f / "r.html").read_text(encoding="utf-8")
+            self.assertTrue(text.startswith("<!DOCTYPE html>"))
+
+
 class TestExecutar(unittest.TestCase):
     def test_a_second_run_does_not_ask_again(self):
         with tempfile.TemporaryDirectory() as folder:

@@ -11,7 +11,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import report
+from . import html_report, report
 from .grading import grade_all, self_check, tally_by_model
 from .providers import AnthropicProvider, FakeProvider, OpenAIProvider, Provider, ProviderError
 from .runner import RunConfig, run
@@ -21,6 +21,7 @@ DEFAULT_CASES = Path("casos/casos.json")
 DEFAULT_OUTPUT = Path("data/respostas.jsonl")
 DEFAULT_VERDICTS = Path("data/vereditos.json")
 DEFAULT_REPORT = Path("relatorios/relatorio.md")
+DEFAULT_REPORT_HTML = Path("relatorios/relatorio.html")
 
 
 def build_provider(kind: str, model: str | None, temperature: float = 0.0) -> Provider:
@@ -100,7 +101,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     relatorio = sub.add_parser("relatorio", help="escrever o relatorio legivel")
     relatorio.add_argument("--casos", type=Path, default=DEFAULT_CASES)
     relatorio.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
-    relatorio.add_argument("--saida", type=Path, default=DEFAULT_REPORT)
+    relatorio.add_argument("--saida", type=Path, default=None)
+    relatorio.add_argument("--formato", choices=("md", "html"), default="md")
     relatorio.add_argument(
         "--fontes-confirmadas",
         action="store_true",
@@ -204,16 +206,23 @@ def comando_relatorio(args: argparse.Namespace) -> int:
 
     answers = read_answers(args.respostas)
     verdicts, missing = grade_all(cases, answers)
-    text = report.build(
+    formato = getattr(args, "formato", "md")
+
+    saida = args.saida
+    if saida is None:
+        saida = DEFAULT_REPORT_HTML if formato == "html" else DEFAULT_REPORT
+
+    builder = html_report.build if formato == "html" else report.build
+    text = builder(
         cases,
         answers,
         verdicts,
         missing=missing,
         sources_verified=args.fontes_confirmadas,
     )
-    args.saida.parent.mkdir(parents=True, exist_ok=True)
-    args.saida.write_text(text, encoding="utf-8")
-    print(f"relatorio em {args.saida} ({len(text.splitlines())} linhas)")
+    saida.parent.mkdir(parents=True, exist_ok=True)
+    saida.write_text(text, encoding="utf-8")
+    print(f"relatorio em {saida} ({len(text.splitlines())} linhas)")
     return 0
 
 
