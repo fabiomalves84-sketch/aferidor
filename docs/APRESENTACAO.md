@@ -55,8 +55,11 @@ E o que falta, dito com a mesma clareza:
   ferramenta automática, e uma ferramenta automática transcreve mal um número.
   Até essa confirmação, qualquer resultado mede o modelo contra valores não
   verificados. A tabela de confirmação está em `casos/VERIFICACAO.md`.
-- **Nenhum modelo real foi ainda executado.** O que existe foi provado de ponta
-  a ponta com o fornecedor falso.
+- **Só houve uma execução real, e limitada.** Dezoito perguntas a um modelo, sem
+  API, sem controlo de temperatura e com uma amostra por pergunta. Deu 16 em 18 e
+  apanhou uma referência desatualizada no banco. Está registada em
+  `ensaios/2026-09-14-agente/`, com os limites escritos. Ainda não houve uma
+  execução pela API com repetição.
 - **A distinção entre receitar um fármaco e o nomear para o excluir é feita por
   heurística, não por compreensão de texto.** Erra nas duas direções, e o README
   diz como e porquê, em Limites conhecidos.

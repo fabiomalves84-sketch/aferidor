@@ -188,5 +188,6 @@ por tipo de falha e por risco, relatório legível e documentação. 138 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as
-fontes com os olhos numa pessoa (`casos/VERIFICACAO.md`) e correr contra um
-modelo real.
+fontes com os olhos numa pessoa (`casos/VERIFICACAO.md`) e repetir a execução
+real pela API, com várias amostras por pergunta. A primeira execução, sem API e
+com uma amostra, está em `ensaios/2026-09-14-agente/`.

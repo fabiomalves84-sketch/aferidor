@@ -33,7 +33,16 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 | INT-CLA-015 | RCM Claritromicina | 4.3 e 4.5 | Claritromicina com sinvastatina ou lovastatina: contraindicado, risco de rabdomiólise | bate | [ ] |
 | INT-COL-016 | RCM Claritromicina | 4.3 e 4.4 | Claritromicina com colquicina: não administrar, toxicidade por colquicina | bate | [ ] |
 | FMT-CIST-017 | APMGF Guia ATB 1.3 | 26 | Nitrofurantoína 100 mg 6/6h 5 dias (mesma matéria do 003, formato imposto) | bate | [ ] |
-| AJU-MET-018 | Infarmed Circular 006/CD/2016 | toda | Metformina: dose reduzida <1500 mg/dia entre 60 e 30 ml/min, contraindicada abaixo de 30 | bate, **mas ver nota** | [ ] |
+| AJU-MET-018 | RCM metformina (harmonizado UE) | 4.2 e 4.3 | Metformina: máximo 2000 mg/dia entre 45 e 59 ml/min, 1000 mg/dia entre 30 e 44, contraindicada abaixo de 30 | reescrito a 14/09, **sem 2.ª leitura** | [ ] |
+| PED-OMA-019 | APMGF Guia ATB 1.3 | 15 | Criança ≥ 2 anos: amoxicilina 80-90 mg/kg/dia, máx. 3000 mg/dia, 12/12h, 5 dias | não | [ ] |
+| PED-OMA-020 | APMGF Guia ATB 1.3 | 15 | Criança < 2 anos: mesma dose, 7 dias (nota 5) | não | [ ] |
+| PED-OMA-021 | APMGF Guia ATB 1.3 | 15 | Hipersensibilidade tipo I: azitromicina 10 mg/kg/dia, máx. 500 mg/dia, 24/24h, 3 dias; cefuroxima só na não tipo I | não | [ ] |
+| GRA-CIST-022 | APMGF Guia ATB 1.3 | 26 | Grávida: fosfomicina 3000 mg toma única; urocultura prévia (nota 2) | não | [ ] |
+| GRA-IECA-023 | RCM Ramipril (Infarmed) | 4.3 e 4.6 | IECA contraindicado no 2.º e 3.º trimestres; ecografia se exposição a partir do 2.º | não | [ ] |
+| GRA-VPA-024 | EMA, valproato, art. 31.º, Anexo III | pp. 77-79, 82 | Bipolar: contraindicado na gravidez; idade fértil só com programa de prevenção da gravidez | não | [ ] |
+| AJU-APX-025 | RCM Eliquis (EMA) | 4.2 | FA não valvular: 2,5 mg 2x/dia com ≥ 2 de: ≥ 80 anos, ≤ 60 kg, creatinina ≥ 1,5 mg/dl | não | [ ] |
+| AJU-APX-026 | RCM Eliquis (EMA) | 4.2 | Um só critério: 5 mg 2x/dia | não | [ ] |
+| DOS-MTX-027 | RCM Ledertrexato (Pfizer) | 4.2, pp. 2-3 | Artrite reumatoide: 7,5 a 20 mg uma vez por semana, máx. 20 mg/semana | não | [ ] |
 
 A coluna **2.ª leitura** registou uma releitura dos dois documentos por uma via
 automática diferente da que produziu os casos, a 14 de setembro de 2026. Todos os
@@ -54,9 +63,26 @@ preencher.
   autorização, não pelo Infarmed. O RCM em vigor consulta-se no Infomed, no sítio
   do Infarmed, e é aí que a confirmação humana tem de ser feita. Se a versão em
   vigor divergir, é a do Infomed que manda.
-- Infarmed, *Circular Informativa n.º 006/CD/550.20.001*, de 29/01/2016,
-  metformina em doentes com função renal reduzida
-  https://www.infarmed.pt/documents/15786/1089098/11648350.PDF/7ed78ff1-dd99-4b5a-b9ac-7507ead4821d
+- Comissão Europeia, *Resumo das Características do Medicamento, metformina*,
+  secções 4.2 e 4.3, após a revisão europeia de 2016
+  https://ec.europa.eu/health/documents/community-register/2016/20161208136460/anx_136460_pt.pdf
+  Substituiu a circular do Infarmed n.º 006/CD/550.20.001, de 29/01/2016, que
+  estava desatualizada. Ver a nota sobre AJU-MET-018 abaixo.
+- Infarmed, *Resumo das Características do Medicamento, Ramipril cápsulas*,
+  texto harmonizado, secções 4.3 e 4.6
+  https://www.infarmed.pt/documents/15786/1577857/Ramipril_Capsula_RCM.doc/9adaba60-3630-4577-8907-14fc5aeeeeea
+- EMA, *Valproato, arbitragem do artigo 31.º, Anexo III*, alterações às secções
+  4.3, 4.4 e 4.6 do RCM
+  https://www.ema.europa.eu/pt/documents/referral/valproate-article-31-referral-annex-iii_pt.pdf
+  **Atenção na confirmação:** este é o texto da arbitragem de 2018. O RCM em vigor
+  pode ter sido atualizado depois; confirmar no Infomed.
+- EMA, *Eliquis (apixabano), informação do medicamento*, secção 4.2
+  https://www.ema.europa.eu/pt/documents/product-information/eliquis-epar-product-information_pt.pdf
+- Pfizer, *Resumo das Características do Medicamento, Ledertrexato 2,5 mg comprimidos*,
+  revisão de 03/2025, secção 4.2
+  https://labeling.pfizer.com/ShowLabeling.aspx?id=5181
+  **Atenção na confirmação:** cópia alojada pelo titular, não pelo Infarmed.
+  Confirmar no Infomed.
 - DGS, *Norma n.º 005/2022 de 28/05/2022, atualizada a 04/01/2023, Terapêutica Farmacológica para a COVID-19*
   https://www.dgs.pt/normas-orientacoes-e-informacoes/normas-e-circulares-normativas/norma-n-0052022-de-28052022-pdf.aspx
 
