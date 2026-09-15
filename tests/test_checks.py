@@ -38,6 +38,16 @@ class TestFindTerm(unittest.TestCase):
     def test_a_term_with_a_slash_still_matches_when_glued_to_a_unit(self):
         self.assertGreaterEqual(find_term(normalize("8/8h"), "8/8"), 0)
 
+    def test_a_term_starting_with_a_digit_does_not_match_after_a_decimal_comma(self):
+        self.assertEqual(find_term(normalize("apixabano 2,5 mg"), "5 mg"), -1)
+
+    def test_a_term_starting_with_a_digit_does_not_match_inside_a_longer_number(self):
+        self.assertEqual(find_term(normalize("dose de 25 mg"), "5 mg"), -1)
+        self.assertEqual(find_term(normalize("cetorolac 100 mg"), "0 mg"), -1)
+
+    def test_a_term_starting_with_a_digit_matches_on_its_own(self):
+        self.assertGreaterEqual(find_term(normalize("tomar 5 mg"), "5 mg"), 0)
+
 
 class TestContem(unittest.TestCase):
     def test_any_one_of_the_terms_is_enough(self):

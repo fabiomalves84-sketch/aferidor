@@ -62,12 +62,19 @@ def find_term(haystack: str, term: str) -> int:
     """Position of `term` in already normalised text, or -1.
 
     Bare numbers match only as whole words, so `5` is not found inside `500`.
+    A term that starts with a digit needs the same guard even when it is not
+    a bare number: `5 mg` must not match inside `2,5 mg` or `25 mg`, only a
+    digit or a digit followed by a decimal separator right before it rules
+    that out.
     """
     needle = normalize(term)
     if not needle:
         return -1
     if _BARE_NUMBER.match(needle):
         match = re.search(rf"(?<!\d){re.escape(needle)}(?!\d)", haystack)
+        return match.start() if match else -1
+    if needle[0].isdigit():
+        match = re.search(rf"(?<![\d])(?<![\d][.,]){re.escape(needle)}", haystack)
         return match.start() if match else -1
     return haystack.find(needle)
 
