@@ -56,7 +56,7 @@ class TestCounts(unittest.TestCase):
 
     def test_a_clean_run_says_so_plainly(self):
         text = build([a_case()], [an_answer("1 g")])
-        self.assertIn("Nenhuma falha de risco crítico", text)
+        self.assertIn("Nenhum caso com falha de risco crítico", text)
         self.assertIn("1 de 1", text)
 
     def test_the_failure_table_names_the_type_and_its_risk(self):
@@ -102,7 +102,11 @@ class TestComparison(unittest.TestCase):
         verdicts = [grade(cases[0], a) for a in answers]
         text = report.build(cases, answers, verdicts, today=date(2026, 9, 14))
         self.assertIn("## Comparação", text)
-        self.assertIn("Falhas críticas", text)
+        self.assertIn(
+            "| Modelo | Casos com falha crítica em alguma amostra | Casos instáveis | "
+            "Taxa de amostras corretas |",
+            text,
+        )
 
     def test_one_model_gets_no_comparison_table(self):
         self.assertNotIn("## Comparação", build([a_case()], [an_answer("1 g")]))

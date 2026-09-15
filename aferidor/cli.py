@@ -23,13 +23,15 @@ DEFAULT_VERDICTS = Path("data/vereditos.json")
 DEFAULT_REPORT = Path("relatorios/relatorio.md")
 
 
-def build_provider(kind: str, model: str | None) -> Provider:
+def build_provider(kind: str, model: str | None, temperature: float = 0.0) -> Provider:
     if kind == "falso":
-        return FakeProvider(name=f"falso:{model}" if model else "falso")
+        return FakeProvider(name=f"falso:{model}" if model else "falso", temperature=temperature)
     if kind == "openai":
-        return OpenAIProvider(model=model) if model else OpenAIProvider()
+        kwargs = {"temperature": temperature}
+        return OpenAIProvider(model=model, **kwargs) if model else OpenAIProvider(**kwargs)
     if kind == "anthropic":
-        return AnthropicProvider(model=model) if model else AnthropicProvider()
+        kwargs = {"temperature": temperature}
+        return AnthropicProvider(model=model, **kwargs) if model else AnthropicProvider(**kwargs)
     raise ValueError(f"fornecedor desconhecido {kind!r}")
 
 
@@ -46,6 +48,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     executar.add_argument("--saida", type=Path, default=DEFAULT_OUTPUT)
     executar.add_argument("--limite", type=int, default=0, help="0 corre todos")
     executar.add_argument("--tentativas", type=int, default=3)
+    executar.add_argument(
+        "--repeticoes", type=int, default=1, help="quantas vezes perguntar cada caso"
+    )
+    executar.add_argument(
+        "--temperatura", type=float, default=0.0, help="temperatura pedida ao fornecedor"
+    )
     executar.add_argument(
         "--recomecar",
         action="store_true",
@@ -75,6 +83,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     ensaio.add_argument("--relatorio", type=Path, default=DEFAULT_REPORT)
     ensaio.add_argument("--limite", type=int, default=0)
     ensaio.add_argument("--tentativas", type=int, default=3)
+    ensaio.add_argument(
+        "--repeticoes", type=int, default=1, help="quantas vezes perguntar cada caso"
+    )
+    ensaio.add_argument(
+        "--temperatura", type=float, default=0.0, help="temperatura pedida ao fornecedor"
+    )
     ensaio.add_argument("--recomecar", action="store_true")
     ensaio.add_argument("--fontes-confirmadas", action="store_true")
 
@@ -102,12 +116,12 @@ def comando_executar(args: argparse.Namespace) -> int:
         cases = cases[: args.limite]
 
     try:
-        provider = build_provider(args.fornecedor, args.modelo)
+        provider = build_provider(args.fornecedor, args.modelo, temperature=args.temperatura)
     except ProviderError as error:
         print(f"erro: {error}", file=sys.stderr)
         return 2
 
-    print(f"{len(cases)} casos, modelo {provider.name}")
+    print(f"{len(cases)} casos x {args.repeticoes} amostra(s), modelo {provider.name}")
 
     def progress(case, answer, status) -> None:
         mark = "." if status == "ok" else ("-" if status == "ja respondido" else "!")
@@ -119,6 +133,7 @@ def comando_executar(args: argparse.Namespace) -> int:
         provider,
         path=None if args.recomecar else args.saida,
         config=RunConfig(attempts=args.tentativas),
+        repetitions=args.repeticoes,
         progress=progress,
     )
 
@@ -233,6 +248,7 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     executar_args = argparse.Namespace(
         fornecedor=args.fornecedor, modelo=args.modelo, casos=args.casos,
         saida=args.saida, limite=args.limite, tentativas=args.tentativas,
+        repeticoes=args.repeticoes, temperatura=args.temperatura,
         recomecar=args.recomecar,
     )
     codigo = comando_executar(executar_args)

@@ -94,7 +94,25 @@ tentado a esquecê-la.
 Cada critério que alargares fica registado no git com a razão. É isso que
 distingue afinar de fazer batota.
 
-## 7. Comparar dois modelos
+## 7. Repetir a mesma pergunta
+
+```
+python -m aferidor ensaio --fornecedor openai --modelo <nome> --repeticoes 5 --temperatura 1.0
+```
+
+Um modelo que acerta a dose 4 vezes em 5 é, na prática, um modelo que erra a
+dose: o médico só vê uma resposta e não escolhe qual das cinco lhe calha. É
+por isso que o relatório passa a contar casos com falha crítica em pelo menos
+uma amostra, não respostas certas em média.
+
+**Usa `--temperatura 1,0` para isto, não o valor por omissão.** A temperatura
+0 pede ao modelo a resposta mais provável sempre, e por isso esconde
+exatamente a variabilidade que um ensaio de consistência quer medir. Um
+produto real, o que o utilizador final usa, normalmente não corre a
+temperatura 0. Medir a 0 e reportar como se fosse o produto é medir outra
+coisa.
+
+## 8. Comparar dois modelos
 
 Corre os dois. As respostas dos dois convivem no mesmo ficheiro, separadas por
 modelo, e o relatório passa a trazer uma tabela de comparação no topo.
@@ -107,7 +125,7 @@ python -m aferidor ensaio --fornecedor anthropic --modelo <nome>
 A tabela mostra a taxa de acerto e as falhas críticas lado a lado. Ler a segunda
 coluna antes da primeira.
 
-## 8. Recomeçar do zero
+## 9. Recomeçar do zero
 
 ```
 python -m aferidor ensaio --fornecedor openai --modelo <nome> --recomecar

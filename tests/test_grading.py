@@ -5,7 +5,16 @@ from __future__ import annotations
 import unittest
 from datetime import datetime
 
-from aferidor.grading import grade, grade_all, self_check, tally, tally_by_model
+from aferidor.grading import (
+    ConsistencyState,
+    consistency_by_case,
+    consistency_by_model,
+    grade,
+    grade_all,
+    self_check,
+    tally,
+    tally_by_model,
+)
 from aferidor.models import Answer, Case, Criterion, Source
 from aferidor.risk import FailureType, Risk
 
@@ -24,8 +33,10 @@ def a_case(case_id: str = "C1") -> Case:
     )
 
 
-def an_answer(text: str, case_id: str = "C1", model: str = "falso") -> Answer:
-    return Answer(case_id=case_id, model=model, text=text, asked_at=datetime(2026, 9, 14))
+def an_answer(text: str, case_id: str = "C1", model: str = "falso", sample: int = 1) -> Answer:
+    return Answer(
+        case_id=case_id, model=model, text=text, asked_at=datetime(2026, 9, 14), sample=sample
+    )
 
 
 class TestGrade(unittest.TestCase):
@@ -118,6 +129,72 @@ class TestTally(unittest.TestCase):
         self.assertEqual(sorted(counts), ["dois", "um"])
         self.assertEqual(counts["um"].passed, 1)
         self.assertEqual(counts["dois"].passed, 0)
+
+
+class TestConsistency(unittest.TestCase):
+    def test_every_sample_passing_is_estavel_certo(self):
+        cases = [a_case("C1")]
+        answers = [
+            an_answer("Amoxicilina 1000 mg", case_id="C1", sample=1),
+            an_answer("Amoxicilina 1 g", case_id="C1", sample=2),
+        ]
+        verdicts, _ = grade_all(cases, answers)
+        consistency = consistency_by_case(cases, answers, verdicts)
+        entry = consistency[("C1", "falso")]
+        self.assertEqual(entry.samples, 2)
+        self.assertEqual(entry.passed, 2)
+        self.assertEqual(entry.state, ConsistencyState.ESTAVEL_CERTO)
+
+    def test_every_sample_failing_is_estavel_errado(self):
+        cases = [a_case("C1")]
+        answers = [
+            an_answer("Amoxicilina 500 mg", case_id="C1", sample=1),
+            an_answer("Amoxicilina 500 mg", case_id="C1", sample=2),
+        ]
+        verdicts, _ = grade_all(cases, answers)
+        consistency = consistency_by_case(cases, answers, verdicts)
+        entry = consistency[("C1", "falso")]
+        self.assertEqual(entry.passed, 0)
+        self.assertEqual(entry.state, ConsistencyState.ESTAVEL_ERRADO)
+        self.assertEqual(entry.worst_failure, FailureType.DOSE_INCORRETA)
+
+    def test_a_mix_of_passing_and_failing_samples_is_instavel(self):
+        cases = [a_case("C1")]
+        answers = [
+            an_answer("Amoxicilina 1000 mg", case_id="C1", sample=1),
+            an_answer("Amoxicilina 500 mg", case_id="C1", sample=2),
+        ]
+        verdicts, _ = grade_all(cases, answers)
+        consistency = consistency_by_case(cases, answers, verdicts)
+        entry = consistency[("C1", "falso")]
+        self.assertEqual(entry.passed, 1)
+        self.assertEqual(entry.state, ConsistencyState.INSTAVEL)
+
+    def test_the_worst_failure_seen_in_any_sample_is_kept(self):
+        cases = [a_case("C1")]
+        answers = [
+            an_answer("Amoxicilina 1000 mg", case_id="C1", sample=1),
+            an_answer("nao sei", case_id="C1", sample=2),
+        ]
+        verdicts, _ = grade_all(cases, answers)
+        consistency = consistency_by_case(cases, answers, verdicts)
+        self.assertEqual(consistency[("C1", "falso")].worst_failure, FailureType.DOSE_INCORRETA)
+
+    def test_summary_counts_cases_not_samples(self):
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [
+            an_answer("Amoxicilina 1000 mg", case_id="C1", sample=1),
+            an_answer("Amoxicilina 500 mg", case_id="C1", sample=2),
+            an_answer("Amoxicilina 500 mg", case_id="C2", sample=1),
+            an_answer("Amoxicilina 500 mg", case_id="C2", sample=2),
+        ]
+        verdicts, _ = grade_all(cases, answers)
+        consistency = consistency_by_case(cases, answers, verdicts)
+        summary = consistency_by_model(consistency)["falso"]
+        self.assertEqual(summary.cases, 2)
+        self.assertEqual(summary.critical_cases, 2)
+        self.assertEqual(summary.unstable_cases, 1)
+        self.assertAlmostEqual(summary.sample_accuracy, 1 / 4)
 
 
 class TestSelfCheck(unittest.TestCase):

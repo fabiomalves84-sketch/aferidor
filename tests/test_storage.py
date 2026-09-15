@@ -107,6 +107,29 @@ class TestAnswerRoundTrip(unittest.TestCase):
             lines = [ln for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()]
         self.assertEqual(len(lines), 1)
 
+    def test_an_answer_written_with_sample_and_temperature_survives_a_round_trip(self):
+        answers = [
+            Answer("C-001", "modelo-x", "500 mg", datetime(2026, 9, 14, 10, 0), sample=3,
+                   temperature=1.0),
+        ]
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            write_answers(answers, path)
+            recovered = read_answers(path)
+        self.assertEqual(recovered, answers)
+
+    def test_an_old_file_without_sample_or_temperature_reads_as_sample_one_at_zero(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            path.write_text(
+                '{"caso": "C-001", "modelo": "m", "texto": "x", '
+                '"perguntada_em": "2026-09-14T10:00:00"}\n',
+                encoding="utf-8",
+            )
+            recovered = read_answers(path)
+        self.assertEqual(recovered[0].sample, 1)
+        self.assertEqual(recovered[0].temperature, 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

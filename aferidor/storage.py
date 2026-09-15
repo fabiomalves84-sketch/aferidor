@@ -129,6 +129,8 @@ def answer_to_dict(answer: Answer) -> dict:
         "perguntada_em": answer.asked_at.isoformat(),
         "latencia_ms": answer.latency_ms,
         "execucao": answer.run_id,
+        "amostra": answer.sample,
+        "temperatura": answer.temperature,
     }
 
 
@@ -140,6 +142,8 @@ def answer_from_dict(data: dict, where: str) -> Answer:
         asked_at=datetime.fromisoformat(str(_require(data, "perguntada_em", where))),
         latency_ms=int(data.get("latencia_ms", 0)),
         run_id=str(data.get("execucao", "")),
+        sample=int(data.get("amostra", 1)),
+        temperature=float(data.get("temperatura", 0.0)),
     )
 
 

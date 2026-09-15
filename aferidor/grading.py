@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
 
 from .checks import check
 from .models import Answer, Case, Verdict
@@ -111,6 +112,128 @@ def tally_by_model(verdicts: list[Verdict]) -> dict[str, Tally]:
     return {model: tally(group) for model, group in sorted(grouped.items())}
 
 
+class ConsistencyState(Enum):
+    """How stable a model's answers were across repeated samples of one case.
+
+    A model right in one sample out of five is, for a clinician who only ever
+    sees one answer, a model that gets that case wrong. Instability is a
+    finding on its own, separate from whether any given sample passed.
+    """
+
+    ESTAVEL_CERTO = "estavel_certo"
+    ESTAVEL_ERRADO = "estavel_errado"
+    INSTAVEL = "instavel"
+
+    @property
+    def label(self) -> str:
+        return _CONSISTENCY_LABELS[self]
+
+    def __str__(self) -> str:
+        return self.value
+
+
+_CONSISTENCY_LABELS: dict[ConsistencyState, str] = {
+    ConsistencyState.ESTAVEL_CERTO: "estável certo",
+    ConsistencyState.ESTAVEL_ERRADO: "estável errado",
+    ConsistencyState.INSTAVEL: "instável",
+}
+
+
+@dataclass
+class Consistency:
+    """How one model answered one case across every sample it was asked."""
+
+    case_id: str
+    model: str
+    samples: int
+    passed: int
+    worst_failure: FailureType | None
+    state: ConsistencyState
+
+
+def consistency_by_case(
+    cases: list[Case], answers: list[Answer], verdicts: list[Verdict]
+) -> dict[tuple[str, str], Consistency]:
+    """Group verdicts by (case, model), reading sample numbers off `answers`.
+
+    `verdicts` must be exactly what `grade_all(cases, answers)` returned for
+    this same `answers` list: its order lines up with the answers whose case
+    is known, which is the same filter applied here.
+    """
+    known_ids = {c.case_id for c in cases}
+    matched = [a for a in answers if a.case_id in known_ids]
+    if len(matched) != len(verdicts):
+        raise ValueError(
+            "answers e verdicts fora de sincronia; volta a correr grade_all(cases, answers)"
+        )
+
+    grouped: dict[tuple[str, str], list[tuple[Answer, Verdict]]] = {}
+    for answer, verdict in zip(matched, verdicts):
+        grouped.setdefault((answer.case_id, answer.model), []).append((answer, verdict))
+
+    result: dict[tuple[str, str], Consistency] = {}
+    for (case_id, model), pairs in grouped.items():
+        samples = len(pairs)
+        passed = sum(1 for _, v in pairs if v.passed)
+        failures = [f for _, v in pairs for f in v.failures]
+        worst = max(failures, key=lambda f: f.risk.value) if failures else None
+        if passed == samples:
+            state = ConsistencyState.ESTAVEL_CERTO
+        elif passed == 0:
+            state = ConsistencyState.ESTAVEL_ERRADO
+        else:
+            state = ConsistencyState.INSTAVEL
+        result[(case_id, model)] = Consistency(
+            case_id=case_id,
+            model=model,
+            samples=samples,
+            passed=passed,
+            worst_failure=worst,
+            state=state,
+        )
+    return result
+
+
+@dataclass
+class ConsistencySummary:
+    """One model's consistency, counted by case rather than by sample.
+
+    Counting by sample hides exactly what this is for: a model that is wrong
+    in one sample out of five still gets a case wrong for the one clinician
+    who saw that sample.
+    """
+
+    model: str
+    cases: int
+    critical_cases: int
+    unstable_cases: int
+    sample_accuracy: float
+
+
+def consistency_by_model(
+    consistency: dict[tuple[str, str], Consistency]
+) -> dict[str, ConsistencySummary]:
+    """One summary per model, sorted by name. Mixing models here is as wrong as in `tally`."""
+    grouped: dict[str, list[Consistency]] = {}
+    for (_, model), entry in consistency.items():
+        grouped.setdefault(model, []).append(entry)
+
+    result: dict[str, ConsistencySummary] = {}
+    for model, entries in sorted(grouped.items()):
+        total_samples = sum(e.samples for e in entries)
+        total_passed = sum(e.passed for e in entries)
+        result[model] = ConsistencySummary(
+            model=model,
+            cases=len(entries),
+            critical_cases=sum(
+                1 for e in entries if e.worst_failure and e.worst_failure.risk == Risk.CRITICO
+            ),
+            unstable_cases=sum(1 for e in entries if e.state is ConsistencyState.INSTAVEL),
+            sample_accuracy=(total_passed / total_samples) if total_samples else 0.0,
+        )
+    return result
+
+
 def self_check(cases: list[Case]) -> list[tuple[Case, Verdict]]:
     """Grade every case's own reference answer against its own criteria.
 
@@ -134,4 +257,16 @@ def self_check(cases: list[Case]) -> list[tuple[Case, Verdict]]:
     return broken
 
 
-__all__ = ["grade", "grade_all", "tally", "tally_by_model", "self_check", "Tally"]
+__all__ = [
+    "grade",
+    "grade_all",
+    "tally",
+    "tally_by_model",
+    "self_check",
+    "Tally",
+    "ConsistencyState",
+    "Consistency",
+    "consistency_by_case",
+    "ConsistencySummary",
+    "consistency_by_model",
+]

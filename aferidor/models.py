@@ -84,7 +84,12 @@ class Case:
 
 @dataclass(frozen=True)
 class Answer:
-    """What a model replied to one case, kept exactly as it came."""
+    """What a model replied to one case, kept exactly as it came.
+
+    `sample` numbers repeated asks of the same case to the same model, so a
+    consistency run can tell them apart. `temperature` is the value the
+    provider was configured with when this answer was asked.
+    """
 
     case_id: str
     model: str
@@ -92,10 +97,14 @@ class Answer:
     asked_at: datetime
     latency_ms: int = 0
     run_id: str = ""
+    sample: int = 1
+    temperature: float = 0.0
 
     def __post_init__(self) -> None:
         if self.latency_ms < 0:
             raise ValueError("latency cannot be negative")
+        if self.sample < 1:
+            raise ValueError("sample numbers start at 1")
 
 
 @dataclass(frozen=True)

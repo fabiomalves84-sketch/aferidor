@@ -69,11 +69,13 @@ class FakeProvider(Provider):
         replies: dict[str, str] | None = None,
         default: str = "sem resposta",
         failures: int = 0,
+        temperature: float = 0.0,
     ) -> None:
         self.name = name
         self.replies = dict(replies or {})
         self.default = default
         self.failures = failures
+        self.temperature = temperature
         self.prompts: list[str] = []
 
     def ask(self, prompt: str) -> str:

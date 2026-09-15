@@ -123,6 +123,46 @@ class TestResume(unittest.TestCase):
             self.assertEqual(result.skipped, [])
             self.assertEqual(len(read_answers(path)), 2)
 
+    def test_resuming_partway_through_the_repetitions_of_one_case(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            provider = FakeProvider(default="x")
+            run([a_case("A")], provider, path=path, repetitions=2)
+            self.assertEqual(len(provider.prompts), 2)
+
+            provider2 = FakeProvider(default="y")
+            result = run([a_case("A")], provider2, path=path, repetitions=5)
+
+            self.assertEqual([an.sample for an in result.answers], [3, 4, 5])
+            self.assertEqual(len(provider2.prompts), 3)
+            saved = read_answers(path)
+            self.assertEqual(sorted(a.sample for a in saved), [1, 2, 3, 4, 5])
+
+
+class TestRepetitions(unittest.TestCase):
+    def test_each_case_is_asked_once_per_repetition(self):
+        result = run([a_case("A"), a_case("B")], FakeProvider(default="x"), repetitions=3)
+        self.assertEqual(
+            [(an.case_id, an.sample) for an in result.answers],
+            [("A", 1), ("A", 2), ("A", 3), ("B", 1), ("B", 2), ("B", 3)],
+        )
+
+    def test_an_old_answer_without_a_sample_field_is_read_as_sample_one(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            path.write_text(
+                '{"caso": "A", "modelo": "falso", "texto": "x", '
+                '"perguntada_em": "2026-09-14T10:00:00"}\n',
+                encoding="utf-8",
+            )
+            provider = FakeProvider(default="y")
+            result = run([a_case("A")], provider, path=path, repetitions=2)
+            self.assertEqual([an.sample for an in result.answers], [2])
+
+    def test_the_temperature_asked_for_is_recorded_on_the_answer(self):
+        result = run([a_case()], FakeProvider(temperature=1.0))
+        self.assertEqual(result.answers[0].temperature, 1.0)
+
 
 class TestConfig(unittest.TestCase):
     def test_zero_attempts_is_refused(self):

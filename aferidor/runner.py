@@ -78,10 +78,16 @@ class RunResult:
         return ", ".join(parts)
 
 
-def _answered_already(path: Path | None, model: str) -> set[str]:
+def _answered_already(path: Path | None, model: str) -> set[tuple[str, int]]:
+    """Which (case, sample) pairs this model already has an answer for.
+
+    The key includes the sample number, not just the case, so a run
+    interrupted partway through its repetitions resumes at the missing
+    sample instead of skipping the whole case or repeating what is done.
+    """
     if path is None or not Path(path).exists():
         return set()
-    return {a.case_id for a in read_answers(Path(path)) if a.model == model}
+    return {(a.case_id, a.sample) for a in read_answers(Path(path)) if a.model == model}
 
 
 def _ask_with_retry(
@@ -109,45 +115,53 @@ def run(
     path: Path | None = None,
     run_id: str | None = None,
     config: RunConfig | None = None,
+    repetitions: int = 1,
     progress: Callable[[Case, Answer | None, str], None] | None = None,
 ) -> RunResult:
     """Ask every case and keep what came back.
 
     `path` is a JSONL file appended to as answers arrive; when it already holds
-    answers from this same model, those cases are skipped.
+    answers from this same model, those (case, sample) pairs are skipped.
+
+    `repetitions` asks each case that many times, numbered from 1, so a
+    consistency check can see whether the model answers the same way twice.
     """
     config = config or RunConfig()
     result = RunResult(run_id=run_id or uuid.uuid4().hex[:12], model=provider.name)
     done = _answered_already(path, provider.name)
+    temperature = getattr(provider, "temperature", 0.0)
 
     for case in cases:
-        if case.case_id in done:
-            result.skipped.append(case.case_id)
-            if progress:
-                progress(case, None, "ja respondido")
-            continue
+        for sample in range(1, repetitions + 1):
+            if (case.case_id, sample) in done:
+                result.skipped.append(case.case_id)
+                if progress:
+                    progress(case, None, "ja respondido")
+                continue
 
-        try:
-            text, latency_ms = _ask_with_retry(provider, build_prompt(case), config)
-        except ProviderError as error:
-            result.errors[case.case_id] = str(error)
-            if progress:
-                progress(case, None, f"erro: {error}")
-            continue
+            try:
+                text, latency_ms = _ask_with_retry(provider, build_prompt(case), config)
+            except ProviderError as error:
+                result.errors[case.case_id] = str(error)
+                if progress:
+                    progress(case, None, f"erro: {error}")
+                continue
 
-        answer = Answer(
-            case_id=case.case_id,
-            model=provider.name,
-            text=text,
-            asked_at=datetime.now(),
-            latency_ms=latency_ms,
-            run_id=result.run_id,
-        )
-        if path is not None:
-            append_answer(answer, Path(path))
-        result.answers.append(answer)
-        if progress:
-            progress(case, answer, "ok")
+            answer = Answer(
+                case_id=case.case_id,
+                model=provider.name,
+                text=text,
+                asked_at=datetime.now(),
+                latency_ms=latency_ms,
+                run_id=result.run_id,
+                sample=sample,
+                temperature=temperature,
+            )
+            if path is not None:
+                append_answer(answer, Path(path))
+            result.answers.append(answer)
+            if progress:
+                progress(case, answer, "ok")
 
     return result
 
