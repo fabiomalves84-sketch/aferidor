@@ -15,8 +15,37 @@ import os
 import urllib.error
 import urllib.request
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 USER_AGENT = "aferidor/0.1"
+
+
+@dataclass(frozen=True)
+class Reply:
+    """What a provider got back: the text, and why it stopped.
+
+    `finish_reason` is normalized across vendors to one of "stop" (the model
+    finished on its own), "length" (cut off by `max_tokens`), or "unknown"
+    (anything else, kept rather than guessed at).
+    """
+
+    text: str
+    finish_reason: str = "stop"
+
+
+def normalize_finish_reason(raw: str | None) -> str:
+    """Fold every vendor's own vocabulary into "stop", "length" or "unknown".
+
+    OpenAI's chat completions and Ollama's compatible layer say "stop" or
+    "length"; Anthropic says "end_turn"/"stop_sequence" or "max_tokens". A
+    caller that only needs to know "did the model run out of room" should
+    never have to know which vendor it is talking to.
+    """
+    if raw in ("stop", "end_turn", "stop_sequence"):
+        return "stop"
+    if raw in ("length", "max_tokens"):
+        return "length"
+    return "unknown"
 
 
 class ProviderError(RuntimeError):
@@ -42,8 +71,8 @@ class Provider(ABC):
     name: str
 
     @abstractmethod
-    def ask(self, prompt: str) -> str:
-        """Send one prompt and return the reply text."""
+    def ask(self, prompt: str) -> Reply:
+        """Send one prompt and return the reply, text and finish reason."""
 
     def available_models(self) -> list[str]:
         """Model identifiers this provider currently offers.
@@ -60,7 +89,8 @@ class FakeProvider(Provider):
 
     `replies` maps a prompt to its reply; anything unscripted gets `default`.
     `failures` makes the first N calls raise a retryable error, which is how
-    the runner's retry path gets exercised without a network.
+    the runner's retry path gets exercised without a network. `finish_reason`
+    lets a test simulate a model that ran out of `max_tokens`.
     """
 
     def __init__(
@@ -70,23 +100,25 @@ class FakeProvider(Provider):
         default: str = "sem resposta",
         failures: int = 0,
         temperature: float = 0.0,
+        finish_reason: str = "stop",
     ) -> None:
         self.name = name
         self.replies = dict(replies or {})
         self.default = default
         self.failures = failures
         self.temperature = temperature
+        self.finish_reason = finish_reason
         self.prompts: list[str] = []
 
-    def ask(self, prompt: str) -> str:
+    def ask(self, prompt: str) -> Reply:
         self.prompts.append(prompt)
         if self.failures > 0:
             self.failures -= 1
             raise ProviderError("falha simulada", retryable=True)
         for needle, reply in self.replies.items():
             if needle in prompt:
-                return reply
-        return self.default
+                return Reply(text=reply, finish_reason=self.finish_reason)
+        return Reply(text=self.default, finish_reason=self.finish_reason)
 
 
 def _request_json(
@@ -145,7 +177,7 @@ def _chat_completion(
     max_tokens: int,
     timeout: float,
     who: str,
-) -> str:
+) -> Reply:
     """One call to any endpoint that speaks the OpenAI chat completions shape.
 
     OpenAI's own API and Ollama's compatibility layer both take this payload
@@ -164,9 +196,11 @@ def _chat_completion(
         timeout,
     )
     try:
-        return data["choices"][0]["message"]["content"] or ""
+        choice = data["choices"][0]
+        text = choice["message"]["content"] or ""
     except (KeyError, IndexError, TypeError):
         raise ProviderError(f"resposta {who} sem texto: {str(data)[:300]}") from None
+    return Reply(text=text, finish_reason=normalize_finish_reason(choice.get("finish_reason")))
 
 
 class OpenAIProvider(Provider):
@@ -190,7 +224,7 @@ class OpenAIProvider(Provider):
         self.max_tokens = max_tokens
         self.timeout = timeout
 
-    def ask(self, prompt: str) -> str:
+    def ask(self, prompt: str) -> Reply:
         return _chat_completion(
             self.ENDPOINT,
             {"authorization": f"Bearer {self.api_key}"},
@@ -234,7 +268,7 @@ class AnthropicProvider(Provider):
         self.max_tokens = max_tokens
         self.timeout = timeout
 
-    def ask(self, prompt: str) -> str:
+    def ask(self, prompt: str) -> Reply:
         data = _post_json(
             self.ENDPOINT,
             {"x-api-key": self.api_key, "anthropic-version": self.VERSION},
@@ -248,9 +282,10 @@ class AnthropicProvider(Provider):
         )
         try:
             blocks = data["content"]
-            return "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
+            text = "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
         except (KeyError, TypeError):
             raise ProviderError(f"resposta da Anthropic sem texto: {str(data)[:300]}") from None
+        return Reply(text=text, finish_reason=normalize_finish_reason(data.get("stop_reason")))
 
     def available_models(self) -> list[str]:
         data = _request_json(
@@ -310,7 +345,7 @@ class LocalProvider(Provider):
             retryable=False,
         )
 
-    def ask(self, prompt: str) -> str:
+    def ask(self, prompt: str) -> Reply:
         try:
             return _chat_completion(
                 f"{self.base_url}/v1/chat/completions",
@@ -340,6 +375,8 @@ class LocalProvider(Provider):
 __all__ = [
     "Provider",
     "ProviderError",
+    "Reply",
+    "normalize_finish_reason",
     "FakeProvider",
     "OpenAIProvider",
     "AnthropicProvider",

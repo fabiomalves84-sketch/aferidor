@@ -88,7 +88,10 @@ class Answer:
 
     `sample` numbers repeated asks of the same case to the same model, so a
     consistency run can tell them apart. `temperature` is the value the
-    provider was configured with when this answer was asked.
+    provider was configured with when this answer was asked. `finish_reason`
+    is "stop" unless the provider says otherwise; a truncated or empty reply
+    never reaches here at all (the runner treats it as an execution error,
+    not an answer), so in practice this is almost always "stop".
     """
 
     case_id: str
@@ -99,6 +102,7 @@ class Answer:
     run_id: str = ""
     sample: int = 1
     temperature: float = 0.0
+    finish_reason: str = "stop"
 
     def __post_init__(self) -> None:
         if self.latency_ms < 0:

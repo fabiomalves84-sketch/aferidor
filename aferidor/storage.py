@@ -131,6 +131,7 @@ def answer_to_dict(answer: Answer) -> dict:
         "execucao": answer.run_id,
         "amostra": answer.sample,
         "temperatura": answer.temperature,
+        "fim": answer.finish_reason,
     }
 
 
@@ -144,6 +145,7 @@ def answer_from_dict(data: dict, where: str) -> Answer:
         run_id=str(data.get("execucao", "")),
         sample=int(data.get("amostra", 1)),
         temperature=float(data.get("temperatura", 0.0)),
+        finish_reason=str(data.get("fim", "stop")),
     )
 
 

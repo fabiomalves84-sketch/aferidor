@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Callable
 
 from .models import Answer, Case
-from .providers import Provider, ProviderError
+from .providers import Provider, ProviderError, Reply
 from .storage import append_answer, read_answers
 
 INSTRUCTION = (
@@ -90,21 +90,37 @@ def _answered_already(path: Path | None, model: str) -> set[tuple[str, int]]:
     return {(a.case_id, a.sample) for a in read_answers(Path(path)) if a.model == model}
 
 
+def _check_reply(reply: Reply) -> None:
+    """Refuse a reply that the model never actually finished giving.
+
+    A reply cut off by `max_tokens` (`finish_reason` "length") or that came
+    back with no text at all is not a wrong answer, it is a question the
+    model never got to answer. Grading it would count a dose the model never
+    stated as a dose it got wrong. This is deliberately not retryable: the
+    same `max_tokens` would just cut it off again, and retrying with a
+    different budget mid-run would leave two different measurements in the
+    same file.
+    """
+    if reply.finish_reason == "length" or not reply.text.strip():
+        raise ProviderError("resposta truncada no limite de tokens", retryable=False)
+
+
 def _ask_with_retry(
     provider: Provider, prompt: str, config: RunConfig
-) -> tuple[str, int]:
+) -> tuple[Reply, int]:
     last: ProviderError | None = None
     for attempt in range(1, config.attempts + 1):
         started = time.monotonic()
         try:
-            text = provider.ask(prompt)
+            reply = provider.ask(prompt)
+            _check_reply(reply)
         except ProviderError as error:
             last = error
             if not error.retryable or attempt == config.attempts:
                 break
             config.sleep(config.backoff_s * attempt)
             continue
-        return text, int((time.monotonic() - started) * 1000)
+        return reply, int((time.monotonic() - started) * 1000)
     raise last if last else ProviderError("falhou sem erro registado")
 
 
@@ -140,7 +156,7 @@ def run(
                 continue
 
             try:
-                text, latency_ms = _ask_with_retry(provider, build_prompt(case), config)
+                reply, latency_ms = _ask_with_retry(provider, build_prompt(case), config)
             except ProviderError as error:
                 result.errors[case.case_id] = str(error)
                 if progress:
@@ -150,12 +166,13 @@ def run(
             answer = Answer(
                 case_id=case.case_id,
                 model=provider.name,
-                text=text,
+                text=reply.text,
                 asked_at=datetime.now(),
                 latency_ms=latency_ms,
                 run_id=result.run_id,
                 sample=sample,
                 temperature=temperature,
+                finish_reason=reply.finish_reason,
             )
             if path is not None:
                 append_answer(answer, Path(path))

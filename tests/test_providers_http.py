@@ -80,7 +80,7 @@ class TestOpenAIReplies(unittest.TestCase):
         provider = OpenAIProvider(model="m", api_key="k")
         payload = {"choices": [{"message": {"content": "1000 mg de 8 em 8 horas"}}]}
         with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
-            self.assertEqual(provider.ask("p"), "1000 mg de 8 em 8 horas")
+            self.assertEqual(provider.ask("p").text, "1000 mg de 8 em 8 horas")
 
     def test_a_reply_without_text_is_an_error_and_shows_what_came(self):
         provider = OpenAIProvider(model="m", api_key="k")
@@ -93,13 +93,31 @@ class TestOpenAIReplies(unittest.TestCase):
         provider = OpenAIProvider(model="m", api_key="k")
         payload = {"choices": [{"message": {"content": None}}]}
         with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
-            self.assertEqual(provider.ask("p"), "")
+            self.assertEqual(provider.ask("p").text, "")
 
     def test_listing_models_returns_them_sorted(self):
         provider = OpenAIProvider(model="m", api_key="k")
         payload = {"data": [{"id": "zeta"}, {"id": "alfa"}, {"sem": "id"}]}
         with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
             self.assertEqual(provider.available_models(), ["alfa", "zeta"])
+
+    def test_a_finish_reason_of_stop_is_normalized(self):
+        provider = OpenAIProvider(model="m", api_key="k")
+        payload = {"choices": [{"message": {"content": "x"}, "finish_reason": "stop"}]}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
+            self.assertEqual(provider.ask("p").finish_reason, "stop")
+
+    def test_a_finish_reason_of_length_is_normalized(self):
+        provider = OpenAIProvider(model="m", api_key="k")
+        payload = {"choices": [{"message": {"content": "a meio"}, "finish_reason": "length"}]}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
+            self.assertEqual(provider.ask("p").finish_reason, "length")
+
+    def test_an_unrecognised_finish_reason_is_unknown(self):
+        provider = OpenAIProvider(model="m", api_key="k")
+        payload = {"choices": [{"message": {"content": "x"}, "finish_reason": "tool_calls"}]}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
+            self.assertEqual(provider.ask("p").finish_reason, "unknown")
 
 
 class TestAnthropicReplies(unittest.TestCase):
@@ -113,7 +131,19 @@ class TestAnthropicReplies(unittest.TestCase):
             ]
         }
         with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
-            self.assertEqual(provider.ask("p"), "Amoxicilina 1000 mg")
+            self.assertEqual(provider.ask("p").text, "Amoxicilina 1000 mg")
+
+    def test_a_stop_reason_of_max_tokens_is_normalized_to_length(self):
+        provider = AnthropicProvider(model="m", api_key="k")
+        payload = {"content": [{"type": "text", "text": "a meio"}], "stop_reason": "max_tokens"}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
+            self.assertEqual(provider.ask("p").finish_reason, "length")
+
+    def test_a_stop_reason_of_end_turn_is_normalized_to_stop(self):
+        provider = AnthropicProvider(model="m", api_key="k")
+        payload = {"content": [{"type": "text", "text": "x"}], "stop_reason": "end_turn"}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
+            self.assertEqual(provider.ask("p").finish_reason, "stop")
 
     def test_a_reply_without_content_is_an_error(self):
         provider = AnthropicProvider(model="m", api_key="k")
@@ -133,7 +163,7 @@ class TestLocalReplies(unittest.TestCase):
         provider = LocalProvider(model="llama3")
         payload = {"choices": [{"message": {"content": "1000 mg de 8 em 8 horas"}}]}
         with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
-            self.assertEqual(provider.ask("p"), "1000 mg de 8 em 8 horas")
+            self.assertEqual(provider.ask("p").text, "1000 mg de 8 em 8 horas")
 
     def test_no_authorization_header_is_sent(self):
         provider = LocalProvider(model="llama3")

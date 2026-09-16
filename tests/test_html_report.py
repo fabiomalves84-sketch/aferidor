@@ -102,6 +102,14 @@ class TestGrid(unittest.TestCase):
         text = build(cases, [an_answer("1 g", case_id="C1")], missing=["C2"])
         self.assertIn("sem resposta", text)
 
+    def test_a_known_reason_is_shown_next_to_the_case(self):
+        cases = [a_case("C1"), a_case("C2")]
+        text = build(
+            cases, [an_answer("1 g", case_id="C1")],
+            missing=["C2"], reasons={"C2": "resposta truncada no limite de tokens"},
+        )
+        self.assertIn("C2 (resposta truncada no limite de tokens)", text)
+
 
 class TestDetail(unittest.TestCase):
     def test_a_failed_case_gets_a_details_block(self):

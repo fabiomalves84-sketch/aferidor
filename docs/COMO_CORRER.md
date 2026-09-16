@@ -125,7 +125,38 @@ python -m aferidor ensaio --fornecedor anthropic --modelo <nome>
 A tabela mostra a taxa de acerto e as falhas críticas lado a lado. Ler a segunda
 coluna antes da primeira.
 
-## 9. Ensaio de comparação
+## 9. O limite de tokens, e o modelo que raciocina antes de responder
+
+`--tokens-max` (omissão 4096) é o número máximo de tokens que o fornecedor
+pode gastar numa resposta. Um modelo comum gasta isso tudo no texto que o
+médico lê. Um modelo que raciocina antes de responder (o `qwen3:8b`, por
+exemplo) gasta parte do orçamento a pensar em voz alta antes da primeira
+palavra da resposta, e só o resto fica para o texto.
+
+**Isto já aconteceu aqui.** A `omissão` era 1024 até o ensaio de comparação
+de 16/09/2026 correr com dois modelos locais: 35 das 135 respostas do
+`qwen3:8b` chegaram vazias e 75 acabaram a meio da frase, porque o
+raciocínio consumiu o limite antes de a resposta começar. O runner trata uma
+resposta cortada por `max_tokens` como um caso por responder, não como uma
+resposta errada — mas um caso por responder também não mede nada, e um
+ensaio com 80% dos casos por responder não serve de evidência. Ver
+`ensaios/2026-09-16-comparacao-local-invalida/README.md` para o relato
+completo.
+
+Se um modelo local ou pago costuma pensar antes de responder, sobe o
+limite:
+
+```
+python -m aferidor ensaio --fornecedor local --modelo qwen3:8b --tokens-max 8192
+```
+
+Não há uma retentativa automática com mais tokens quando uma resposta chega
+cortada: isso mudaria a medição a meio do ensaio e deixaria duas medições
+diferentes no mesmo ficheiro. Se um ensaio tiver casos por responder com o
+motivo "resposta truncada no limite de tokens", a resposta é correr de novo
+com um `--tokens-max` maior, do zero.
+
+## 10. Ensaio de comparação
 
 O ensaio completo, para uma candidatura ou uma decisão a sério: três modelos,
 cinco amostras por caso, a temperatura que esconde menos variabilidade.
@@ -136,9 +167,9 @@ da máquina, e é repetível quantas vezes for preciso. Instala o Ollama
 (`ollama list`), e corre:
 
 ```
-python -m aferidor ensaio --fornecedor local --modelo <nome-a> --repeticoes 5 --temperatura 1.0
-python -m aferidor ensaio --fornecedor local --modelo <nome-b> --repeticoes 5 --temperatura 1.0
-python -m aferidor ensaio --fornecedor local --modelo <nome-c> --repeticoes 5 --temperatura 1.0
+python -m aferidor ensaio --fornecedor local --modelo <nome-a> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
+python -m aferidor ensaio --fornecedor local --modelo <nome-b> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
+python -m aferidor ensaio --fornecedor local --modelo <nome-c> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
 python -m aferidor relatorio --formato html
 ```
 
@@ -147,6 +178,11 @@ portátil demora muito mais por resposta do que uma API. 27 casos × 5
 repetições × 3 modelos são 405 pedidos; a duração real varia com o hardware e
 o tamanho do modelo, por isso o tempo total gasto deve ficar escrito no
 README do ensaio, não só o número de pedidos.
+
+**`--tokens-max 8192`, não a omissão, para um modelo que raciocina antes de
+responder.** Ver secção 9: a omissão de 4096 já chega para a maioria, mas um
+modelo como o `qwen3:8b` gasta parte do orçamento a pensar antes da primeira
+palavra da resposta.
 
 O último comando escreve `relatorios/relatorio.html`, um ficheiro só que abre
 com duplo clique: a grelha de casos por modelo, com o estado de cada um,
@@ -166,7 +202,7 @@ python -m aferidor ensaio --fornecedor openai --modelo <nome> --repeticoes 5 --t
 pedidos.** Nos modelos correntes isto fica em cêntimos ou poucos euros, não
 em dezenas, mas é bom saber o número antes de o correr, não depois.
 
-## 10. Recomeçar do zero
+## 11. Recomeçar do zero
 
 ```
 python -m aferidor ensaio --fornecedor openai --modelo <nome> --recomecar

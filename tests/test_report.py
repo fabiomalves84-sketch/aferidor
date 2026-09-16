@@ -91,6 +91,21 @@ class TestMissing(unittest.TestCase):
         self.assertIn("C2", text)
         self.assertIn("Não entram em nenhuma contagem", text)
 
+    def test_a_known_reason_is_shown_next_to_the_case(self):
+        text = build(
+            [a_case("C1")], [an_answer("1 g", case_id="C1")],
+            missing=["C2"], reasons={"C2": "resposta truncada no limite de tokens"},
+        )
+        self.assertIn("C2 (resposta truncada no limite de tokens)", text)
+
+    def test_a_case_without_a_known_reason_is_named_alone(self):
+        text = build(
+            [a_case("C1")], [an_answer("1 g", case_id="C1")],
+            missing=["C2"], reasons={"C3": "outra razao"},
+        )
+        self.assertIn("C2", text)
+        self.assertNotIn("C2 (", text)
+
 
 class TestComparison(unittest.TestCase):
     def test_two_models_get_a_comparison_table(self):

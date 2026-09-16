@@ -64,6 +64,10 @@ class TestAnswer(unittest.TestCase):
         with self.assertRaises(ValueError):
             Answer("C-001", "modelo-x", "texto", datetime(2026, 9, 14, 10, 0), latency_ms=-1)
 
+    def test_finish_reason_defaults_to_stop(self):
+        answer = Answer("C-001", "modelo-x", "texto", datetime(2026, 9, 14, 10, 0))
+        self.assertEqual(answer.finish_reason, "stop")
+
 
 class TestVerdict(unittest.TestCase):
     def test_an_answer_that_meets_every_criterion_passes(self):

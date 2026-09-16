@@ -45,6 +45,13 @@ class TestArguments(unittest.TestCase):
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
             parse_args(["modelos"])
 
+    def test_tokens_max_defaults_high_enough_for_a_reasoning_model(self):
+        self.assertEqual(parse_args(["executar"]).tokens_max, 4096)
+        self.assertEqual(parse_args(["ensaio"]).tokens_max, 4096)
+
+    def test_tokens_max_can_be_overridden(self):
+        self.assertEqual(parse_args(["executar", "--tokens-max", "8192"]).tokens_max, 8192)
+
 
 class TestBuildProvider(unittest.TestCase):
     def test_the_fake_provider_needs_no_key(self):
@@ -56,6 +63,12 @@ class TestBuildProvider(unittest.TestCase):
     def test_an_unknown_provider_is_refused(self):
         with self.assertRaises(ValueError):
             build_provider("inventado", None)
+
+    def test_tokens_max_travels_into_a_real_provider(self):
+        self.assertEqual(build_provider("local", "llama3", max_tokens=8192).max_tokens, 8192)
+
+    def test_without_tokens_max_the_providers_own_default_holds(self):
+        self.assertEqual(build_provider("local", "llama3").max_tokens, 1024)
 
     def test_a_real_provider_without_a_key_raises_rather_than_asking(self):
         import os

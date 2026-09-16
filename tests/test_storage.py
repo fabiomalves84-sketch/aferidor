@@ -129,6 +129,18 @@ class TestAnswerRoundTrip(unittest.TestCase):
             recovered = read_answers(path)
         self.assertEqual(recovered[0].sample, 1)
         self.assertEqual(recovered[0].temperature, 0.0)
+        self.assertEqual(recovered[0].finish_reason, "stop")
+
+    def test_a_finish_reason_survives_a_round_trip(self):
+        answers = [
+            Answer("C-001", "modelo-x", "a meio", datetime(2026, 9, 14, 10, 0),
+                   finish_reason="length"),
+        ]
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            write_answers(answers, path)
+            recovered = read_answers(path)
+        self.assertEqual(recovered, answers)
 
 
 if __name__ == "__main__":

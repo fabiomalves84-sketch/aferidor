@@ -78,6 +78,40 @@ class TestRun(unittest.TestCase):
         self.assertEqual(sorted(result.errors), ["A", "B"])
         self.assertFalse(result.complete)
 
+    def test_a_reply_cut_off_by_the_token_limit_is_not_an_answer(self):
+        """`max_tokens` too low is an execution error, not a wrong answer.
+
+        Reproduces the failure found running qwen3:8b at `max_tokens` 1024: the
+        model spent the whole budget reasoning and the case is left unanswered,
+        not graded against an answer it never gave.
+        """
+        provider = FakeProvider(default="a meio da frase", finish_reason="length")
+        result = run([a_case("A")], provider, config=RunConfig(attempts=1))
+        self.assertEqual(result.answers, [])
+        self.assertEqual(list(result.errors), ["A"])
+        self.assertIn("truncada", result.errors["A"])
+
+    def test_an_empty_reply_is_not_an_answer_either(self):
+        provider = FakeProvider(default="")
+        result = run([a_case("A")], provider, config=RunConfig(attempts=1))
+        self.assertEqual(result.answers, [])
+        self.assertEqual(list(result.errors), ["A"])
+
+    def test_a_cut_off_reply_is_not_retried(self):
+        """Retrying would just hit the same `max_tokens` again.
+
+        A caller who wants a real second attempt asks again with a higher
+        `--tokens-max`; the runner never invents that retry on its own, or two
+        different measurements end up mixed in the same run.
+        """
+        provider = FakeProvider(default="a meio", finish_reason="length")
+        run([a_case("A")], provider, config=RunConfig(attempts=5, backoff_s=0, sleep=lambda _: None))
+        self.assertEqual(len(provider.prompts), 1)
+
+    def test_a_successful_answer_records_its_finish_reason(self):
+        result = run([a_case()], FakeProvider(default="1000 mg"))
+        self.assertEqual(result.answers[0].finish_reason, "stop")
+
     def test_a_permanent_failure_is_not_retried(self):
         class Broken(Provider):
             name = "partido"

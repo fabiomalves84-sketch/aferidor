@@ -10,17 +10,18 @@ from aferidor.providers import (
     LocalProvider,
     OpenAIProvider,
     ProviderError,
+    normalize_finish_reason,
 )
 
 
 class TestFakeProvider(unittest.TestCase):
     def test_a_scripted_prompt_gets_its_scripted_reply(self):
         provider = FakeProvider(replies={"amoxicilina": "1000 mg 8/8h"}, default="nada")
-        self.assertEqual(provider.ask("dose de amoxicilina?"), "1000 mg 8/8h")
+        self.assertEqual(provider.ask("dose de amoxicilina?").text, "1000 mg 8/8h")
 
     def test_an_unscripted_prompt_gets_the_default(self):
         provider = FakeProvider(default="nao sei")
-        self.assertEqual(provider.ask("qualquer coisa"), "nao sei")
+        self.assertEqual(provider.ask("qualquer coisa").text, "nao sei")
 
     def test_every_prompt_is_kept_for_inspection(self):
         provider = FakeProvider()
@@ -33,7 +34,29 @@ class TestFakeProvider(unittest.TestCase):
         with self.assertRaises(ProviderError) as caught:
             provider.ask("pergunta")
         self.assertTrue(caught.exception.retryable)
-        self.assertEqual(provider.ask("pergunta"), "ok")
+        self.assertEqual(provider.ask("pergunta").text, "ok")
+
+
+class TestFinishReason(unittest.TestCase):
+    def test_a_fake_provider_defaults_to_stop(self):
+        self.assertEqual(FakeProvider(default="x").ask("p").finish_reason, "stop")
+
+    def test_a_fake_provider_can_simulate_being_cut_off(self):
+        provider = FakeProvider(default="a meio", finish_reason="length")
+        self.assertEqual(provider.ask("p").finish_reason, "length")
+
+    def test_openai_and_ollama_vocabulary_is_normalized(self):
+        self.assertEqual(normalize_finish_reason("stop"), "stop")
+        self.assertEqual(normalize_finish_reason("length"), "length")
+
+    def test_anthropic_vocabulary_is_normalized(self):
+        self.assertEqual(normalize_finish_reason("end_turn"), "stop")
+        self.assertEqual(normalize_finish_reason("stop_sequence"), "stop")
+        self.assertEqual(normalize_finish_reason("max_tokens"), "length")
+
+    def test_anything_else_is_unknown_rather_than_guessed_at(self):
+        self.assertEqual(normalize_finish_reason("tool_calls"), "unknown")
+        self.assertEqual(normalize_finish_reason(None), "unknown")
 
 
 class TestProviderErrors(unittest.TestCase):

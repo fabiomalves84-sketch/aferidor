@@ -39,6 +39,22 @@ def _percent(value: float) -> str:
     return f"{value * 100:.0f}%"
 
 
+def format_missing(missing: list[str], reasons: dict[str, str] | None = None) -> str:
+    """The unanswered cases, each with its reason when one is known.
+
+    A reason is only available for cases missed in the same process that
+    also wrote this report (an `ensaio` run knows why its own model failed a
+    case); a case missing from an older file, read back later, is named
+    without one rather than guessed at.
+    """
+    reasons = reasons or {}
+    parts = []
+    for case_id in sorted(set(missing)):
+        reason = reasons.get(case_id)
+        parts.append(f"{case_id} ({reason})" if reason else case_id)
+    return ", ".join(parts)
+
+
 def _risk_line(critical_cases: int, total_cases: int) -> str:
     """The headline number: cases, not samples.
 
@@ -115,6 +131,7 @@ def build(
     answers: list[Answer],
     verdicts: list[Verdict],
     missing: list[str] | None = None,
+    reasons: dict[str, str] | None = None,
     sources_verified: bool = False,
     today: date | None = None,
 ) -> str:
@@ -145,7 +162,7 @@ def build(
     if missing:
         out.append(
             "> **Casos sem resposta.** "
-            + ", ".join(sorted(set(missing)))
+            + format_missing(missing, reasons)
             + ". Não entram em nenhuma contagem deste relatório."
         )
         out.append("")
@@ -216,4 +233,4 @@ def build(
     return "\n".join(out)
 
 
-__all__ = ["build", "HEADER_NOTE"]
+__all__ = ["build", "format_missing", "HEADER_NOTE"]

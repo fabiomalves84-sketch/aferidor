@@ -29,19 +29,22 @@ DEFAULT_OUTPUT = Path("data/respostas.jsonl")
 DEFAULT_VERDICTS = Path("data/vereditos.json")
 DEFAULT_REPORT = Path("relatorios/relatorio.md")
 DEFAULT_REPORT_HTML = Path("relatorios/relatorio.html")
+DEFAULT_TOKENS_MAX = 4096
 
 
-def build_provider(kind: str, model: str | None, temperature: float = 0.0) -> Provider:
+def build_provider(
+    kind: str, model: str | None, temperature: float = 0.0, max_tokens: int | None = None
+) -> Provider:
     if kind == "falso":
         return FakeProvider(name=f"falso:{model}" if model else "falso", temperature=temperature)
+    kwargs: dict = {"temperature": temperature}
+    if max_tokens is not None:
+        kwargs["max_tokens"] = max_tokens
     if kind == "openai":
-        kwargs = {"temperature": temperature}
         return OpenAIProvider(model=model, **kwargs) if model else OpenAIProvider(**kwargs)
     if kind == "anthropic":
-        kwargs = {"temperature": temperature}
         return AnthropicProvider(model=model, **kwargs) if model else AnthropicProvider(**kwargs)
     if kind == "local":
-        kwargs = {"temperature": temperature}
         return LocalProvider(model=model, **kwargs) if model else LocalProvider(**kwargs)
     raise ValueError(f"fornecedor desconhecido {kind!r}")
 
@@ -64,6 +67,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     executar.add_argument(
         "--temperatura", type=float, default=0.0, help="temperatura pedida ao fornecedor"
+    )
+    executar.add_argument(
+        "--tokens-max", type=int, default=DEFAULT_TOKENS_MAX,
+        help="limite de tokens da resposta; um modelo que raciocina antes de responder precisa de mais",
     )
     executar.add_argument(
         "--recomecar",
@@ -104,6 +111,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     ensaio.add_argument(
         "--temperatura", type=float, default=0.0, help="temperatura pedida ao fornecedor"
     )
+    ensaio.add_argument(
+        "--tokens-max", type=int, default=DEFAULT_TOKENS_MAX,
+        help="limite de tokens da resposta; um modelo que raciocina antes de responder precisa de mais",
+    )
     ensaio.add_argument("--recomecar", action="store_true")
     ensaio.add_argument("--fontes-confirmadas", action="store_true")
 
@@ -130,13 +141,18 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def comando_executar(args: argparse.Namespace) -> int:
+def comando_executar(
+    args: argparse.Namespace, errors_out: dict[str, str] | None = None
+) -> int:
     cases = read_cases(args.casos)
     if args.limite > 0:
         cases = cases[: args.limite]
 
     try:
-        provider = build_provider(args.fornecedor, args.modelo, temperature=args.temperatura)
+        provider = build_provider(
+            args.fornecedor, args.modelo, temperature=args.temperatura,
+            max_tokens=getattr(args, "tokens_max", DEFAULT_TOKENS_MAX),
+        )
     except ProviderError as error:
         print(f"erro: {error}", file=sys.stderr)
         return 2
@@ -167,6 +183,8 @@ def comando_executar(args: argparse.Namespace) -> int:
     print(f"respostas em {args.saida}")
     for case_id, message in result.errors.items():
         print(f"  por responder {case_id}: {message}", file=sys.stderr)
+    if errors_out is not None:
+        errors_out.update(result.errors)
     return 0 if result.complete else 1
 
 
@@ -218,7 +236,9 @@ def comando_verificar(args: argparse.Namespace) -> int:
     return 1 if broken else 0
 
 
-def comando_relatorio(args: argparse.Namespace) -> int:
+def comando_relatorio(
+    args: argparse.Namespace, reasons: dict[str, str] | None = None
+) -> int:
     cases = read_cases(args.casos)
     if getattr(args, "limite", 0) > 0:
         cases = cases[: args.limite]
@@ -240,6 +260,7 @@ def comando_relatorio(args: argparse.Namespace) -> int:
         answers,
         verdicts,
         missing=missing,
+        reasons=reasons,
         sources_verified=args.fontes_confirmadas,
     )
     saida.parent.mkdir(parents=True, exist_ok=True)
@@ -280,9 +301,10 @@ def comando_ensaio(args: argparse.Namespace) -> int:
         fornecedor=args.fornecedor, modelo=args.modelo, casos=args.casos,
         saida=args.saida, limite=args.limite, tentativas=args.tentativas,
         repeticoes=args.repeticoes, temperatura=args.temperatura,
-        recomecar=args.recomecar,
+        tokens_max=args.tokens_max, recomecar=args.recomecar,
     )
-    codigo = comando_executar(executar_args)
+    errors: dict[str, str] = {}
+    codigo = comando_executar(executar_args, errors_out=errors)
     if codigo == 2:
         return codigo
 
@@ -295,7 +317,7 @@ def comando_ensaio(args: argparse.Namespace) -> int:
         casos=args.casos, respostas=args.saida, saida=args.relatorio,
         fontes_confirmadas=args.fontes_confirmadas, limite=args.limite,
     )
-    comando_relatorio(relatorio_args)
+    comando_relatorio(relatorio_args, reasons=errors)
 
     if codigo == 1:
         print(

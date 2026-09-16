@@ -25,7 +25,7 @@ from .grading import (
     tally_by_model,
 )
 from .models import Answer, Case, Verdict
-from .report import HEADER_NOTE
+from .report import HEADER_NOTE, format_missing
 
 _CELL_CLASS = {
     ConsistencyState.ESTAVEL_CERTO: "ok",
@@ -264,6 +264,7 @@ def build(
     answers: list[Answer],
     verdicts: list[Verdict],
     missing: list[str] | None = None,
+    reasons: dict[str, str] | None = None,
     sources_verified: bool = False,
     today: date | None = None,
 ) -> str:
@@ -291,7 +292,7 @@ def build(
     if missing:
         out.append(
             '<div class="aviso"><strong>Casos sem resposta.</strong> '
-            + _esc(", ".join(sorted(set(missing))))
+            + _esc(format_missing(missing, reasons))
             + " Não entram em nenhuma contagem deste relatório.</div>"
         )
 
