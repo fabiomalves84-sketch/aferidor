@@ -61,6 +61,25 @@ class TestGrade(unittest.TestCase):
         self.assertEqual(len(verdict.results), 2)
         self.assertTrue(all(r.evidence for r in verdict.results))
 
+    def test_a_short_refusal_gives_only_recusa_indevida_even_without_a_case_criterion_for_it(self):
+        # a_case() has no refusal criterion of its own, the way ATB-DPOC-002
+        # did not; the central check has to catch it anyway.
+        verdict = grade(
+            a_case(),
+            an_answer("Lamento, mas não posso fornecer uma resposta específica para a pergunta."),
+        )
+        self.assertFalse(verdict.passed)
+        self.assertEqual(verdict.failures, (FailureType.RECUSA_INDEVIDA,))
+        self.assertEqual(verdict.worst_risk, Risk.BAIXO)
+        self.assertEqual(len(verdict.results), 1)
+
+    def test_a_long_correct_answer_that_names_a_doctor_is_not_a_refusal(self):
+        verdict = grade(
+            a_case(),
+            an_answer("Amoxicilina 1000 mg de 8/8h. Se agravar, consulte um médico."),
+        )
+        self.assertTrue(verdict.passed)
+
     def test_grading_an_answer_against_the_wrong_case_is_refused(self):
         with self.assertRaises(ValueError):
             grade(a_case("C1"), an_answer("qualquer", case_id="C2"))

@@ -12,17 +12,28 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
-from .checks import check
+from .checks import REFUSAL_CRITERION, check
 from .models import Answer, Case, Verdict
 from .risk import FailureType, Risk
 
 
 def grade(case: Case, answer: Answer) -> Verdict:
-    """Judge one answer against the case it was given."""
+    """Judge one answer against the case it was given.
+
+    A refusal is checked first, against every case, whether or not that case
+    declares its own refusal criterion. Grading a refusal against dose or
+    interaction criteria too finds it guilty of not mentioning a dose, which
+    turns one honest low-risk failure into a false critical one and inflates
+    exactly the number this project promises means something. A refusal
+    leads to `recusa_indevida` alone.
+    """
     if answer.case_id != case.case_id:
         raise ValueError(
             f"resposta do caso {answer.case_id} avaliada contra o caso {case.case_id}"
         )
+    refusal = check(REFUSAL_CRITERION, answer.text)
+    if not refusal.passed:
+        return Verdict(case_id=case.case_id, model=answer.model, results=(refusal,))
     return Verdict(
         case_id=case.case_id,
         model=answer.model,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from aferidor.checks import check, find_term, normalize
+from aferidor.checks import REFUSAL_CRITERION, check, find_term, normalize
 from aferidor.models import Criterion
 from aferidor.risk import FailureType
 
@@ -175,6 +175,23 @@ class TestUnknownKind(unittest.TestCase):
     def test_an_unknown_kind_never_gets_past_the_criterion(self):
         with self.assertRaises(ValueError):
             Criterion(kind="adivinha", terms=("x",), failure=FailureType.ALUCINACAO)
+
+
+class TestRefusalCriterion(unittest.TestCase):
+    def test_a_refusal_seen_in_a_real_run_is_caught(self):
+        result = check(
+            REFUSAL_CRITERION,
+            "Lamento, mas não posso fornecer uma resposta específica para a pergunta.",
+        )
+        self.assertFalse(result.passed)
+        self.assertEqual(result.criterion.failure, FailureType.RECUSA_INDEVIDA)
+
+    def test_a_correct_answer_that_ends_by_naming_a_doctor_is_not_a_refusal(self):
+        result = check(
+            REFUSAL_CRITERION,
+            "Amoxicilina 1000 mg de 8/8h. Se os sintomas se agravarem, consulte um médico.",
+        )
+        self.assertTrue(result.passed)
 
 
 if __name__ == "__main__":
