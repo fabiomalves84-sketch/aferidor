@@ -80,6 +80,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     classificar.add_argument("--casos", type=Path, default=DEFAULT_CASES)
     classificar.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
     classificar.add_argument("--saida", type=Path, default=DEFAULT_VERDICTS)
+    classificar.add_argument(
+        "--limite", type=int, default=0,
+        help="0 usa todos os casos; tem de bater com o --limite usado em executar",
+    )
 
     ensaio = sub.add_parser(
         "ensaio", help="executar, classificar e escrever o relatorio de uma vez"
@@ -113,6 +117,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     relatorio.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
     relatorio.add_argument("--saida", type=Path, default=None)
     relatorio.add_argument("--formato", choices=("md", "html"), default="md")
+    relatorio.add_argument(
+        "--limite", type=int, default=0,
+        help="0 usa todos os casos; tem de bater com o --limite usado em executar",
+    )
     relatorio.add_argument(
         "--fontes-confirmadas",
         action="store_true",
@@ -164,6 +172,8 @@ def comando_executar(args: argparse.Namespace) -> int:
 
 def comando_classificar(args: argparse.Namespace) -> int:
     cases = read_cases(args.casos)
+    if getattr(args, "limite", 0) > 0:
+        cases = cases[: args.limite]
     if not args.respostas.exists():
         print(f"erro: nao ha respostas em {args.respostas}", file=sys.stderr)
         return 2
@@ -210,6 +220,8 @@ def comando_verificar(args: argparse.Namespace) -> int:
 
 def comando_relatorio(args: argparse.Namespace) -> int:
     cases = read_cases(args.casos)
+    if getattr(args, "limite", 0) > 0:
+        cases = cases[: args.limite]
     if not args.respostas.exists():
         print(f"erro: nao ha respostas em {args.respostas}", file=sys.stderr)
         return 2
@@ -275,13 +287,13 @@ def comando_ensaio(args: argparse.Namespace) -> int:
         return codigo
 
     classificar_args = argparse.Namespace(
-        casos=args.casos, respostas=args.saida, saida=args.vereditos
+        casos=args.casos, respostas=args.saida, saida=args.vereditos, limite=args.limite
     )
     comando_classificar(classificar_args)
 
     relatorio_args = argparse.Namespace(
         casos=args.casos, respostas=args.saida, saida=args.relatorio,
-        fontes_confirmadas=args.fontes_confirmadas,
+        fontes_confirmadas=args.fontes_confirmadas, limite=args.limite,
     )
     comando_relatorio(relatorio_args)
 

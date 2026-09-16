@@ -103,6 +103,32 @@ class TestClassificar(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertIn("nao ha respostas", err)
 
+    def test_with_a_limit_matching_the_run_nothing_is_missing(self):
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            run(
+                "executar", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                "--limite", "3", "--saida", str(f / "respostas.jsonl"),
+            )
+            _, _, err = run(
+                "classificar", "--casos", str(REAL_CASES), "--limite", "3",
+                "--respostas", str(f / "respostas.jsonl"), "--saida", str(f / "v.json"),
+            )
+            self.assertNotIn("sem resposta valida", err)
+
+    def test_without_the_matching_limit_the_rest_shows_up_as_missing(self):
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            run(
+                "executar", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                "--limite", "3", "--saida", str(f / "respostas.jsonl"),
+            )
+            _, _, err = run(
+                "classificar", "--casos", str(REAL_CASES),
+                "--respostas", str(f / "respostas.jsonl"), "--saida", str(f / "v.json"),
+            )
+            self.assertIn("sem resposta valida", err)
+
 
 class TestEnsaio(unittest.TestCase):
     def test_the_whole_chain_runs_and_leaves_the_three_files(self):
@@ -153,6 +179,20 @@ class TestEnsaio(unittest.TestCase):
             )
             linhas = (f / "respostas.jsonl").read_text(encoding="utf-8").strip().splitlines()
             self.assertEqual(len(linhas), 2)
+
+    def test_the_limit_does_not_name_cases_that_were_never_asked(self):
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            _, _, err = run(
+                "ensaio", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                "--limite", "3",
+                "--saida", str(f / "respostas.jsonl"),
+                "--vereditos", str(f / "vereditos.json"),
+                "--relatorio", str(f / "relatorio.md"),
+            )
+            self.assertNotIn("sem resposta valida", err)
+            texto = (f / "relatorio.md").read_text(encoding="utf-8")
+            self.assertNotIn("Casos sem resposta", texto)
 
 
 class TestRelatorioHtml(unittest.TestCase):
