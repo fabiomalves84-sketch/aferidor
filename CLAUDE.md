@@ -43,6 +43,11 @@ que fixa esta fronteira. Se alguma vez falhar, não o contornes.
 se algum tipo de falha ficar sem caso. Se acrescentares um tipo, acrescenta o
 caso.
 
+**A contagem de testes escrita nos documentos tem de ser a verdadeira.** Já
+aconteceu os documentos dizerem 181 com a bateria em 211. Qualquer tarefa que
+acrescente ou remova testes atualiza o número no README, no
+`docs/APRESENTACAO.md` e aqui, no mesmo commit que muda os testes.
+
 ## Mensagens de commit
 
 Explicam a decisão, não listam ficheiros. Corre `git log` e lê duas ou três
