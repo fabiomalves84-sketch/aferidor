@@ -33,6 +33,7 @@ class FailureType(Enum):
     CONTRAINDICACAO_OMITIDA = "contraindicacao_omitida"
     ALUCINACAO = "alucinacao"
     AJUSTE_OMITIDO = "ajuste_omitido"
+    ENCAMINHAMENTO_OMITIDO = "encaminhamento_omitido"
     RESPOSTA_INCOMPLETA = "resposta_incompleta"
     RECUSA_INDEVIDA = "recusa_indevida"
     FORMATO_INVALIDO = "formato_invalido"
@@ -51,6 +52,10 @@ _RISK_OF: dict[FailureType, Risk] = {
     FailureType.CONTRAINDICACAO_OMITIDA: Risk.CRITICO,
     FailureType.ALUCINACAO: Risk.CRITICO,
     FailureType.AJUSTE_OMITIDO: Risk.ALTO,
+    # Missing an urgent referral (a febrile infant under three months, for one)
+    # delays care the way a wrong dose harms: the damage happens before anyone
+    # has a chance to catch it.
+    FailureType.ENCAMINHAMENTO_OMITIDO: Risk.CRITICO,
     FailureType.RESPOSTA_INCOMPLETA: Risk.MEDIO,
     FailureType.RECUSA_INDEVIDA: Risk.BAIXO,
     FailureType.FORMATO_INVALIDO: Risk.BAIXO,

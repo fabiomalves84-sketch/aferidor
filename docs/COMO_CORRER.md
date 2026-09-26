@@ -41,6 +41,17 @@ de propósito: uma lista de nomes de modelos escrita num documento está errada
 dentro de meses, e apontar a um modelo retirado dá um erro que não tem nada a ver
 com o banco de ensaio.
 
+## Qual banco de casos correr
+
+Há dois bancos. O `casos/casos.json` (27 casos, antibioterapia e alergias) é o predefinido. O `casos_v1.1/aferidor_casos_v1.1.json` (30 casos de consulta de adulto, criança e cessação tabágica, com nível de risco, fonte e data de verificação por caso) corre com `--casos`:
+
+```
+python -m aferidor verificar --casos casos_v1.1/aferidor_casos_v1.1.json
+python -m aferidor ensaio --fornecedor <fornecedor> --modelo <nome> --casos casos_v1.1/aferidor_casos_v1.1.json --limite 3
+```
+
+Usa ficheiros de saída próprios (`--saida`, `--vereditos`, `--relatorio`) para não misturar as respostas dos dois bancos.
+
 ## 4. Correr
 
 Um comando faz tudo: pergunta, corrige e escreve o relatório.

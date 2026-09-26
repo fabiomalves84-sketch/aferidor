@@ -7,6 +7,7 @@ from aferidor.risk import FailureType
 from aferidor.storage import read_cases
 
 CASES = Path(__file__).resolve().parent.parent / "casos" / "casos.json"
+BANK = Path(__file__).resolve().parent.parent / "casos_v1.1" / "aferidor_casos_v1.1.json"
 
 
 class TestShippedCases(unittest.TestCase):
@@ -39,14 +40,17 @@ class TestShippedCases(unittest.TestCase):
         """A taxonomy that names a failure nobody can trigger is a promise the bench
         does not keep, and it fails silently: the report shows zero of that failure
         whether the models are clean or the cases simply never ask."""
-        measured = {cr.failure for c in self.cases for cr in c.criteria}
+        # The taxonomy is shared by both banks, so coverage is measured across them.
+        both = self.cases + read_cases(BANK)
+        measured = {cr.failure for c in both for cr in c.criteria}
         missing = sorted(f.value for f in FailureType if f not in measured)
         self.assertEqual(missing, [], f"tipos de falha sem nenhum caso: {missing}")
 
     def test_every_critical_failure_is_measured_by_more_than_one_criterion(self):
         from collections import Counter
 
-        counts = Counter(cr.failure for c in self.cases for cr in c.criteria)
+        both = self.cases + read_cases(BANK)
+        counts = Counter(cr.failure for c in both for cr in c.criteria)
         thin = sorted(
             f.value for f in FailureType if f.risk.name == "CRITICO" and counts[f] < 1
         )
@@ -57,6 +61,40 @@ class TestShippedCases(unittest.TestCase):
         for case in self.cases:
             with self.subTest(case=case.case_id):
                 self.assertIn(case.case_id, table)
+
+
+class TestAnnotatedBank(unittest.TestCase):
+    """The 30-case bank with risk levels, review state and source sections."""
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+
+        cls.raw = json.loads(BANK.read_text(encoding="utf-8"))
+        cls.cases = read_cases(BANK)
+
+    def test_it_loads_every_case(self):
+        self.assertEqual(len(self.cases), len(self.raw["casos"]))
+        self.assertGreaterEqual(len(self.cases), 30)
+
+    def test_every_reference_passes_its_own_criteria(self):
+        from aferidor.grading import self_check
+
+        broken = [case.case_id for case, _ in self_check(self.cases)]
+        self.assertEqual(broken, [])
+
+    def test_every_case_records_a_source_a_type_and_a_verification_date(self):
+        for item in self.raw["casos"]:
+            with self.subTest(case=item["id"]):
+                self.assertTrue(item["fonte"].strip())
+                self.assertIn(item["fonte_tipo"], ("primaria", "secundaria"))
+                self.assertTrue(item["data_verificacao"])
+
+    def test_every_high_risk_case_has_a_critical_error_listed(self):
+        for item in self.raw["casos"]:
+            if item["risco"] == "alto":
+                with self.subTest(case=item["id"]):
+                    self.assertTrue(item["erros_criticos"])
 
 
 if __name__ == "__main__":

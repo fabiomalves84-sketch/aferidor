@@ -96,9 +96,43 @@ def case_to_dict(case: Case) -> dict:
     return out
 
 
+def _bank_case_to_legacy(data: dict, where: str) -> dict:
+    """Map one case from the annotated bank format onto the format `case_from_dict` reads.
+
+    The bank format (version 1.1 onwards) keeps, next to the checkable criteria,
+    what a human reviewer needs: risk level, review state, source version and
+    section, and the prose lists of required elements and critical errors. Only
+    the parts the grader uses are carried across; the rest stays in the file for
+    people to read. The risk level and any grading note travel in `notas` so the
+    report can still show them.
+    """
+    case_id = str(_require(data, "id", where))
+    at = f"{where}, caso {case_id}"
+    reference = " ".join(
+        part for part in (data.get("fonte_versao", ""), data.get("fonte_seccao", "")) if part
+    ) or "ver fonte"
+    source: dict = {"nome": _require(data, "fonte", at), "referencia": reference}
+    if data.get("data_verificacao"):
+        source["consultada"] = data["data_verificacao"]
+    notes = " ".join(
+        part for part in (f"Risco {data.get('risco', '')}.", data.get("nota_avaliacao", "")) if part
+    )
+    return {
+        "id": case_id,
+        "categoria": _require(data, "area", at),
+        "pergunta": _require(data, "pergunta", at),
+        "referencia": _require(data, "resposta_referencia", at),
+        "fonte": source,
+        "criterios": _require(data, "criterios", at),
+        "notas": notes,
+    }
+
+
 def read_cases(path: Path) -> list[Case]:
     """Load every case in a JSON file, refusing duplicates and empty sets."""
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    if isinstance(raw, dict) and "casos" in raw:
+        raw = [_bank_case_to_legacy(dict(item), str(path)) for item in raw["casos"]]
     if not isinstance(raw, list):
         raise ValueError(f"{path}: expected a list of cases at the top level")
     if not raw:

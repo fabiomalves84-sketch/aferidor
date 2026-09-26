@@ -143,5 +143,37 @@ class TestAnswerRoundTrip(unittest.TestCase):
         self.assertEqual(recovered, answers)
 
 
+class TestBankFormat(unittest.TestCase):
+    def test_reads_the_annotated_bank_format(self):
+        bank = {
+            "versao": "teste",
+            "casos": [{
+                "id": "B-001", "area": "pediatria", "risco": "alto", "estado": "revisto_fonte",
+                "pergunta": "Pode dar-se mel a um bebe de 7 meses?",
+                "resposta_referencia": "Nao, risco de botulismo antes dos 12 meses.",
+                "fonte": "Manual MSD", "fonte_versao": "2026", "fonte_seccao": "botulismo",
+                "data_verificacao": "2026-09-26",
+                "criterios": [{"tipo": "contem", "termos": ["botulismo"], "falha": "contraindicacao_omitida"}],
+            }],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "banco.json"
+            path.write_text(json.dumps(bank), encoding="utf-8")
+            [case] = read_cases(path)
+        self.assertEqual(case.case_id, "B-001")
+        self.assertEqual(case.category, "pediatria")
+        self.assertEqual(case.source.reference, "2026 botulismo")
+        self.assertEqual(case.source.consulted, date(2026, 9, 26))
+        self.assertIn("Risco alto", case.notes)
+
+    def test_bank_case_without_criteria_is_refused(self):
+        bank = {"casos": [{"id": "B-002", "area": "x", "pergunta": "p", "resposta_referencia": "r", "fonte": "f"}]}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "banco.json"
+            path.write_text(json.dumps(bank), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                read_cases(path)
+
+
 if __name__ == "__main__":
     unittest.main()

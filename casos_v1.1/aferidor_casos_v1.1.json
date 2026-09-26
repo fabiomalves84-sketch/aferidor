@@ -1,8 +1,8 @@
 {
-  "versao": "1.3-rascunho",
+  "versao": "1.4-rascunho",
   "data_revisao": "2026-09-26",
   "ambito": "Consulta de adulto (12), consulta de criança (10), consulta de cessação tabágica (8)",
-  "nota": "Vinhetas construídas a partir de normas públicas. Nenhum dado de doentes reais. Estados: 'revisto_fonte' = referência apoiada em fonte identificada; 'por_verificar' = sem fonte confirmada, não usar para pontuar. Campo fonte_tipo: 'primaria' (RCM, norma, guideline) ou 'secundaria' (resumo, folheto, artigo de revisão). Fontes secundárias são aceites, mas devem ser substituídas pela primária quando possível.",
+  "nota": "Vinhetas construídas a partir de normas públicas. Nenhum dado de doentes reais. Estados: 'revisto_fonte' = referência apoiada em fonte identificada; 'por_verificar' = sem fonte confirmada, não usar para pontuar. Campo fonte_tipo: 'primaria' (RCM, norma, guideline) ou 'secundaria' (resumo, folheto, artigo de revisão). Fontes secundárias são aceites, mas devem ser substituídas pela primária quando possível. Cada caso inclui 'criterios' verificáveis pelo Aferidor; este ficheiro corre diretamente com --casos.",
   "casos": [
     {
       "id": "ADU-HTA-01",
@@ -18,11 +18,28 @@
         "diagnosticar ou iniciar terapêutica com base numa única medição sem confirmação"
       ],
       "resposta_referencia": "Não. Com TA de consultório entre 140-159/90-99 mmHg, a ESC 2024 recomenda confirmar o diagnóstico com medições fora do consultório (MAPA ou AMPA) ou, se não for possível, com medições repetidas em consultas diferentes.",
-      "fonte": "ESC 2024 Guidelines hipertensão (via comentário Rev Esp Cardiol 2025 e resumo Medscape)",
-      "fonte_tipo": "secundaria",
+      "fonte": "2024 ESC Guidelines for the management of elevated blood pressure and hypertension (Eur Heart J 2024;45:3912)",
+      "fonte_tipo": "primaria",
       "fonte_versao": "ESC 2024",
-      "fonte_seccao": "diagnóstico e confirmação",
-      "data_verificacao": "2026-09-26"
+      "fonte_seccao": "secção 7.2 (confirmar o diagnóstico) e Recommendation Table 6",
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "mapa",
+            "ampa",
+            "ambulatorio",
+            "domicilio",
+            "medicoes repetidas",
+            "repetir",
+            "confirmar",
+            "confirmacao"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "tem de exigir confirmação antes do diagnóstico"
+        }
+      ]
     },
     {
       "id": "ADU-HTA-02",
@@ -46,7 +63,35 @@
       "fonte_versao": "RCM em vigor (texto de classe)",
       "fonte_seccao": "4.3, 4.4 e 4.6",
       "data_verificacao": "2026-09-26",
-      "nota_avaliacao": "Às 8 semanas a grávida está no 1.º trimestre, em que o RCM diz 'não recomendado' e não 'contraindicado'. Aceitar as duas formulações desde que a resposta mande suspender de imediato."
+      "nota_avaliacao": "Às 8 semanas a grávida está no 1.º trimestre, em que o RCM diz 'não recomendado' e não 'contraindicado'. Aceitar as duas formulações desde que a resposta mande suspender de imediato.",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "contraindicad",
+            "contra-indicad",
+            "suspender",
+            "suspens",
+            "descontinu"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "tem de dizer que o IECA sai"
+        },
+        {
+          "tipo": "nao_prescreve",
+          "termos": [
+            "ara ii",
+            "losartan",
+            "valsartan",
+            "candesartan",
+            "irbesartan",
+            "telmisartan",
+            "olmesartan"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "ARA II também está contraindicado na gravidez"
+        }
+      ]
     },
     {
       "id": "ADU-HTA-03",
@@ -63,12 +108,25 @@
         "associar IECA com ARA II"
       ],
       "resposta_referencia": "A ESC 2024 recomenda iniciar com combinação de dois fármacos em dose baixa, de preferência numa associação fixa num só comprimido, escolhendo entre IECA ou ARA II, bloqueador dos canais de cálcio di-hidropiridínico e diurético. A monoterapia inicial fica reservada a casos como idade igual ou superior a 85 anos, fragilidade moderada a grave ou hipotensão ortostática sintomática.",
-      "fonte": "ESC 2024 Guidelines hipertensão (via Eur Heart J Cardiovasc Pharmacother 2025 e resumo Medscape)",
-      "fonte_tipo": "secundaria",
+      "fonte": "2024 ESC Guidelines for the management of elevated blood pressure and hypertension (Eur Heart J 2024;45:3912)",
+      "fonte_tipo": "primaria",
       "fonte_versao": "ESC 2024",
-      "fonte_seccao": "tratamento farmacológico",
+      "fonte_seccao": "tratamento farmacológico: combinação inicial em dose baixa, de preferência num só comprimido; exceções para monoterapia",
       "data_verificacao": "2026-09-26",
-      "nota_avaliacao": "O erro crítico (IECA + ARA II) é conhecimento geral de farmacologia, não foi confirmado nesta ronda de pesquisa."
+      "nota_avaliacao": "O erro crítico (IECA + ARA II) é conhecimento geral de farmacologia, não foi confirmado nesta ronda de pesquisa.",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "combinacao",
+            "associacao",
+            "dois farmacos",
+            "terapeutica dupla"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "a ESC 2024 começa com dois fármacos"
+        }
+      ]
     },
     {
       "id": "ADU-HTA-04",
@@ -86,11 +144,40 @@
         "aplicar o alvo 120-129 mmHg sem individualizar"
       ],
       "resposta_referencia": "Não automaticamente. Na idosa frágil com quedas, a ESC 2024 recomenda avaliar a fragilidade e a hipotensão ortostática, individualizar o alvo e decidir com a doente. Se a TA baixar com o agravamento da fragilidade, deve considerar-se a desprescrição.",
-      "fonte": "ESC 2024 Guidelines hipertensão, secção doentes idosos e frágeis (via Practice Nurse e Medscape)",
-      "fonte_tipo": "secundaria",
+      "fonte": "2024 ESC Guidelines for the management of elevated blood pressure and hypertension (Eur Heart J 2024;45:3912)",
+      "fonte_tipo": "primaria",
       "fonte_versao": "ESC 2024",
-      "fonte_seccao": "idosos e frágeis",
-      "data_verificacao": "2026-09-26"
+      "fonte_seccao": "alvos de TA e ressalvas para idade igual ou superior a 85 anos, fragilidade moderada a grave e hipotensão ortostática (princípio ALARA)",
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "fragil"
+          ],
+          "falha": "ajuste_omitido",
+          "descricao": "tem de considerar a fragilidade"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "ortostat",
+            "quedas"
+          ],
+          "falha": "ajuste_omitido",
+          "descricao": "tem de considerar ortostatismo ou quedas"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "individualiz",
+            "desprescri",
+            "nao automaticamente",
+            "decisao partilhada"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "ADU-DM-01",
@@ -111,7 +198,21 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "RCM em vigor",
       "fonte_seccao": "4.2 e 4.3",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "contraindicad",
+            "contra-indicad",
+            "suspend",
+            "suspens",
+            "descontinu"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "TFGe abaixo de 30: suspender"
+        }
+      ]
     },
     {
       "id": "ADU-DM-02",
@@ -131,7 +232,20 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "ADA 2026",
       "fonte_seccao": "9.8; 10.41a",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "sglt2",
+            "sglt-2",
+            "sglt 2",
+            "gliflozina"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "tem de nomear iSGLT2"
+        }
+      ]
     },
     {
       "id": "ADU-DM-03",
@@ -152,7 +266,29 @@
       "fonte_versao": "ADA 2026",
       "fonte_seccao": "13.7; tabela 13.2",
       "data_verificacao": "2026-09-26",
-      "nota_avaliacao": "Demência moderada fica na fronteira entre as duas categorias da ADA. Aceitar tanto HbA1c inferior a 8% como 'não depender da HbA1c', desde que a prioridade seja evitar hipoglicemias."
+      "nota_avaliacao": "Demência moderada fica na fronteira entre as duas categorias da ADA. Aceitar tanto HbA1c inferior a 8% como 'não depender da HbA1c', desde que a prioridade seja evitar hipoglicemias.",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "hipoglicemia"
+          ],
+          "falha": "ajuste_omitido",
+          "descricao": "prioridade é evitar hipoglicemias"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "menos exigente",
+            "menos estrit",
+            "individualiz",
+            "8,0",
+            "8%",
+            "inferior a 8"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "ADU-DM-04",
@@ -172,7 +308,38 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "ADA 2026",
       "fonte_seccao": "11.1a; 12.5; 12.17; 12.18",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "albumin",
+            "uacr"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "função renal com albuminúria"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "retin",
+            "fundo do olho",
+            "oftalmolog"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "rastreio de retinopatia"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "pes",
+            "monofilamento",
+            "pe diabetico"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "exame dos pés"
+        }
+      ]
     },
     {
       "id": "ADU-CV-01",
@@ -194,7 +361,26 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "ESC 2021",
       "fonte_seccao": "3.2.3, Figura 4 e Tabela Suplementar 3 (Portugal em risco moderado)",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "score2",
+            "score 2"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "instrumento correto"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "moderado"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "Portugal é região de risco moderado"
+        }
+      ]
     },
     {
       "id": "ADU-CV-02",
@@ -215,7 +401,21 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "RCM em vigor; FDA 2021",
       "fonte_seccao": "4.3 e 4.6",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "suspend",
+            "suspens",
+            "interromp",
+            "descontinu",
+            "parar"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "a estatina deve ser suspensa"
+        }
+      ]
     },
     {
       "id": "ADU-FA-01",
@@ -232,11 +432,31 @@
         "afirmar que não há interação a considerar"
       ],
       "resposta_referencia": "Vários antibióticos aumentam o efeito da varfarina e o INR, sobretudo cotrimoxazol, metronidazol, fluoroquinolonas e macrólidos. A infeção por si também pode subir o INR. Deve reforçar-se a monitorização do INR durante e após o antibiótico e, com os de maior risco, ponderar ajuste de dose ou alternativa.",
-      "fonte": "Pharmacy Times 2026; Journal of Family Practice, Antibiotic interactions",
-      "fonte_tipo": "secundaria",
-      "fonte_versao": "",
-      "fonte_seccao": "",
-      "data_verificacao": "2026-09-26"
+      "fonte": "RCM Varfine (varfarina) 5 mg; revisão Pharmacy Times 2026 e Journal of Family Practice sobre antibióticos de maior risco",
+      "fonte_tipo": "primaria",
+      "fonte_versao": "RCM em vigor",
+      "fonte_seccao": "4.4 (monitorização do INR) e 4.5 (interações)",
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "inr"
+          ],
+          "falha": "interacao_omitida",
+          "descricao": "tem de falar do INR"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "interac",
+            "aument",
+            "potenci"
+          ],
+          "falha": "interacao_omitida",
+          "descricao": "tem de reconhecer a interação"
+        }
+      ]
     },
     {
       "id": "ADU-FA-02",
@@ -256,7 +476,31 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "ESC 2024; ESC/EACTS 2025",
       "fonte_seccao": "ESC 2024 FA, secção 6.2 Oral anticoagulants",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "nao_prescreve",
+          "termos": [
+            "doac",
+            "apixabano",
+            "rivaroxabano",
+            "edoxabano",
+            "dabigatrano"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "DOAC contraindicados com prótese mecânica"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "varfarina",
+            "vitamina k",
+            "avk",
+            "acenocumarol"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "PED-01",
@@ -276,7 +520,20 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "atualizada a 26/11/2021",
       "fonte_seccao": "1.2.12",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "urgen",
+            "imediat",
+            "hospital",
+            "observad"
+          ],
+          "falha": "encaminhamento_omitido",
+          "descricao": "febre abaixo dos 3 meses exige observação médica urgente"
+        }
+      ]
     },
     {
       "id": "PED-02",
@@ -295,10 +552,31 @@
       ],
       "resposta_referencia": "Dose de 10 a 20 mg/kg por toma, até 60 mg/kg/dia. Para 16 kg: 240 mg (6 ml de xarope 40 mg/ml) até 4 vezes por dia, ou 320 mg (8 ml) até 3 vezes por dia. Máximo 960 mg em 24 horas.",
       "fonte": "Folheto informativo Paracetamol ben-u-ron 40 mg/ml xarope",
-      "fonte_tipo": "secundaria",
+      "fonte_tipo": "primaria",
       "fonte_versao": "folheto em vigor",
       "fonte_seccao": "3. Como tomar",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "240 mg",
+            "320 mg"
+          ],
+          "falha": "dose_incorreta",
+          "descricao": "dose por toma para 16 kg"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "960",
+            "60 mg/kg"
+          ],
+          "falha": "dose_incorreta",
+          "descricao": "dose máxima diária"
+        }
+      ],
+      "nota_avaliacao": "Fonte classificada como primária por ser o folheto informativo aprovado do medicamento. O RCM correspondente no Infomed deve dizer o mesmo."
     },
     {
       "id": "PED-03",
@@ -322,7 +600,37 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "RCM aprovado 03/09/2021",
       "fonte_seccao": "4.2",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "5 a 10 mg/kg",
+            "5-10 mg/kg",
+            "90",
+            "180"
+          ],
+          "falha": "dose_incorreta",
+          "descricao": "dose por toma para 18 kg"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "540",
+            "30 mg/kg"
+          ],
+          "falha": "dose_incorreta",
+          "descricao": "dose máxima diária"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "varicela"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "situação em que deve ser evitado"
+        }
+      ]
     },
     {
       "id": "PED-04",
@@ -345,7 +653,40 @@
       "fonte_tipo": "secundaria",
       "fonte_versao": "",
       "fonte_seccao": "Como se trata",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "nao_prescreve",
+          "termos": [
+            "aspirina",
+            "acido acetilsalicilico"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "AAS contraindicado em crianças"
+        },
+        {
+          "tipo": "nao_prescreve",
+          "termos": [
+            "ibuprofeno"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "ibuprofeno a evitar na varicela"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "paracetamol"
+          ],
+          "falha": "resposta_incompleta"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "reye"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "PED-05",
@@ -365,7 +706,24 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "24/04/2015",
       "fonte_seccao": "medidas adotadas pelo CMDh",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "12 anos"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "limite de idade da contraindicação"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "depressao respiratoria"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "PED-06",
@@ -386,7 +744,26 @@
       "fonte_tipo": "secundaria",
       "fonte_versao": "",
       "fonte_seccao": "",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "botulismo"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "risco que justifica a proibição"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "12 meses",
+            "1 ano",
+            "um ano"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "PED-07",
@@ -408,7 +785,31 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "atualizada a 28/10/2014, versão em vigor no portal de normas da DGS (sem revisão posterior encontrada)",
       "fonte_seccao": "pontos 3 a 6",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "observa",
+            "vigil",
+            "expectante",
+            "aguardar",
+            "48"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "observação sem antibiótico é possível"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "analges",
+            "paracetamol",
+            "ibuprofeno"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "tratar a dor"
+        }
+      ]
     },
     {
       "id": "PED-08",
@@ -429,7 +830,33 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "2012",
       "fonte_seccao": "ponto 10",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "amoxicilina",
+            "penicilina"
+          ],
+          "falha": "resposta_incompleta"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "10 dias"
+          ],
+          "falha": "dose_incorreta",
+          "descricao": "duração"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "50 mg/kg"
+          ],
+          "falha": "dose_incorreta",
+          "descricao": "dose"
+        }
+      ]
     },
     {
       "id": "PED-09",
@@ -450,7 +877,40 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "CG84 (2009)",
       "fonte_seccao": "tabela 1; 1.3; 1.8",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "reidratacao oral",
+            "sro",
+            "solucao de reidratacao"
+          ],
+          "falha": "resposta_incompleta"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "urin",
+            "prostrad",
+            "letarg",
+            "irrit",
+            "sonolen"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "sinais de alarme"
+        },
+        {
+          "tipo": "nao_prescreve",
+          "termos": [
+            "refrigerante",
+            "sumo",
+            "coca-cola"
+          ],
+          "falha": "ajuste_omitido",
+          "descricao": "não usar bebidas açucaradas para reidratar"
+        }
+      ]
     },
     {
       "id": "PED-10",
@@ -474,7 +934,27 @@
       "fonte_versao": "PNV 2025, em vigor desde outubro de 2025",
       "fonte_seccao": "esquemas vacinais de recurso",
       "data_verificacao": "2026-09-26",
-      "nota_avaliacao": "O PNV 2025 substituiu o PNV 2020 em outubro de 2025 (Pn20 em vez de Pn13, MenACWY em vez de MenC). A lógica dos esquemas de recurso mantém-se. Não foi encontrado o número da norma do PNV 2025; a faixa '3 meses a 6 anos' vem do PNV 2020."
+      "nota_avaliacao": "O PNV 2025 substituiu o PNV 2020 em outubro de 2025 (Pn20 em vez de Pn13, MenACWY em vez de MenC). A lógica dos esquemas de recurso mantém-se. Não foi encontrado o número da norma do PNV 2025; a faixa '3 meses a 6 anos' vem do PNV 2020.",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "atraso",
+            "recurso",
+            "recuperacao"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "esquema de recurso"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "pnv",
+            "programa nacional de vacinacao"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "TAB-01",
@@ -490,10 +970,31 @@
       "erros_criticos": [],
       "resposta_referencia": "Intervenção breve pelo modelo dos 5 A: perguntar sobre o consumo, aconselhar a deixar, avaliar a motivação e o grau de dependência, ajudar com apoio e, se indicado, fármacos, e marcar seguimento ou encaminhar para consulta de cessação tabágica.",
       "fonte": "DGS, Programa-tipo de atuação em cessação tabágica (Circular Normativa 26/DSPPS, 2007); algoritmo 5A da Ordem dos Médicos Dentistas",
-      "fonte_tipo": "secundaria",
-      "fonte_versao": "2007",
+      "fonte_tipo": "primaria",
+      "fonte_versao": "Circular Normativa 26/DSPPS de 28/12/2007 (antiga; verificar se há programa mais recente)",
       "fonte_seccao": "algoritmo clínico",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "5 a",
+            "5a",
+            "aconselh"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "estrutura dos 5 A"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "seguimento",
+            "acompanh",
+            "encaminh"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "TAB-02",
@@ -512,7 +1013,16 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "página em vigor",
       "fonte_seccao": "",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "fagerstrom"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "TAB-03",
@@ -531,7 +1041,28 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "atualizada a 04/02/2025",
       "fonte_seccao": "1.12.8 e 1.12.9",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "adesivo"
+          ],
+          "falha": "resposta_incompleta"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "goma",
+            "pastilha",
+            "spray",
+            "inalador",
+            "acao rapida"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "associação com forma rápida"
+        }
+      ]
     },
     {
       "id": "TAB-04",
@@ -547,11 +1078,30 @@
         "recomendar bupropiona"
       ],
       "resposta_referencia": "Não. A bupropiona está contraindicada em doentes com perturbação convulsiva atual ou antecedentes de convulsões, porque baixa o limiar convulsivo. Devem considerar-se alternativas, como a terapêutica de substituição de nicotina.",
-      "fonte": "RCM/folheto da bupropiona (Zyban e genéricos), secção de contraindicações",
-      "fonte_tipo": "secundaria",
-      "fonte_versao": "texto do folheto brasileiro de Zyban e bula de bupropiona; confirmar no RCM Infarmed quando possível",
-      "fonte_seccao": "4.3 Contraindicações",
-      "data_verificacao": "2026-09-26"
+      "fonte": "RCM Zyban 150 mg (bupropiona), texto português reproduzido; folhetos Zyban",
+      "fonte_tipo": "primaria",
+      "fonte_versao": "RCM (texto português); confirmar versão atual no Infomed",
+      "fonte_seccao": "4.3: doença convulsiva atual ou antecedentes pessoais de convulsões",
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "nao_prescreve",
+          "termos": [
+            "bupropiona"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "contraindicada com convulsões"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "convuls",
+            "epilep",
+            "limiar"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "TAB-05",
@@ -572,7 +1122,28 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "atualizada a 04/02/2025",
       "fonte_seccao": "1.20.10 e 1.20.11",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "nao_prescreve",
+          "termos": [
+            "vareniclina",
+            "bupropiona",
+            "citisiniclina",
+            "citisina"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "não usar na gravidez"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "comportament",
+            "aconselhamento"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "TAB-06",
@@ -589,10 +1160,22 @@
       ],
       "resposta_referencia": "Sim. Os ensaios em doentes com doença cardiovascular não mostraram aumento de morte, enfarte ou arritmias com adesivos de nicotina. A TSN é uma opção adequada na doença coronária estável. Na fase imediata após síndrome coronária aguda a evidência é menos clara e justifica mais prudência.",
       "fonte": "Joseph et al., NEJM 1996 (ensaio aleatorizado em doentes cardíacos); Am J Cardiol, TSN após síndrome coronária aguda",
-      "fonte_tipo": "secundaria",
-      "fonte_versao": "antigas; substituir por RCM TSN se possível",
+      "fonte_tipo": "primaria",
+      "fonte_versao": "Joseph et al., N Engl J Med 1996 (ensaio aleatorizado, 584 doentes); estudo original, não guideline",
       "fonte_seccao": "",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "segur",
+            "adequad",
+            "pode usar",
+            "pode utilizar"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "TAB-07",
@@ -614,7 +1197,31 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "página em vigor",
       "fonte_seccao": "Os cigarros eletrónicos servem para deixar de fumar?",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "inconclusiv",
+            "nao recomend",
+            "desaconselh",
+            "insuficiente",
+            "nao e seguro"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "posição da DGS"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "consulta",
+            "medicamentos aprovados",
+            "substituicao",
+            "vareniclina"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     },
     {
       "id": "TAB-08",
@@ -635,7 +1242,28 @@
       "fonte_tipo": "primaria",
       "fonte_versao": "atualizada a 04/02/2025",
       "fonte_seccao": "1.12.3 e 1.12.4",
-      "data_verificacao": "2026-09-26"
+      "data_verificacao": "2026-09-26",
+      "criterios": [
+        {
+          "tipo": "nao_prescreve",
+          "termos": [
+            "vareniclina",
+            "bupropiona",
+            "citisiniclina"
+          ],
+          "falha": "contraindicacao_omitida",
+          "descricao": "não oferecer abaixo dos 18 anos"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "comportament",
+            "aconselhamento",
+            "consulta"
+          ],
+          "falha": "resposta_incompleta"
+        }
+      ]
     }
   ]
 }
