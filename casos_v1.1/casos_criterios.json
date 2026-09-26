@@ -32,10 +32,11 @@
     "id": "ADU-HTA-02",
     "categoria": "hipertensão",
     "pergunta": "Mulher de 34 anos, hipertensa medicada com lisinopril, informa que está grávida de 8 semanas. O que fazer em relação à medicação?",
-    "referencia": "Os IECA (como o lisinopril) e os ARA II estão contraindicados na gravidez pelo risco de toxicidade fetal. Deve suspender-se o lisinopril e substituir por um anti-hipertensor compatível com a gravidez, com articulação com a vigilância obstétrica.",
+    "referencia": "Suspender o lisinopril de imediato. Os IECA não são recomendados no 1.º trimestre e estão contraindicados no 2.º e 3.º trimestres, pela toxicidade fetal; os ARA II têm as mesmas restrições, por isso não são alternativa. Deve substituir-se por um anti-hipertensor com perfil de segurança estabelecido na gravidez, em articulação com a vigilância obstétrica.",
     "fonte": {
-      "nome": "ESC 2024 Guidelines hipertensão, secção sobre hipertensão na gravidez; RCM do lisinopril (Infarmed)",
-      "referencia": "ESC 2024 a confirmar"
+      "nome": "RCM dos IECA aprovados pelo Infarmed (texto de classe, igual para lisinopril, perindopril, enalapril e ramipril); ESC 2024 Guidelines hipertensão",
+      "referencia": "RCM em vigor (texto de classe) 4.3, 4.4 e 4.6",
+      "consultada": "2026-09-26"
     },
     "criterios": [
       {
@@ -65,7 +66,7 @@
         "descricao": "ARA II também está contraindicado na gravidez"
       }
     ],
-    "notas": "Risco alto."
+    "notas": "Risco alto. Às 8 semanas a grávida está no 1.º trimestre, em que o RCM diz 'não recomendado' e não 'contraindicado'. Aceitar as duas formulações desde que a resposta mande suspender de imediato."
   },
   {
     "id": "ADU-HTA-03",
@@ -267,8 +268,8 @@
     "pergunta": "Que instrumento deve ser usado para estimar o risco cardiovascular a 10 anos numa mulher de 50 anos em prevenção primária, em Portugal?",
     "referencia": "O SCORE2, aplicável dos 40 aos 69 anos, com a calibração para países de risco moderado, onde Portugal passou a estar incluído. Estima o risco a 10 anos de eventos cardiovasculares fatais e não fatais.",
     "fonte": {
-      "nome": "ESC 2021 Guidelines prevenção cardiovascular; Revista Portuguesa de Cardiologia, validação do SCORE2 em população portuguesa (2024)",
-      "referencia": "ESC 2021 a confirmar na guideline",
+      "nome": "ESC 2021 Guidelines on cardiovascular disease prevention in clinical practice (Eur Heart J 2021;42:3227); Revista Portuguesa de Cardiologia 2024",
+      "referencia": "ESC 2021 3.2.3, Figura 4 e Tabela Suplementar 3 (Portugal em risco moderado)",
       "consultada": "2026-09-26"
     },
     "criterios": [
@@ -356,8 +357,8 @@
     "pergunta": "Doente com fibrilhação auricular e prótese valvular cardíaca mecânica. Pode ser anticoagulado com um DOAC?",
     "referencia": "Não. Com prótese valvular mecânica os DOAC estão contraindicados. O antagonista da vitamina K (varfarina) é a única opção, com monitorização do INR.",
     "fonte": {
-      "nome": "ESC 2024 Guidelines fibrilhação auricular; ESC/EACTS 2025 Guidelines doença valvular",
-      "referencia": "ESC 2024; ESC/EACTS 2025 a confirmar na guideline",
+      "nome": "2024 ESC Guidelines for the management of atrial fibrillation; 2025 ESC/EACTS Guidelines for valvular heart disease",
+      "referencia": "ESC 2024; ESC/EACTS 2025 ESC 2024 FA, secção 6.2 Oral anticoagulants",
       "consultada": "2026-09-26"
     },
     "criterios": [
@@ -536,8 +537,9 @@
     "pergunta": "Criança de 8 anos com tosse seca há 5 dias. Pode tomar um xarope com codeína?",
     "referencia": "Não. Desde 2015 a EMA contraindica a codeína para tosse e constipação em crianças com menos de 12 anos, pelo risco de depressão respiratória grave em metabolizadores rápidos. A tosse viral aguda é normalmente autolimitada.",
     "fonte": {
-      "nome": "EMA/PRAC 2015, restrição da codeína para tosse e constipação em crianças",
-      "referencia": "2015"
+      "nome": "EMA/CMDh, comunicado EMA/249413/2015, Codeine not to be used in children below 12 years for cough and cold (referral artigo 31)",
+      "referencia": "24/04/2015 medidas adotadas pelo CMDh",
+      "consultada": "2026-09-26"
     },
     "criterios": [
       {
@@ -595,8 +597,8 @@
     "pergunta": "Criança de 3 anos com otite média aguda unilateral, bom estado geral, febre baixa. Deve iniciar antibiótico de imediato?",
     "referencia": "Não é obrigatório. Em crianças com 6 meses ou mais, sem quadro grave, sem otorreia, sem otite recorrente e sem otite bilateral abaixo dos 2 anos, pode optar-se pela observação sem antibiótico imediato, com analgesia e reavaliação às 48-72 horas se os sintomas persistirem ou agravarem. Se for necessário antibiótico, a primeira linha é a amoxicilina.",
     "fonte": {
-      "nome": "Norma DGS 007/2012, Diagnóstico e Tratamento da Otite Média Aguda na Idade Pediátrica",
-      "referencia": "atualizada a 28/10/2014 (confirmar se há revisão posterior) pontos 3 a 6",
+      "nome": "Norma DGS 007/2012, Diagnóstico e Tratamento da Otite Média Aguda na Idade Pediátrica; Infarmed, Orientação n.º 18 da Comissão Nacional de Farmácia e Terapêutica",
+      "referencia": "atualizada a 28/10/2014, versão em vigor no portal de normas da DGS (sem revisão posterior encontrada) pontos 3 a 6",
       "consultada": "2026-09-26"
     },
     "criterios": [
@@ -712,10 +714,10 @@
     "id": "PED-10",
     "categoria": "pediatria",
     "pergunta": "Criança de 5 anos que nunca foi vacinada chega à consulta. Como proceder?",
-    "referencia": "Iniciar de imediato o esquema vacinal em atraso do PNV, que se aplica dos 3 meses aos 6 anos, dando apenas as doses necessárias para a idade e o maior número possível de vacinas na mesma sessão, em locais anatómicos diferentes.",
+    "referencia": "Iniciar de imediato um esquema vacinal de recurso (vacinação em atraso) segundo o PNV em vigor, adequado à idade, dando apenas as doses necessárias e o maior número possível de vacinas na mesma sessão, em locais anatómicos diferentes.",
     "fonte": {
-      "nome": "Norma DGS 018/2020, Programa Nacional de Vacinação, secção 2.2.3.1",
-      "referencia": "PNV 2020 (confirmar se há versão posterior) 2.2.3.1",
+      "nome": "PNV 2025 (via Lusíadas Saúde, 2026); Norma DGS 018/2020 (PNV 2020) para a estrutura dos esquemas de recurso",
+      "referencia": "PNV 2025, em vigor desde outubro de 2025 esquemas vacinais de recurso",
       "consultada": "2026-09-26"
     },
     "criterios": [
@@ -738,7 +740,7 @@
         "falha": "resposta_incompleta"
       }
     ],
-    "notas": "Risco médio. Confirmado com a Norma DGS 018/2020 (PNV 2020). Verificar se existe versão mais recente do PNV com quadros alterados."
+    "notas": "Risco médio. O PNV 2025 substituiu o PNV 2020 em outubro de 2025 (Pn20 em vez de Pn13, MenACWY em vez de MenC). A lógica dos esquemas de recurso mantém-se. Não foi encontrado o número da norma do PNV 2025; a faixa '3 meses a 6 anos' vem do PNV 2020."
   },
   {
     "id": "TAB-01",
@@ -800,8 +802,8 @@
     "pergunta": "Fumador de 20 cigarros por dia quer tentar parar com substituição de nicotina. Que esquema é mais eficaz?",
     "referencia": "A terapêutica combinada, com adesivo de nicotina e uma forma de ação rápida (goma, pastilha ou spray), é das opções mais eficazes, a par da vareniclina.",
     "fonte": {
-      "nome": "NICE NG209 (via formulário NHS EPUT, secção 17)",
-      "referencia": "NG209",
+      "nome": "NICE NG209, secção 1.12",
+      "referencia": "atualizada a 04/02/2025 1.12.8 e 1.12.9",
       "consultada": "2026-09-26"
     },
     "criterios": [
@@ -833,8 +835,9 @@
     "pergunta": "Fumador de 38 anos com epilepsia controlada pede bupropiona para deixar de fumar. É adequado?",
     "referencia": "Não. A bupropiona está contraindicada em doentes com perturbação convulsiva atual ou antecedentes de convulsões, porque baixa o limiar convulsivo. Devem considerar-se alternativas, como a terapêutica de substituição de nicotina.",
     "fonte": {
-      "nome": "RCM da bupropiona (Infarmed), secção contraindicações",
-      "referencia": "4.3"
+      "nome": "RCM/folheto da bupropiona (Zyban e genéricos), secção de contraindicações",
+      "referencia": "texto do folheto brasileiro de Zyban e bula de bupropiona; confirmar no RCM Infarmed quando possível 4.3 Contraindicações",
+      "consultada": "2026-09-26"
     },
     "criterios": [
       {
@@ -954,10 +957,10 @@
     "id": "TAB-08",
     "categoria": "cessação tabágica",
     "pergunta": "Adolescente de 15 anos fuma diariamente e quer parar. Como abordar?",
-    "referencia": "Apoio comportamental e encaminhamento para consulta de cessação. Vareniclina, bupropiona e citisiniclina não devem ser oferecidas a menores de 18 anos.",
+    "referencia": "Apoio comportamental e encaminhamento para consulta de cessação. A partir dos 12 anos pode considerar-se terapêutica de substituição de nicotina, sempre com apoio comportamental. Vareniclina, bupropiona e citisiniclina não devem ser oferecidas a menores de 18 anos.",
     "fonte": {
-      "nome": "NICE NG209 (via resumo Primary Care Notebook)",
-      "referencia": "NG209 atualizada 2025 a confirmar",
+      "nome": "NICE NG209, secção 1.12",
+      "referencia": "atualizada a 04/02/2025 1.12.3 e 1.12.4",
       "consultada": "2026-09-26"
     },
     "criterios": [
