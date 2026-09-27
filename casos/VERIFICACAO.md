@@ -18,7 +18,7 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 |---|---|---|---|---|---|
 | ATB-PAC-001 | DGS Norma 045/2011; duração: DGS Norma 006/2014 | 1 (ponto 4 a)); 20 | Amoxicilina 500 mg 8/8h, 3-7 dias (mudou a 27/09: era APMGF, 1000 mg) | não | [ ] |
 | ATB-DPOC-002 | APMGF Guia ATB 1.3 | 19 | Amoxicilina 500 mg 8/8h, 5 dias | bate | [ ] |
-| ATB-CIST-003 | APMGF Guia ATB 1.3 | 26 | Nitrofurantoína 100 mg 6/6h 5 dias; fosfomicina 3000 mg toma única | bate | [ ] |
+| ATB-CIST-003 | DGS Norma 015/2011 | 6 (Anexo VII) | Nitrofurantoína 100 mg 6/6h 5-7 dias; fosfomicina 3000 mg toma única (mudou a 27/09: era APMGF, 5 dias) | não | [ ] |
 | ATB-FAR-004 | APMGF Guia ATB 1.3 | 13 | Azitromicina 500 mg 24/24h, 5 dias, na hipersensibilidade tipo I | bate | [ ] |
 | ATB-FAR-005 | APMGF Guia ATB 1.3 | 13 | Amoxicilina 500 mg 12/12h, 10 dias | bate | [ ] |
 | ATB-PIEL-006 | APMGF Guia ATB 1.3 | 28 | Ceftriaxona 1000 mg toma única, depois cefuroxima 500 mg 12/12h 7 dias | bate | [ ] |
@@ -32,12 +32,12 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 | ATB-FAR-014 | APMGF Guia ATB 1.3 | 13 | Cefuroxima 250 mg 12/12h, 10 dias, na hipersensibilidade não tipo I | bate | [ ] |
 | INT-CLA-015 | RCM Claritromicina | 4.3 e 4.5 | Claritromicina com sinvastatina ou lovastatina: contraindicado, risco de rabdomiólise | bate | [ ] |
 | INT-COL-016 | RCM Claritromicina | 4.3 e 4.4 | Claritromicina com colquicina: não administrar, toxicidade por colquicina | bate | [ ] |
-| FMT-CIST-017 | APMGF Guia ATB 1.3 | 26 | Nitrofurantoína 100 mg 6/6h 5 dias (mesma matéria do 003, formato imposto) | bate | [ ] |
+| FMT-CIST-017 | DGS Norma 015/2011 | 6 (Anexo VII) | Nitrofurantoína 100 mg 6/6h 5-7 dias (mesma matéria do 003, formato imposto; mudou a 27/09: era APMGF, 5 dias) | não | [ ] |
 | AJU-MET-018 | RCM metformina (harmonizado UE) | 4.2 e 4.3 | Metformina: máximo 2000 mg/dia entre 45 e 59 ml/min, 1000 mg/dia entre 30 e 44, contraindicada abaixo de 30 | reescrito a 14/09, **sem 2.ª leitura** | [ ] |
 | PED-OMA-019 | APMGF Guia ATB 1.3 | 15 | Criança ≥ 2 anos: amoxicilina 80-90 mg/kg/dia, máx. 3000 mg/dia, 12/12h, 5 dias | não | [ ] |
 | PED-OMA-020 | APMGF Guia ATB 1.3 | 15 | Criança < 2 anos: mesma dose, 7 dias (nota 5) | não | [ ] |
 | PED-OMA-021 | APMGF Guia ATB 1.3 | 15 | Hipersensibilidade tipo I: azitromicina 10 mg/kg/dia, máx. 500 mg/dia, 24/24h, 3 dias; cefuroxima só na não tipo I | não | [ ] |
-| GRA-CIST-022 | APMGF Guia ATB 1.3 | 26 | Grávida: fosfomicina 3000 mg toma única; urocultura prévia (nota 2) | não | [ ] |
+| GRA-CIST-022 | DGS Norma 015/2011 | 6 (Anexo VII); 2 (critério II a)) | Grávida: fosfomicina 3000 mg toma única; urocultura prévia (fonte mudou a 27/09: era APMGF) | não | [ ] |
 | GRA-IECA-023 | RCM Ramipril (Infarmed) | 4.3 e 4.6 | IECA contraindicado no 2.º e 3.º trimestres; ecografia se exposição a partir do 2.º | não | [ ] |
 | GRA-VPA-024 | EMA, valproato, art. 31.º, Anexo III | pp. 77-79, 82 | Bipolar: contraindicado na gravidez; idade fértil só com programa de prevenção da gravidez | não | [ ] |
 | AJU-APX-025 | RCM Eliquis (EMA) | 4.2 | FA não valvular: 2,5 mg 2x/dia com ≥ 2 de: ≥ 80 anos, ≤ 60 kg, creatinina ≥ 1,5 mg/dl | não | [ ] |
@@ -57,6 +57,8 @@ preencher.
 - DGS, *Norma n.º 045/2011 de 26/12/2011, Antibioterapia na Pneumonia Adquirida na Comunidade em Adultos Imunocompetentes*
   https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/antibioterapia-na-pneumonia-adquirida-na-comunidade-em-adultos-imunocompetentes.pdf
   **Atenção na confirmação:** o PDF traz o carimbo "em audição e teste de aplicabilidade até 30 de março de 2012". Confirmar se há versão final diferente.
+- DGS, *Norma n.º 015/2011 de 30/08/2011, Terapêutica de infeções do aparelho urinário (comunidade)*
+  https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/terapeutica-de-infecoes-do-aparelho-urinario-comunidade.pdf
 - DGS, *Norma n.º 006/2014 de 08/05/2014, atualizada a 17/11/2022, Duração de Terapêutica Antibiótica em Patologia Infeciosa*
   https://normas.dgs.min-saude.pt/wp-content/uploads/2014/05/norma_006_2014_atualizada_17_11_2022_duracao_terapeutica_antibiotica_patologia_infeciosa.pdf
 - APMGF, *Guia de Bolso de Antibioterapia em Ambulatório*, edição 1.3, novembro 2025

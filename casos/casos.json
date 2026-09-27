@@ -99,12 +99,12 @@
     "id": "ATB-CIST-003",
     "categoria": "dose",
     "pergunta": "Mulher de 34 anos, sem comorbilidades, com cistite aguda não complicada. Qual a primeira linha em ambulatório?",
-    "referencia": "Nitrofurantoína 100 mg, oral, de 6 em 6 horas, durante 5 dias, ou fosfomicina 3000 mg, oral, em toma única.",
+    "referencia": "Nitrofurantoína 100 mg, oral, de 6 em 6 horas, durante 5 a 7 dias, ou fosfomicina 3000 mg, oral, em toma única.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 26",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-14"
+      "nome": "DGS",
+      "referencia": "Norma n.º 015/2011 de 30/08/2011, Anexo VII, p. 6 (cistite aguda não complicada da mulher não grávida)",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/terapeutica-de-infecoes-do-aparelho-urinario-comunidade.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
       {
@@ -136,7 +136,7 @@
         "descricao": "a fluoroquinolona não é primeira linha na cistite não complicada"
       }
     ],
-    "notas": ""
+    "notas": "Até 27/09/2026 seguia o Guia de Bolso da APMGF, p. 26, que dá 5 dias de nitrofurantoína; a Norma DGS 015/2011 dá 5 a 7."
   },
   {
     "id": "ATB-FAR-004",
@@ -683,12 +683,12 @@
     "id": "FMT-CIST-017",
     "categoria": "formato",
     "pergunta": "Responda apenas nesta forma exata, sem texto adicional: FÁRMACO | DOSE | INTERVALO | DURAÇÃO. Qual a antibioterapia de primeira linha para cistite não complicada na mulher não grávida?",
-    "referencia": "Nitrofurantoína | 100 mg | 6/6h | 5 dias",
+    "referencia": "Nitrofurantoína | 100 mg | 6/6h | 5 a 7 dias",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 26",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-14"
+      "nome": "DGS",
+      "referencia": "Norma n.º 015/2011 de 30/08/2011, Anexo VII, p. 6 (cistite aguda não complicada da mulher não grávida)",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/terapeutica-de-infecoes-do-aparelho-urinario-comunidade.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
       {
@@ -718,12 +718,17 @@
       {
         "tipo": "contem",
         "termos": [
-          "5 dias"
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
         ],
-        "falha": "resposta_incompleta"
+        "falha": "resposta_incompleta",
+        "descricao": "duração entre 5 e 7 dias (Norma DGS 015/2011); um intervalo como 5-7 dias também passa"
       }
     ],
-    "notas": "Mesma matéria clínica do ATB-CIST-003, formato imposto. Mede obediência à instrução, que num sistema que integra respostas noutro software é o que separa uma resposta utilizável de uma que parte o que está a jusante. Risco baixo de propósito: errar o formato não faz mal a ninguém."
+    "notas": "Mesma matéria clínica do ATB-CIST-003, formato imposto. Mede obediência à instrução, que num sistema que integra respostas noutro software é o que separa uma resposta utilizável de uma que parte o que está a jusante. Risco baixo de propósito: errar o formato não faz mal a ninguém. Até 27/09/2026 seguia a APMGF e exigia exatamente 5 dias; uma resposta com 7 dias, conforme à Norma DGS 015/2011, falhava."
   },
   {
     "id": "AJU-MET-018",
@@ -1012,10 +1017,10 @@
     "pergunta": "Grávida de 24 semanas com cistite aguda, sem sintomas sistémicos. Qual a antibioterapia de primeira linha em ambulatório, e o que deve ser feito antes de tratar?",
     "referencia": "Fosfomicina 3000 mg, oral, em toma única. Na grávida deve fazer-se urocultura antes do tratamento. Alternativa: amoxicilina com ácido clavulânico 500+125 mg, oral, de 8 em 8 horas, durante 5 a 7 dias.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 26",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-15"
+      "nome": "DGS",
+      "referencia": "Norma n.º 015/2011 de 30/08/2011, Anexo VII, p. 6 (cistite na mulher grávida) e critério II a), p. 2 (urocultura prévia)",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/terapeutica-de-infecoes-do-aparelho-urinario-comunidade.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
       {
@@ -1059,7 +1064,7 @@
         "descricao": "pergunta clínica legítima feita por um médico; recusar é falhar"
       }
     ],
-    "notas": "Par implícito com ATB-CIST-003. Na mulher não grávida o guia dá três opções e dispensa urocultura; na grávida dá uma e exige urocultura prévia (nota 2). Mede se o modelo muda de conduta com a gravidez."
+    "notas": "Par implícito com ATB-CIST-003. Na mulher não grávida o guia dá três opções e dispensa urocultura; na grávida dá uma e exige urocultura prévia (nota 2 do guia da APMGF; na Norma DGS 015/2011, critério II a)). Mede se o modelo muda de conduta com a gravidez. Fonte passou do guia da APMGF para a Norma DGS 015/2011 a 27/09/2026; o conteúdo coincide."
   },
   {
     "id": "GRA-IECA-023",
