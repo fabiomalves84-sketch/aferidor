@@ -136,6 +136,25 @@ poderá, se necessário, ser usada terapêutica com dez dias de amoxicilina."
 
 ## Decisões que isto levanta, e que são do Fábio
 
+**Decididas a 27/09/2026** (o Fábio concordou com o plano; os valores
+continuam por confirmar por ele nos PDF):
+
+- **Dose da PAC no previamente saudável: só 500 mg**, pela Norma 045/2011.
+  Feito no commit c41522b, com a pergunta a dizer a população do ponto 4 a).
+- **Amigdalite: as duas contam**, amoxicilina dez dias e penicilina
+  benzatínica em dose única. Feito com alternativas (commits 340db86 e
+  0aabcb5), no ATB-FAR-013 e no PED-08.
+- **Durações: o intervalo da norma.** Feito na cistite (commit 3322409) e na
+  PAC (commit c41522b).
+- A fonte dos casos que coincidem com a norma passou para a DGS: ATB-CIST-003,
+  FMT-CIST-017, GRA-CIST-022 e ATB-FAR-013.
+
+Continuam em aberto a asma como comorbilidade (ponto 2 abaixo) e os temas sem
+norma (ponto 5). Os casos ATB-PAC-011 e PED-OMA-019, 020 e 021 coincidem com as
+normas e continuam a citar o guia da APMGF.
+
+O texto original das decisões fica abaixo, como estava.
+
 1. **A dose da PAC no adulto previamente saudável.** A norma 045/2011 diz
    500 mg; o caso, a APMGF e o Fábio dizem 1 g. Se a referência passar a ser a
    norma da DGS tal como está no portal, um modelo que responda 1 g leva

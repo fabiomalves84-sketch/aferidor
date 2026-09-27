@@ -106,7 +106,7 @@ casos.
 
 ```
 python -m unittest discover -s tests   # 325 testes
-python -m aferidor verificar           # 27/27 casos, 187/187 controlos negativos
+python -m aferidor verificar           # 27/27 casos, 190/190 controlos negativos
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```
