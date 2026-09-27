@@ -193,6 +193,30 @@ class TestEnsaio(unittest.TestCase):
             linhas = (f / "respostas.jsonl").read_text(encoding="utf-8").strip().splitlines()
             self.assertEqual(len(linhas), 2)
 
+    def test_unanswered_cases_make_the_exit_code_non_zero(self):
+        """The first case exhausts every retry and is never answered; the
+        second succeeds. The run as a whole must not report success."""
+        from unittest import mock
+
+        from aferidor.cli import comando_ensaio, parse_args
+        from aferidor.providers import FakeProvider
+
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            args = parse_args([
+                "ensaio", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                "--limite", "2", "--tentativas", "1",
+                "--saida", str(f / "respostas.jsonl"),
+                "--vereditos", str(f / "vereditos.json"),
+                "--relatorio", str(f / "relatorio.md"),
+            ])
+            with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                with mock.patch(
+                    "aferidor.cli.build_provider", return_value=FakeProvider(failures=1)
+                ):
+                    code = comando_ensaio(args)
+            self.assertEqual(code, 1)
+
     def test_the_limit_does_not_name_cases_that_were_never_asked(self):
         with tempfile.TemporaryDirectory() as folder:
             f = Path(folder)

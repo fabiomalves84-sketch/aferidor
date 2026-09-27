@@ -313,19 +313,24 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     classificar_args = argparse.Namespace(
         casos=args.casos, respostas=args.saida, saida=args.vereditos, limite=args.limite
     )
-    comando_classificar(classificar_args)
+    codigo_classificar = comando_classificar(classificar_args)
+    if codigo_classificar != 0:
+        return codigo_classificar
 
     relatorio_args = argparse.Namespace(
         casos=args.casos, respostas=args.saida, saida=args.relatorio,
         fontes_confirmadas=args.fontes_confirmadas, limite=args.limite,
     )
-    comando_relatorio(relatorio_args, reasons=errors)
+    codigo_relatorio = comando_relatorio(relatorio_args, reasons=errors)
+    if codigo_relatorio != 0:
+        return codigo_relatorio
 
     if codigo == 1:
         print(
             "\naviso: houve casos sem resposta; o relatorio nomeia-os e nao os conta",
             file=sys.stderr,
         )
+        return 1
     return 0
 
 
