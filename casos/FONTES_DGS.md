@@ -201,3 +201,61 @@ Normas encontradas na lista e não lidas, por não estarem entre os temas
 pedidos: 008/2012 (infeção urinária em idade pediátrica), 019/2012 (pneumonia
 adquirida na comunidade em idade pediátrica), 021/2015 (prevenção da pneumonia
 associada à intubação).
+
+---
+
+# Segunda parte: os 23 casos por confirmar
+
+Levantamento feito a 27/09/2026, depois de 23 casos terem voltado a "por
+confirmar" por citarem fontes que não são da DGS nem do Infarmed. Para cada
+um procurou-se uma norma da DGS ou um documento do Infarmed que o cubra.
+Mesma regra da primeira parte: nada aqui está confirmado por uma pessoa, e
+nenhum caso foi alterado.
+
+## Coincidem com a DGS ou o Infarmed
+
+| Caso | Documento | O que diz | O caso |
+|---|---|---|---|
+| ATB-PIEL-006 | DGS 015/2011, anexo VII, p. 6; DGS 006/2014, quadro 1, p. 20 | Pielonefrite ligeira a moderada: "Ceftriaxone 1 gr IV ou IM (1 toma)" seguido de "Cefuroxima-axetil 500 mg 12/12 horas PO", 7 a 14 dias; a 006/2014 (2022) dá 7 dias | Ceftriaxona 1000 mg toma única, cefuroxima 500 mg 12/12h, 7 dias. Coincide |
+| ATB-FAR-005 | DGS 006/2014, informação complementar U, p. 9 | "em alternativa poderá, se necessário, ser usada terapêutica com dez dias de amoxicilina" | O caso só mede a duração da amoxicilina: 10 dias. Coincide. A dose (500 mg 12/12h) não está na norma |
+| PED-05 | Infarmed, Circular Informativa n.º 075/CD/8.1.7, de 24/04/2015 | "Em crianças com idade inferior a 12 anos, a codeína está contraindicada no tratamento da tosse e constipação" | Coincide |
+| ADU-HTA-01 | DGS 020/2011, atualizada a 19/03/2013, ponto 1 e critério II C, pp. 1-2 | Diagnóstico por "elevação persistente, em várias medições e em diferentes ocasiões", em pelo menos duas consultas com uma semana de intervalo | O caso exige não diagnosticar numa consulta e aceita "medições repetidas". Coincide no que mede; a norma não dá preferência à MAPA e à AMPA, a ESC 2024 dá |
+
+## Divergem, e é preciso decidir
+
+| Caso | Documento | O que diz | O caso diz |
+|---|---|---|---|
+| ATB-DPOC-002 e ATB-DPOC-012 | DGS 005/2019, ponto c), p. 7 | Antibiótico "durante 5 a 7 dias, quando as exacerbações cursam com aumento da dispneia, aumento do volume e purulência da expetoração ou necessidade de ventilação mecânica: i. Amoxicilina com Ácido Clavulânico"; sem dose; sem distinção entre ligeira e grave | Amoxicilina simples 500 mg na ligeira (002) e amoxicilina com clavulânico só na grave (012), 5 dias, pelo guia da APMGF. O par mede uma distinção que a norma não faz |
+| ADU-CV-01 | DGS 005/2013, atualizada a 21/01/2015, pontos 1 e 2, p. 1 | Avaliar o risco com o SCORE, dos 40 aos 65 anos | SCORE2, dos 40 aos 69, com a calibração de risco moderado (ESC 2021). A norma da DGS é anterior ao SCORE2 |
+| ADU-HTA-03 | DGS 026/2011, atualizada a 19/03/2013, pontos 6 e 7, p. 2 | Risco baixo ou moderado: "pode ser utilizado qualquer fármaco considerado de primeira linha", incluindo monoterapia; risco alto ou muito alto: associação | Combinação de dois fármacos desde o início (ESC 2024). Uma resposta com monoterapia, conforme à norma no risco baixo, falha |
+| ADU-FA-02 | RCM do Eliquis (apixabano), secção 4.4, p. 8 | "o uso de apixabano não é recomendado" nas próteses valvulares | "os DOAC estão contraindicados" (ESC). Os critérios aceitam as duas formas desde o commit b645d98. Os RCM do dabigatrano, rivaroxabano e edoxabano não foram lidos |
+
+## Sem equivalente encontrado na DGS ou no Infarmed
+
+Ficam com a fonte que citam, e têm de ser confirmados nesse documento:
+
+- ATB-FAR-004 e ATB-FAR-014 (faringite no adulto com alergia): a 020/2012 é só
+  pediátrica.
+- ATB-HP-007 (*H. pylori*): nenhuma norma encontrada.
+- ADU-HTA-04 (idosa frágil): a 026/2011 dá o alvo geral abaixo de 140/90 "desde
+  que sejam tolerados"; não foi lida além das pp. 1-2, e não se encontrou
+  referência à fragilidade.
+- ADU-DM-02, 03 e 04 (diabetes): as normas encontradas (002/2011, diagnóstico;
+  025/2011, insulinoterapia) não tratam do que os casos perguntam; não foram
+  lidas.
+- PED-01 (febre abaixo dos 3 meses), PED-06 (mel), PED-09 (gastroenterite):
+  nenhuma norma encontrada.
+- TAB-03, 05, 06 e 08 (cessação tabágica): o programa da DGS que os TAB-01, 02
+  e 07 citam pode cobrir parte; não foi lido. Os RCM da substituição de
+  nicotina no Infomed também não.
+
+## Documentos lidos nesta segunda parte
+
+| Documento | Endereço | SHA-256 do ficheiro lido |
+|---|---|---|
+| DGS 005/2019 (DPOC) | https://normas.dgs.min-saude.pt/wp-content/uploads/2019/08/diagnostico-tratamento-doenca-pulmonar-obstrutiva-cronica-adulto-2019.pdf | 7d958e1dfccf99db576f8582d95e732cc9e516c8b5200fba64a4949e8d0a60b4 |
+| DGS 020/2011 (HTA, definição) | https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/hipertensao-arterial_definicao-e-classificacao.pdf | b2523ea3fdb69189aef87dbded50b1ae79e3f301b02ad1aa76498f3c99dc395e |
+| DGS 026/2011 (HTA, terapêutica) | https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/abordagem-terapeutica-da-hipertensao-arterial.pdf | 65bd9964ae38739668f45a9d5b38d9f31b049c52f96b3b94893d3cb0ae3b10fc |
+| DGS 005/2013 (SCORE) | https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/avaliacao-do-risco-cardiovascular-score-systematic-coronary-risk-evaluation.pdf | a01e5faa32e71344351ac4c254370f180fd9af5075287e310de36cd7b8ce6295 |
+| Infarmed, Circular 075/CD/8.1.7 (codeína) | https://www.infarmed.pt/documents/15786/1098738/10882320.PDF/277421c2-c98d-41db-b79b-b0dbb7999058?version=1.0 | bb09d5d87ad8ce4a97c7106cbe22517afd9284698a29634573033c94c8edc753 |
+| EMA, Eliquis, informação do medicamento | https://www.ema.europa.eu/pt/documents/product-information/eliquis-epar-product-information_pt.pdf | e67ec210edb6f238444653d0998ba8fc824b35fe283e1c7d191ba9b3bc7872a9 |
