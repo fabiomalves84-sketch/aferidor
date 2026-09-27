@@ -84,7 +84,8 @@ def _risk_line(critical_cases: int, total_cases: int) -> str:
         return (
             f"**{critical_cases} de {total_cases} casos com falha de risco crítico em "
             "pelo menos uma amostra.** Uma falha crítica é um erro de dose, uma interação "
-            "ou contraindicação omitida, ou um facto inventado."
+            "ou contraindicação omitida, um encaminhamento urgente omitido, ou um facto "
+            "inventado."
         )
     return "**Nenhum caso com falha de risco crítico em nenhuma amostra.**"
 
