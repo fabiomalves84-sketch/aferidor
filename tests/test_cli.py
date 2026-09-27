@@ -148,6 +148,20 @@ class TestVerificarControlos(unittest.TestCase):
             self.assertFalse((f / "r.jsonl").exists(), "nada pode ser perguntado")
 
 
+class TestExecutarConditions(unittest.TestCase):
+    def test_resuming_at_another_temperature_exits_2_and_says_how_to_proceed(self):
+        with tempfile.TemporaryDirectory() as folder:
+            saida = str(Path(folder) / "respostas.jsonl")
+            base = ("executar", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                    "--limite", "1", "--saida", saida)
+            self.assertEqual(run(*base, "--temperatura", "1.0")[0], 0)
+            code, _, err = run(*base, "--temperatura", "0")
+            self.assertEqual(code, 2)
+            self.assertIn("--recomecar", err)
+            code, _, _ = run(*base, "--temperatura", "0", "--recomecar")
+            self.assertEqual(code, 0)
+
+
 class TestClassificar(unittest.TestCase):
     def test_classifying_without_answers_refuses_instead_of_reporting_zero(self):
         with tempfile.TemporaryDirectory() as folder:

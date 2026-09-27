@@ -55,6 +55,13 @@ retoma em vez de repetir. Repetir não é só desperdício de dinheiro: a segund
 resposta do modelo à mesma pergunta é outra, e o conjunto medido deixa
 silenciosamente de ser o conjunto que foi escolhido.
 
+**A retoma só continua a mesma medição.** Antes de perguntar seja o que for, o
+`runner` compara as respostas que o ficheiro já tem deste modelo com as
+condições da execução nova: temperatura, limite de tokens e o texto enviado a
+cada caso. Se alguma diferir, recusa, e a saída diz como avançar
+(`--recomecar` ou outro `--saida`). Um ficheiro com duas medições diferentes
+dá um resultado que não descreve nenhuma delas.
+
 **Nenhuma contagem mistura modelos.** `tally` recusa vereditos de modelos
 diferentes na mesma contagem, em vez de os somar. `consistency_by_model` segue
 a mesma regra.

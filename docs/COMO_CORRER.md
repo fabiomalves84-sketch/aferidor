@@ -79,6 +79,11 @@ execução muitas vezes, e o projeto foi feito para não precisar disso: as
 respostas ficam guardadas em `data/respostas.jsonl` e uma segunda execução salta
 os casos que já foram respondidos por aquele modelo.
 
+Só salta se for a mesma medição. Se a segunda execução pedir outra
+`--temperatura`, outro `--tokens-max`, ou se o texto de algum caso tiver mudado,
+recusa antes de perguntar o que quer que seja. Para uma medição nova, usa
+`--recomecar` ou outro `--saida`.
+
 ## 6. O passo que vai dar trabalho
 
 Até hoje o banco só foi corrido contra respostas de mentira, curtas e limpas. Um

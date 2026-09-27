@@ -85,6 +85,53 @@ class RunResult:
         return ", ".join(parts)
 
 
+class ConditionsMismatch(ValueError):
+    """A resumed run would add answers obtained under different conditions.
+
+    Resuming is only safe while it is the same measurement. An answer asked
+    at another temperature, with another token limit, or with another prompt
+    for the same case is a different measurement, and mixing the two in one
+    file leaves a result that describes neither.
+    """
+
+
+def _check_same_conditions(
+    path: Path | None,
+    provider: Provider,
+    cases: list[Case],
+    temperature: float,
+    max_tokens: int | None,
+) -> None:
+    """Refuse to resume onto answers of this model obtained differently.
+
+    A field an older answer never recorded is not compared: there is nothing
+    to compare it with, and refusing every old file would be a refusal
+    nobody could act on.
+    """
+    if path is None or not Path(path).exists():
+        return
+    prompts = {case.case_id: prompt_digest(build_prompt(case)) for case in cases}
+    differences: list[str] = []
+    for answer in read_answers(Path(path)):
+        if answer.model != provider.name:
+            continue
+        where = f"{answer.case_id} amostra {answer.sample}"
+        if answer.temperature != temperature:
+            differences.append(f"{where}: temperatura {answer.temperature:g}, agora {temperature:g}")
+        if answer.max_tokens is not None and answer.max_tokens != max_tokens:
+            differences.append(f"{where}: tokens_max {answer.max_tokens}, agora {max_tokens}")
+        wanted = prompts.get(answer.case_id)
+        if answer.prompt_sha256 and wanted and answer.prompt_sha256 != wanted:
+            differences.append(f"{where}: o texto enviado ao modelo mudou")
+    if differences:
+        shown = "; ".join(differences[:5])
+        more = f" (e mais {len(differences) - 5})" if len(differences) > 5 else ""
+        raise ConditionsMismatch(
+            f"{path} tem respostas de {provider.name} obtidas noutras condicoes: "
+            f"{shown}{more}"
+        )
+
+
 def _answered_already(path: Path | None, model: str) -> set[tuple[str, int]]:
     """Which (case, sample) pairs this model already has an answer for.
 
@@ -148,12 +195,16 @@ def run(
 
     `repetitions` asks each case that many times, numbered from 1, so a
     consistency check can see whether the model answers the same way twice.
+
+    Resuming onto answers of this model obtained under other conditions
+    raises `ConditionsMismatch` before anything is asked.
     """
     config = config or RunConfig()
-    result = RunResult(run_id=run_id or uuid.uuid4().hex[:12], model=provider.name)
-    done = _answered_already(path, provider.name)
     temperature = getattr(provider, "temperature", 0.0)
     max_tokens = getattr(provider, "max_tokens", None)
+    _check_same_conditions(path, provider, cases, temperature, max_tokens)
+    result = RunResult(run_id=run_id or uuid.uuid4().hex[:12], model=provider.name)
+    done = _answered_already(path, provider.name)
     build = build_id()
 
     for case in cases:
@@ -198,4 +249,12 @@ def run(
     return result
 
 
-__all__ = ["run", "build_prompt", "prompt_digest", "RunConfig", "RunResult", "INSTRUCTION"]
+__all__ = [
+    "run",
+    "build_prompt",
+    "prompt_digest",
+    "ConditionsMismatch",
+    "RunConfig",
+    "RunResult",
+    "INSTRUCTION",
+]

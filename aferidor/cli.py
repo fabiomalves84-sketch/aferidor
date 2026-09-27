@@ -21,7 +21,7 @@ from .providers import (
     Provider,
     ProviderError,
 )
-from .runner import RunConfig, run
+from .runner import ConditionsMismatch, RunConfig, run
 from .storage import read_answers, read_cases, write_answers, write_verdicts
 
 DEFAULT_CASES = Path("casos/casos.json")
@@ -172,14 +172,23 @@ def comando_executar(
         detail = f" {status}" if status not in ("ok",) else ""
         print(f"  {mark} {case.case_id}{detail}")
 
-    result = run(
-        cases,
-        provider,
-        path=args.saida,
-        config=RunConfig(attempts=args.tentativas),
-        repetitions=args.repeticoes,
-        progress=progress,
-    )
+    try:
+        result = run(
+            cases,
+            provider,
+            path=args.saida,
+            config=RunConfig(attempts=args.tentativas),
+            repetitions=args.repeticoes,
+            progress=progress,
+        )
+    except ConditionsMismatch as error:
+        print(f"erro: {error}", file=sys.stderr)
+        print(
+            "para continuar esta medicao, usa as mesmas condicoes; para comecar outra,"
+            " usa --recomecar ou outro --saida",
+            file=sys.stderr,
+        )
+        return 2
 
     print(result.summary())
     print(f"respostas em {args.saida}")

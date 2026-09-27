@@ -10,8 +10,8 @@ from aferidor.models import Case, Criterion, Source
 from aferidor.providers import FakeProvider, Provider, ProviderError, Reply
 from aferidor.risk import FailureType
 from aferidor import build_id
-from aferidor.runner import RunConfig, build_prompt, prompt_digest, run
-from aferidor.storage import read_answers
+from aferidor.runner import ConditionsMismatch, RunConfig, build_prompt, prompt_digest, run
+from aferidor.storage import read_answers, write_answers
 
 
 def a_case(case_id: str = "ATB-001") -> Case:
@@ -270,6 +270,79 @@ class TestConditions(unittest.TestCase):
         build = run([a_case()], FakeProvider()).answers[0].build
         self.assertEqual(build, build_id())
         self.assertRegex(build, r"^\d+\.\d+\.\d+\+[0-9a-f]{12}$")
+
+
+class TestResumeUnderSameConditions(unittest.TestCase):
+    """Resuming is only safe while it is still the same measurement."""
+
+    def first_run(self, folder: str, **provider_kwargs) -> Path:
+        path = Path(folder) / "respostas.jsonl"
+        provider = FakeProvider(**provider_kwargs)
+        provider.max_tokens = 4096
+        run([a_case("A")], provider, path=path)
+        return path
+
+    def test_the_same_conditions_resume(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = self.first_run(folder, temperature=1.0)
+            provider = FakeProvider(temperature=1.0)
+            provider.max_tokens = 4096
+            result = run([a_case("A"), a_case("B")], provider, path=path)
+        self.assertEqual([a.case_id for a in result.answers], ["B"])
+
+    def test_another_temperature_is_refused_before_anything_is_asked(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = self.first_run(folder, temperature=1.0)
+            provider = FakeProvider(temperature=0.0)
+            provider.max_tokens = 4096
+            with self.assertRaises(ConditionsMismatch) as raised:
+                run([a_case("A"), a_case("B")], provider, path=path)
+        self.assertIn("temperatura 1", str(raised.exception))
+        self.assertEqual(provider.prompts, [])
+
+    def test_another_token_limit_is_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = self.first_run(folder)
+            provider = FakeProvider()
+            provider.max_tokens = 8192
+            with self.assertRaises(ConditionsMismatch) as raised:
+                run([a_case("A")], provider, path=path)
+        self.assertIn("tokens_max 4096, agora 8192", str(raised.exception))
+
+    def test_a_changed_prompt_for_the_same_case_is_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = self.first_run(folder)
+            reworded = Case(
+                case_id="A", category="x", question="Pergunta reescrita?", reference="r",
+                source=Source(name="s", reference="p"), criteria=a_case().criteria,
+            )
+            provider = FakeProvider()
+            provider.max_tokens = 4096
+            with self.assertRaises(ConditionsMismatch) as raised:
+                run([reworded], provider, path=path)
+        self.assertIn("texto enviado ao modelo mudou", str(raised.exception))
+
+    def test_another_model_in_the_same_file_is_not_compared(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = self.first_run(folder, temperature=1.0)
+            other = FakeProvider(name="outro", temperature=0.0)
+            result = run([a_case("A")], other, path=path)
+        self.assertEqual(len(result.answers), 1)
+
+    def test_an_old_answer_without_conditions_is_not_compared_on_them(self):
+        from datetime import datetime
+
+        from aferidor.models import Answer
+
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            write_answers(
+                [Answer("A", "falso", "texto", datetime(2026, 9, 16), temperature=0.0)], path
+            )
+            provider = FakeProvider()
+            provider.max_tokens = 8192
+            result = run([a_case("A"), a_case("B")], provider, path=path)
+        self.assertEqual([a.case_id for a in result.answers], ["B"])
 
 
 class TestConfig(unittest.TestCase):
