@@ -16,7 +16,7 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 
 | Caso | Fonte | Página | Valor a confirmar | 2.ª leitura | Pessoa |
 |---|---|---|---|---|---|
-| ATB-PAC-001 | APMGF Guia ATB 1.3 | 17 | Amoxicilina 1000 mg 8/8h, 5-7 dias | bate | [ ] |
+| ATB-PAC-001 | DGS Norma 045/2011; duração: DGS Norma 006/2014 | 1 (ponto 4 a)); 20 | Amoxicilina 500 mg 8/8h, 3-7 dias (mudou a 27/09: era APMGF, 1000 mg) | não | [ ] |
 | ATB-DPOC-002 | APMGF Guia ATB 1.3 | 19 | Amoxicilina 500 mg 8/8h, 5 dias | bate | [ ] |
 | ATB-CIST-003 | APMGF Guia ATB 1.3 | 26 | Nitrofurantoína 100 mg 6/6h 5 dias; fosfomicina 3000 mg toma única | bate | [ ] |
 | ATB-FAR-004 | APMGF Guia ATB 1.3 | 13 | Azitromicina 500 mg 24/24h, 5 dias, na hipersensibilidade tipo I | bate | [ ] |
@@ -54,6 +54,11 @@ preencher.
 
 ## Documentos
 
+- DGS, *Norma n.º 045/2011 de 26/12/2011, Antibioterapia na Pneumonia Adquirida na Comunidade em Adultos Imunocompetentes*
+  https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/antibioterapia-na-pneumonia-adquirida-na-comunidade-em-adultos-imunocompetentes.pdf
+  **Atenção na confirmação:** o PDF traz o carimbo "em audição e teste de aplicabilidade até 30 de março de 2012". Confirmar se há versão final diferente.
+- DGS, *Norma n.º 006/2014 de 08/05/2014, atualizada a 17/11/2022, Duração de Terapêutica Antibiótica em Patologia Infeciosa*
+  https://normas.dgs.min-saude.pt/wp-content/uploads/2014/05/norma_006_2014_atualizada_17_11_2022_duracao_terapeutica_antibiotica_patologia_infeciosa.pdf
 - APMGF, *Guia de Bolso de Antibioterapia em Ambulatório*, edição 1.3, novembro 2025
   https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf
 - Infarmed, *Resumo das Características do Medicamento, Claritromicina 500 mg*,
@@ -102,6 +107,11 @@ comorbilidades, e neste último acrescenta azitromicina 500 mg 24/24h durante
 3 dias. O caso pergunta pelo doente sem critérios de gravidade e a referência
 corresponde ao primeiro. Vale a pena, mais tarde, acrescentar o segundo como
 caso próprio.
+
+Atualização de 27/09/2026: a fonte deste caso passou a ser a Norma DGS
+045/2011, que dá 500 mg no previamente saudável e 1 g com comorbilidades. A
+releitura acima diz respeito ao guia da APMGF, e não à norma. Ver
+`casos/FONTES_DGS.md`.
 
 **ATB-HP-007.** O guia tem dois esquemas, o quádruplo sem bismuto durante
 14 dias e o quádruplo com bismuto durante 10 dias. A referência corresponde ao

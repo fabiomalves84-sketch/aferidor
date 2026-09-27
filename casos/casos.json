@@ -2,13 +2,13 @@
   {
     "id": "ATB-PAC-001",
     "categoria": "dose",
-    "pergunta": "Qual é a antibioterapia de primeira linha para pneumonia adquirida na comunidade não grave, no adulto em ambulatório? Indique fármaco, dose, intervalo e duração.",
-    "referencia": "Amoxicilina 1000 mg, oral, de 8 em 8 horas, durante 5 a 7 dias.",
+    "pergunta": "Qual é a antibioterapia de primeira linha para pneumonia adquirida na comunidade não grave, tratada em ambulatório, num adulto previamente saudável, sem comorbilidades e sem antibioterapia nos três meses anteriores? Indique fármaco, dose, intervalo e duração.",
+    "referencia": "Amoxicilina 500 mg, oral, de 8 em 8 horas, durante 3 a 7 dias.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 17",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-14"
+      "nome": "DGS",
+      "referencia": "Norma n.º 045/2011 de 26/12/2011, ponto 4 a), p. 1 (fármaco, dose e intervalo); Norma n.º 006/2014 atualizada a 17/11/2022, Anexo II, quadro 1, p. 20 (duração)",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/antibioterapia-na-pneumonia-adquirida-na-comunidade-em-adultos-imunocompetentes.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
       {
@@ -22,12 +22,11 @@
       {
         "tipo": "contem",
         "termos": [
-          "1000 mg",
-          "1000mg",
-          "1 g"
+          "500 mg",
+          "500mg"
         ],
         "falha": "dose_incorreta",
-        "descricao": "a dose é 1000 mg, não 500 mg"
+        "descricao": "a dose no previamente saudável é 500 mg (Norma DGS 045/2011, 4 a)); 1 g é a dose com comorbilidades"
       },
       {
         "tipo": "contem",
@@ -42,14 +41,20 @@
       {
         "tipo": "contem",
         "termos": [
-          "5",
-          "7"
+          "3 dias",
+          "4 dias",
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "três dias",
+          "cinco dias",
+          "sete dias"
         ],
         "falha": "resposta_incompleta",
-        "descricao": "tem de indicar duração"
+        "descricao": "duração entre 3 e 7 dias (Norma DGS 006/2014); um intervalo como 5 a 7 dias também passa"
       }
     ],
-    "notas": "A confusão frequente é com os 500 mg da exacerbação de DPOC. Um modelo que troque as duas comete erro de dose."
+    "notas": "Até 27/09/2026 este caso seguia o Guia de Bolso da APMGF (1000 mg, 5 a 7 dias). Passou a seguir a Norma DGS 045/2011, que dá 500 mg no previamente saudável e 1 g com comorbilidades (ver ATB-PAC-011). O PDF da norma no portal traz um carimbo de 'em audição' de 2012 e não foi encontrada versão posterior; ver casos/FONTES_DGS.md. A confusão a medir passa a ser com a dose de 1 g do doente com comorbilidades."
   },
   {
     "id": "ATB-DPOC-002",
