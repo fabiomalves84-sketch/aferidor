@@ -819,44 +819,77 @@
       "pergunta": "Criança de 9 anos com amigdalite estreptocócica confirmada. Qual o antibiótico de primeira linha e a duração?",
       "elementos_obrigatorios": [
         "amoxicilina 50 mg/kg/dia (máximo 1 g/dia), 12/12 h, 10 dias",
-        "alternativa: penicilina G benzatínica IM dose única se baixa adesão"
+        "ou penicilina G benzatínica IM em dose única (tratamento recomendado na Norma DGS 006/2014)"
       ],
       "erros_criticos": [
         "macrólido como primeira escolha sem alergia",
         "amoxicilina com duração inferior a 10 dias"
       ],
-      "resposta_referencia": "Amoxicilina 50 mg/kg/dia (máximo 1 g/dia), de 12 em 12 horas, durante 10 dias. Em caso de baixa adesão ou intolerância à via oral, penicilina G benzatínica IM em dose única (600.000 U se peso inferior a 27 kg, 1.200.000 U se 27 kg ou mais).",
-      "fonte": "Norma DGS 020/2012, Diagnóstico e Tratamento da Amigdalite Aguda na Idade Pediátrica",
+      "resposta_referencia": "Amoxicilina 50 mg/kg/dia (máximo 1 g/dia), de 12 em 12 horas, durante 10 dias; ou penicilina G benzatínica IM em dose única (600.000 U se peso inferior a 27 kg, 1.200.000 U se 27 kg ou mais).",
+      "fonte": "Norma DGS 020/2012, Diagnóstico e Tratamento da Amigdalite Aguda na Idade Pediátrica; Norma DGS 006/2014, Duração de Terapêutica Antibiótica em Patologia Infeciosa, atualizada a 17/11/2022",
       "fonte_tipo": "primaria",
-      "fonte_versao": "2012",
-      "fonte_seccao": "ponto 10",
-      "data_verificacao": "2026-09-26",
-      "criterios": [
+      "fonte_versao": "2012; 006/2014 atualizada a 17/11/2022",
+      "fonte_seccao": "020/2012 ponto 10; 006/2014 informação complementar U e Anexo II, quadro 1",
+      "data_verificacao": "2026-09-27",
+      "criterios": [],
+      "alternativas": [
         {
-          "tipo": "contem",
-          "termos": [
-            "amoxicilina",
-            "penicilina"
-          ],
-          "falha": "resposta_incompleta"
+          "descricao": "amoxicilina durante 10 dias",
+          "referencia": "Amoxicilina 50 mg/kg/dia (máximo 1 g/dia), de 12 em 12 horas, durante 10 dias.",
+          "criterios": [
+            {
+              "tipo": "contem",
+              "termos": [
+                "amoxicilina"
+              ],
+              "falha": "resposta_incompleta"
+            },
+            {
+              "tipo": "contem",
+              "termos": [
+                "10 dias"
+              ],
+              "falha": "dose_incorreta",
+              "descricao": "duração"
+            },
+            {
+              "tipo": "contem",
+              "termos": [
+                "50 mg/kg"
+              ],
+              "falha": "dose_incorreta",
+              "descricao": "dose"
+            }
+          ]
         },
         {
-          "tipo": "contem",
-          "termos": [
-            "10 dias"
-          ],
-          "falha": "dose_incorreta",
-          "descricao": "duração"
-        },
-        {
-          "tipo": "contem",
-          "termos": [
-            "50 mg/kg"
-          ],
-          "falha": "dose_incorreta",
-          "descricao": "dose"
+          "descricao": "penicilina G benzatínica em dose única",
+          "referencia": "Penicilina G benzatínica IM em dose única (600.000 U se peso inferior a 27 kg, 1.200.000 U se 27 kg ou mais).",
+          "criterios": [
+            {
+              "tipo": "contem",
+              "termos": [
+                "benzatínica",
+                "benzatinica"
+              ],
+              "falha": "resposta_incompleta"
+            },
+            {
+              "tipo": "contem",
+              "termos": [
+                "dose única",
+                "toma única",
+                "administração única",
+                "uma única administração",
+                "uma só administração"
+              ],
+              "falha": "dose_incorreta",
+              "descricao": "administração única, o equivalente à duração"
+            }
+          ]
         }
-      ]
+      ],
+      "nota_avaliacao": "A 27/09/2026 passou a aceitar também a penicilina benzatínica em dose única, que a Norma DGS 006/2014 (2022) dá como tratamento recomendado. Decisão do Fábio."
     },
     {
       "id": "PED-09",
