@@ -19,13 +19,13 @@ python -m aferidor relatorio --formato html
 ```
 
 - **`llama3.1:8b`:** 135 respostas, entre 14:40 e 15:38 (58 min de relógio,
-  57 min de soma das latências — quase sem sobreposição). Um processo morreu
+  57 min de soma das latências, quase sem sobreposição). Um processo morreu
   por falta de memória a meio e foi retomado uma vez; nada se perdeu, porque
   as respostas são gravadas no disco à medida que chegam.
 - **`qwen3:8b`:** 135 respostas, entre 15:40 e 20:03 (4h23 de relógio, 3h46
   de soma das latências). A máquina esteve sob pressão de memória durante
-  todo este ensaio — outra sessão do Claude Code e o próprio Ollama a
-  disputarem RAM ao mesmo tempo — e o processo morreu e foi retomado **sete
+  todo este ensaio (outra sessão do Claude Code e o próprio Ollama a
+  disputarem RAM ao mesmo tempo), e o processo morreu e foi retomado **sete
   vezes**. A diferença entre o tempo de relógio e a soma das latências
   (cerca de 37 minutos) é esse atrito: cada retoma tem de recarregar o
   modelo no Ollama antes de continuar. Nenhuma resposta se perdeu pela mesma
@@ -129,6 +129,21 @@ texto) e 15 tinham dose e mudam para os critérios do próprio caso.
 
 O aviso que o próprio relatório traz continua verdadeiro: as fontes dos 27
 casos ainda não estão todas confirmadas por uma pessoa contra o documento
-original (`casos/VERIFICACAO.md`). Este ensaio é válido como medição —
-zero respostas truncadas, os dois modelos completos — mas os números só
+original (`casos/VERIFICACAO.md`). Este ensaio é válido como medição
+(zero respostas truncadas, os dois modelos completos), mas os números só
 contam como evidência apresentável depois dessa confirmação.
+
+## Depois de 27/09/2026: os casos mudaram, as respostas não
+
+Depois da reclassificação acima, vários casos do banco mudaram de fonte e, em
+alguns, de pergunta: os casos de infeção passaram a seguir as normas da DGS
+(ver `casos/FONTES_DGS.md`), e o ATB-PAC-001 passou de 1000 mg para 500 mg e a
+dizer "previamente saudável". As respostas desta pasta foram dadas às
+perguntas de 16/09, com a instrução de então, e nenhuma foi repetida.
+
+Por isso os números desta página são os do instrumento e dos casos dessa
+altura. Voltar a corrigir estas respostas com os casos de hoje mistura
+perguntas que os modelos não leram com respostas que deram a outras, e não
+serve para os comparar com um ensaio novo. Um ensaio novo começa do zero, com
+protocolo escrito antes.
+

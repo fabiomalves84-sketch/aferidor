@@ -108,4 +108,5 @@ diferem no modelo e em mais nada.
 - `relatorios/relatorio.html` o mesmo documento em HTML, quando pedido com
   `--formato html`
 
-Os três últimos não entram no repositório. São produto de execução, não fonte.
+Os quatro últimos não entram no repositório. São produto de execução, não fonte;
+as execuções que valem como registo vão para `ensaios/`, com um README cada.

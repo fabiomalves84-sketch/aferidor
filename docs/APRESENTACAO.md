@@ -32,45 +32,55 @@ pergunta, a resposta de referência, a fonte e o texto que o modelo escreveu.
 julgamento clínico. Mede um sistema, não um doente.
 
 **Não contém dados de doentes.** Todos os casos vêm de documentos públicos
-portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
+(normas portuguesas e diretrizes internacionais) ou são sintéticos. Nenhum registo clínico real entra aqui.
 
 **Não avalia nenhum produto comercial.** Os casos são genéricos.
 
 ## Estado honesto, hoje
 
-- 27 casos clínicos, cada um com fonte pública identificada até à página, vários
-  deles em pares que medem uma distinção que um modelo pode não fazer: pneumonia
-  com e sem comorbilidades, exacerbação de DPOC ligeira e grave, faringite com
-  hipersensibilidade tipo I e não tipo I, um só critério de ajuste de apixabano
-  contra dois. Cobrem também pediatria por peso, gravidez e ajuste de
-  anticoagulante, as áreas onde um erro de consulta rápida custa mais
-- Executor com adaptadores para OpenAI, Anthropic e modelos locais pelo
-  Ollama, e um fornecedor falso para ensaiar sem custo
-- Correção determinista por critérios, com taxonomia de nove tipos de falha, e
-  pelo menos um caso a medir cada um deles
-- Relatório legível, com as falhas críticas antes da percentagem
-- 368 testes automáticos, todos a passar
-- Sem dependências externas, só biblioteca padrão do Python
+- **Dois bancos de casos, 57 ao todo**, cada um com fonte pública identificada:
+  27 de antibioterapia, interações, gravidez e ajuste de dose, e 30 de consulta
+  de adulto, criança e cessação tabágica. Muitos em pares que medem uma
+  distinção que um modelo pode não fazer (pneumonia com e sem comorbilidades,
+  hipersensibilidade tipo I e não tipo I, um só critério de ajuste de
+  apixabano contra dois). Os casos de infeção seguem as normas da DGS; onde duas
+  fontes reconhecidas divergem de forma defensável, o caso aceita as duas.
+- **Um corretor que se ensaia a si próprio nos dois sentidos.** A resposta de
+  referência de cada caso tem de passar, e uma resposta errada construída para
+  cada critério tem de falhar: 206 e 83 destes controlos, todos apanhados.
+- **Rastreabilidade.** Cada resposta guarda o texto exato enviado (por hash), a
+  temperatura, o limite de tokens e a versão do código; uma retoma recusa
+  misturar condições; o relatório diz o que mediu, com que banco e quando.
+- **Critério de aprovação escrito antes**, num protocolo, e um relatório que
+  diz aprovado ou reprovado e avisa quando o protocolo foi escrito depois.
+- **Uma folha cega para um clínico julgar o corretor**, e a medida da
+  concordância entre os dois, com as passagens falsas primeiro.
+- Intervalos de confiança nos números principais, e um indicador de português
+  europeu à parte das falhas clínicas.
+- Adaptadores para OpenAI, Anthropic e modelos locais pelo Ollama.
+- 368 testes automáticos, todos a passar, sem dependências externas.
 
 E o que falta, dito com a mesma clareza:
 
-- **A confirmação das fontes está a meio, e tem duas qualidades.** Dez casos
-  de infeção foram confirmados nos PDF das normas da DGS, um a um. Outros 24
-  foram declarados confirmados por grupo na DGS e no Infarmed, sem registo de
-  página caso a caso. Os 23 restantes citam a APMGF, a ESC, a ADA, o NICE ou a
-  EMA e ainda não foram confirmados. A tabela `casos/VERIFICACAO.md` diz qual
-  é qual.
-- **Só houve uma execução real, e limitada.** Dezoito perguntas a um modelo, sem
-  API, sem controlo de temperatura e com uma amostra por pergunta. Deu 16 em 18 e
-  apanhou uma referência desatualizada no banco. Está registada em
-  `ensaios/2026-09-14-agente/`, com os limites escritos. Ainda não houve uma
-  execução pela API com repetição.
-- **A distinção entre receitar um fármaco e o nomear para o excluir é feita por
-  heurística, não por compreensão de texto.** Erra nas duas direções, e o README
-  diz como e porquê, em Limites conhecidos.
+- **O corretor ainda não foi comparado com um clínico.** A ferramenta existe
+  (`revisao` e `concordancia`); falta alguém julgar a folha. Até lá, não se sabe
+  com que frequência o corretor deixa passar uma resposta errada.
+- **As fontes estão confirmadas a meio.** 10 casos foram confirmados nos PDF da
+  DGS, um a um; 24 foram declarados confirmados por grupo; dos 23 restantes,
+  16 foram lidos no documento original por ferramenta e batem, e 7 (ESC e ADA)
+  esperam leitura humana. `casos/VERIFICACAO.md` diz qual é qual.
+- **Ainda não houve um ensaio pela API.** Houve uma execução limitada com um
+  modelo por uma sessão de assistente (18 perguntas) e uma comparação de dois
+  modelos locais de 8 mil milhões de parâmetros, com 5 amostras por caso. Os
+  casos mudaram depois dessa comparação, e os números dela não servem para
+  comparar com um ensaio novo.
+- **A correção é textual.** Numa só revisão apareceram oito erros do corretor,
+  todos corrigidos e fixados em testes; cada ensaio real vai trazer mais. A
+  distinção entre receitar um fármaco e o nomear para o excluir é heurística, e
+  o README diz onde erra.
 
-Estas três linhas estão aqui de propósito. Um instrumento de medida que esconde
-os seus próprios limites não serve como instrumento de medida.
+Estas linhas estão aqui de propósito. Um instrumento de medida que esconde os
+seus próprios limites não serve como instrumento de medida.
 
 ## O que demonstra sobre método
 
@@ -84,12 +94,13 @@ essas normas pedem:
 
 | Exigência | Onde está |
 |---|---|
-| Critérios de aceitação definidos antes do ensaio | `casos/casos.json`, escritos antes de qualquer execução |
+| Critérios de aceitação definidos antes do ensaio | os critérios de cada caso, escritos antes da primeira execução e alterados depois só com a razão no commit; o protocolo de aprovação do sistema (`aferidor protocolo`) |
 | Rastreabilidade à fonte | cada caso guarda documento e página |
 | Verificação dos dados de origem | `casos/VERIFICACAO.md` e o comando `verificar` |
 | Classificação de falhas por risco | `aferidor/risk.py` |
 | Registo íntegro dos resultados | `data/respostas.jsonl`, escrito à medida que chega |
-| Relatório para revisão humana | `relatorios/relatorio.md` |
+| Relatório para revisão humana | `relatorios/relatorio.md` e `.html`, com as condições do ensaio e intervalos de confiança |
+| Validação do método de medida | `aferidor revisao` e `concordancia`: o corretor contra um clínico, às cegas |
 
 O comando `verificar` merece nota. Avalia a resposta de referência de cada caso
 contra os critérios desse mesmo caso. Quando foi escrito, apanhou logo dois
@@ -109,6 +120,7 @@ casos.
 ```
 python -m unittest discover -s tests   # 368 testes
 python -m aferidor verificar           # 27/27 casos, 206/206 controlos negativos
+python -m aferidor verificar --casos casos/consulta.json   # 30/30, 83/83
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```

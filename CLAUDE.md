@@ -65,6 +65,7 @@ demonstra.
 ```
 python3 -m unittest discover -s tests   # 368 testes
 python3 -m aferidor verificar           # 27/27 casos, 206/206 controlos negativos
+python3 -m aferidor verificar --casos casos/consulta.json   # 30/30, 83/83
 python3 -m aferidor ensaio --fornecedor falso
 ```
 

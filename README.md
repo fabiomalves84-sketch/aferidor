@@ -59,11 +59,21 @@ mesma exatidão e não têm nada a ver um com o outro.
 
 ## Fontes dos casos
 
-Só fontes públicas e citáveis, com a referência guardada em cada caso:
+Só fontes públicas e citáveis, com a referência guardada em cada caso, e a
+fonte portuguesa oficial primeiro sempre que existe:
 
-- Resumos das Características do Medicamento e folhetos informativos do Infarmed
-- Normas e orientações da Direção-Geral da Saúde
-- Bases públicas de interações medicamentosas
+- Normas de orientação clínica da Direção-Geral da Saúde
+- Resumos das Características do Medicamento e circulares do Infarmed, e textos
+  da EMA
+- O Guia de Bolso de Antibioterapia em Ambulatório da APMGF, onde a DGS não tem
+  norma ou ao lado dela
+- Diretrizes internacionais (ESC, ADA, NICE) onde não há fonte portuguesa, ou
+  onde a norma portuguesa é anterior à evidência atual
+
+Quando duas fontes reconhecidas dão respostas diferentes e ambas defensáveis, o
+caso aceita as duas como alternativas, com a razão escrita. O levantamento das
+normas da DGS, o que dizem e onde divergiam dos casos está em
+`casos/FONTES_DGS.md`.
 
 Um caso sem fonte não entra. Uma referência que eu não consiga apontar é uma
 referência que inventei.
@@ -86,6 +96,15 @@ demonstração.
 - [x] **Fase 4** Classificadores e taxonomia de falhas
 - [x] **Fase 5** Relatório e métricas por categoria de risco
 - [x] **Fase 6** Documentação e apresentação
+- [x] **Fase 7** Robustez do instrumento (27/09/2026): controlos negativos no
+  `verificar`, condições de obtenção gravadas em cada resposta, esquemas
+  alternativos, fontes da DGS, indicador de português europeu, intervalos de
+  confiança
+- [x] **Fase 8** Ferramentas de validação (27/09/2026): protocolo com critério
+  de aprovação escrito antes, e folha cega para um clínico julgar o corretor
+- [ ] **Fase 9** Validação: um clínico julga uma amostra de respostas reais, as
+  fontes que faltam são confirmadas, e corre um ensaio pela API com protocolo
+  feito antes
 
 ## Como correr
 
@@ -94,13 +113,17 @@ Sem dependências externas. Python 3.10 ou superior, biblioteca padrão apenas.
 ```
 python -m unittest discover -s tests             # testes
 python -m aferidor verificar                     # a referencia passa e uma resposta errada falha?
+python -m aferidor verificar --casos casos/consulta.json   # o segundo banco
 python -m aferidor executar --fornecedor falso   # ensaio a seco, sem chave nem custo
-python -m aferidor executar --fornecedor openai --modelo gpt-4o
 python -m aferidor classificar                   # avalia as respostas guardadas
 python -m aferidor relatorio                     # escreve relatorios/relatorio.md
+python -m aferidor relatorio --formato html      # o mesmo, num ficheiro HTML
 
 python -m aferidor modelos --fornecedor openai   # que modelos existem hoje
-python -m aferidor ensaio --fornecedor openai --modelo <nome>   # tudo de uma vez
+python -m aferidor protocolo --nome <nome> --saida protocolos/<nome>.json
+python -m aferidor ensaio --fornecedor openai --modelo <nome> --protocolo protocolos/<nome>.json
+python -m aferidor revisao --respostas data/respostas.jsonl   # folha para um clínico
+python -m aferidor concordancia                  # o corretor contra o clínico
 ```
 
 `docs/COMO_CORRER.md` explica o que fazer no dia em que houver chave de API,
@@ -291,15 +314,41 @@ foi dado como falhado e a investigação mostrou que o errado era a referência,
 o modelo. A fonte usada estava desatualizada. O caso foi reescrito contra a fonte
 em vigor.
 
+A segunda, em `ensaios/2026-09-16-comparacao-local-invalida/`, é uma medição
+que falhou por culpa do instrumento: o limite de tokens cortava as respostas de
+um modelo que raciocina antes de responder, e o corretor contava-as como erros.
+Ficou guardada e explicada, e a terceira, em
+`ensaios/2026-09-16-comparacao-local/`, é a mesma comparação feita em condições
+(dois modelos locais, 27 casos, 5 amostras cada). Foi reclassificada a 27/09
+com o corretor corrigido, sem repetir nenhuma pergunta e sem tocar nos
+originais.
+
+Depois de 27/09 vários casos mudaram de fonte e de pergunta (os de infeção
+passaram para as normas da DGS). As respostas desses ensaios foram dadas às
+perguntas de então, e os números que os READMEs dos ensaios registam são os do
+instrumento dessa altura. Não servem para comparar com um ensaio novo.
+
 ## Estado
 
-Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
-um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 368 testes,
-todos a passar. Sem dependências externas.
+**O instrumento está completo; a validação ainda não.**
 
-Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as 23
-fontes que faltam e registar caso a caso as 24 declaradas por grupo
-(`casos/VERIFICACAO.md`) e repetir a execução real pela API, com várias
-amostras por pergunta. A primeira execução, sem API e
-com uma amostra, está em `ensaios/2026-09-14-agente/`.
+- Dois bancos: 27 casos de antibioterapia, interações, gravidez e ajuste de
+  dose (`casos/casos.json`) e 30 de consulta de adulto, criança e cessação
+  tabágica (`casos/consulta.json`), cada um com fonte identificada.
+- `verificar` dá 27/27 e 30/30 casos coerentes, e 206/206 e 83/83 controlos
+  negativos apanhados.
+- 368 testes, todos a passar, em Python 3.10 a 3.14 na CI. Sem dependências
+  externas.
+- Fontes: 34 de 57 marcadas como confirmadas por uma pessoa, com duas
+  qualidades de evidência; das 23 restantes, 16 foram lidas no documento
+  original e batem, e 7 (ESC e ADA) não se deixaram ler automaticamente. Tudo
+  descrito em `casos/VERIFICACAO.md`.
+
+Por fazer, e é o que falta para os números valerem como evidência:
+
+1. Um clínico julgar uma amostra de respostas reais com `revisao`, para se
+   saber com que frequência o corretor concorda com uma pessoa.
+2. Confirmar à mão as 23 fontes por confirmar, e registar caso a caso as
+   declaradas por grupo.
+3. Um ensaio novo pela API, com vários modelos, cinco amostras por caso e um
+   protocolo commitado antes de correr.

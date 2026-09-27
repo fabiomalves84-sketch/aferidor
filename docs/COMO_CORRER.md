@@ -152,8 +152,9 @@ python -m aferidor ensaio --fornecedor openai --modelo <nome>
 python -m aferidor ensaio --fornecedor anthropic --modelo <nome>
 ```
 
-A tabela mostra a taxa de acerto e as falhas críticas lado a lado. Ler a segunda
-coluna antes da primeira.
+A tabela mostra, por modelo, os casos com falha crítica em alguma amostra, os
+casos instáveis e a taxa de amostras corretas, por esta ordem, e cada número com
+o seu intervalo de confiança. Ler as duas primeiras colunas antes da terceira.
 
 ## 9. O limite de tokens, e o modelo que raciocina antes de responder
 
@@ -168,7 +169,7 @@ de 16/09/2026 correr com dois modelos locais: 35 das 135 respostas do
 `qwen3:8b` chegaram vazias e 75 acabaram a meio da frase, porque o
 raciocínio consumiu o limite antes de a resposta começar. O runner trata uma
 resposta cortada por `max_tokens` como um caso por responder, não como uma
-resposta errada — mas um caso por responder também não mede nada, e um
+resposta errada, mas um caso por responder também não mede nada, e um
 ensaio com 80% dos casos por responder não serve de evidência. Ver
 `ensaios/2026-09-16-comparacao-local-invalida/README.md` para o relato
 completo.

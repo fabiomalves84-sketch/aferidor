@@ -26,7 +26,7 @@ afetado, mas sofre do mesmo problema numa escala menor: um punhado das suas
 O corretor (`grading.grade`), tal como estava nesta altura, não distinguia
 uma resposta vazia de uma resposta errada: contava uma dose nunca mencionada
 como `dose_incorreta`, e uma resposta cortada a meio de uma frase como
-`resposta_incompleta` — os dois tipos de falha de risco mais alto que o
+`resposta_incompleta`, os dois tipos de falha de risco mais alto que o
 banco mede. As contagens deste ensaio estão inflacionadas por um erro do
 instrumento, não por erro dos modelos.
 
@@ -38,7 +38,7 @@ errado quem não tinha, de facto, errado.
 ## Porque fica, e não se apaga
 
 Uma medição inválida detetada e documentada é evidência de método. Apagá-la
-deixaria só o número, sem a explicação de que ele não vale nada — e um
+deixaria só o número, sem a explicação de que ele não vale nada; e um
 ensaio destes correu, custou tempo de máquina real, e o que se aprendeu com
 ele (`max_tokens` tem de acompanhar o modelo, e um caso sem resposta válida
 não pode entrar em contagem nenhuma) já está no código: a flag `--tokens-max`
@@ -49,7 +49,7 @@ de `executar` e `ensaio`, descrita na secção 9 de `docs/COMO_CORRER.md`.
 - `respostas.jsonl`: as 270 respostas (135 por modelo), exatamente como
   vieram do Ollama.
 - `vereditos.json`: os vereditos que o corretor desta altura produziu contra
-  essas respostas — inválidos pela razão acima, mantidos por completude.
+  essas respostas: inválidos pela razão acima, mantidos por completude.
 - `relatorio.md`: o relatório escrito a partir desses vereditos.
 
 ## O que fazer a seguir
