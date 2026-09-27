@@ -149,9 +149,17 @@ continuam por confirmar por ele nos PDF):
 - A fonte dos casos que coincidem com a norma passou para a DGS: ATB-CIST-003,
   FMT-CIST-017, GRA-CIST-022 e ATB-FAR-013.
 
+- Depois, a pedido do Fábio, os restantes passaram também para a DGS:
+  PED-OMA-019 e 020 só na fonte (commit 97287df); ATB-PAC-011 com as três
+  associações do ponto 4 b) da 045/2011 (commit d8f6598); PED-OMA-021 com os
+  três macrólidos do ponto 10 a) da 007/2012 (commit 64ac607). A tabela "O que
+  isto muda" abaixo dizia que estes dois coincidiam com a norma; coincidiam no
+  que o caso pedia, mas o caso aceitava menos do que a norma aceita.
+- O desempate entre alternativas passou a ser pelo risco mais alto (commit
+  7474f76), depois de se ver que o risco mais baixo escondia uma dose errada.
+
 Continuam em aberto a asma como comorbilidade (ponto 2 abaixo) e os temas sem
-norma (ponto 5). Os casos ATB-PAC-011 e PED-OMA-019, 020 e 021 coincidem com as
-normas e continuam a citar o guia da APMGF.
+norma (ponto 5).
 
 O texto original das decisões fica abaixo, como estava.
 
