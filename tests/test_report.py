@@ -24,8 +24,10 @@ def a_case(case_id: str = "C1") -> Case:
     )
 
 
-def an_answer(text: str, case_id: str = "C1", model: str = "falso") -> Answer:
-    return Answer(case_id=case_id, model=model, text=text, asked_at=datetime(2026, 9, 14))
+def an_answer(text: str, case_id: str = "C1", model: str = "falso", sample: int = 1) -> Answer:
+    return Answer(
+        case_id=case_id, model=model, text=text, asked_at=datetime(2026, 9, 14), sample=sample
+    )
 
 
 def build(cases, answers, **kwargs) -> str:
@@ -105,6 +107,31 @@ class TestMissing(unittest.TestCase):
         )
         self.assertIn("C2", text)
         self.assertNotIn("C2 (", text)
+
+
+class TestMissingSamples(unittest.TestCase):
+    def test_a_partial_case_is_named_with_how_many_samples_came_in(self):
+        # qwen answers C1 three times and C2 five times, so five is what it
+        # was expected to answer everywhere, and C1 is short by two.
+        text = build(
+            [a_case("C1"), a_case("C2")],
+            [an_answer("1 g", case_id="C1", model="qwen", sample=s) for s in (1, 2, 3)]
+            + [an_answer("1 g", case_id="C2", model="qwen", sample=s) for s in (1, 2, 3, 4, 5)],
+        )
+        self.assertIn("Amostras em falta", text)
+        self.assertIn("C1 (qwen, 3 de 5 amostras)", text)
+
+    def test_a_model_missing_a_case_entirely_is_named_too(self):
+        text = build(
+            [a_case("C1"), a_case("C2")],
+            [an_answer("1 g", case_id="C1", model="llama")]
+            + [an_answer("1 g", case_id="C2", model="qwen")],
+        )
+        self.assertIn("C2 (llama, 0 de 1 amostras)", text)
+
+    def test_no_gaps_means_no_section(self):
+        text = build([a_case("C1")], [an_answer("1 g", case_id="C1")])
+        self.assertNotIn("Amostras em falta", text)
 
 
 class TestComparison(unittest.TestCase):

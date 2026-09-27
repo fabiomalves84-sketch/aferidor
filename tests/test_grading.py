@@ -9,8 +9,10 @@ from aferidor.grading import (
     ConsistencyState,
     consistency_by_case,
     consistency_by_model,
+    expected_samples,
     grade,
     grade_all,
+    missing_samples,
     self_check,
     tally,
     tally_by_model,
@@ -122,6 +124,53 @@ class TestGradeAll(unittest.TestCase):
         self.assertEqual(verdicts, [])
         self.assertIn("C9", missing)
         self.assertIn("C1", missing)
+
+
+class TestMissingSamples(unittest.TestCase):
+    def test_a_case_with_fewer_samples_than_expected_is_named(self):
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [
+            an_answer("Amoxicilina 1000 mg", case_id="C1", model="qwen", sample=s)
+            for s in (1, 2)
+        ] + [
+            an_answer("Amoxicilina 1000 mg", case_id="C2", model="qwen", sample=s)
+            for s in (1, 2, 3)
+        ]
+        gaps = missing_samples(cases, answers)
+        self.assertEqual(gaps[("C1", "qwen")], (3,))
+        self.assertNotIn(("C2", "qwen"), gaps)
+
+    def test_a_model_that_never_answered_one_case_is_named_with_every_sample(self):
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [
+            an_answer("Amoxicilina 1000 mg", case_id="C1", model="llama", sample=s)
+            for s in (1, 2)
+        ]
+        gaps = missing_samples(cases, answers)
+        self.assertEqual(gaps[("C2", "llama")], (1, 2))
+
+    def test_a_case_answered_by_one_model_and_not_another_is_not_hidden(self):
+        """The scenario grade_all's plain 'missing' list cannot see: the case
+        has an answer from someone, so it never looks unanswered, even though
+        one model never touched it."""
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [
+            an_answer("Amoxicilina 1000 mg", case_id="C1", model="llama"),
+            an_answer("Amoxicilina 1000 mg", case_id="C2", model="qwen"),
+        ]
+        _, missing = grade_all(cases, answers)
+        gaps = missing_samples(cases, answers)
+        self.assertEqual(missing, [])
+        self.assertIn(("C1", "qwen"), gaps)
+        self.assertIn(("C2", "llama"), gaps)
+
+    def test_expected_samples_is_the_highest_sample_seen_per_model(self):
+        answers = [
+            an_answer("x", case_id="C1", model="llama", sample=1),
+            an_answer("x", case_id="C2", model="llama", sample=5),
+            an_answer("x", case_id="C1", model="qwen", sample=2),
+        ]
+        self.assertEqual(expected_samples(answers), {"llama": 5, "qwen": 2})
 
 
 class TestTally(unittest.TestCase):

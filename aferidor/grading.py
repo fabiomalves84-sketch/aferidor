@@ -264,6 +264,47 @@ def consistency_by_model(
     return result
 
 
+def expected_samples(answers: list[Answer]) -> dict[str, int]:
+    """How many samples each model was actually asked for.
+
+    Read off the data itself, as the highest sample number that model has
+    anywhere in the file, rather than configured separately: it can never
+    drift from what the run really did.
+    """
+    expected: dict[str, int] = {}
+    for answer in answers:
+        expected[answer.model] = max(expected.get(answer.model, 0), answer.sample)
+    return expected
+
+
+def missing_samples(
+    cases: list[Case], answers: list[Answer]
+) -> dict[tuple[str, str], tuple[int, ...]]:
+    """Which sample numbers are missing, for every (case, model) pair.
+
+    A case answered 3 times out of 5 by one model, or answered in full by
+    `llama` and not at all by `qwen`, is invisible to `grade_all`'s plain
+    list of unanswered cases: that list only names a case when every model
+    missed it completely, and both of these have at least one answer from
+    someone. This checks every case against every model that answered
+    anything at all, including a model that has nothing whatsoever for that
+    case, and names exactly which sample numbers never came back.
+    """
+    expected = expected_samples(answers)
+    have: dict[tuple[str, str], set[int]] = {}
+    for answer in answers:
+        have.setdefault((answer.case_id, answer.model), set()).add(answer.sample)
+
+    result: dict[tuple[str, str], tuple[int, ...]] = {}
+    for case in cases:
+        for model, wanted in expected.items():
+            got = have.get((case.case_id, model), set())
+            gaps = tuple(n for n in range(1, wanted + 1) if n not in got)
+            if gaps:
+                result[(case.case_id, model)] = gaps
+    return result
+
+
 def self_check(cases: list[Case]) -> list[tuple[Case, Verdict]]:
     """Grade every case's own reference answer against its own criteria.
 
@@ -301,4 +342,6 @@ __all__ = [
     "consistency_by_case",
     "ConsistencySummary",
     "consistency_by_model",
+    "expected_samples",
+    "missing_samples",
 ]

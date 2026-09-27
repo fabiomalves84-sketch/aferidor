@@ -78,6 +78,19 @@ class TestRun(unittest.TestCase):
         self.assertEqual(sorted(result.errors), ["A", "B"])
         self.assertFalse(result.complete)
 
+    def test_errors_from_different_samples_of_one_case_are_both_kept(self):
+        provider = FakeProvider(failures=99)
+        result = run(
+            [a_case("A")],
+            provider,
+            config=RunConfig(attempts=1),
+            repetitions=2,
+        )
+        self.assertEqual(list(result.errors), ["A"])
+        self.assertIn("amostra 1: falha simulada", result.errors["A"])
+        self.assertIn("amostra 2: falha simulada", result.errors["A"])
+        self.assertIn("; ", result.errors["A"])
+
     def test_a_reply_cut_off_by_the_token_limit_is_not_an_answer(self):
         """`max_tokens` too low is an execution error, not a wrong answer.
 

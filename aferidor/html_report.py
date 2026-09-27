@@ -21,11 +21,13 @@ from .grading import (
     ConsistencySummary,
     consistency_by_case,
     consistency_by_model,
+    expected_samples,
+    missing_samples,
     pairs_by_case,
     tally_by_model,
 )
 from .models import Answer, Case, Verdict
-from .report import HEADER_NOTE, format_missing
+from .report import HEADER_NOTE, format_missing, format_missing_samples
 
 _CELL_CLASS = {
     ConsistencyState.ESTAVEL_CERTO: "ok",
@@ -294,6 +296,15 @@ def build(
             '<div class="aviso"><strong>Casos sem resposta.</strong> '
             + _esc(format_missing(missing, reasons))
             + " Não entram em nenhuma contagem deste relatório.</div>"
+        )
+
+    gaps = missing_samples(cases, answers)
+    if gaps:
+        out.append(
+            '<div class="aviso"><strong>Amostras em falta.</strong> '
+            + _esc(format_missing_samples(gaps, expected_samples(answers)))
+            + " Não muda nenhuma contagem abaixo; só nomeia o que já era "
+            "invisível nelas.</div>"
         )
 
     if not models:

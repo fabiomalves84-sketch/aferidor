@@ -111,6 +111,22 @@ class TestGrid(unittest.TestCase):
         self.assertIn("C2 (resposta truncada no limite de tokens)", text)
 
 
+class TestMissingSamples(unittest.TestCase):
+    def test_a_partial_case_is_named_with_how_many_samples_came_in(self):
+        cases = [a_case("C1"), a_case("C2")]
+        answers = (
+            [an_answer("1 g", case_id="C1", model="qwen", sample=s) for s in (1, 2, 3)]
+            + [an_answer("1 g", case_id="C2", model="qwen", sample=s) for s in range(1, 6)]
+        )
+        text = build(cases, answers)
+        self.assertIn("Amostras em falta", text)
+        self.assertIn("C1 (qwen, 3 de 5 amostras)", text)
+
+    def test_no_gaps_means_no_section(self):
+        text = build([a_case("C1")], [an_answer("1 g", case_id="C1")])
+        self.assertNotIn("Amostras em falta", text)
+
+
 class TestDetail(unittest.TestCase):
     def test_a_failed_case_gets_a_details_block(self):
         text = build([a_case()], [an_answer("500 mg")])

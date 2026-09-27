@@ -23,7 +23,9 @@ from .grading import (
     Tally,
     consistency_by_case,
     consistency_by_model,
+    expected_samples,
     match_answers,
+    missing_samples,
     tally_by_model,
 )
 from .models import Answer, Case, Verdict
@@ -52,6 +54,23 @@ def format_missing(missing: list[str], reasons: dict[str, str] | None = None) ->
     for case_id in sorted(set(missing)):
         reason = reasons.get(case_id)
         parts.append(f"{case_id} ({reason})" if reason else case_id)
+    return ", ".join(parts)
+
+
+def format_missing_samples(
+    gaps: dict[tuple[str, str], tuple[int, ...]], expected: dict[str, int]
+) -> str:
+    """Every (caso, modelo) with fewer samples than that model was actually asked for.
+
+    Shown as how many came in against how many were expected, for example
+    "ATB-PAC-001 (local:qwen3:8b, 3 de 5 amostras)", so a partial case or a
+    model that skipped a case entirely reads the same way as any other gap.
+    """
+    parts = []
+    for case_id, model in sorted(gaps):
+        wanted = expected[model]
+        have = wanted - len(gaps[(case_id, model)])
+        parts.append(f"{case_id} ({model}, {have} de {wanted} amostras)")
     return ", ".join(parts)
 
 
@@ -167,6 +186,16 @@ def build(
         )
         out.append("")
 
+    gaps = missing_samples(cases, answers)
+    if gaps:
+        out.append(
+            "> **Amostras em falta.** "
+            + format_missing_samples(gaps, expected_samples(answers))
+            + ". Não muda nenhuma contagem abaixo; só nomeia o que já era invisível "
+            "nelas."
+        )
+        out.append("")
+
     if not per_model:
         out.append("Não há vereditos para relatar.")
         out.append("")
@@ -233,4 +262,4 @@ def build(
     return "\n".join(out)
 
 
-__all__ = ["build", "format_missing", "HEADER_NOTE"]
+__all__ = ["build", "format_missing", "format_missing_samples", "HEADER_NOTE"]

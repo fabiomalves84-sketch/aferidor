@@ -158,7 +158,9 @@ def run(
             try:
                 reply, latency_ms = _ask_with_retry(provider, build_prompt(case), config)
             except ProviderError as error:
-                result.errors[case.case_id] = str(error)
+                message = f"amostra {sample}: {error}"
+                previous = result.errors.get(case.case_id)
+                result.errors[case.case_id] = f"{previous}; {message}" if previous else message
                 if progress:
                     progress(case, None, f"erro: {error}")
                 continue
