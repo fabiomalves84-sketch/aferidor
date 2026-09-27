@@ -167,6 +167,14 @@ diferentes no mesmo ficheiro. Se um ensaio tiver casos por responder com o
 motivo "resposta truncada no limite de tokens", a resposta é correr de novo
 com um `--tokens-max` maior, do zero.
 
+**Os modelos de raciocínio da OpenAI (`o1`, `o3`, `gpt-5` e semelhantes) só
+aceitam `--temperatura 1.0`.** Recusam qualquer outro valor com um erro 400,
+que não é retentável. Também recusam o parâmetro `max_tokens` que os outros
+fornecedores aceitam; o `OpenAIProvider` já manda `max_completion_tokens` em
+vez disso, mas isto nunca foi confirmado contra a API real, só com pedidos
+HTTP simulados nos testes. Antes de uma execução completa com um destes
+modelos, confirma com `--limite 1`.
+
 ## 10. Ensaio de comparação
 
 O ensaio completo, para uma candidatura ou uma decisão a sério: três modelos,

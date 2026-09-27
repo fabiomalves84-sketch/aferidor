@@ -177,12 +177,20 @@ def _chat_completion(
     max_tokens: int,
     timeout: float,
     who: str,
+    *,
+    tokens_param: str = "max_tokens",
 ) -> Reply:
     """One call to any endpoint that speaks the OpenAI chat completions shape.
 
     OpenAI's own API and Ollama's compatibility layer both take this payload
     and answer with the same `choices[0].message.content` shape, so the two
     providers that talk to them share this instead of each repeating it.
+
+    `tokens_param` is the field name for the token limit: OpenAI's reasoning
+    models (o1, o3, gpt-5, ...) reject `max_tokens` outright and want
+    `max_completion_tokens` instead, while Ollama's compatibility layer only
+    understands `max_tokens`. The caller picks the right one; this function
+    does not guess.
     """
     data = _post_json(
         endpoint,
@@ -190,7 +198,7 @@ def _chat_completion(
         {
             "model": model,
             "temperature": temperature,
-            "max_tokens": max_tokens,
+            tokens_param: max_tokens,
             "messages": [{"role": "user", "content": prompt}],
         },
         timeout,
@@ -234,6 +242,7 @@ class OpenAIProvider(Provider):
             self.max_tokens,
             self.timeout,
             "da OpenAI",
+            tokens_param="max_completion_tokens",
         )
 
     def available_models(self) -> list[str]:

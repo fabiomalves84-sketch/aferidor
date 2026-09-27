@@ -119,6 +119,23 @@ class TestOpenAIReplies(unittest.TestCase):
         with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
             self.assertEqual(provider.ask("p").finish_reason, "unknown")
 
+    def test_the_token_limit_is_sent_as_max_completion_tokens(self):
+        """OpenAI's reasoning models (o1, o3, gpt-5, ...) reject `max_tokens`
+        outright with a 400; `max_completion_tokens` is what they accept."""
+        provider = OpenAIProvider(model="o3", api_key="k", max_tokens=2048)
+        captured = {}
+
+        def fake_urlopen(request, timeout):
+            captured["body"] = json.loads(request.data.decode())
+            return FakeResponse(
+                json.dumps({"choices": [{"message": {"content": "x"}}]}).encode()
+            )
+
+        with mock.patch("aferidor.providers.urllib.request.urlopen", fake_urlopen):
+            provider.ask("p")
+        self.assertEqual(captured["body"]["max_completion_tokens"], 2048)
+        self.assertNotIn("max_tokens", captured["body"])
+
 
 class TestAnthropicReplies(unittest.TestCase):
     def test_text_blocks_are_joined_and_other_blocks_ignored(self):
@@ -178,6 +195,23 @@ class TestLocalReplies(unittest.TestCase):
         with mock.patch("aferidor.providers.urllib.request.urlopen", fake_urlopen):
             provider.ask("p")
         self.assertNotIn("Authorization", captured["headers"])
+
+    def test_the_token_limit_is_still_sent_as_max_tokens(self):
+        """Unlike OpenAI, Ollama's compatibility layer only understands
+        `max_tokens`; it must not switch to `max_completion_tokens`."""
+        provider = LocalProvider(model="llama3", max_tokens=2048)
+        captured = {}
+
+        def fake_urlopen(request, timeout):
+            captured["body"] = json.loads(request.data.decode())
+            return FakeResponse(
+                json.dumps({"choices": [{"message": {"content": "x"}}]}).encode()
+            )
+
+        with mock.patch("aferidor.providers.urllib.request.urlopen", fake_urlopen):
+            provider.ask("p")
+        self.assertEqual(captured["body"]["max_tokens"], 2048)
+        self.assertNotIn("max_completion_tokens", captured["body"])
 
     def test_listing_models_reads_ollamas_own_tags_endpoint(self):
         provider = LocalProvider(model="llama3")
