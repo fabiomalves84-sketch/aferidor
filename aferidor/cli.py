@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import sys
 from pathlib import Path
 
@@ -295,12 +296,25 @@ def comando_relatorio(
         missing=missing,
         reasons=reasons,
         sources_verified=args.fontes_confirmadas,
-        cases_source=(str(args.casos), hashlib.sha256(args.casos.read_bytes()).hexdigest()),
+        cases_source=_cases_source(args.casos),
     )
     saida.parent.mkdir(parents=True, exist_ok=True)
     saida.write_text(text, encoding="utf-8")
     print(f"relatorio em {saida} ({len(text.splitlines())} linhas)")
     return 0
+
+
+def _cases_source(path: Path) -> tuple[str, str]:
+    """The case file as the report names it: path, version when it has one, SHA-256."""
+    raw = path.read_bytes()
+    label = str(path)
+    try:
+        version = json.loads(raw).get("versao")
+    except (AttributeError, ValueError):
+        version = None
+    if version:
+        label += f", versão {version}"
+    return label, hashlib.sha256(raw).hexdigest()
 
 
 def comando_modelos(args: argparse.Namespace) -> int:

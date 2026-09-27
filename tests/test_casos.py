@@ -95,6 +95,16 @@ class TestAnnotatedBank(unittest.TestCase):
         _, uncaught = uncaught_controls(self.cases)
         self.assertEqual([(c.case_id, c.change) for c, _ in uncaught], [])
 
+    def test_every_case_appears_in_the_verification_table_with_an_unmarked_box(self):
+        """The person who confirms the source needs a row to confirm it in. The box
+        is only ever marked by that person, so a test cannot require it marked;
+        it only requires the row to exist."""
+        table = (BANK.parent / "VERIFICACAO.md").read_text(encoding="utf-8")
+        section = table[table.index("## Banco de consulta"):]
+        for item in self.raw["casos"]:
+            with self.subTest(case=item["id"]):
+                self.assertRegex(section, rf"\| {item['id']} \|.*\| \[[ x]\] \|")
+
     def test_every_case_records_a_source_a_type_and_a_verification_date(self):
         for item in self.raw["casos"]:
             with self.subTest(case=item["id"]):

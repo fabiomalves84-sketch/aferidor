@@ -162,6 +162,20 @@ class TestExecutarConditions(unittest.TestCase):
             self.assertEqual(code, 0)
 
 
+class TestRelatorioCasesSource(unittest.TestCase):
+    def test_the_report_names_the_bank_version_and_hash(self):
+        bank = REAL_CASES.parent / "consulta.json"
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            run("executar", "--fornecedor", "falso", "--casos", str(bank), "--limite", "1",
+                "--saida", str(f / "r.jsonl"))
+            run("relatorio", "--casos", str(bank), "--limite", "1",
+                "--respostas", str(f / "r.jsonl"), "--saida", str(f / "r.md"))
+            text = (f / "r.md").read_text(encoding="utf-8")
+        version = json.loads(bank.read_text(encoding="utf-8"))["versao"]
+        self.assertIn(f"consulta.json, versão {version} (SHA-256 ", text)
+
+
 class TestClassificar(unittest.TestCase):
     def test_classifying_without_answers_refuses_instead_of_reporting_zero(self):
         with tempfile.TemporaryDirectory() as folder:

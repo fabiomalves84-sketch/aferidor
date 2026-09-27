@@ -188,7 +188,7 @@ menção como prescrição, que era o comportamento anterior e que marcava como
 errada uma resposta certa por ela acrescentar um aviso. Não é compreensão de
 texto e não se apresenta como tal.
 
-Nenhuma das vinte e sete fontes foi ainda confirmada por uma pessoa. Até isso acontecer,
+Nenhuma das fontes dos dois bancos (27 casos no principal, 30 no de consulta) foi ainda confirmada por uma pessoa. Até isso acontecer,
 qualquer resultado deste banco mede o modelo contra valores transcritos por uma
 ferramenta automática. Ver `casos/VERIFICACAO.md`.
 
@@ -214,7 +214,7 @@ em vigor.
 
 Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 310 testes,
+por tipo de falha e por risco, relatório legível e documentação. 312 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as
