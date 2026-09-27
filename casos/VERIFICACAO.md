@@ -16,9 +16,9 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 
 | Caso | Fonte | Página | Valor a confirmar | 2.ª leitura | Pessoa |
 |---|---|---|---|---|---|
-| ATB-PAC-001 | DGS Norma 045/2011; duração: DGS Norma 006/2014 | 1 (ponto 4 a)); 20 | Amoxicilina 500 mg 8/8h, 3-7 dias (mudou a 27/09: era APMGF, 1000 mg) | não | [ ] |
+| ATB-PAC-001 | DGS Norma 045/2011; duração: DGS Norma 006/2014 | 1 (ponto 4 a)); 20 | Amoxicilina 500 mg 8/8h, 3-7 dias (mudou a 27/09: era APMGF, 1000 mg) | não | [x] |
 | ATB-DPOC-002 | APMGF Guia ATB 1.3 | 19 | Amoxicilina 500 mg 8/8h, 5 dias | bate | [ ] |
-| ATB-CIST-003 | DGS Norma 015/2011 | 6 (Anexo VII) | Nitrofurantoína 100 mg 6/6h 5-7 dias; fosfomicina 3000 mg toma única (mudou a 27/09: era APMGF, 5 dias) | não | [ ] |
+| ATB-CIST-003 | DGS Norma 015/2011 | 6 (Anexo VII) | Nitrofurantoína 100 mg 6/6h 5-7 dias; fosfomicina 3000 mg toma única (mudou a 27/09: era APMGF, 5 dias) | não | [x] |
 | ATB-FAR-004 | APMGF Guia ATB 1.3 | 13 | Azitromicina 500 mg 24/24h, 5 dias, na hipersensibilidade tipo I | bate | [ ] |
 | ATB-FAR-005 | APMGF Guia ATB 1.3 | 13 | Amoxicilina 500 mg 12/12h, 10 dias | bate | [ ] |
 | ATB-PIEL-006 | APMGF Guia ATB 1.3 | 28 | Ceftriaxona 1000 mg toma única, depois cefuroxima 500 mg 12/12h 7 dias | bate | [ ] |
@@ -26,18 +26,18 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 | COV-DEX-008 | DGS Norma 005/2022 | Quadro 3 | Dexametasona 6 mg/dia, 10 dias | bate | [ ] |
 | COV-TOC-009 | DGS Norma 005/2022 | Quadro 3 | Tocilizumab 8 mg/kg, máximo 800 mg | bate | [ ] |
 | COV-JAN-010 | DGS Norma 005/2022 | Ponto 3, alínea c | Antivírico nos primeiros 5 dias de sintomas | bate | [ ] |
-| ATB-PAC-011 | DGS Norma 045/2011; duração: DGS Norma 006/2014 | 1 (ponto 4 b)), 2 (ponto 5); 20 | Amoxicilina 1 g 8/8h 3-7 dias + azitromicina 500 mg/dia 3 dias, ou claritromicina 500 mg 12/12h, ou doxiciclina 200 mg e depois 100 mg 12/12h (mudou a 27/09: era APMGF, só azitromicina) | não | [ ] |
+| ATB-PAC-011 | DGS Norma 045/2011; duração: DGS Norma 006/2014 | 1 (ponto 4 b)), 2 (ponto 5); 20 | Amoxicilina 1 g 8/8h 3-7 dias + azitromicina 500 mg/dia 3 dias, ou claritromicina 500 mg 12/12h, ou doxiciclina 200 mg e depois 100 mg 12/12h (mudou a 27/09: era APMGF, só azitromicina) | não | [x] |
 | ATB-DPOC-012 | APMGF Guia ATB 1.3 | 19 | Amoxicilina + ácido clavulânico 500+125 mg 8/8h, 5 dias | bate | [ ] |
-| ATB-FAR-013 | DGS Norma 020/2012; DGS Norma 006/2014 | 2 (ponto 10 b)); 9 e 20 | Amoxicilina 50 mg/kg/dia, máximo 1000 mg/dia, 12/12h, 10 dias; ou penicilina G benzatínica IM dose única, 50.000 U/kg (600.000 U < 27 kg; 1.200.000 U ≥ 27 kg) (mudou a 27/09: era APMGF, só amoxicilina) | não | [ ] |
+| ATB-FAR-013 | DGS Norma 020/2012; DGS Norma 006/2014 | 2 (ponto 10 b)); 9 e 20 | Amoxicilina 50 mg/kg/dia, máximo 1000 mg/dia, 12/12h, 10 dias; ou penicilina G benzatínica IM dose única, 50.000 U/kg (600.000 U < 27 kg; 1.200.000 U ≥ 27 kg) (mudou a 27/09: era APMGF, só amoxicilina) | não | [x] |
 | ATB-FAR-014 | APMGF Guia ATB 1.3 | 13 | Cefuroxima 250 mg 12/12h, 10 dias, na hipersensibilidade não tipo I | bate | [ ] |
 | INT-CLA-015 | RCM Claritromicina | 4.3 e 4.5 | Claritromicina com sinvastatina ou lovastatina: contraindicado, risco de rabdomiólise | bate | [ ] |
 | INT-COL-016 | RCM Claritromicina | 4.3 e 4.4 | Claritromicina com colquicina: não administrar, toxicidade por colquicina | bate | [ ] |
-| FMT-CIST-017 | DGS Norma 015/2011 | 6 (Anexo VII) | Nitrofurantoína 100 mg 6/6h 5-7 dias (mesma matéria do 003, formato imposto; mudou a 27/09: era APMGF, 5 dias) | não | [ ] |
+| FMT-CIST-017 | DGS Norma 015/2011 | 6 (Anexo VII) | Nitrofurantoína 100 mg 6/6h 5-7 dias (mesma matéria do 003, formato imposto; mudou a 27/09: era APMGF, 5 dias) | não | [x] |
 | AJU-MET-018 | RCM metformina (harmonizado UE) | 4.2 e 4.3 | Metformina: máximo 2000 mg/dia entre 45 e 59 ml/min, 1000 mg/dia entre 30 e 44, contraindicada abaixo de 30 | reescrito a 14/09, **sem 2.ª leitura** | [ ] |
-| PED-OMA-019 | DGS Norma 007/2012 (atualizada 2014) | 2, 3 e 17 (quadro 2) | Criança ≥ 2 anos: amoxicilina 80-90 mg/kg/dia, máx. 3000 mg/dia, 12/12h, 5 dias | não | [ ] |
-| PED-OMA-020 | DGS Norma 007/2012 (atualizada 2014) | 2, 3 e 17 (quadro 2) | Criança < 2 anos: mesma dose, 7 dias (ponto 11 a)) | não | [ ] |
-| PED-OMA-021 | DGS Norma 007/2012 (atualizada 2014) | 2-3 (pontos 10 a) e 11 c)) e 17 (quadro 2) | Hipersensibilidade tipo I: azitromicina 10 mg/kg/dia, máx. 500 mg/dia, 24/24h, 3 dias; ou claritromicina 15 mg/kg/dia, máx. 1 g/dia, 12/12h, 5 dias; ou eritromicina 50 mg/kg/dia, máx. 2 g/dia, 6/6h ou 8/8h, 5 dias; cefuroxima só na não tipo I (mudou a 27/09: era APMGF, só azitromicina) | não | [ ] |
-| GRA-CIST-022 | DGS Norma 015/2011 | 6 (Anexo VII); 2 (critério II a)) | Grávida: fosfomicina 3000 mg toma única; urocultura prévia (fonte mudou a 27/09: era APMGF) | não | [ ] |
+| PED-OMA-019 | DGS Norma 007/2012 (atualizada 2014) | 2, 3 e 17 (quadro 2) | Criança ≥ 2 anos: amoxicilina 80-90 mg/kg/dia, máx. 3000 mg/dia, 12/12h, 5 dias | não | [x] |
+| PED-OMA-020 | DGS Norma 007/2012 (atualizada 2014) | 2, 3 e 17 (quadro 2) | Criança < 2 anos: mesma dose, 7 dias (ponto 11 a)) | não | [x] |
+| PED-OMA-021 | DGS Norma 007/2012 (atualizada 2014) | 2-3 (pontos 10 a) e 11 c)) e 17 (quadro 2) | Hipersensibilidade tipo I: azitromicina 10 mg/kg/dia, máx. 500 mg/dia, 24/24h, 3 dias; ou claritromicina 15 mg/kg/dia, máx. 1 g/dia, 12/12h, 5 dias; ou eritromicina 50 mg/kg/dia, máx. 2 g/dia, 6/6h ou 8/8h, 5 dias; cefuroxima só na não tipo I (mudou a 27/09: era APMGF, só azitromicina) | não | [x] |
+| GRA-CIST-022 | DGS Norma 015/2011 | 6 (Anexo VII); 2 (critério II a)) | Grávida: fosfomicina 3000 mg toma única; urocultura prévia (fonte mudou a 27/09: era APMGF) | não | [x] |
 | GRA-IECA-023 | RCM Ramipril (Infarmed) | 4.3 e 4.6 | IECA contraindicado no 2.º e 3.º trimestres; ecografia se exposição a partir do 2.º | não | [ ] |
 | GRA-VPA-024 | EMA, valproato, art. 31.º, Anexo III | pp. 77-79, 82 | Bipolar: contraindicado na gravidez; idade fértil só com programa de prevenção da gravidez | não | [ ] |
 | AJU-APX-025 | RCM Eliquis (EMA) | 4.2 | FA não valvular: 2,5 mg 2x/dia com ≥ 2 de: ≥ 80 anos, ≤ 60 kg, creatinina ≥ 1,5 mg/dl | não | [ ] |
@@ -51,6 +51,17 @@ releitura saíram da mesma transcrição, e por isso contam como uma leitura só
 transcrição, mas não fecha o assunto: continuam a ser duas máquinas a ler o
 mesmo PDF. A coluna **Pessoa** é a que conta, e é a que ainda está por
 preencher.
+
+### Confirmações registadas
+
+**27/09/2026.** Marcadas as linhas de ATB-PAC-001, ATB-PAC-011, ATB-CIST-003,
+FMT-CIST-017, GRA-CIST-022, PED-OMA-019, PED-OMA-020, PED-OMA-021, ATB-FAR-013
+e PED-08 (banco de consulta). Fontes: Normas DGS 045/2011, 015/2011, 007/2012,
+020/2012 e 006/2014, nos PDF listados em `casos/FONTES_DGS.md`. O Fábio
+confirmou os valores nos PDF, com uma médica presente que também os confirmou.
+**As caixas foram marcadas pelo Claude, a pedido explícito do Fábio**, em
+exceção à regra do `CLAUDE.md` de que só ele as marca. Fica escrito para o
+registo não parecer outra coisa. O nome da médica não ficou registado.
 
 ## Documentos
 
@@ -207,7 +218,7 @@ pode ser o caso que está errado.
 | PED-05 | EMA/CMDh, comunicado EMA/249413/2015, Codeine not to be used in children below 12 years for cough and cold (referral artigo 31) | 24/04/2015 ; medidas adotadas pelo CMDh | primária | em falta | Não. Desde 2015 a EMA contraindica a codeína para tosse e constipação em crianças com menos de 12 anos, pelo risco de depressão respiratória grave em metabolizadores rápidos. A tosse viral aguda é normalmente autolimitada. | [ ] |
 | PED-06 | Manual MSD, Botulismo infantil | **sem versão nem secção** | **secundária** | em falta | Não. O mel não deve ser dado a crianças com menos de 12 meses, porque pode conter esporos de Clostridium botulinum e causar botulismo infantil. | [ ] |
 | PED-07 | Norma DGS 007/2012, Diagnóstico e Tratamento da Otite Média Aguda na Idade Pediátrica; Infarmed, Orientação n.º 18 da Comissão Nacional de Farmácia e Terapêutica | atualizada a 28/10/2014, versão em vigor no portal de normas da DGS (sem revisão posterior encontrada) ; pontos 3 a 6 | primária | em falta | Não é obrigatório. Em crianças com 6 meses ou mais, sem quadro grave, sem otorreia, sem otite recorrente e sem otite bilateral abaixo dos 2 anos, pode optar-se pela observação sem antibiótico imediato, com analgesia e reavaliação às 48-72 horas se os sintomas persistirem ou agravarem. Se for necessário antibiótico, a primeira linha é a amoxicilina. | [ ] |
-| PED-08 | Norma DGS 020/2012, Diagnóstico e Tratamento da Amigdalite Aguda na Idade Pediátrica; Norma DGS 006/2014, Duração de Terapêutica Antibiótica em Patologia Infeciosa, atualizada a 17/11/2022 | 2012; 006/2014 atualizada a 17/11/2022 ; 020/2012 ponto 10; 006/2014 informação complementar U e Anexo II, quadro 1 | primária | em falta | Amoxicilina 50 mg/kg/dia (máximo 1 g/dia), de 12 em 12 horas, durante 10 dias; ou penicilina G benzatínica IM em dose única (600.000 U se peso inferior a 27 kg, 1.200.000 U se 27 kg ou mais). (mudou a 27/09: passou a aceitar a benzatínica) | [ ] |
+| PED-08 | Norma DGS 020/2012, Diagnóstico e Tratamento da Amigdalite Aguda na Idade Pediátrica; Norma DGS 006/2014, Duração de Terapêutica Antibiótica em Patologia Infeciosa, atualizada a 17/11/2022 | 2012; 006/2014 atualizada a 17/11/2022 ; 020/2012 ponto 10; 006/2014 informação complementar U e Anexo II, quadro 1 | primária | em falta | Amoxicilina 50 mg/kg/dia (máximo 1 g/dia), de 12 em 12 horas, durante 10 dias; ou penicilina G benzatínica IM em dose única (600.000 U se peso inferior a 27 kg, 1.200.000 U se 27 kg ou mais). (mudou a 27/09: passou a aceitar a benzatínica) | [x] |
 | PED-09 | NICE CG84, Diarrhoea and vomiting caused by gastroenteritis in under 5s, tabela 1 e secção 1.8 | CG84 (2009) ; tabela 1; 1.3; 1.8 | primária | em falta | Em casa: manter o leite habitual, dar solução de reidratação oral em pequenas quantidades frequentes e evitar sumos e refrigerantes. Deve ser observada com urgência se parecer mais doente, estiver irritável ou prostrada, urinar menos, tiver pele pálida ou marmoreada ou extremidades frias. | [ ] |
 | PED-10 | PNV 2025 (via Lusíadas Saúde, 2026); Norma DGS 018/2020 (PNV 2020) para a estrutura dos esquemas de recurso | PNV 2025, em vigor desde outubro de 2025 ; esquemas vacinais de recurso | **secundária** | em falta | Iniciar de imediato um esquema vacinal de recurso (vacinação em atraso) segundo o PNV em vigor, adequado à idade, dando apenas as doses necessárias e o maior número possível de vacinas na mesma sessão, em locais anatómicos diferentes. | [ ] |
 | TAB-01 | DGS, Programa-tipo de atuação em cessação tabágica (Circular Normativa 26/DSPPS, 2007); algoritmo 5A da Ordem dos Médicos Dentistas | Circular Normativa 26/DSPPS de 28/12/2007 (antiga; verificar se há programa mais recente) ; algoritmo clínico | primária | em falta | Intervenção breve pelo modelo dos 5 A: perguntar sobre o consumo, aconselhar a deixar, avaliar a motivação e o grau de dependência, ajudar com apoio e, se indicado, fármacos, e marcar seguimento ou encaminhar para consulta de cessação tabágica. | [ ] |
