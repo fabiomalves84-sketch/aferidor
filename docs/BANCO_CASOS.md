@@ -4,7 +4,7 @@
 
 Trinta perguntas clínicas em português europeu, do tipo que um médico de família faz a um assistente: consulta de adulto (12), consulta de criança (10) e cessação tabágica (8). Cada caso tem uma resposta de referência, os elementos que uma resposta certa tem de conter, os erros que a tornam perigosa, um nível de risco e a fonte de onde tudo isto vem, com versão, secção e data de verificação.
 
-O ficheiro é `casos_v1.1/aferidor_casos_v1.1.json`. Os critérios que o Aferidor usa para corrigir estão dentro de cada caso.
+O ficheiro é `casos/consulta.json`. Os critérios que o Aferidor usa para corrigir estão dentro de cada caso.
 
 ## Porque é que estes casos
 

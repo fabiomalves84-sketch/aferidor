@@ -25,8 +25,8 @@ jobs:
       - name: Os casos passam nos próprios critérios
         run: python -m aferidor verificar
 
-      - name: Os casos v1.1 passam nos próprios critérios
-        run: python -m aferidor verificar --casos casos_v1.1/aferidor_casos_v1.1.json
+      - name: O banco de consulta passa nos próprios critérios
+        run: python -m aferidor verificar --casos casos/consulta.json
 
       - name: Execução a seco e relatório
         run: |

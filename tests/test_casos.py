@@ -7,7 +7,7 @@ from aferidor.risk import FailureType
 from aferidor.storage import read_cases
 
 CASES = Path(__file__).resolve().parent.parent / "casos" / "casos.json"
-BANK = Path(__file__).resolve().parent.parent / "casos_v1.1" / "aferidor_casos_v1.1.json"
+BANK = Path(__file__).resolve().parent.parent / "casos" / "consulta.json"
 
 
 class TestShippedCases(unittest.TestCase):
