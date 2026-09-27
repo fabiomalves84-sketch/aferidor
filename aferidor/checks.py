@@ -134,6 +134,33 @@ def snippet(haystack: str, position: int, width: int = 60) -> str:
     )
 
 
+# Either a Portuguese thousands-grouped number (one to three leading digits
+# with no leading zero, then one or more groups of a period or space and
+# exactly three digits, then an optional comma decimal) or a plain run of
+# digits with at most one decimal separator. Tried in this order so "1.000"
+# groups as a thousand before falling back to reading the dot as a decimal.
+_NUMBER_TOKEN = r"(?:[1-9]\d{0,2}(?:[.\ ]\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)"
+_THOUSANDS_GROUPED = re.compile(r"([1-9]\d{0,2})((?:[.\ ]\d{3})+)(?:,(\d+))?")
+
+
+def _parse_number(raw: str) -> float:
+    """Read a number written the Portuguese way.
+
+    A period or a space between one to three digits with no leading zero and
+    a group of exactly three digits is a thousands separator, so "1.000" and
+    "1 000" both read as one thousand and "1.000,5" as one thousand and a
+    half. Without that shape - "0.125", or a plain run of digits such as
+    "1000" - a period is read as a decimal point, as before. A comma is
+    always a decimal separator.
+    """
+    grouped = _THOUSANDS_GROUPED.fullmatch(raw)
+    if grouped:
+        integer_part = grouped.group(1) + re.sub(r"[.\ ]", "", grouped.group(2))
+        decimal_part = grouped.group(3)
+        return float(f"{integer_part}.{decimal_part}" if decimal_part else integer_part)
+    return float(raw.replace(",", "."))
+
+
 def _numbers_before(haystack: str, unit: str) -> list[float]:
     """Every number that is written immediately before `unit`.
 
@@ -144,8 +171,8 @@ def _numbers_before(haystack: str, unit: str) -> list[float]:
     """
     normalized_unit = normalize(unit)
     guard = "" if normalized_unit.endswith("/kg") else _FOLLOWED_BY_PER_KG
-    pattern = re.compile(rf"(\d+(?:[.,]\d+)?)\s*{re.escape(normalized_unit)}\b{guard}")
-    return [float(m.group(1).replace(",", ".")) for m in pattern.finditer(haystack)]
+    pattern = re.compile(rf"({_NUMBER_TOKEN})\s*{re.escape(normalized_unit)}\b{guard}")
+    return [_parse_number(m.group(1)) for m in pattern.finditer(haystack)]
 
 
 def check(criterion: Criterion, text: str) -> CriterionResult:
@@ -226,7 +253,12 @@ def _check_not_prescribed(criterion: Criterion, haystack: str) -> CriterionResul
 
 
 def _check_number(criterion: Criterion, haystack: str) -> CriterionResult:
-    """`termos` is (valor, unidade) and optionally (valor, unidade, tolerancia)."""
+    """`termos` is (valor, unidade) and optionally (valor, unidade, tolerancia).
+
+    A criterion asking for `mg` also accepts a value written in `g`,
+    multiplied by 1000: "1 g" is a match for "1000 mg". This only runs in
+    that direction; it is not a general unit conversion.
+    """
     if len(criterion.terms) < 2:
         raise ValueError("valor_numerico precisa de valor e unidade em 'termos'")
     expected = float(criterion.terms[0].replace(",", "."))
@@ -234,6 +266,8 @@ def _check_number(criterion: Criterion, haystack: str) -> CriterionResult:
     tolerance = float(criterion.terms[2].replace(",", ".")) if len(criterion.terms) > 2 else 0.0
 
     seen = _numbers_before(haystack, unit)
+    if normalize(unit) == "mg":
+        seen = seen + [value * 1000 for value in _numbers_before(haystack, "g")]
     if not seen:
         return CriterionResult(criterion, False, f"nenhum valor em {unit}")
     for value in seen:

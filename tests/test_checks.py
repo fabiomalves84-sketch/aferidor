@@ -205,6 +205,21 @@ class TestValorNumerico(unittest.TestCase):
             check(criterion("valor_numerico", "1000", "mg"), "1000 mg/dia").passed
         )
 
+    def test_a_period_as_thousands_separator_is_read_as_one_thousand(self):
+        self.assertTrue(check(criterion("valor_numerico", "1000", "mg"), "1.000 mg").passed)
+
+    def test_a_space_as_thousands_separator_is_read_as_one_thousand(self):
+        self.assertTrue(check(criterion("valor_numerico", "1000", "mg"), "1 000 mg").passed)
+
+    def test_a_value_in_grams_counts_as_the_same_value_in_milligrams_times_1000(self):
+        self.assertTrue(check(criterion("valor_numerico", "1000", "mg"), "1 g").passed)
+        self.assertTrue(check(criterion("valor_numerico", "500", "mg"), "0,5 g").passed)
+
+    def test_a_period_that_is_not_a_thousands_separator_is_still_a_decimal(self):
+        self.assertTrue(
+            check(criterion("valor_numerico", "0,125", "mg"), "0.125 mg").passed
+        )
+
 
 class TestUnknownKind(unittest.TestCase):
     def test_an_unknown_kind_never_gets_past_the_criterion(self):
