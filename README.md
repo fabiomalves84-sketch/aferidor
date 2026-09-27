@@ -3,6 +3,10 @@
 Banco de ensaio para respostas clínicas de modelos de linguagem em português
 europeu. Mede, não aconselha.
 
+**Ver um relatório de exemplo:**
+https://fabiomalves84-sketch.github.io/aferidor/exemplo/ (dois modelos locais,
+27 casos, 5 amostras por caso, ensaio de 16/09/2026).
+
 ## Começar
 
 Precisa de Python 3.10 ou superior e de nada mais: só a biblioteca padrão.

@@ -147,3 +147,21 @@ perguntas que os modelos não leram com respostas que deram a outras, e não
 serve para os comparar com um ensaio novo. Um ensaio novo começa do zero, com
 protocolo escrito antes.
 
+## O banco de casos deste ensaio
+
+`casos.json`, nesta pasta, é o banco tal como estava quando as perguntas foram
+feitas (igual ao do commit 436e536; SHA-256 começa por 8ba3cc612a95). Foi
+guardado a 27/09/2026, depois de os casos mudarem, para que estas respostas
+possam ser sempre corrigidas contra as perguntas que os modelos de facto
+leram. O relatório de exemplo publicado em `docs/exemplo/` é feito assim:
+
+```
+python3 -m aferidor relatorio --formato html \
+  --casos ensaios/2026-09-16-comparacao-local/casos.json \
+  --respostas ensaios/2026-09-16-comparacao-local/respostas.jsonl \
+  --saida docs/exemplo/index.html
+```
+
+Usa o corretor de hoje, e por isso os números não são exatamente os das
+tabelas acima, que são os do corretor de 16/09 e de 27/09.
+
