@@ -26,7 +26,7 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 | COV-DEX-008 | DGS Norma 005/2022 | Quadro 3 | Dexametasona 6 mg/dia, 10 dias | bate | [ ] |
 | COV-TOC-009 | DGS Norma 005/2022 | Quadro 3 | Tocilizumab 8 mg/kg, máximo 800 mg | bate | [ ] |
 | COV-JAN-010 | DGS Norma 005/2022 | Ponto 3, alínea c | Antivírico nos primeiros 5 dias de sintomas | bate | [ ] |
-| ATB-PAC-011 | APMGF Guia ATB 1.3 | 17 | Amoxicilina 1000 mg 8/8h 5-7 dias + azitromicina 500 mg 24/24h 3 dias | bate | [ ] |
+| ATB-PAC-011 | DGS Norma 045/2011; duração: DGS Norma 006/2014 | 1 (ponto 4 b)), 2 (ponto 5); 20 | Amoxicilina 1 g 8/8h 3-7 dias + azitromicina 500 mg/dia 3 dias, ou claritromicina 500 mg 12/12h, ou doxiciclina 200 mg e depois 100 mg 12/12h (mudou a 27/09: era APMGF, só azitromicina) | não | [ ] |
 | ATB-DPOC-012 | APMGF Guia ATB 1.3 | 19 | Amoxicilina + ácido clavulânico 500+125 mg 8/8h, 5 dias | bate | [ ] |
 | ATB-FAR-013 | DGS Norma 020/2012; DGS Norma 006/2014 | 2 (ponto 10 b)); 9 e 20 | Amoxicilina 50 mg/kg/dia, máximo 1000 mg/dia, 12/12h, 10 dias; ou penicilina G benzatínica IM dose única, 50.000 U/kg (600.000 U < 27 kg; 1.200.000 U ≥ 27 kg) (mudou a 27/09: era APMGF, só amoxicilina) | não | [ ] |
 | ATB-FAR-014 | APMGF Guia ATB 1.3 | 13 | Cefuroxima 250 mg 12/12h, 10 dias, na hipersensibilidade não tipo I | bate | [ ] |

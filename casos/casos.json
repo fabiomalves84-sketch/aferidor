@@ -407,23 +407,21 @@
   {
     "id": "ATB-PAC-011",
     "categoria": "dose",
-    "pergunta": "Qual é a antibioterapia de primeira linha para pneumonia adquirida na comunidade não grave, no adulto em ambulatório COM comorbilidades ou fatores de risco? Indique fármacos, doses, intervalos e durações.",
-    "referencia": "Amoxicilina 1000 mg, oral, de 8 em 8 horas, durante 5 a 7 dias, associada a azitromicina 500 mg, oral, de 24 em 24 horas, durante 3 dias.",
+    "pergunta": "Qual é a antibioterapia de primeira linha para pneumonia adquirida na comunidade não grave, tratada em ambulatório, num adulto com comorbilidades ou com antibioterapia nos três meses anteriores? Indique fármacos, doses, intervalos e durações.",
+    "referencia": "Amoxicilina 1000 mg, oral, de 8 em 8 horas, durante 3 a 7 dias, associada a um de três: azitromicina 500 mg, oral, uma vez por dia, durante 3 dias; claritromicina 500 mg, oral, de 12 em 12 horas; ou doxiciclina 200 mg na dose inicial, depois 100 mg de 12 em 12 horas.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 17",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-14"
+      "nome": "DGS",
+      "referencia": "Norma n.º 045/2011 de 26/12/2011, ponto 4 b), p. 1, e ponto 5, p. 2; duração da amoxicilina: Norma n.º 006/2014 atualizada a 17/11/2022, Anexo II, quadro 1, p. 20",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/antibioterapia-na-pneumonia-adquirida-na-comunidade-em-adultos-imunocompetentes.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
       {
-        "tipo": "contem_todos",
+        "tipo": "contem",
         "termos": [
-          "amoxicilina",
-          "azitromicina"
+          "amoxicilina"
         ],
-        "falha": "resposta_incompleta",
-        "descricao": "a associação é o que distingue este doente do doente sem comorbilidades"
+        "falha": "resposta_incompleta"
       },
       {
         "tipo": "contem",
@@ -432,18 +430,81 @@
           "1000mg",
           "1 g"
         ],
-        "falha": "dose_incorreta"
-      },
-      {
-        "tipo": "contem",
-        "termos": [
-          "3 dias"
-        ],
         "falha": "dose_incorreta",
-        "descricao": "a azitromicina é 3 dias, não 5"
+        "descricao": "com comorbilidades a amoxicilina é 1 g, não 500 mg"
       }
     ],
-    "notas": "Par do ATB-PAC-001. Mede se o modelo distingue o doente com comorbilidades do doente sem, em vez de repetir a primeira linha habitual."
+    "notas": "Par do ATB-PAC-001. Mede se o modelo distingue o doente com comorbilidades do doente sem: 1 g de amoxicilina associada a um macrólido ou à doxiciclina, contra 500 mg isolada. Até 27/09/2026 seguia o guia da APMGF e só aceitava a azitromicina; a Norma DGS 045/2011, ponto 4 b), aceita também a claritromicina e a doxiciclina, sem ordem de preferência. As comorbilidades da norma são DPOC, diabetes, doença cardíaca, hepática ou renal crónica, neoplasia, alcoolismo e esplenectomia.",
+    "alternativas": [
+      {
+        "descricao": "amoxicilina com azitromicina",
+        "referencia": "Amoxicilina 1000 mg, oral, de 8 em 8 horas, durante 3 a 7 dias, associada a azitromicina 500 mg, oral, uma vez por dia, durante 3 dias.",
+        "criterios": [
+          {
+            "tipo": "contem",
+            "termos": [
+              "azitromicina"
+            ],
+            "falha": "resposta_incompleta"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "3 dias",
+              "três dias"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "a azitromicina faz 3 dias (Norma 045/2011, ponto 5)"
+          }
+        ]
+      },
+      {
+        "descricao": "amoxicilina com claritromicina",
+        "referencia": "Amoxicilina 1000 mg, oral, de 8 em 8 horas, durante 3 a 7 dias, associada a claritromicina 500 mg, oral, de 12 em 12 horas.",
+        "criterios": [
+          {
+            "tipo": "contem",
+            "termos": [
+              "claritromicina"
+            ],
+            "falha": "resposta_incompleta"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "12/12",
+              "12 em 12",
+              "duas vezes por dia",
+              "2 vezes por dia"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "intervalo da claritromicina"
+          }
+        ]
+      },
+      {
+        "descricao": "amoxicilina com doxiciclina",
+        "referencia": "Amoxicilina 1000 mg, oral, de 8 em 8 horas, durante 3 a 7 dias, associada a doxiciclina 200 mg na dose inicial, depois 100 mg de 12 em 12 horas.",
+        "criterios": [
+          {
+            "tipo": "contem",
+            "termos": [
+              "doxiciclina"
+            ],
+            "falha": "resposta_incompleta"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "200 mg",
+              "200mg"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "dose inicial da doxiciclina"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "ATB-DPOC-012",
