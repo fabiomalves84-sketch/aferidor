@@ -114,10 +114,11 @@ _BARE_NUMBER = re.compile(r"^\d+([.,]\d+)?$")
 # A term ending in a bare mass unit (not already `/kg`) must not be found when
 # what follows in the text is `/kg`: a per-kilo dose is a different quantity
 # from a total dose, and confusing them is the paediatric error the case bank
-# is meant to catch. The lookbehind keeps this from matching the trailing "g"
-# of "kg" itself.
+# is meant to catch. The same goes for a volume after the slash, `/ml` or
+# `/5 ml`: `500 mg/5 ml` is the strength of a suspension, not a dose. The
+# lookbehind keeps this from matching the trailing "g" of "kg" itself.
 _MASS_UNIT_SUFFIX = re.compile(r"(?<![a-z])(mg|mcg|ug|g)$")
-_FOLLOWED_BY_PER_KG = r"(?!\s*/\s*kg\b)"
+_NOT_PER_KG_OR_VOLUME = r"(?!\s*/\s*(?:kg|(?:\d+(?:[.,]\d+)?\s*)?ml)\b)"
 
 
 def normalize(text: str) -> str:
@@ -141,8 +142,9 @@ def _term_pattern(needle: str) -> str:
     out. A term that starts with a digit but is not itself a bare number
     needs the same guard on the leading side: `5 mg` must not match inside
     `2,5 mg` or `25 mg`. A term ending in a bare mass unit (`mg`, `mcg`, `g`)
-    is also not found when it is immediately followed by `/kg`: that is a
-    dose per kilo, a different quantity from the total dose the term names.
+    is also not found when it is immediately followed by `/kg`, a dose per
+    kilo, or by `/ml` or `/5 ml`, a concentration: neither is the total dose
+    the term names.
 
     A term that starts with a letter must start a word: `tid` is not found
     inside `mantida`, nor `sumo` inside `consumo`. Longer terms may still end
@@ -155,7 +157,7 @@ def _term_pattern(needle: str) -> str:
     if _BARE_NUMBER.match(needle):
         return rf"(?<!\d)(?<!\d[.,]){escaped}(?!\d)(?![.,]\d)"
     if needle[0].isdigit():
-        guard = _FOLLOWED_BY_PER_KG if _MASS_UNIT_SUFFIX.search(needle) else ""
+        guard = _NOT_PER_KG_OR_VOLUME if _MASS_UNIT_SUFFIX.search(needle) else ""
         return rf"(?<![\d])(?<![\d][.,]){escaped}{guard}"
     if needle[0].isalpha():
         end = r"s?(?![a-z0-9])" if len(needle) <= 3 and needle.isalpha() else ""
@@ -216,10 +218,12 @@ def _numbers_before(haystack: str, unit: str) -> list[float]:
     When the requested unit is not itself a per-kilo one, a number whose unit
     is followed by `/kg` does not count: `1000 mg/kg/dia` is not a match for
     a criterion asking for `1000 mg`, because it is a per-kilo dose, not a
-    total one. `mg/dia` is unaffected and still counts as `mg`.
+    total one. For the same reason `500 mg/5 ml`, the strength of a
+    suspension, is not a match for `500 mg`. `mg/dia` is unaffected and still
+    counts as `mg`.
     """
     normalized_unit = normalize(unit)
-    guard = "" if normalized_unit.endswith("/kg") else _FOLLOWED_BY_PER_KG
+    guard = "" if normalized_unit.endswith("/kg") else _NOT_PER_KG_OR_VOLUME
     pattern = re.compile(rf"({_NUMBER_TOKEN})\s*{re.escape(normalized_unit)}\b{guard}")
     return [_parse_number(m.group(1)) for m in pattern.finditer(haystack)]
 

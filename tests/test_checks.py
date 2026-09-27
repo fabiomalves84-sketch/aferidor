@@ -65,6 +65,15 @@ class TestFindTerm(unittest.TestCase):
     def test_a_total_dose_term_still_matches_a_daily_total(self):
         self.assertGreaterEqual(find_term(normalize("dar 1000 mg/dia"), "1000 mg"), 0)
 
+    def test_a_total_dose_term_does_not_match_a_concentration(self):
+        self.assertEqual(find_term(normalize("suspensão de 500 mg/5 ml"), "500 mg"), -1)
+        self.assertEqual(find_term(normalize("xarope 40 mg/ml"), "40 mg"), -1)
+        self.assertEqual(find_term(normalize("250 mg / 5ml"), "250 mg"), -1)
+
+    def test_a_dose_next_to_a_concentration_still_matches(self):
+        text = normalize("suspensão 250 mg/5 ml: dar 500 mg de 12/12h")
+        self.assertGreaterEqual(find_term(text, "500 mg"), 0)
+
     def test_a_word_term_does_not_match_in_the_middle_of_another_word(self):
         """Seen in the 16/09 run: two answers to ATB-PAC-001 gave no interval at all
         and passed the interval criterion because `tid` was found in `mantida` and
@@ -234,6 +243,13 @@ class TestValorNumerico(unittest.TestCase):
         self.assertTrue(
             check(criterion("valor_numerico", "1000", "mg"), "1000 mg/dia").passed
         )
+
+    def test_a_total_dose_criterion_does_not_accept_a_concentration(self):
+        result = check(criterion("valor_numerico", "500", "mg"), "suspensão 500 mg/5 ml, 5 ml")
+        self.assertFalse(result.passed)
+
+    def test_a_concentration_criterion_still_accepts_a_concentration(self):
+        self.assertTrue(check(criterion("valor_numerico", "40", "mg/ml"), "xarope 40 mg/ml").passed)
 
     def test_a_period_as_thousands_separator_is_read_as_one_thousand(self):
         self.assertTrue(check(criterion("valor_numerico", "1000", "mg"), "1.000 mg").passed)
