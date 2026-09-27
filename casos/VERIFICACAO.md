@@ -34,8 +34,8 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 | INT-COL-016 | RCM Claritromicina | 4.3 e 4.4 | Claritromicina com colquicina: não administrar, toxicidade por colquicina | bate | [ ] |
 | FMT-CIST-017 | DGS Norma 015/2011 | 6 (Anexo VII) | Nitrofurantoína 100 mg 6/6h 5-7 dias (mesma matéria do 003, formato imposto; mudou a 27/09: era APMGF, 5 dias) | não | [ ] |
 | AJU-MET-018 | RCM metformina (harmonizado UE) | 4.2 e 4.3 | Metformina: máximo 2000 mg/dia entre 45 e 59 ml/min, 1000 mg/dia entre 30 e 44, contraindicada abaixo de 30 | reescrito a 14/09, **sem 2.ª leitura** | [ ] |
-| PED-OMA-019 | APMGF Guia ATB 1.3 | 15 | Criança ≥ 2 anos: amoxicilina 80-90 mg/kg/dia, máx. 3000 mg/dia, 12/12h, 5 dias | não | [ ] |
-| PED-OMA-020 | APMGF Guia ATB 1.3 | 15 | Criança < 2 anos: mesma dose, 7 dias (nota 5) | não | [ ] |
+| PED-OMA-019 | DGS Norma 007/2012 (atualizada 2014) | 2, 3 e 17 (quadro 2) | Criança ≥ 2 anos: amoxicilina 80-90 mg/kg/dia, máx. 3000 mg/dia, 12/12h, 5 dias | não | [ ] |
+| PED-OMA-020 | DGS Norma 007/2012 (atualizada 2014) | 2, 3 e 17 (quadro 2) | Criança < 2 anos: mesma dose, 7 dias (ponto 11 a)) | não | [ ] |
 | PED-OMA-021 | APMGF Guia ATB 1.3 | 15 | Hipersensibilidade tipo I: azitromicina 10 mg/kg/dia, máx. 500 mg/dia, 24/24h, 3 dias; cefuroxima só na não tipo I | não | [ ] |
 | GRA-CIST-022 | DGS Norma 015/2011 | 6 (Anexo VII); 2 (critério II a)) | Grávida: fosfomicina 3000 mg toma única; urocultura prévia (fonte mudou a 27/09: era APMGF) | não | [ ] |
 | GRA-IECA-023 | RCM Ramipril (Infarmed) | 4.3 e 4.6 | IECA contraindicado no 2.º e 3.º trimestres; ecografia se exposição a partir do 2.º | não | [ ] |
@@ -61,6 +61,8 @@ preencher.
   https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/terapeutica-de-infecoes-do-aparelho-urinario-comunidade.pdf
 - DGS, *Norma n.º 020/2012 de 26/12/2012, Diagnóstico e Tratamento da Amigdalite Aguda na Idade Pediátrica*
   https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/diagnostico-e-tratamento-da-amigdalite-aguda-na-idade-pediatrica.pdf
+- DGS, *Norma n.º 007/2012 de 16/12/2012, atualizada a 28/10/2014, Diagnóstico e Tratamento da Otite Média Aguda na Idade Pediátrica*
+  https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/diagnostico-e-tratamento-da-otite-media-aguda-na-idade-pediatrica.pdf
 - DGS, *Norma n.º 006/2014 de 08/05/2014, atualizada a 17/11/2022, Duração de Terapêutica Antibiótica em Patologia Infeciosa*
   https://normas.dgs.min-saude.pt/wp-content/uploads/2014/05/norma_006_2014_atualizada_17_11_2022_duracao_terapeutica_antibiotica_patologia_infeciosa.pdf
 - APMGF, *Guia de Bolso de Antibioterapia em Ambulatório*, edição 1.3, novembro 2025

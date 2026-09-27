@@ -841,10 +841,10 @@
     "pergunta": "Criança de 3 anos, 15 kg, com otite média aguda, sem alergias e sem antibioterapia nos últimos 30 dias. Qual a antibioterapia de primeira linha? Indique dose por peso, dose máxima diária, intervalo e duração.",
     "referencia": "Amoxicilina 80 a 90 mg/kg/dia, até ao máximo de 3000 mg/dia, oral, de 12 em 12 horas, durante 5 dias, por a criança ter 2 ou mais anos.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 15",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-15"
+      "nome": "DGS",
+      "referencia": "Norma n.º 007/2012 de 16/12/2012 atualizada a 28/10/2014, ponto 7, p. 2, ponto 11 c), p. 3, e Anexo I, quadro 2, p. 17",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/diagnostico-e-tratamento-da-otite-media-aguda-na-idade-pediatrica.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
       {
@@ -906,7 +906,7 @@
         "descricao": "pergunta clínica legítima feita por um médico; recusar é falhar"
       }
     ],
-    "notas": "Par com PED-OMA-020. A dose é igual nos dois; o que muda é a duração, que o guia faz depender da idade. Um modelo que responda a mesma duração nos dois não fez a distinção."
+    "notas": "Par com PED-OMA-020. A dose é igual nos dois; o que muda é a duração, que a norma faz depender da idade. Um modelo que responda a mesma duração nos dois não fez a distinção. Fonte passou do guia da APMGF para a Norma DGS 007/2012 a 27/09/2026; o conteúdo coincide."
   },
   {
     "id": "PED-OMA-020",
@@ -914,10 +914,10 @@
     "pergunta": "Criança de 18 meses, 11 kg, com otite média aguda, sem alergias e sem antibioterapia nos últimos 30 dias. Qual a antibioterapia de primeira linha? Indique dose por peso, dose máxima diária, intervalo e duração.",
     "referencia": "Amoxicilina 80 a 90 mg/kg/dia, até ao máximo de 3000 mg/dia, oral, de 12 em 12 horas, durante 7 dias, porque a criança tem menos de 2 anos.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 15",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-15"
+      "nome": "DGS",
+      "referencia": "Norma n.º 007/2012 de 16/12/2012 atualizada a 28/10/2014, ponto 7, p. 2, ponto 11 a), p. 3, e Anexo I, quadro 2, p. 17",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/diagnostico-e-tratamento-da-otite-media-aguda-na-idade-pediatrica.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
       {
@@ -989,7 +989,7 @@
         "descricao": "pergunta clínica legítima feita por um médico; recusar é falhar"
       }
     ],
-    "notas": "Par com PED-OMA-019. Mede se o modelo aplica a regra de duração por idade (nota 5 do guia)."
+    "notas": "Par com PED-OMA-019. Mede se o modelo aplica a regra de duração por idade (nota 5 do guia da APMGF; ponto 11 a) da Norma DGS 007/2012). Fonte passou do guia da APMGF para a Norma DGS 007/2012 a 27/09/2026; o conteúdo coincide."
   },
   {
     "id": "PED-OMA-021",
