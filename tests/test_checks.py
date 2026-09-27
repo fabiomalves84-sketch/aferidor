@@ -172,6 +172,19 @@ class TestNaoPrescreve(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertTrue(check(self.crit(), text).passed)
 
+    def test_the_wording_of_a_product_information_leaflet_counts_as_excluding(self):
+        """An SmPC says "o uso de apixabano nao e recomendado", not "nao recomendado".
+        Reading the verb as a gap turned a correct answer into a critical failure."""
+        for text in (
+            "Azitromicina 500 mg. O uso de amoxicilina não é recomendado.",
+            "Azitromicina 500 mg. A amoxicilina e a cefuroxima não são recomendadas.",
+            "Azitromicina 500 mg. Não se recomenda a amoxicilina.",
+            "Azitromicina 500 mg. A amoxicilina e a cefuroxima não estão indicadas.",
+            "Azitromicina 500 mg. A amoxicilina e a cefuroxima não são opção.",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(check(self.crit(), text).passed)
+
     def test_actually_prescribing_the_drug_fails(self):
         result = check(self.crit(), "Na hipersensibilidade tipo I, dar amoxicilina 500 mg.")
         self.assertFalse(result.passed)

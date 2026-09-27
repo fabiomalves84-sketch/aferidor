@@ -40,7 +40,9 @@ EXCLUSION_MARKERS = (
     "contraindicad", "contra-indicad", "contraindicac",
     "nao usar", "nao administrar", "nao prescrever", "nao dar", "nao utilizar",
     "nao deve", "nao pode ser usad", "nao e opcao", "nao esta indicad",
-    "nao recomendad", "esta excluid", "deve ser evitad", "evitar",
+    "nao recomendad", "nao e recomendad", "nao sao recomendad", "nao se recomenda",
+    "nao estao indicad", "nao sao opcao",
+    "esta excluid", "deve ser evitad", "evitar",
 )
 EXCLUSION_WINDOW = 70
 # Where a sentence ends, for the exclusion window not to reach into the next one.
