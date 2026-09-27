@@ -165,6 +165,18 @@ assim que se encontrou a exclusão numa frase a desculpar a receita na frase
 seguinte. Estes controlos não apanham um termo que aparece por acaso dentro de
 outra palavra de uma resposta real: isso só se vê com respostas reais.
 
+## Português europeu
+
+O banco pede respostas em português europeu, e o relatório mostra, por modelo,
+quantas usam formas do português do Brasil ("você", "equipe", "estar
+fazendo", "crônico") e quantas usam a grafia anterior ao Acordo Ortográfico
+("infecção", "contracepção"). É um indicador à parte, e não um tipo de falha:
+a contagem de falhas críticas só vale enquanto significar risco clínico, e uma
+grafia do Brasil não é uma dose errada. A lista é curta e explícita, está em
+`aferidor/lingua.py`, e deixa de fora de propósito o que Portugal também usa,
+incluindo "antibioticoterapia", que a DGS escreve. Conta por baixo, não por
+cima.
+
 ## Critério de aprovação, escrito antes
 
 Os critérios de cada caso dizem se uma resposta está certa. Não dizem se um
@@ -283,7 +295,7 @@ em vigor.
 
 Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 361 testes,
+por tipo de falha e por risco, relatório legível e documentação. 367 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as 23

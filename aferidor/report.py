@@ -30,6 +30,7 @@ from .grading import (
     tally_by_model,
     wilson_interval,
 )
+from .lingua import language_by_model, language_line
 from .models import Answer, Case, Verdict
 from .protocolo import Outcome, Protocol, evaluate, warnings as protocol_warnings
 from .risk import Risk
@@ -339,6 +340,7 @@ def build(
         )
         out.append("")
 
+    languages = language_by_model(answers)
     for model, counts in per_model.items():
         summary = consistency_per_model[model]
         out.append(f"## {model}")
@@ -359,6 +361,15 @@ def build(
         out.append("### Falhas por tipo")
         out.append("")
         out.extend(_failure_table(counts))
+        out.append("")
+        out.append("### Português europeu")
+        out.append("")
+        out.append(language_line(languages[model]))
+        out.append("")
+        out.append(
+            "Indicador à parte, por uma lista curta de formas que o português europeu atual "
+            "não usa: não entra em nenhuma contagem de falhas, e conta por baixo."
+        )
         out.append("")
         out.append("### Respostas que falharam")
         out.append("")

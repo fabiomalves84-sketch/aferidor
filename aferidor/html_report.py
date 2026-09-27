@@ -26,6 +26,7 @@ from .grading import (
     pairs_by_case,
     tally_by_model,
 )
+from .lingua import language_by_model, language_line
 from .models import Answer, Case, Verdict
 from .protocolo import Protocol
 from .report import (
@@ -363,6 +364,14 @@ def build(
         out.append("</ul></section>")
     out.append(_headline(models, summaries))
     out.append(_grid(cases, models, consistency))
+    languages = language_by_model(answers)
+    out.append('<section class="lingua"><h2>Português europeu</h2><ul>')
+    for model in models:
+        out.append(f"<li><strong>{_esc(model)}</strong>: {_esc(language_line(languages[model]))}</li>")
+    out.append(
+        "</ul><p>Indicador à parte, por uma lista curta de formas que o português europeu "
+        "atual não usa: não entra em nenhuma contagem de falhas, e conta por baixo.</p></section>"
+    )
     out.append(_detail(cases, models, consistency, pairs))
     out.append("</body></html>")
 

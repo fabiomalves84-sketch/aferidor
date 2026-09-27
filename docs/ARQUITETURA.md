@@ -28,6 +28,7 @@ flowchart LR
 | `grading.py` | Produzir vereditos, contagens por risco, consistência entre amostras e os controlos negativos do banco |
 | `report.py` | Escrever o documento em Markdown |
 | `html_report.py` | Escrever o mesmo documento em HTML, num ficheiro só |
+| `lingua.py` | O indicador de português europeu, à parte da correção clínica |
 | `protocolo.py` | O critério de aprovação do sistema, escrito antes do ensaio, e as verificações de que o foi |
 | `revisao.py` | Comparar o corretor com o juízo de uma pessoa, numa folha cega |
 | `cli.py` | Os comandos de terminal |
