@@ -483,6 +483,7 @@ class NegativeControl:
     criterion: Criterion
     change: str
     text: str | None
+    alternative: str = ""
 
 
 def negative_controls(case: Case) -> list[NegativeControl]:
@@ -494,11 +495,15 @@ def negative_controls(case: Case) -> list[NegativeControl]:
     """
     controls: list[NegativeControl] = []
     targets = [(c, case.reference, "") for c in case.criteria] + [
-        (c, a.reference, f"{a.description}: ") for a in case.alternatives for c in a.criteria
+        (c, a.reference, a.description) for a in case.alternatives for c in a.criteria
     ]
-    for criterion, reference, label in targets:
+    for criterion, reference, alternative in targets:
+        label = f"{alternative}: " if alternative else ""
+
         def add(change: str, text: str | None) -> None:
-            controls.append(NegativeControl(case.case_id, criterion, label + change, text))
+            controls.append(
+                NegativeControl(case.case_id, criterion, label + change, text, alternative)
+            )
 
         if criterion.kind == "contem":
             text = reference
@@ -541,6 +546,13 @@ def uncaught_controls(
     included, carries that criterion's failure type. Without this, a
     criterion that can never fail looks exactly like one that never needed
     to.
+
+    A criterion of an alternative is held to a different standard: the wrong
+    answer must not be accepted by any alternative. Its failure type is then
+    the one of whichever regimen the answer came closest to, which can
+    rightly be another alternative's: "amoxicilina, 5 a 7 dias" with the
+    clavulanate taken out reads as plain amoxicillin without its dose, a
+    dose failure, and that verdict is correct.
     """
     total = 0
     uncaught: list[tuple[NegativeControl, Verdict | None]] = []
@@ -559,10 +571,11 @@ def uncaught_controls(
                     asked_at=datetime.now(),
                 ),
             )
-            caught = (
-                not check(control.criterion, control.text).passed
-                and control.criterion.failure in verdict.failures
-            )
+            criterion_failed = not check(control.criterion, control.text).passed
+            if control.alternative:
+                caught = criterion_failed and not verdict.passed
+            else:
+                caught = criterion_failed and control.criterion.failure in verdict.failures
             if not caught:
                 uncaught.append((control, verdict))
     return total, uncaught

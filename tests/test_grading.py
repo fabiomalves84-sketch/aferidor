@@ -563,6 +563,39 @@ class TestAlternatives(unittest.TestCase):
         self.assertEqual(len(benzathine), 3)
         self.assertTrue(all("amoxicilina" not in c.text for c in benzathine))
 
+    def test_a_control_of_an_alternative_is_caught_when_no_regimen_accepts_it(self):
+        """Taking the drug's name out of one regimen can leave an answer that reads
+        closer to the other regimen, with that regimen's failure. It is still a
+        rejected wrong answer, which is what the control has to show."""
+        import dataclasses
+
+        case = a_two_regimen_case()
+        loose = dataclasses.replace(
+            case.alternatives[1],
+            reference="Penicilina G benzatínica 1.200.000 U IM em dose única, 10 dias.",
+        )
+        case = dataclasses.replace(case, alternatives=(case.alternatives[0], loose))
+        total, uncaught = uncaught_controls([case])
+        self.assertEqual(uncaught, [])
+
+    def test_a_control_accepted_through_another_regimen_is_reported(self):
+        """If breaking one regimen leaves an answer another regimen accepts, the
+        criterion proved nothing, and that has to show up."""
+        import dataclasses
+
+        case = a_two_regimen_case()
+        both = dataclasses.replace(
+            case.alternatives[1],
+            reference=(
+                "Penicilina G benzatínica 1.200.000 U IM em dose única; "
+                "ou amoxicilina 50 mg/kg/dia de 12/12h durante 10 dias."
+            ),
+        )
+        case = dataclasses.replace(case, alternatives=(case.alternatives[0], both))
+        _, uncaught = uncaught_controls([case])
+        self.assertTrue(uncaught)
+        self.assertTrue(all(c.alternative for c, _ in uncaught))
+
     def test_a_single_alternative_is_refused(self):
         import dataclasses
 
