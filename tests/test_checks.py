@@ -198,6 +198,35 @@ class TestNaoPrescreve(unittest.TestCase):
         )
         self.assertFalse(check(crit, "Dar cefuroxima 250 mg.").passed)
 
+    def test_an_exclusion_in_the_previous_sentence_does_not_cover_a_prescription(self):
+        """Found in the code review: in type I hypersensitivity, cefuroxime given
+        right after "amoxicilina contraindicada" passed as excluded, and the
+        critical failure vanished from the verdict."""
+        crit = criterion(
+            "nao_prescreve", "cefuroxima", failure=FailureType.CONTRAINDICACAO_OMITIDA
+        )
+        for text in (
+            "A amoxicilina está contraindicada. Em alternativa, cefuroxima 500 mg de 12/12h.",
+            "A amoxicilina está contraindicada.\n\nTratamento: cefuroxima 250 mg.",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(check(crit, text).passed)
+
+    def test_an_unrelated_warning_in_the_next_sentence_does_not_excuse_a_prescription(self):
+        """Once a known limit of the README: "Evitar alcool" used to excuse the drug."""
+        self.assertFalse(check(self.crit(), "Amoxicilina 1000 mg 8/8h. Evitar álcool.").passed)
+
+    def test_a_semicolon_or_a_numbered_list_does_not_end_the_sentence(self):
+        crit = criterion(
+            "nao_prescreve", "cefuroxima", failure=FailureType.CONTRAINDICACAO_OMITIDA
+        )
+        for text in (
+            "A amoxicilina está contraindicada; a cefuroxima também.",
+            "Não usar os seguintes fármacos: 1. amoxicilina 2. cefuroxima",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(check(crit, text).passed)
+
     def test_a_term_inside_another_word_is_not_a_prescription(self):
         crit = criterion("nao_prescreve", "sumo", failure=FailureType.AJUSTE_OMITIDO)
         self.assertTrue(check(crit, "Soro de reidratacao oral; reduzir o consumo de leite.").passed)

@@ -158,19 +158,17 @@ O critério `contem` não lê negações. "Não usar amoxicilina" passa num
 critério `contem amoxicilina`, porque o texto contém a palavra, e o critério
 não sabe que veio depois de um "não".
 
-O critério `nao_prescreve` lê "evitar" dentro da sua janela como exclusão do
-fármaco em causa, mesmo quando a frase se refere a outra coisa. "Amoxicilina
-1000 mg 8/8h. Evitar álcool." passa como se a amoxicilina tivesse sido
-excluída, porque "evitar" está lá perto, e a heurística não sabe do que fala.
-
 O critério `nao_prescreve` distingue receitar um fármaco de o nomear para o
 excluir, e fá-lo com uma heurística: procura uma expressão de exclusão explícita
-a uma distância curta do nome do fármaco. Erra nas duas direções. Dá por excluído
-um fármaco quando a expressão de exclusão ali perto pertence a outro, e dá por
-receitado um fármaco quando a exclusão está escrita de uma forma que a lista não
-contém. É melhor do que tratar toda a menção como prescrição, que era o
-comportamento anterior e que marcava como errada uma resposta certa por ela
-acrescentar um aviso. Não é compreensão de texto e não se apresenta como tal.
+perto do nome do fármaco e na mesma frase. Erra nas duas direções. Dá por
+excluído um fármaco quando a expressão de exclusão da mesma frase pertence a
+outro: "Não usar amoxicilina, dar cefuroxima" passa, porque "não usar" está na
+frase da cefuroxima. E dá por receitado um fármaco quando a exclusão está escrita
+de uma forma que a lista não contém ("não são alternativa"), ou está na frase ao
+lado ("Não usar amoxicilina. Nem a cefuroxima."). É melhor do que tratar toda a
+menção como prescrição, que era o comportamento anterior e que marcava como
+errada uma resposta certa por ela acrescentar um aviso. Não é compreensão de
+texto e não se apresenta como tal.
 
 Nenhuma das vinte e sete fontes foi ainda confirmada por uma pessoa. Até isso acontecer,
 qualquer resultado deste banco mede o modelo contra valores transcritos por uma
@@ -198,7 +196,7 @@ em vigor.
 
 Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 270 testes,
+por tipo de falha e por risco, relatório legível e documentação. 273 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as
