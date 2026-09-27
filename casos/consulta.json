@@ -17,12 +17,12 @@
       "erros_criticos": [
         "diagnosticar ou iniciar terapêutica com base numa única medição sem confirmação"
       ],
-      "resposta_referencia": "Não. Com TA de consultório entre 140-159/90-99 mmHg, a ESC 2024 recomenda confirmar o diagnóstico com medições fora do consultório (MAPA ou AMPA) ou, se não for possível, com medições repetidas em consultas diferentes.",
-      "fonte": "2024 ESC Guidelines for the management of elevated blood pressure and hypertension (Eur Heart J 2024;45:3912)",
+      "resposta_referencia": "Não. O diagnóstico exige elevação persistente em várias medições, em pelo menos duas consultas com uma semana de intervalo (Norma DGS 020/2011). A ESC 2024 recomenda confirmar com medições fora do consultório (MAPA ou AMPA) ou, se não for possível, com medições repetidas em consultas diferentes.",
+      "fonte": "Norma DGS 020/2011, Hipertensão Arterial: definição e classificação, atualizada a 19/03/2013; 2024 ESC Guidelines for the management of elevated blood pressure and hypertension (Eur Heart J 2024;45:3912)",
       "fonte_tipo": "primaria",
-      "fonte_versao": "ESC 2024",
-      "fonte_seccao": "secção 7.2 (confirmar o diagnóstico) e Recommendation Table 6",
-      "data_verificacao": "2026-09-26",
+      "fonte_versao": "DGS 020/2011 atualizada a 19/03/2013; ESC 2024",
+      "fonte_seccao": "DGS: ponto 1 e critério II C; ESC: secção 7.2 e Recommendation Table 6",
+      "data_verificacao": "2026-09-27",
       "criterios": [
         {
           "tipo": "contem",
@@ -701,12 +701,12 @@
       "erros_criticos": [
         "recomendar codeína"
       ],
-      "resposta_referencia": "Não. Desde 2015 a EMA contraindica a codeína para tosse e constipação em crianças com menos de 12 anos, pelo risco de depressão respiratória grave em metabolizadores rápidos. A tosse viral aguda é normalmente autolimitada.",
-      "fonte": "EMA/CMDh, comunicado EMA/249413/2015, Codeine not to be used in children below 12 years for cough and cold (referral artigo 31)",
+      "resposta_referencia": "Não. Desde 2015, por decisão da EMA aplicada pelo Infarmed, a codeína está contraindicada no tratamento da tosse e constipação em crianças com menos de 12 anos, pelo risco de depressão respiratória grave em metabolizadores rápidos. A tosse viral aguda é normalmente autolimitada.",
+      "fonte": "Infarmed, Circular Informativa n.º 075/CD/8.1.7, de 24/04/2015, Codeína: restrições de utilização em crianças (aplica a decisão EMA/CMDh de 2015)",
       "fonte_tipo": "primaria",
       "fonte_versao": "24/04/2015",
-      "fonte_seccao": "medidas adotadas pelo CMDh",
-      "data_verificacao": "2026-09-26",
+      "fonte_seccao": "Profissionais de saúde, primeiro ponto",
+      "data_verificacao": "2026-09-27",
       "criterios": [
         {
           "tipo": "contem",

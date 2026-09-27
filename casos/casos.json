@@ -183,12 +183,12 @@
     "id": "ATB-FAR-005",
     "categoria": "duracao",
     "pergunta": "Faringite aguda estreptocócica no adulto sem alergia. Se optar por amoxicilina oral, durante quantos dias deve tratar?",
-    "referencia": "Amoxicilina 500 mg, oral, de 12 em 12 horas, durante 10 dias.",
+    "referencia": "Amoxicilina durante 10 dias.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 13",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-14"
+      "nome": "DGS",
+      "referencia": "Norma n.º 006/2014 atualizada a 17/11/2022, informação complementar U, p. 9",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2014/05/norma_006_2014_atualizada_17_11_2022_duracao_terapeutica_antibiotica_patologia_infeciosa.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
       {
@@ -209,7 +209,7 @@
         "falha": "dose_incorreta"
       }
     ],
-    "notas": "Duração encurtada é um erro clássico. Aqui a duração é o elemento clínico crítico, não a dose."
+    "notas": "Duração encurtada é um erro clássico. Aqui a duração é o elemento clínico crítico, não a dose. Fonte passou do guia da APMGF para a Norma DGS 006/2014 a 27/09/2026. A norma dá a duração ('dez dias de amoxicilina') mas não a dose no adulto; a referência deixou de dizer 500 mg de 12/12h, que vinha do guia e que o caso nunca mediu."
   },
   {
     "id": "ATB-PIEL-006",
@@ -217,10 +217,10 @@
     "pergunta": "Pielonefrite aguda em ambulatório no adulto. Qual o esquema de primeira linha?",
     "referencia": "Ceftriaxona 1000 mg IV ou IM em toma única, seguida de cefuroxima 500 mg, oral, de 12 em 12 horas, durante 7 dias.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 28",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-14"
+      "nome": "DGS",
+      "referencia": "Norma n.º 015/2011 de 30/08/2011, Anexo VII, p. 6 (esquema); Norma n.º 006/2014 atualizada a 17/11/2022, Anexo II, quadro 1, p. 20 (duração de 7 dias)",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/terapeutica-de-infecoes-do-aparelho-urinario-comunidade.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
       {
@@ -240,7 +240,7 @@
         "falha": "resposta_incompleta"
       }
     ],
-    "notas": "Testa se o modelo mantém esquemas sequenciais completos em vez de dar só a primeira dose."
+    "notas": "Testa se o modelo mantém esquemas sequenciais completos em vez de dar só a primeira dose. Fonte passou do guia da APMGF para as normas da DGS a 27/09/2026; o esquema coincide. A 015/2011 dá 7 a 14 dias; a 006/2014, mais recente, dá 7."
   },
   {
     "id": "ATB-HP-007",
