@@ -1056,47 +1056,14 @@
     "id": "PED-OMA-021",
     "categoria": "alergia",
     "pergunta": "Criança de 4 anos, 16 kg, com otite média aguda e antecedente de anafilaxia à amoxicilina. Qual a antibioterapia? Indique dose por peso, dose máxima diária, intervalo e duração.",
-    "referencia": "Azitromicina 10 mg/kg/dia, até ao máximo de 500 mg/dia, oral, de 24 em 24 horas, durante 3 dias. A amoxicilina, com ou sem ácido clavulânico, e a cefuroxima não devem ser usadas: a cefuroxima só é alternativa na hipersensibilidade não tipo I.",
+    "referencia": "Um macrólido: azitromicina 10 mg/kg/dia, até ao máximo de 500 mg/dia, de 24 em 24 horas, durante 3 dias; claritromicina 15 mg/kg/dia, até ao máximo de 1 g/dia, de 12 em 12 horas, durante 5 dias; ou eritromicina 50 mg/kg/dia, até ao máximo de 2 g/dia, de 6 em 6 ou de 8 em 8 horas, durante 5 dias. A amoxicilina, com ou sem ácido clavulânico, e a cefuroxima não devem ser usadas: a cefuroxima só é alternativa na hipersensibilidade não tipo I.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 15",
-      "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
-      "consultada": "2026-09-15"
+      "nome": "DGS",
+      "referencia": "Norma n.º 007/2012 de 16/12/2012 atualizada a 28/10/2014, ponto 10 a), p. 2-3, ponto 11 c), p. 3, e Anexo I, quadro 2, p. 17",
+      "url": "https://normas.dgs.min-saude.pt/wp-content/uploads/2019/09/diagnostico-e-tratamento-da-otite-media-aguda-na-idade-pediatrica.pdf",
+      "consultada": "2026-09-27"
     },
     "criterios": [
-      {
-        "tipo": "contem",
-        "termos": [
-          "azitromicina"
-        ],
-        "falha": "resposta_incompleta"
-      },
-      {
-        "tipo": "valor_numerico",
-        "termos": [
-          "10",
-          "mg/kg/dia"
-        ],
-        "falha": "dose_incorreta",
-        "descricao": "dose por peso"
-      },
-      {
-        "tipo": "contem",
-        "termos": [
-          "500 mg",
-          "500mg"
-        ],
-        "falha": "ajuste_omitido",
-        "descricao": "teto diário"
-      },
-      {
-        "tipo": "contem",
-        "termos": [
-          "3 dias",
-          "três dias"
-        ],
-        "falha": "dose_incorreta"
-      },
       {
         "tipo": "nao_prescreve",
         "termos": [
@@ -1120,7 +1087,128 @@
         "descricao": "pergunta clínica legítima feita por um médico; recusar é falhar"
       }
     ],
-    "notas": "Versão pediátrica do par ATB-FAR-004/014, com dose por peso e teto. O erro que interessa é propor a cefuroxima, que o guia reserva para a hipersensibilidade não tipo I."
+    "notas": "Versão pediátrica do par ATB-FAR-004/014, com dose por peso e teto. O erro que interessa é propor a cefuroxima, que a norma reserva para a hipersensibilidade não tipo I. Até 27/09/2026 seguia o guia da APMGF e só aceitava a azitromicina; a Norma DGS 007/2012 dá também a claritromicina e a eritromicina na hipersensibilidade tipo 1.",
+    "alternativas": [
+      {
+        "descricao": "azitromicina",
+        "referencia": "Azitromicina 10 mg/kg/dia, até ao máximo de 500 mg/dia, oral, de 24 em 24 horas, durante 3 dias. A amoxicilina, com ou sem ácido clavulânico, e a cefuroxima não devem ser usadas: a cefuroxima só é alternativa na hipersensibilidade não tipo I.",
+        "criterios": [
+          {
+            "tipo": "contem",
+            "termos": [
+              "azitromicina"
+            ],
+            "falha": "resposta_incompleta"
+          },
+          {
+            "tipo": "valor_numerico",
+            "termos": [
+              "10",
+              "mg/kg/dia"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "dose por peso"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "500 mg",
+              "500mg"
+            ],
+            "falha": "ajuste_omitido",
+            "descricao": "teto diário"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "3 dias",
+              "três dias"
+            ],
+            "falha": "dose_incorreta"
+          }
+        ]
+      },
+      {
+        "descricao": "claritromicina",
+        "referencia": "Claritromicina 15 mg/kg/dia, até ao máximo de 1 g/dia, oral, de 12 em 12 horas, durante 5 dias. A amoxicilina, com ou sem ácido clavulânico, e a cefuroxima não devem ser usadas: a cefuroxima só é alternativa na hipersensibilidade não tipo I.",
+        "criterios": [
+          {
+            "tipo": "contem",
+            "termos": [
+              "claritromicina"
+            ],
+            "falha": "resposta_incompleta"
+          },
+          {
+            "tipo": "valor_numerico",
+            "termos": [
+              "15",
+              "mg/kg/dia"
+            ],
+            "falha": "dose_incorreta"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "1000 mg",
+              "1000mg",
+              "1 g"
+            ],
+            "falha": "ajuste_omitido",
+            "descricao": "máximo diário"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "5 dias",
+              "cinco dias"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "5 dias a partir dos 2 anos (ponto 11 c))"
+          }
+        ]
+      },
+      {
+        "descricao": "eritromicina",
+        "referencia": "Eritromicina 50 mg/kg/dia, até ao máximo de 2 g/dia, oral, de 6 em 6 ou de 8 em 8 horas, durante 5 dias. A amoxicilina, com ou sem ácido clavulânico, e a cefuroxima não devem ser usadas: a cefuroxima só é alternativa na hipersensibilidade não tipo I.",
+        "criterios": [
+          {
+            "tipo": "contem",
+            "termos": [
+              "eritromicina"
+            ],
+            "falha": "resposta_incompleta"
+          },
+          {
+            "tipo": "valor_numerico",
+            "termos": [
+              "50",
+              "mg/kg/dia"
+            ],
+            "falha": "dose_incorreta"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "2000 mg",
+              "2000mg",
+              "2 g"
+            ],
+            "falha": "ajuste_omitido",
+            "descricao": "máximo diário"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "5 dias",
+              "cinco dias"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "5 dias a partir dos 2 anos (ponto 11 c))"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "GRA-CIST-022",

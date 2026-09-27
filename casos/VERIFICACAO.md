@@ -36,7 +36,7 @@ ISO 13485 exige antes de qualquer ensaio contar como evidência.
 | AJU-MET-018 | RCM metformina (harmonizado UE) | 4.2 e 4.3 | Metformina: máximo 2000 mg/dia entre 45 e 59 ml/min, 1000 mg/dia entre 30 e 44, contraindicada abaixo de 30 | reescrito a 14/09, **sem 2.ª leitura** | [ ] |
 | PED-OMA-019 | DGS Norma 007/2012 (atualizada 2014) | 2, 3 e 17 (quadro 2) | Criança ≥ 2 anos: amoxicilina 80-90 mg/kg/dia, máx. 3000 mg/dia, 12/12h, 5 dias | não | [ ] |
 | PED-OMA-020 | DGS Norma 007/2012 (atualizada 2014) | 2, 3 e 17 (quadro 2) | Criança < 2 anos: mesma dose, 7 dias (ponto 11 a)) | não | [ ] |
-| PED-OMA-021 | APMGF Guia ATB 1.3 | 15 | Hipersensibilidade tipo I: azitromicina 10 mg/kg/dia, máx. 500 mg/dia, 24/24h, 3 dias; cefuroxima só na não tipo I | não | [ ] |
+| PED-OMA-021 | DGS Norma 007/2012 (atualizada 2014) | 2-3 (pontos 10 a) e 11 c)) e 17 (quadro 2) | Hipersensibilidade tipo I: azitromicina 10 mg/kg/dia, máx. 500 mg/dia, 24/24h, 3 dias; ou claritromicina 15 mg/kg/dia, máx. 1 g/dia, 12/12h, 5 dias; ou eritromicina 50 mg/kg/dia, máx. 2 g/dia, 6/6h ou 8/8h, 5 dias; cefuroxima só na não tipo I (mudou a 27/09: era APMGF, só azitromicina) | não | [ ] |
 | GRA-CIST-022 | DGS Norma 015/2011 | 6 (Anexo VII); 2 (critério II a)) | Grávida: fosfomicina 3000 mg toma única; urocultura prévia (fonte mudou a 27/09: era APMGF) | não | [ ] |
 | GRA-IECA-023 | RCM Ramipril (Infarmed) | 4.3 e 4.6 | IECA contraindicado no 2.º e 3.º trimestres; ecografia se exposição a partir do 2.º | não | [ ] |
 | GRA-VPA-024 | EMA, valproato, art. 31.º, Anexo III | pp. 77-79, 82 | Bipolar: contraindicado na gravidez; idade fértil só com programa de prevenção da gravidez | não | [ ] |
