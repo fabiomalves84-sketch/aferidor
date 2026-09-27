@@ -172,6 +172,34 @@ class TestNumbersMatchMarkdown(unittest.TestCase):
         self.assertIn(f"de {summary.cases} casos com falha crítica em alguma amostra", page)
 
 
+class TestReadableByAnOutsider(unittest.TestCase):
+    """The page has to say what it is before it shows a number."""
+
+    def test_it_opens_by_saying_what_the_aferidor_is_and_how_to_read_it(self):
+        text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
+        self.assertLess(text.index("O que é isto"), text.index('<span class="destaque">'))
+        self.assertIn("Como ler este relatório", text)
+
+    def test_every_section_is_reachable_from_the_index(self):
+        text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
+        for anchor in ("resumo", "grelha", "falhas", "casos-com-falha", "condicoes", "metodo"):
+            with self.subTest(anchor=anchor):
+                self.assertIn(f'href="#{anchor}"', text)
+                self.assertIn(f'id="{anchor}"', text)
+
+    def test_a_state_is_never_shown_by_colour_alone(self):
+        text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
+        self.assertIn("✕ estável errado", text)
+
+    def test_failure_charts_share_one_scale_across_models(self):
+        """Two charts on their own scales make a smaller count look as long as a bigger one."""
+        answers = [an_answer("Amoxicilina 500 mg", model="a"), an_answer("nada", model="b")]
+        extra = [an_answer("Amoxicilina 500 mg", case_id="C2", model="a")]
+        text = build([a_case("C1"), a_case("C2")], answers + extra)
+        self.assertIn("calc(2 / 2 * 100%)", text)
+        self.assertIn("calc(1 / 2 * 100%)", text)
+
+
 class TestEmpty(unittest.TestCase):
     def test_no_verdicts_says_so_instead_of_reporting_zero_percent(self):
         text = html_report.build([a_case()], [], [], today=date(2026, 9, 14))

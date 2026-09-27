@@ -348,6 +348,17 @@ def consistency_by_model(
     return result
 
 
+def states_by_model(
+    consistency: dict[tuple[str, str], Consistency]
+) -> dict[str, dict[ConsistencyState, int]]:
+    """How many cases each model left in each consistency state, every state present."""
+    result: dict[str, dict[ConsistencyState, int]] = {}
+    for (_, model), entry in consistency.items():
+        counts = result.setdefault(model, {state: 0 for state in ConsistencyState})
+        counts[entry.state] += 1
+    return dict(sorted(result.items()))
+
+
 def expected_samples(answers: list[Answer]) -> dict[str, int]:
     """How many samples each model was actually asked for.
 
@@ -618,6 +629,7 @@ __all__ = [
     "consistency_by_case",
     "ConsistencySummary",
     "consistency_by_model",
+    "states_by_model",
     "expected_samples",
     "missing_samples",
     "wilson_interval",
