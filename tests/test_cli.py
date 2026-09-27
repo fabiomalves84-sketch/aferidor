@@ -274,6 +274,40 @@ class TestExecutar(unittest.TestCase):
             _, out, _ = run(*comum)
             self.assertIn("ja existentes", out)
 
+    def test_recomecar_keeps_the_other_models_answers(self):
+        from aferidor.storage import read_answers
+
+        with tempfile.TemporaryDirectory() as folder:
+            saida = Path(folder) / "respostas.jsonl"
+            run("executar", "--fornecedor", "falso", "--modelo", "llama", "--casos",
+                str(REAL_CASES), "--limite", "3", "--saida", str(saida))
+            run("executar", "--fornecedor", "falso", "--modelo", "qwen", "--casos",
+                str(REAL_CASES), "--limite", "3", "--saida", str(saida))
+            run("executar", "--fornecedor", "falso", "--modelo", "qwen", "--casos",
+                str(REAL_CASES), "--limite", "3", "--saida", str(saida), "--recomecar")
+
+            answers = read_answers(saida)
+            by_model: dict[str, int] = {}
+            for answer in answers:
+                by_model[answer.model] = by_model.get(answer.model, 0) + 1
+            self.assertEqual(by_model, {"falso:llama": 3, "falso:qwen": 3})
+
+    def test_recomecar_says_how_many_old_answers_it_discarded(self):
+        with tempfile.TemporaryDirectory() as folder:
+            saida = Path(folder) / "respostas.jsonl"
+            run("executar", "--fornecedor", "falso", "--modelo", "qwen", "--casos",
+                str(REAL_CASES), "--limite", "3", "--saida", str(saida))
+            _, out, _ = run("executar", "--fornecedor", "falso", "--modelo", "qwen", "--casos",
+                             str(REAL_CASES), "--limite", "3", "--saida", str(saida), "--recomecar")
+            self.assertIn("descartadas 3 respostas anteriores de falso:qwen", out)
+
+    def test_recomecar_on_an_empty_file_says_nothing_was_discarded(self):
+        with tempfile.TemporaryDirectory() as folder:
+            saida = Path(folder) / "respostas.jsonl"
+            _, out, _ = run("executar", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                             "--limite", "3", "--saida", str(saida), "--recomecar")
+            self.assertNotIn("descartadas", out)
+
 
 if __name__ == "__main__":
     unittest.main()

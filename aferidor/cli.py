@@ -22,7 +22,7 @@ from .providers import (
     ProviderError,
 )
 from .runner import RunConfig, run
-from .storage import read_answers, read_cases, write_verdicts
+from .storage import read_answers, read_cases, write_answers, write_verdicts
 
 DEFAULT_CASES = Path("casos/casos.json")
 DEFAULT_OUTPUT = Path("data/respostas.jsonl")
@@ -157,6 +157,14 @@ def comando_executar(
         print(f"erro: {error}", file=sys.stderr)
         return 2
 
+    if args.recomecar and args.saida.exists():
+        existing = read_answers(args.saida)
+        kept = [a for a in existing if a.model != provider.name]
+        discarded = len(existing) - len(kept)
+        write_answers(kept, args.saida)
+        if discarded:
+            print(f"--recomecar: descartadas {discarded} respostas anteriores de {provider.name}")
+
     print(f"{len(cases)} casos x {args.repeticoes} amostra(s), modelo {provider.name}")
 
     def progress(case, answer, status) -> None:
@@ -167,17 +175,11 @@ def comando_executar(
     result = run(
         cases,
         provider,
-        path=None if args.recomecar else args.saida,
+        path=args.saida,
         config=RunConfig(attempts=args.tentativas),
         repetitions=args.repeticoes,
         progress=progress,
     )
-
-    if args.recomecar:
-        from .storage import write_answers
-
-        args.saida.parent.mkdir(parents=True, exist_ok=True)
-        write_answers(result.answers, args.saida)
 
     print(result.summary())
     print(f"respostas em {args.saida}")

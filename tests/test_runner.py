@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from aferidor.models import Case, Criterion, Source
-from aferidor.providers import FakeProvider, Provider, ProviderError
+from aferidor.providers import FakeProvider, Provider, ProviderError, Reply
 from aferidor.risk import FailureType
 from aferidor.runner import RunConfig, build_prompt, run
 from aferidor.storage import read_answers
@@ -128,7 +128,36 @@ class TestRun(unittest.TestCase):
         self.assertEqual(provider.calls, 1)
 
 
+class _CrashesAfter(Provider):
+    """Answers normally, then dies without ever raising `ProviderError`.
+
+    Stands in for the process being killed mid-run (out of memory, machine
+    reboot): nothing here catches this, so it is the same as `run` itself
+    stopping abruptly, which is exactly what `--recomecar` needs to survive.
+    """
+
+    name = "crasha"
+
+    def __init__(self, survives: int) -> None:
+        self.survives = survives
+        self.calls = 0
+
+    def ask(self, prompt: str) -> Reply:
+        self.calls += 1
+        if self.calls > self.survives:
+            raise RuntimeError("morreu a meio")
+        return Reply(text="Amoxicilina 1000 mg")
+
+
 class TestResume(unittest.TestCase):
+    def test_an_interrupted_run_leaves_on_disk_what_it_already_had(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            provider = _CrashesAfter(survives=2)
+            with self.assertRaises(RuntimeError):
+                run([a_case("A"), a_case("B"), a_case("C")], provider, path=path)
+            self.assertEqual([an.case_id for an in read_answers(path)], ["A", "B"])
+
     def test_answers_are_written_as_they_arrive(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "sub" / "respostas.jsonl"
