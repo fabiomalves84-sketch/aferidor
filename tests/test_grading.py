@@ -382,6 +382,23 @@ def a_wide_case(tolerance: str) -> Case:
     )
 
 
+class TestDuplicates(unittest.TestCase):
+    def test_the_same_sample_twice_is_refused_and_named(self):
+        answers = [an_answer("Amoxicilina 1000 mg"), an_answer("Amoxicilina 1000 mg")]
+        with self.assertRaises(ValueError) as raised:
+            grade_all([a_case()], answers)
+        self.assertIn("C1 (falso, amostra 1)", str(raised.exception))
+
+    def test_different_samples_or_models_are_not_duplicates(self):
+        answers = [
+            an_answer("x", sample=1),
+            an_answer("x", sample=2),
+            an_answer("x", sample=1, model="outro"),
+        ]
+        verdicts, _ = grade_all([a_case()], answers)
+        self.assertEqual(len(verdicts), 3)
+
+
 class TestNegativeControls(unittest.TestCase):
     """self_check shows the right answer passes; these show a wrong one fails."""
 

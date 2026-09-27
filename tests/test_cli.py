@@ -159,6 +159,24 @@ class TestClassificar(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertIn("nao ha respostas", err)
 
+    def test_a_file_with_the_same_sample_twice_is_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            run(
+                "executar", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                "--limite", "1", "--saida", str(f / "respostas.jsonl"),
+            )
+            line = (f / "respostas.jsonl").read_text(encoding="utf-8")
+            (f / "respostas.jsonl").write_text(line + line, encoding="utf-8")
+            for comando, saida in (("classificar", "v.json"), ("relatorio", "r.md")):
+                with self.subTest(comando=comando):
+                    code, _, err = run(
+                        comando, "--casos", str(REAL_CASES), "--limite", "1",
+                        "--respostas", str(f / "respostas.jsonl"), "--saida", str(f / saida),
+                    )
+                    self.assertEqual(code, 2)
+                    self.assertIn("amostras repetidas", err)
+
     def test_with_a_limit_matching_the_run_nothing_is_missing(self):
         with tempfile.TemporaryDirectory() as folder:
             f = Path(folder)

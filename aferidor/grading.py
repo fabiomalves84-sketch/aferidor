@@ -74,7 +74,16 @@ def grade_all(cases: list[Case], answers: list[Answer]) -> tuple[list[Verdict], 
 
     The unanswered list is returned rather than ignored: a score computed over
     the cases that happened to come back is a score for a set nobody chose.
+
+    The same (case, model, sample) twice in the file is refused outright. Two
+    processes writing to the same file, or one file appended onto another,
+    would otherwise count one answer twice and every rate after it would be
+    computed over answers nobody asked for.
     """
+    duplicates = duplicate_samples(answers)
+    if duplicates:
+        named = ", ".join(f"{c} ({m}, amostra {s})" for c, m, s in duplicates)
+        raise ValueError(f"amostras repetidas no ficheiro de respostas: {named}")
     by_id = {c.case_id: c for c in cases}
     verdicts: list[Verdict] = []
     unknown: list[str] = []
@@ -89,6 +98,18 @@ def grade_all(cases: list[Case], answers: list[Answer]) -> tuple[list[Verdict], 
     answered = {a.case_id for a in answers}
     missing = [c.case_id for c in cases if c.case_id not in answered]
     return verdicts, missing + unknown
+
+
+def duplicate_samples(answers: list[Answer]) -> list[tuple[str, str, int]]:
+    """Every (case, model, sample) that appears more than once, in file order."""
+    seen: set[tuple[str, str, int]] = set()
+    repeated: list[tuple[str, str, int]] = []
+    for answer in answers:
+        key = (answer.case_id, answer.model, answer.sample)
+        if key in seen and key not in repeated:
+            repeated.append(key)
+        seen.add(key)
+    return repeated
 
 
 @dataclass
@@ -446,6 +467,7 @@ def uncaught_controls(
 __all__ = [
     "grade",
     "grade_all",
+    "duplicate_samples",
     "tally",
     "tally_by_model",
     "self_check",

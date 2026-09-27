@@ -199,7 +199,11 @@ def comando_classificar(args: argparse.Namespace) -> int:
         return 2
 
     answers = read_answers(args.respostas)
-    verdicts, missing = grade_all(cases, answers)
+    try:
+        verdicts, missing = grade_all(cases, answers)
+    except ValueError as error:
+        print(f"erro: {error}", file=sys.stderr)
+        return 2
 
     args.saida.parent.mkdir(parents=True, exist_ok=True)
     write_verdicts(verdicts, args.saida)
@@ -262,7 +266,11 @@ def comando_relatorio(
         return 2
 
     answers = read_answers(args.respostas)
-    verdicts, missing = grade_all(cases, answers)
+    try:
+        verdicts, missing = grade_all(cases, answers)
+    except ValueError as error:
+        print(f"erro: {error}", file=sys.stderr)
+        return 2
     formato = getattr(args, "formato", "md")
 
     saida = args.saida
