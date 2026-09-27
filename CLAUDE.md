@@ -9,7 +9,7 @@ Um banco de ensaio que mede respostas clínicas de modelos de linguagem em
 português europeu contra casos de referência com fonte pública. Mede, não
 aconselha. Não é dispositivo médico e não contém dados de doentes.
 
-Lê o `README.md` e o `docs/ARQUITETURA.md` antes de mexer em código. As
+Lê o `README.md`, o `docs/METODO.md` e o `docs/ARQUITETURA.md` antes de mexer em código. As
 fronteiras entre módulos existem por razões escritas, não por acaso.
 
 ## Língua

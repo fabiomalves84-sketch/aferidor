@@ -77,7 +77,7 @@ E o que falta, dito com a mesma clareza:
 - **A correção é textual.** Numa só revisão apareceram oito erros do corretor,
   todos corrigidos e fixados em testes; cada ensaio real vai trazer mais. A
   distinção entre receitar um fármaco e o nomear para o excluir é heurística, e
-  o README diz onde erra.
+  `docs/METODO.md` diz onde erra.
 
 Estas linhas estão aqui de propósito. Um instrumento de medida que esconde os
 seus próprios limites não serve como instrumento de medida.
