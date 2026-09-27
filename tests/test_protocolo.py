@@ -108,7 +108,7 @@ class TestReports(unittest.TestCase):
         self.assertIn("## Critério de aprovação", text)
         self.assertIn("**reprovado**", text)
         self.assertIn("não conta como critério", text)
-        self.assertIn("falso: reprovado", page)
+        self.assertIn("Fornecedor de teste: reprovado", page)
         self.assertIn("não conta como critério", page)
 
 

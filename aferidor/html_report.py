@@ -20,6 +20,7 @@ icon and a written label: a state is never shown by colour alone.
 from __future__ import annotations
 
 import html as _html
+import re
 from datetime import date
 
 from .grading import (
@@ -87,6 +88,97 @@ def _plural(n: int, one: str, many: str) -> str:
     return f"{n} {one if n == 1 else many}"
 
 
+# Model families this report knows how to name, and who makes them. A model
+# outside this list is shown by its identifier, never guessed at.
+_FAMILIES = {
+    "llama": ("Llama", "Meta"),
+    "qwen": ("Qwen", "Alibaba"),
+    "mistral": ("Mistral", "Mistral AI"),
+    "mixtral": ("Mixtral", "Mistral AI"),
+    "gemma": ("Gemma", "Google"),
+    "phi": ("Phi", "Microsoft"),
+    "deepseek": ("DeepSeek", "DeepSeek"),
+    "gpt": ("GPT", "OpenAI"),
+    "claude": ("Claude", "Anthropic"),
+}
+_HOW = {
+    "local": "corrido localmente, pelo Ollama",
+    "openai": "pela API da OpenAI",
+    "anthropic": "pela API da Anthropic",
+}
+
+
+def model_label(model_id: str) -> tuple[str, str]:
+    """A readable name and a one-line description for a model identifier.
+
+    "local:llama3.1:8b" reads as ("Llama 3.1", "Meta · 8 mil milhões de
+    parâmetros · corrido localmente, pelo Ollama"). The identifier itself is
+    always shown next to it, small, so the name never replaces what was
+    actually run.
+    """
+    provider, _, rest = model_id.partition(":")
+    if provider not in _HOW and provider != "falso":
+        provider, rest = "", model_id
+    if provider == "falso":
+        return "Fornecedor de teste", "respostas fixas, sem modelo real (ensaio a seco)"
+    base, _, tag = rest.partition(":")
+    details: list[str] = []
+    name = base or model_id
+    match = re.match(r"([a-z]+)[-_]?(.*)$", base.lower())
+    if match and match.group(1) in _FAMILIES:
+        family, maker = _FAMILIES[match.group(1)]
+        words: list[str] = []
+        for token in match.group(2).replace("-", " ").split():
+            if token.isdigit() and words and words[-1].replace(".", "").isdigit():
+                words[-1] += "." + token
+            else:
+                words.append(token.capitalize() if token.isalpha() else token)
+        version = " ".join(words)
+        name = f"{family}-{version}" if family == "GPT" and version else f"{family} {version}".strip()
+        details.append(maker)
+    size = re.match(r"(\d+(?:\.\d+)?)b\b", tag.lower())
+    if size:
+        amount = size.group(1).replace(".", ",")
+        details.append(f"{amount} mil milhões de parâmetros")
+    elif tag:
+        details.append(tag)
+    if provider in _HOW:
+        details.append(_HOW[provider])
+    return name, " · ".join(details)
+
+
+def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo") -> str:
+    name, description = model_label(model_id)
+    sub = f'<span class="modelo-desc">{_esc(description)}</span>' if description else ""
+    return (
+        f'<div class="{css}"><{tag} class="modelo-nome">{_esc(name)}</{tag}>{sub}'
+        f'<code class="modelo-id">{_esc(model_id)}</code></div>'
+    )
+
+
+def _model_short(model_id: str) -> str:
+    return model_label(model_id)[0]
+
+
+_EVIDENCE = (
+    ("nenhum de: ", "Não encontrou nenhum destes termos: "),
+    ("faltou: ", "Faltou: "),
+    ("encontrou ", "Encontrou o que não devia aparecer: "),
+    ("prescreve ", "Receita o que o caso exclui: "),
+    ("nenhum valor em ", "Não indica nenhum valor em "),
+    ("esperava ", "Esperava "),
+)
+
+
+def _evidence(text: str) -> str:
+    """The grader's evidence as a sentence; the quoted text itself is left as it is."""
+    for prefix, sentence in _EVIDENCE:
+        if text.startswith(prefix):
+            text = sentence + text[len(prefix):]
+            break
+    return text.replace(" em: ", " no trecho: ")
+
+
 def _grouped_cases(cases: list[Case]) -> list[tuple[str, list[Case]]]:
     """Cases in their original order, bucketed by category on first sight."""
     order: list[str] = []
@@ -136,9 +228,11 @@ def _intro(cases: list[Case], models: list[str], answers: list[Answer]) -> str:
     erro comete quando erra.</p>
     <p>Cada pergunta tem uma resposta de referência com fonte pública (normas da DGS,
     Infarmed, diretrizes europeias) e critérios de aceitação escritos antes do ensaio.
-    Cada resposta do modelo é corrigida de forma automática e determinista, e cada falha
-    é classificada pelo risco clínico que carrega. Uma média de respostas certas esconde
-    o que importa; por isso este relatório começa pelos erros graves.</p>
+    A mesma pergunta é feita várias vezes a cada modelo, porque um modelo não responde
+    sempre igual: cada uma dessas respostas é uma <em>amostra</em>. Cada amostra é
+    corrigida de forma automática e determinista, e cada falha é classificada pelo risco
+    clínico que carrega. Uma média de respostas certas esconde o que importa; por isso
+    este relatório começa pelos erros graves.</p>
     <ul class="factos">{fact_items}</ul>
   </div>
   <ol class="como-ler" aria-label="Como ler este relatório">
@@ -203,7 +297,7 @@ def _state_bar(model: str, counts: dict[ConsistencyState, int], total: int) -> s
             )
     description = ", ".join(f"{counts.get(s, 0)} {s.label}" for s in _STATE_ORDER)
     return (
-        f'<div class="barra" role="img" aria-label="{_esc(model)}: {_esc(description)}, '
+        f'<div class="barra" role="img" aria-label="{_esc(_model_short(model))}: {_esc(description)}, '
         f'em {total} casos">{"".join(segments)}</div>'
         f'<ul class="legenda-estados">{"".join(legend)}</ul>'
     )
@@ -226,12 +320,12 @@ def _model_card(
         )
     return f"""
 <article class="cartao-modelo">
-  <header><h3 class="modelo">{_esc(model)}</h3>{badge}</header>
+  <header>{_model_heading(model)}{badge}</header>
   <p class="numero-principal"><span class="destaque">{summary.critical_cases}</span><span class="legenda">de {summary.cases} casos com falha crítica em alguma amostra ({_esc(interval_text(summary.critical_cases, summary.cases))})</span></p>
   {_state_bar(model, states, summary.cases)}
   <dl class="metricas">
     <div><dt>Casos instáveis</dt><dd>{summary.unstable_cases} de {summary.cases}</dd></div>
-    <div><dt>Amostras certas</dt><dd>{tally.passed} de {tally.total} ({_esc(interval_text(tally.passed, tally.total))})</dd></div>
+    <div><dt>Respostas certas</dt><dd>{tally.passed} de {tally.total} ({_esc(interval_text(tally.passed, tally.total))})</dd></div>
   </dl>
   <p class="lingua-linha"><strong>Português europeu:</strong> {language.brazilian} de {language.answers} respostas com formas do Brasil, {language.pre_agreement} com grafia anterior ao Acordo.</p>
 </article>"""
@@ -246,15 +340,15 @@ def _failure_chart(model: str, tally: Tally, top: int) -> str:
     rows = tally.worst_first()
     if not rows:
         return (
-            f'<div class="falhas-modelo"><h3>{_esc(model)}</h3>'
+            f'<div class="falhas-modelo">{_model_heading(model)}'
             "<p>Nenhuma falha registada.</p></div>"
         )
-    out = [f'<div class="falhas-modelo"><h3>{_esc(model)}</h3><ul class="barras-falhas">']
+    out = [f'<div class="falhas-modelo">{_model_heading(model)}<ul class="barras-falhas">']
     for failure, n in rows:
         risk = failure.risk
         out.append(
             f'<li><span class="rotulo">{_esc(_FAILURE_LABEL[failure])}'
-            f'<span class="sub">{_esc(failure.value)} · risco {_RISK_LABEL[risk]}</span></span>'
+            f'<span class="sub">risco {_RISK_LABEL[risk]}</span></span>'
             f'<span class="pista"><span class="fill {_RISK_CLASS[risk]}" '
             f'style="flex-basis:calc({n} / {top} * 100%)" '
             f'title="{_esc(_FAILURE_LABEL[failure])}: {n} respostas"></span></span>'
@@ -282,7 +376,7 @@ def _cell(entry: Consistency | None) -> tuple[str, str]:
     label = f'<span class="ic" aria-hidden="true">{icon}</span> {_esc(entry.state.label)}'
     if entry.state is ConsistencyState.ESTAVEL_CERTO:
         return css, label
-    failure = _esc(entry.worst_failure.value) if entry.worst_failure else ""
+    failure = _esc(_FAILURE_LABEL[entry.worst_failure]) if entry.worst_failure else ""
     detail = (
         f" · {entry.passed} de {entry.samples} certas"
         if entry.state is ConsistencyState.INSTAVEL else ""
@@ -296,7 +390,7 @@ def _grid(
     out = ['<div class="grade-wrap"><table class="grade">']
     out.append(
         '<thead><tr><th scope="col">Caso</th>'
-        + "".join(f'<th scope="col">{_esc(model)}</th>' for model in models)
+        + "".join(f'<th scope="col">{_model_heading(model, "span", "cabecalho-modelo")}</th>' for model in models)
         + "</tr></thead>"
     )
     out.append("<tbody>")
@@ -345,7 +439,7 @@ def _sample_block(answer: Answer, verdict: Verdict) -> str:
         if not result.passed:
             out.append(
                 f"<li>{_risk_chip(result.criterion.failure)}"
-                f'<span class="evidencia">{_esc(result.evidence)}</span></li>'
+                f'<span class="evidencia">{_esc(_evidence(result.evidence))}</span></li>'
             )
     out.append("</ul></div>")
     return "".join(out)
@@ -362,7 +456,7 @@ def _detail(
         '<p class="seccao-intro">Cada caso abre para mostrar a pergunta, a resposta de '
         "referência com a fonte, e cada resposta diferente que o modelo deu, com o critério "
         "que falhou e a evidência que o corretor viu. Os círculos à direita dão o estado do "
-        f"caso em cada modelo, por esta ordem: {_esc(', '.join(models))}.</p>",
+        f"caso em cada modelo, por esta ordem: {_esc(', '.join(_model_short(m) for m in models))}.</p>",
     ]
     any_case = False
     for case in cases:
@@ -382,7 +476,7 @@ def _detail(
                 continue
             css, icon = _STATE_STYLE[entry.state]
             minis.append(
-                f'<span class="mini {css}" title="{_esc(model)}: {_esc(entry.state.label)}">{icon}</span>'
+                f'<span class="mini {css}" title="{_esc(_model_short(model))}: {_esc(entry.state.label)}">{icon}</span>'
             )
         out.append("<details>")
         out.append(
@@ -402,7 +496,7 @@ def _detail(
             entry = consistency[(case.case_id, model)]
             css, icon = _STATE_STYLE[entry.state]
             out.append(
-                f'<h4><span class="mini {css}" aria-hidden="true">{icon}</span> {_esc(model)} '
+                f'<h4><span class="mini {css}" aria-hidden="true">{icon}</span> {_esc(_model_short(model))} '
                 f'<span class="h4-sub">{_esc(entry.state.label)}, {entry.passed} de '
                 f"{entry.samples} amostras certas</span></h4>"
             )
@@ -484,8 +578,12 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .seccao-intro { color: var(--ink-2); max-width: 48rem; }
 .cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; }
 .cartao-modelo { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
-.cartao-modelo header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; }
-.modelo { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.95rem; word-break: break-all; }
+.cartao-modelo header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.5rem; min-height: 6.5rem; }
+.modelo-nome { font-size: 1.15rem; font-weight: 650; display: block; }
+.modelo-desc { display: block; color: var(--ink-2); font-size: 0.85rem; margin-top: 0.1rem; }
+.modelo-id { display: inline-block; margin-top: 0.3rem; font-size: 0.72rem; color: var(--muted); background: none; padding: 0; }
+.cabecalho-modelo .modelo-nome { font-size: 0.95rem; }
+.cabecalho-modelo .modelo-desc { font-weight: 400; font-size: 0.76rem; }
 .selo { font-size: 0.8rem; font-weight: 600; border-radius: 999px; padding: 0.15rem 0.6rem; }
 .selo.aprovado { background: var(--good-bg); color: var(--success-text); }
 .selo.reprovado { background: var(--critical-bg); color: var(--ink); }
@@ -511,7 +609,7 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .protocolo ul { padding-left: 1.2rem; margin-bottom: 0; }
 .falhas-grelha { display: grid; grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); gap: 1rem; }
 .falhas-modelo { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
-.falhas-modelo h3 { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92rem; margin-bottom: 0.75rem; }
+.falhas-modelo .modelo { margin-bottom: 0.9rem; }
 .barras-falhas { list-style: none; margin: 0; padding: 0; }
 .barras-falhas li { display: grid; grid-template-columns: 14rem 1fr 2.5rem; align-items: center; gap: 0.6rem; padding: 0.3rem 0; }
 .rotulo { font-size: 0.88rem; line-height: 1.25; }
@@ -524,7 +622,7 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .grade-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
 table.grade { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
 table.grade th, table.grade td { border-bottom: 1px solid var(--grid); padding: 0.55rem 0.75rem; text-align: left; vertical-align: top; }
-table.grade thead th { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; color: var(--ink-2); background: var(--surface); }
+table.grade thead th { font-size: 0.82rem; color: var(--ink); background: var(--surface); min-width: 12rem; }
 table.grade tbody th { font-weight: 400; min-width: 16rem; max-width: 30rem; }
 .caso-id { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; font-weight: 600; }
 .caso-pergunta { display: block; color: var(--ink-2); font-size: 0.82rem; line-height: 1.35; margin-top: 0.15rem; }
@@ -534,7 +632,7 @@ td.cel.ok { background: var(--good-bg); }
 td.cel.erro { background: var(--critical-bg); }
 td.cel.instavel { background: var(--warning-bg); }
 td.cel.sem-resposta { background: var(--neutral-bg); color: var(--ink-2); }
-.cel-falha { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.76rem; color: var(--ink-2); }
+.cel-falha { font-size: 0.8rem; color: var(--ink-2); }
 .ic { font-weight: 700; }
 td.cel.ok .ic { color: var(--success-text); }
 td.cel.erro .ic { color: var(--critical); }
@@ -549,7 +647,7 @@ td.cel.erro .ic { color: var(--critical); }
 .detalhe-corpo { padding: 0.9rem 1rem 1rem; border-top: 1px solid var(--grid); }
 .referencia { background: var(--surface-2); border-radius: 8px; padding: 0.75rem 0.9rem; margin: 0.5rem 0 1rem; }
 .referencia p { margin: 0 0 0.35rem; } .fonte { color: var(--ink-2); font-size: 0.88rem; }
-.detalhe h4 { margin: 1.1rem 0 0.4rem; font-size: 0.95rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.detalhe h4 { margin: 1.1rem 0 0.4rem; font-size: 0.98rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
 .h4-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 400; color: var(--muted); font-size: 0.85rem; }
 .amostra { border-left: 3px solid var(--grid); padding-left: 0.9rem; margin: 0.75rem 0; }
 .amostra-numero, .passou { font-size: 0.85rem; color: var(--ink-2); margin: 0 0 0.3rem; font-weight: 600; }
@@ -565,7 +663,7 @@ blockquote { margin: 0 0 0.5rem; padding: 0.6rem 0.8rem; background: var(--surfa
 .evidencia { font-size: 0.84rem; color: var(--ink-2); }
 .lingua ul { padding-left: 1.2rem; }
 .condicoes dl { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin: 0; }
-.condicoes dt { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; word-break: break-all; }
+.condicoes dt { font-weight: 600; font-size: 0.9rem; word-break: break-word; }
 .condicoes dd { margin: 0.1rem 0 0.8rem; color: var(--ink-2); font-size: 0.9rem; }
 footer.rodape { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--grid); color: var(--ink-2); font-size: 0.88rem; scroll-margin-top: 3.5rem; }
 footer.rodape h2 { font-size: 1rem; color: var(--ink); }
@@ -607,7 +705,10 @@ def _protocol_section(
             f"{c.label}: {c.observed} ({c.limit}{'' if c.met else ', não cumpre'})"
             for c in outcome.checks
         )
-        parts.append(f"<li><strong>{_esc(outcome.model)}: {result}</strong>. {_esc(details)}.</li>")
+        parts.append(
+            f"<li><strong>{_esc(_model_short(outcome.model))}: {result}</strong> "
+            f"<code>{_esc(outcome.model)}</code>. {_esc(details)}.</li>"
+        )
     parts.append("</ul></div></section>")
     return "".join(parts), {o.model: o.approved for o in outcomes}
 
@@ -719,7 +820,7 @@ def build(
         out.append(
             '<section class="lingua"><h2>Português europeu</h2><ul>'
             + "".join(
-                f"<li><strong>{_esc(m)}</strong>: {_esc(language_line(languages[m]))}</li>"
+                f"<li><strong>{_esc(_model_short(m))}</strong> <code>{_esc(m)}</code>: {_esc(language_line(languages[m]))}</li>"
                 for m in models
             )
             + '</ul><p class="seccao-intro">Indicador à parte, por uma lista curta de formas '
@@ -733,7 +834,8 @@ def build(
     if rows:
         out.append("<dl>")
         for label, value in rows:
-            out.append(f"<dt>{_esc(label)}</dt><dd>{_esc(value)}</dd>")
+            shown = label if label == "Banco de casos" else f"{_model_short(label)} ({label})"
+            out.append(f"<dt>{_esc(shown)}</dt><dd>{_esc(value)}</dd>")
         out.append("</dl>")
     else:
         out.append("<p>Sem respostas registadas.</p>")
@@ -755,4 +857,4 @@ def build(
     return "".join(out)
 
 
-__all__ = ["build"]
+__all__ = ["build", "model_label"]

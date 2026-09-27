@@ -200,6 +200,30 @@ class TestReadableByAnOutsider(unittest.TestCase):
         self.assertIn("calc(1 / 2 * 100%)", text)
 
 
+class TestModelNames(unittest.TestCase):
+    """An identifier such as local:llama3.1:8b means nothing to most readers."""
+
+    def test_known_models_get_a_readable_name_and_a_description(self):
+        from aferidor.html_report import model_label
+
+        self.assertEqual(
+            model_label("local:llama3.1:8b"),
+            ("Llama 3.1", "Meta · 8 mil milhões de parâmetros · corrido localmente, pelo Ollama"),
+        )
+        self.assertEqual(model_label("anthropic:claude-sonnet-4-5")[0], "Claude Sonnet 4.5")
+        self.assertEqual(model_label("openai:gpt-4o")[0], "GPT-4o")
+
+    def test_an_unknown_model_is_shown_by_its_identifier_not_guessed(self):
+        from aferidor.html_report import model_label
+
+        self.assertEqual(model_label("xpto-9"), ("xpto-9", ""))
+
+    def test_the_identifier_is_always_shown_next_to_the_name(self):
+        text = build([a_case()], [an_answer("1 g", model="local:qwen3:8b")])
+        self.assertIn("Qwen 3", text)
+        self.assertIn('<code class="modelo-id">local:qwen3:8b</code>', text)
+
+
 class TestEmpty(unittest.TestCase):
     def test_no_verdicts_says_so_instead_of_reporting_zero_percent(self):
         text = html_report.build([a_case()], [], [], today=date(2026, 9, 14))
