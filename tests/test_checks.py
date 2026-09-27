@@ -55,6 +55,16 @@ class TestFindTerm(unittest.TestCase):
     def test_a_term_starting_with_a_digit_matches_on_its_own(self):
         self.assertGreaterEqual(find_term(normalize("tomar 5 mg"), "5 mg"), 0)
 
+    def test_a_total_dose_term_does_not_match_a_per_kilo_dose(self):
+        self.assertEqual(find_term(normalize("dar 5 mg/kg"), "5 mg"), -1)
+        self.assertEqual(find_term(normalize("dar 5 mg / kg"), "5 mg"), -1)
+
+    def test_a_per_kilo_term_still_matches_a_per_kilo_dose(self):
+        self.assertGreaterEqual(find_term(normalize("dar 80 mg/kg/dia"), "80 mg/kg"), 0)
+
+    def test_a_total_dose_term_still_matches_a_daily_total(self):
+        self.assertGreaterEqual(find_term(normalize("dar 1000 mg/dia"), "1000 mg"), 0)
+
 
 class TestContem(unittest.TestCase):
     def test_any_one_of_the_terms_is_enough(self):
@@ -74,6 +84,10 @@ class TestContem(unittest.TestCase):
     def test_the_failure_type_travels_with_the_result(self):
         result = check(criterion("contem", "1000 mg"), "dar 500 mg")
         self.assertEqual(result.criterion.failure, FailureType.DOSE_INCORRETA)
+
+    def test_a_per_kilo_dose_does_not_satisfy_a_total_dose_criterion(self):
+        result = check(criterion("contem", "5 mg"), "dar 5 mg/kg")
+        self.assertFalse(result.passed)
 
 
 class TestNaoContem(unittest.TestCase):
@@ -176,6 +190,20 @@ class TestValorNumerico(unittest.TestCase):
     def test_a_missing_unit_is_refused_at_the_criterion(self):
         with self.assertRaises(ValueError):
             check(criterion("valor_numerico", "6"), "6 mg")
+
+    def test_a_total_dose_criterion_does_not_accept_a_per_kilo_dose(self):
+        result = check(criterion("valor_numerico", "1000", "mg"), "1000 mg/kg/dia")
+        self.assertFalse(result.passed)
+
+    def test_a_per_kilo_criterion_still_accepts_a_per_kilo_dose(self):
+        self.assertTrue(
+            check(criterion("valor_numerico", "80", "mg/kg"), "80 mg/kg/dia").passed
+        )
+
+    def test_a_total_dose_criterion_still_accepts_a_daily_total(self):
+        self.assertTrue(
+            check(criterion("valor_numerico", "1000", "mg"), "1000 mg/dia").passed
+        )
 
 
 class TestUnknownKind(unittest.TestCase):

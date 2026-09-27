@@ -73,6 +73,14 @@ _SPACING = re.compile(r"(\d)\s*(" + "|".join(UNITS) + r")\b")
 _WHITESPACE = re.compile(r"\s+")
 _BARE_NUMBER = re.compile(r"^\d+([.,]\d+)?$")
 
+# A term ending in a bare mass unit (not already `/kg`) must not be found when
+# what follows in the text is `/kg`: a per-kilo dose is a different quantity
+# from a total dose, and confusing them is the paediatric error the case bank
+# is meant to catch. The lookbehind keeps this from matching the trailing "g"
+# of "kg" itself.
+_MASS_UNIT_SUFFIX = re.compile(r"(?<![a-z])(mg|mcg|ug|g)$")
+_FOLLOWED_BY_PER_KG = r"(?!\s*/\s*kg\b)"
+
 
 def normalize(text: str) -> str:
     """Lowercase, strip accents, tidy spacing, and separate numbers from units."""
@@ -94,7 +102,9 @@ def find_term(haystack: str, term: str) -> int:
     by a decimal separator, right before or right after the match rules that
     out. A term that starts with a digit but is not itself a bare number
     needs the same guard on the leading side: `5 mg` must not match inside
-    `2,5 mg` or `25 mg`.
+    `2,5 mg` or `25 mg`. A term ending in a bare mass unit (`mg`, `mcg`, `g`)
+    is also not found when it is immediately followed by `/kg`: that is a
+    dose per kilo, a different quantity from the total dose the term names.
     """
     needle = normalize(term)
     if not needle:
@@ -105,7 +115,10 @@ def find_term(haystack: str, term: str) -> int:
         )
         return match.start() if match else -1
     if needle[0].isdigit():
-        match = re.search(rf"(?<![\d])(?<![\d][.,]){re.escape(needle)}", haystack)
+        guard = _FOLLOWED_BY_PER_KG if _MASS_UNIT_SUFFIX.search(needle) else ""
+        match = re.search(
+            rf"(?<![\d])(?<![\d][.,]){re.escape(needle)}{guard}", haystack
+        )
         return match.start() if match else -1
     return haystack.find(needle)
 
@@ -122,8 +135,16 @@ def snippet(haystack: str, position: int, width: int = 60) -> str:
 
 
 def _numbers_before(haystack: str, unit: str) -> list[float]:
-    """Every number that is written immediately before `unit`."""
-    pattern = re.compile(rf"(\d+(?:[.,]\d+)?)\s*{re.escape(normalize(unit))}\b")
+    """Every number that is written immediately before `unit`.
+
+    When the requested unit is not itself a per-kilo one, a number whose unit
+    is followed by `/kg` does not count: `1000 mg/kg/dia` is not a match for
+    a criterion asking for `1000 mg`, because it is a per-kilo dose, not a
+    total one. `mg/dia` is unaffected and still counts as `mg`.
+    """
+    normalized_unit = normalize(unit)
+    guard = "" if normalized_unit.endswith("/kg") else _FOLLOWED_BY_PER_KG
+    pattern = re.compile(rf"(\d+(?:[.,]\d+)?)\s*{re.escape(normalized_unit)}\b{guard}")
     return [float(m.group(1).replace(",", ".")) for m in pattern.finditer(haystack)]
 
 
