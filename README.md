@@ -199,9 +199,13 @@ menção como prescrição, que era o comportamento anterior e que marcava como
 errada uma resposta certa por ela acrescentar um aviso. Não é compreensão de
 texto e não se apresenta como tal.
 
-Nenhuma das fontes dos dois bancos (27 casos no principal, 30 no de consulta) foi ainda confirmada por uma pessoa. Até isso acontecer,
-qualquer resultado deste banco mede o modelo contra valores transcritos por uma
-ferramenta automática. Ver `casos/VERIFICACAO.md`.
+As fontes dos dois bancos estão marcadas como confirmadas desde 27/09/2026, mas
+com duas qualidades de evidência diferentes, e a `casos/VERIFICACAO.md` diz
+qual é qual. Dez casos de infeção foram confirmados nos PDF das normas da DGS,
+identificados um a um. Os restantes 47 foram declarados confirmados em bloco,
+sem registo de que documento foi aberto para cada caso. Para esses, um
+resultado continua a depender de valores cuja confirmação não se consegue
+mostrar.
 
 ## Documentos
 
@@ -209,7 +213,7 @@ ferramenta automática. Ver `casos/VERIFICACAO.md`.
 - `docs/ARQUITETURA.md` os módulos, as fronteiras entre eles e a razão de cada uma
 - `docs/COMO_CORRER.md` como correr contra um modelo real, e como afinar depois
 - `casos/VERIFICACAO.md` a tabela de confirmação humana das fontes
-- `casos/FONTES_DGS.md` as normas da DGS para os casos de infeção, por confirmar, e onde divergem dos casos
+- `casos/FONTES_DGS.md` as normas da DGS para os casos de infeção, e onde divergiam dos casos
 
 ## Ensaios registados
 
@@ -229,7 +233,8 @@ um fornecedor falso, correção determinista por critérios com contagem separad
 por tipo de falha e por risco, relatório legível e documentação. 326 testes,
 todos a passar. Sem dependências externas.
 
-Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as
-fontes com os olhos numa pessoa (`casos/VERIFICACAO.md`) e repetir a execução
-real pela API, com várias amostras por pergunta. A primeira execução, sem API e
+Por fazer, e é o que falta para os números valerem alguma coisa: registar caso
+a caso a confirmação das fontes que foram declaradas confirmadas em bloco
+(`casos/VERIFICACAO.md`) e repetir a execução real pela API, com várias
+amostras por pergunta. A primeira execução, sem API e
 com uma amostra, está em `ensaios/2026-09-14-agente/`.

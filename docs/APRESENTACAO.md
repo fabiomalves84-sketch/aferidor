@@ -54,10 +54,11 @@ portugueses ou são sintéticos. Nenhum registo clínico real entra aqui.
 
 E o que falta, dito com a mesma clareza:
 
-- **As vinte e sete fontes ainda não foram confirmadas por uma pessoa.** Foram lidas por
-  ferramenta automática, e uma ferramenta automática transcreve mal um número.
-  Até essa confirmação, qualquer resultado mede o modelo contra valores não
-  verificados. A tabela de confirmação está em `casos/VERIFICACAO.md`.
+- **A confirmação das fontes tem duas qualidades.** Dez casos de infeção foram
+  confirmados nos PDF das normas da DGS, um a um. Os restantes foram declarados
+  confirmados em bloco, a 27/09/2026, sem registo de que documento foi aberto
+  para cada caso. A tabela `casos/VERIFICACAO.md` diz qual é qual, e para os
+  segundos a evidência ainda não se consegue mostrar.
 - **Só houve uma execução real, e limitada.** Dezoito perguntas a um modelo, sem
   API, sem controlo de temperatura e com uma amostra por pergunta. Deu 16 em 18 e
   apanhou uma referência desatualizada no banco. Está registada em
