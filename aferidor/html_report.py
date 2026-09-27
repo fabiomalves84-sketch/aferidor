@@ -28,13 +28,16 @@ from .grading import (
     ConsistencyState,
     ConsistencySummary,
     Tally,
+    compare_critical,
     consistency_by_case,
     consistency_by_model,
+    critical_by_category,
     expected_samples,
     missing_samples,
     pairs_by_case,
     states_by_model,
     tally_by_model,
+    worst_examples,
 )
 from .lingua import LanguageSummary, language_by_model, language_line
 from .models import Answer, Case, Verdict
@@ -177,6 +180,28 @@ def _evidence(text: str) -> str:
             text = sentence + text[len(prefix):]
             break
     return text.replace(" em: ", " no trecho: ")
+
+
+_CATEGORY_LABEL = {
+    "dose": "Dose",
+    "alergia": "Alergia",
+    "duracao": "Duração do tratamento",
+    "esquema": "Esquema de tratamento",
+    "criterio": "Critério de tratamento",
+    "pediatria": "Pediatria",
+    "interacao": "Interações",
+    "formato": "Formato pedido",
+    "ajuste": "Ajuste de dose",
+    "gravidez": "Gravidez",
+}
+
+
+def _category(name: str) -> str:
+    return _CATEGORY_LABEL.get(name, name[:1].upper() + name[1:])
+
+
+def _pct(value: float) -> str:
+    return f"{value * 100:.0f}%"
 
 
 def _grouped_cases(cases: list[Case]) -> list[tuple[str, list[Case]]]:
@@ -331,6 +356,70 @@ def _model_card(
 </article>"""
 
 
+def _context_note(models: list[str]) -> str:
+    """Say plainly when the models measured are small local ones.
+
+    A reader who sees 22 critical cases out of 27 without knowing the models
+    are 8-billion-parameter models on a laptop may blame the bench. This
+    states what they are; it does not interpret the results.
+    """
+    local = [m for m in models if m.startswith("local:")]
+    if not local:
+        return ""
+    shorts = [_model_short(m) for m in local]
+    names = shorts[0] if len(shorts) == 1 else ", ".join(shorts[:-1]) + " e " + shorts[-1]
+    return (
+        '<p class="contexto"><strong>Contexto.</strong> '
+        f"{_esc(names)} {'correu' if len(local) == 1 else 'correram'} localmente, num "
+        "computador portátil, pelo Ollama. São modelos abertos e pequenos, muito menores do "
+        "que os modelos comerciais usados por API, e os seus números não descrevem esses.</p>"
+    )
+
+
+def _comparison(summaries: dict[str, ConsistencySummary]) -> str:
+    """Which model had the fewest critical cases, and whether that could be chance."""
+    result = compare_critical(summaries)
+    if len(result.rows) < 2:
+        return ""
+    best, second = result.rows[0], result.rows[1]
+    if best[1] * second[2] == second[1] * best[2]:
+        sentence = (
+            f"{_esc(_model_short(best[0]))} e {_esc(_model_short(second[0]))} tiveram a mesma "
+            "proporção de casos com falha crítica."
+        )
+    else:
+        sentence = (
+            f"<strong>{_esc(_model_short(best[0]))}</strong> teve menos casos com falha crítica "
+            f"({best[1]} de {best[2]}, contra {second[1]} de {second[2]} de "
+            f"{_esc(_model_short(second[0]))})"
+            + (
+                f", mas os intervalos de confiança sobrepõem-se: com {best[2]} casos, a "
+                "diferença pode ser acaso."
+                if result.overlap else
+                ", e os intervalos de confiança não se sobrepõem."
+            )
+        )
+    rows = []
+    for model, critical, cases_n, low, high in result.rows:
+        share = critical / cases_n
+        rows.append(
+            f'<li><span class="comp-nome">{_esc(_model_short(model))}</span>'
+            f'<span class="comp-pista" role="img" aria-label="{_esc(_model_short(model))}: '
+            f'{critical} de {cases_n} casos com falha crítica, intervalo de {_pct(low)} a {_pct(high)}">'
+            f'<span class="comp-ic" style="left:{low * 100:.2f}%;width:{(high - low) * 100:.2f}%"></span>'
+            f'<span class="comp-ponto" style="left:{share * 100:.2f}%"></span></span>'
+            f'<span class="comp-valor">{critical} de {cases_n} · {_pct(share)}</span></li>'
+        )
+    ticks = "".join(f'<span style="left:{v}%">{v}%</span>' for v in (0, 25, 50, 75, 100))
+    return (
+        f'<div class="comparacao"><p class="comp-frase">{sentence}</p>'
+        f'<ul class="comp-lista">{"".join(rows)}</ul>'
+        f'<div class="comp-eixo" aria-hidden="true"><span></span><span class="comp-ticks">{ticks}</span><span></span></div>'
+        '<p class="comp-nota">Percentagem de casos com falha crítica em alguma amostra. O ponto '
+        "é o observado; a linha, o intervalo de confiança a 95%.</p></div>"
+    )
+
+
 def _failure_chart(model: str, tally: Tally, top: int) -> str:
     """One model's failures by type, on a scale shared by every model.
 
@@ -364,6 +453,76 @@ def _risk_legend() -> str:
         for r in (Risk.CRITICO, Risk.ALTO, Risk.MEDIO, Risk.BAIXO)
     )
     return f'<ul class="legenda-riscos">{items}</ul>'
+
+
+def _plain(text: str) -> str:
+    """A model answer with its Markdown marks taken out, for a short excerpt.
+
+    Only for the excerpt in the gravest-mistakes cards: in the full case the
+    answer is shown exactly as it came, because there it is the evidence.
+    """
+    text = re.sub(r"^\s{0,3}#{1,6}\s*", "", text.strip(), flags=re.M)
+    text = text.replace("**", "").replace("__", "")
+    return re.sub(r"\n{3,}", "\n\n", text)
+
+
+def _worst(cases, consistency, pairs) -> str:
+    examples = worst_examples(cases, consistency, pairs)
+    if not examples:
+        return ""
+    out = [
+        '<section id="erros"><h2>Os erros mais graves</h2>',
+        '<p class="seccao-intro">Casos em que o modelo errou em todas as amostras, com um erro de '
+        "risco crítico. Escolhidos por regra, não à mão: por cada modelo, à vez, os primeiros "
+        "casos que cumprem a regra.</p><div class=\"erros\">",
+    ]
+    for case, answer, verdict in examples:
+        text = _plain(answer.text)
+        short = text if len(text) <= 420 else text[:420].rsplit(" ", 1)[0] + " …"
+        chips = "".join(_risk_chip(f) for f in verdict.failures)
+        out.append(
+            '<article class="erro-cartao">'
+            f'<p class="erro-topo"><span class="caso-id">{_esc(case.case_id)}</span>'
+            f'<span class="erro-modelo">{_esc(_model_short(answer.model))}</span></p>'
+            f'<p class="erro-pergunta">{_esc(case.question)}</p>'
+            f'<div class="erro-par"><div><p class="erro-rotulo">O modelo respondeu</p>'
+            f"<blockquote>{_esc(short)}</blockquote></div>"
+            f'<div><p class="erro-rotulo">A referência diz</p>'
+            f'<p class="erro-ref">{_esc(case.reference)}</p>'
+            f'<p class="fonte">{_esc(case.source.name)}, {_esc(case.source.reference)}</p></div></div>'
+            f'<p class="erro-chips">{chips}</p>'
+            f'<p><a href="#caso-{_esc(case.case_id)}">Ver o caso completo</a></p></article>'
+        )
+    out.append("</div></section>")
+    return "".join(out)
+
+
+def _areas(cases, models, consistency) -> str:
+    categories, table = critical_by_category(cases, consistency)
+    head = "".join(f'<th scope="col">{_esc(_model_short(m))}</th>' for m in models)
+    rows = []
+    for category in categories:
+        cells = []
+        for model in models:
+            critical, answered = table.get(model, {}).get(category, (0, 0))
+            if not answered:
+                cells.append('<td class="area-cel vazio">sem resposta</td>')
+                continue
+            share = critical / answered
+            cells.append(
+                f'<td class="area-cel" style="--a:{0.08 + 0.62 * share:.3f}" '
+                f'title="{_esc(_category(category))}, {_esc(_model_short(model))}: {critical} de {answered}">'
+                f"<strong>{critical}</strong> de {answered}</td>"
+            )
+        rows.append(f'<tr><th scope="row">{_esc(_category(category))}</th>{"".join(cells)}</tr>')
+    return (
+        '<section id="areas"><h2>Por área clínica</h2>'
+        '<p class="seccao-intro">Casos com falha crítica em alguma amostra, por área. Um modelo '
+        "pode parecer razoável na média e ser perigoso numa área: é aqui que isso se vê. Quanto "
+        "mais escura a célula, maior a proporção de casos com falha crítica.</p>"
+        f'<div class="grade-wrap"><table class="areas"><thead><tr><th scope="col">Área</th>{head}</tr></thead>'
+        f'<tbody>{"".join(rows)}</tbody></table></div></section>'
+    )
 
 
 # ---------------------------------------------------------------- grid
@@ -480,7 +639,7 @@ def _detail(
             )
         out.append("<details>")
         out.append(
-            f'<summary><span class="caso-id">{_esc(case.case_id)}</span>'
+            f'<summary id="caso-{_esc(case.case_id)}"><span class="caso-id">{_esc(case.case_id)}</span>'
             f'<span class="resumo-pergunta">{_esc(case.question)}</span>'
             f'<span class="minis" aria-hidden="true">{"".join(minis)}</span></summary>'
         )
@@ -607,6 +766,41 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .lingua-linha { font-size: 0.86rem; color: var(--ink-2); margin: 0; }
 .protocolo .cartao { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
 .protocolo ul { padding-left: 1.2rem; margin-bottom: 0; }
+.contexto { background: var(--surface-2); border-radius: 10px; padding: 0.75rem 1rem; max-width: 48rem; font-size: 0.92rem; color: var(--ink-2); }
+.contexto strong { color: var(--ink); }
+.comparacao { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+.comp-frase { font-size: 1.05rem; }
+.comp-lista, .comp-eixo { list-style: none; margin: 0; padding: 0; }
+.comp-lista li, .comp-eixo { display: grid; grid-template-columns: 9rem 1fr 8.5rem; align-items: center; gap: 0.75rem; padding: 0.45rem 0; }
+.comp-nome { font-weight: 600; }
+.comp-pista { position: relative; height: 22px; border-left: 1px solid var(--grid); border-right: 1px solid var(--grid);
+  background: linear-gradient(var(--grid), var(--grid)) center / 100% 1px no-repeat; }
+.comp-ic { position: absolute; top: 9px; height: 4px; border-radius: 2px; background: var(--critical); opacity: 0.45; }
+.comp-ponto { position: absolute; top: 3px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%;
+  background: var(--critical); box-shadow: 0 0 0 2px var(--surface); }
+.comp-valor { font-variant-numeric: tabular-nums; font-size: 0.9rem; color: var(--ink-2); }
+.comp-eixo { padding-top: 0; }
+.comp-ticks { position: relative; height: 1.1rem; font-size: 0.72rem; color: var(--muted); }
+.comp-ticks span { position: absolute; transform: translateX(-50%); }
+.comp-ticks span:first-child { transform: none; } .comp-ticks span:last-child { transform: translateX(-100%); }
+.comp-nota { font-size: 0.82rem; color: var(--muted); margin: 0.4rem 0 0; }
+.erros { display: grid; grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr)); gap: 1rem; }
+.erro-cartao { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--critical); border-radius: 12px; padding: 1.1rem 1.25rem; }
+.erro-topo { display: flex; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.3rem; }
+.erro-modelo { font-size: 0.85rem; color: var(--ink-2); font-weight: 600; }
+.erro-pergunta { font-weight: 600; }
+.erro-par { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.erro-rotulo { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 0.25rem; font-weight: 600; }
+.erro-par blockquote { max-height: 12rem; font-size: 0.84rem; }
+.erro-ref { background: var(--good-bg); border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.88rem; margin-bottom: 0.4rem; }
+.erro-chips { margin: 0.6rem 0 0.3rem; }
+.erro-cartao a, .rodape a { color: var(--accent); }
+table.areas { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+table.areas th, table.areas td { border-bottom: 1px solid var(--grid); padding: 0.5rem 0.75rem; text-align: left; }
+table.areas thead th { font-size: 0.85rem; }
+table.areas tbody th { font-weight: 500; }
+.area-cel { background: rgba(208, 59, 59, var(--a)); font-variant-numeric: tabular-nums; min-width: 7rem; }
+.area-cel.vazio { background: var(--neutral-bg); color: var(--ink-2); }
 .falhas-grelha { display: grid; grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); gap: 1rem; }
 .falhas-modelo { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
 .falhas-modelo .modelo { margin-bottom: 0.9rem; }
@@ -675,6 +869,9 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
   .destaque { font-size: 2.6rem; }
   .topo h1 { font-size: 1.6rem; }
   .metricas { grid-template-columns: 1fr; }
+  .erros { grid-template-columns: 1fr; }
+  .erro-par { grid-template-columns: 1fr; }
+  .comp-lista li, .comp-eixo { grid-template-columns: 6rem 1fr 6.5rem; }
 }
 @media print {
   nav.indice { position: static; }
@@ -749,6 +946,8 @@ def build(
         if protocol is not None:
             sections.append(("criterio", "Critério de aprovação"))
         sections += [
+            ("erros", "Erros mais graves"),
+            ("areas", "Por área clínica"),
             ("grelha", "Caso a caso"),
             ("falhas", "Falhas por tipo"),
             ("casos-com-falha", "Casos com falha"),
@@ -783,6 +982,8 @@ def build(
             "Os intervalos são de confiança a 95%: com poucos casos, o número real pode estar "
             "longe do observado.</p>"
         )
+        out.append(_context_note(models))
+        out.append(_comparison(summaries))
         out.append('<div class="cartoes">')
         for model in models:
             out.append(
@@ -793,6 +994,8 @@ def build(
             )
         out.append("</div></section>")
         out.append(protocol_html)
+        out.append(_worst(cases, consistency, pairs))
+        out.append(_areas(cases, models, consistency))
 
         out.append('<section id="grelha"><h2>Caso a caso</h2>')
         out.append(

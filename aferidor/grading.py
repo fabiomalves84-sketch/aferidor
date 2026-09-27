@@ -359,6 +359,91 @@ def states_by_model(
     return dict(sorted(result.items()))
 
 
+def critical_by_category(
+    cases: list[Case], consistency: dict[tuple[str, str], Consistency]
+) -> tuple[list[str], dict[str, dict[str, tuple[int, int]]]]:
+    """Cases with a critical failure in some sample, per clinical area and per model.
+
+    Returns the categories in the order the cases first show them, and for
+    each model a (critical, answered) pair per category. The whole point of
+    the bench is that a model can look good on average and be dangerous in
+    one area; this is where that shows.
+    """
+    categories: list[str] = []
+    for case in cases:
+        if case.category not in categories:
+            categories.append(case.category)
+    by_id = {c.case_id: c for c in cases}
+    table: dict[str, dict[str, tuple[int, int]]] = {}
+    for (case_id, model), entry in consistency.items():
+        category = by_id[case_id].category
+        row = table.setdefault(model, {c: (0, 0) for c in categories})
+        critical, answered = row[category]
+        is_critical = entry.worst_failure is not None and entry.worst_failure.risk == Risk.CRITICO
+        row[category] = (critical + int(is_critical), answered + 1)
+    return categories, dict(sorted(table.items()))
+
+
+@dataclass(frozen=True)
+class CriticalComparison:
+    """Models ordered from fewest to most cases with a critical failure.
+
+    `rows` holds (model, critical, cases, low, high) with the 95% Wilson
+    interval. `overlap` says whether the first two intervals overlap: when
+    they do, the difference between the two best models can be chance.
+    """
+
+    rows: tuple[tuple[str, int, int, float, float], ...]
+    overlap: bool
+
+
+def compare_critical(summaries: dict[str, "ConsistencySummary"]) -> CriticalComparison:
+    rows = []
+    for model, summary in summaries.items():
+        if not summary.cases:
+            continue
+        low, high = wilson_interval(summary.critical_cases, summary.cases)
+        rows.append((model, summary.critical_cases, summary.cases, low, high))
+    rows.sort(key=lambda r: (r[1] / r[2], r[0]))
+    overlap = len(rows) > 1 and rows[0][4] >= rows[1][3]
+    return CriticalComparison(rows=tuple(rows), overlap=overlap)
+
+
+def worst_examples(
+    cases: list[Case],
+    consistency: dict[tuple[str, str], Consistency],
+    pairs: dict[tuple[str, str], list[tuple[Answer, Verdict]]],
+    limit: int = 4,
+) -> list[tuple[Case, Answer, Verdict]]:
+    """A few of the gravest mistakes, picked by a fixed rule, not by a person.
+
+    A case qualifies for a model when the model got it wrong in every sample
+    and its worst failure is critical. From each such case the first sample
+    with a critical failure is shown, not merely the first that failed: that
+    one can be a refusal, which is not what this list is for. Models take turns, in name order, so one model's
+    mistakes do not fill the list; within a model, cases keep their order.
+    """
+    queues: dict[str, list[tuple[Case, Answer, Verdict]]] = {}
+    for case in cases:
+        for (case_id, model), entry in sorted(consistency.items()):
+            if case_id != case.case_id:
+                continue
+            if entry.state is not ConsistencyState.ESTAVEL_ERRADO:
+                continue
+            if entry.worst_failure is None or entry.worst_failure.risk != Risk.CRITICO:
+                continue
+            for answer, verdict in pairs.get((case_id, model), []):
+                if verdict.worst_risk == Risk.CRITICO:
+                    queues.setdefault(model, []).append((case, answer, verdict))
+                    break
+    chosen: list[tuple[Case, Answer, Verdict]] = []
+    while len(chosen) < limit and any(queues.values()):
+        for model in sorted(queues):
+            if queues[model] and len(chosen) < limit:
+                chosen.append(queues[model].pop(0))
+    return chosen
+
+
 def expected_samples(answers: list[Answer]) -> dict[str, int]:
     """How many samples each model was actually asked for.
 
@@ -630,6 +715,10 @@ __all__ = [
     "ConsistencySummary",
     "consistency_by_model",
     "states_by_model",
+    "critical_by_category",
+    "CriticalComparison",
+    "compare_critical",
+    "worst_examples",
     "expected_samples",
     "missing_samples",
     "wilson_interval",

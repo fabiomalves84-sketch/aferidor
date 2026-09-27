@@ -148,8 +148,9 @@ class TestDetail(unittest.TestCase):
                 an_answer("600 mg", sample=3),
             ],
         )
-        self.assertEqual(text.count("500 mg"), 1)
-        self.assertIn("600 mg", text)
+        detail = text.split('id="casos-com-falha"', 1)[1]
+        self.assertEqual(detail.count("500 mg"), 1)
+        self.assertIn("600 mg", detail)
 
 
 class TestNumbersMatchMarkdown(unittest.TestCase):
@@ -222,6 +223,46 @@ class TestModelNames(unittest.TestCase):
         text = build([a_case()], [an_answer("1 g", model="local:qwen3:8b")])
         self.assertIn("Qwen 3", text)
         self.assertIn('<code class="modelo-id">local:qwen3:8b</code>', text)
+
+
+class TestWhatJumpsOut(unittest.TestCase):
+    """Areas, a direct comparison, the gravest mistakes and the models' context."""
+
+    def two_models(self):
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [
+            an_answer("Amoxicilina 500 mg", "C1", model="local:llama3.1:8b"),
+            an_answer("Amoxicilina 500 mg", "C2", model="local:llama3.1:8b"),
+            an_answer("Amoxicilina 1 g", "C1", model="local:qwen3:8b"),
+            an_answer("Amoxicilina 500 mg", "C2", model="local:qwen3:8b"),
+        ]
+        return build(cases, answers)
+
+    def test_critical_cases_are_shown_by_clinical_area(self):
+        text = self.two_models()
+        self.assertIn('id="areas"', text)
+        self.assertIn("<th scope=\"row\">Dose</th>", text)
+        self.assertIn("<strong>2</strong> de 2", text)
+
+    def test_the_comparison_names_the_better_model_and_says_when_it_can_be_chance(self):
+        text = self.two_models()
+        self.assertIn("<strong>Qwen 3</strong> teve menos casos com falha crítica (1 de 2, contra 2 de 2", text)
+        self.assertIn("a diferença pode ser acaso", text)
+
+    def test_the_gravest_mistakes_are_highlighted_with_what_should_have_been_said(self):
+        text = self.two_models()
+        worst = text.split('id="erros"', 1)[1].split("</section>", 1)[0]
+        self.assertIn("A referência diz", worst)
+        self.assertIn("Dose incorreta", worst)
+        self.assertIn('href="#caso-C1"', worst)
+        self.assertIn('id="caso-C1"', text)
+
+    def test_small_local_models_are_put_in_context(self):
+        self.assertIn("modelos abertos e pequenos", self.two_models())
+
+    def test_models_not_run_locally_get_no_such_note(self):
+        text = build([a_case()], [an_answer("1 g", model="openai:gpt-4o")])
+        self.assertNotIn("modelos abertos e pequenos", text)
 
 
 class TestEmpty(unittest.TestCase):
