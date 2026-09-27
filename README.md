@@ -202,10 +202,10 @@ texto e não se apresenta como tal.
 As fontes dos dois bancos estão marcadas como confirmadas desde 27/09/2026, mas
 com duas qualidades de evidência diferentes, e a `casos/VERIFICACAO.md` diz
 qual é qual. Dez casos de infeção foram confirmados nos PDF das normas da DGS,
-identificados um a um. Os restantes 47 foram declarados confirmados em bloco,
-sem registo de que documento foi aberto para cada caso. Para esses, um
-resultado continua a depender de valores cuja confirmação não se consegue
-mostrar.
+identificados um a um. Outros 24 foram declarados confirmados por grupo, nos
+documentos da DGS e do Infarmed, sem registo de página caso a caso. Os
+restantes 23 citam fontes que não são da DGS nem do Infarmed (APMGF, ESC, ADA,
+NICE, EMA) e continuam por confirmar.
 
 ## Documentos
 
@@ -233,8 +233,8 @@ um fornecedor falso, correção determinista por critérios com contagem separad
 por tipo de falha e por risco, relatório legível e documentação. 326 testes,
 todos a passar. Sem dependências externas.
 
-Por fazer, e é o que falta para os números valerem alguma coisa: registar caso
-a caso a confirmação das fontes que foram declaradas confirmadas em bloco
+Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as 23
+fontes que faltam e registar caso a caso as 24 declaradas por grupo
 (`casos/VERIFICACAO.md`) e repetir a execução real pela API, com várias
 amostras por pergunta. A primeira execução, sem API e
 com uma amostra, está em `ensaios/2026-09-14-agente/`.
