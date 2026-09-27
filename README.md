@@ -198,6 +198,7 @@ ferramenta automática. Ver `casos/VERIFICACAO.md`.
 - `docs/ARQUITETURA.md` os módulos, as fronteiras entre eles e a razão de cada uma
 - `docs/COMO_CORRER.md` como correr contra um modelo real, e como afinar depois
 - `casos/VERIFICACAO.md` a tabela de confirmação humana das fontes
+- `casos/FONTES_DGS.md` as normas da DGS para os casos de infeção, por confirmar, e onde divergem dos casos
 
 ## Ensaios registados
 
