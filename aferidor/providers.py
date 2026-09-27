@@ -10,6 +10,7 @@ the bench has no dependency that can change under it between runs.
 
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import urllib.error
@@ -149,6 +150,8 @@ def _request_json(
         ) from None
     except urllib.error.URLError as error:
         raise ProviderError(f"{url} inacessivel: {error.reason}", retryable=True) from None
+    except (ConnectionResetError, http.client.RemoteDisconnected) as error:
+        raise ProviderError(f"{url} desligou a meio da leitura: {error}", retryable=True) from None
     except TimeoutError:
         raise ProviderError(f"{url} excedeu {timeout}s", retryable=True) from None
     except json.JSONDecodeError:

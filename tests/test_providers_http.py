@@ -11,6 +11,7 @@ going to clear.
 
 from __future__ import annotations
 
+import http.client
 import io
 import json
 import unittest
@@ -73,6 +74,14 @@ class TestErrorClassification(unittest.TestCase):
 
     def test_the_error_says_what_the_server_answered(self):
         self.assertIn("invalid api key", str(self.ask_with(failing(http_error(401, "invalid api key")))))
+
+    def test_a_connection_reset_mid_read_is_retryable(self):
+        self.assertTrue(self.ask_with(failing(ConnectionResetError("ligacao fechada"))).retryable)
+
+    def test_the_server_hanging_up_mid_read_is_retryable(self):
+        self.assertTrue(
+            self.ask_with(failing(http.client.RemoteDisconnected("sem resposta"))).retryable
+        )
 
 
 class TestOpenAIReplies(unittest.TestCase):
