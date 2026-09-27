@@ -92,6 +92,13 @@ class Answer:
     is "stop" unless the provider says otherwise; a truncated or empty reply
     never reaches here at all (the runner treats it as an execution error,
     not an answer), so in practice this is almost always "stop".
+
+    The last three fields say under what conditions the answer was obtained,
+    so two answers in one file can be shown to belong to the same
+    measurement: `prompt_sha256` is the hash of the exact text sent (the
+    instruction and the question), `max_tokens` the limit the provider was
+    given, and `build` the Aferidor version and code hash (`build_id`). They
+    are empty on answers written before they existed.
     """
 
     case_id: str
@@ -103,6 +110,9 @@ class Answer:
     sample: int = 1
     temperature: float = 0.0
     finish_reason: str = "stop"
+    prompt_sha256: str = ""
+    max_tokens: int | None = None
+    build: str = ""
 
     def __post_init__(self) -> None:
         if self.latency_ms < 0:

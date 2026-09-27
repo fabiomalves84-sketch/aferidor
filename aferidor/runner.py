@@ -13,6 +13,7 @@ Three things matter here and nothing else does:
 
 from __future__ import annotations
 
+import hashlib
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -20,6 +21,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
+from . import build_id
 from .models import Answer, Case
 from .providers import Provider, ProviderError, Reply
 from .storage import append_answer, read_answers
@@ -40,6 +42,11 @@ def build_prompt(case: Case) -> str:
     source stay on this side of the wall.
     """
     return INSTRUCTION.format(question=case.question)
+
+
+def prompt_digest(prompt: str) -> str:
+    """SHA-256 of the exact text sent, written on the answer it produced."""
+    return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
 
 
 @dataclass(frozen=True)
@@ -146,6 +153,8 @@ def run(
     result = RunResult(run_id=run_id or uuid.uuid4().hex[:12], model=provider.name)
     done = _answered_already(path, provider.name)
     temperature = getattr(provider, "temperature", 0.0)
+    max_tokens = getattr(provider, "max_tokens", None)
+    build = build_id()
 
     for case in cases:
         for sample in range(1, repetitions + 1):
@@ -155,8 +164,9 @@ def run(
                     progress(case, None, "ja respondido")
                 continue
 
+            prompt = build_prompt(case)
             try:
-                reply, latency_ms = _ask_with_retry(provider, build_prompt(case), config)
+                reply, latency_ms = _ask_with_retry(provider, prompt, config)
             except ProviderError as error:
                 message = f"amostra {sample}: {error}"
                 previous = result.errors.get(case.case_id)
@@ -175,6 +185,9 @@ def run(
                 sample=sample,
                 temperature=temperature,
                 finish_reason=reply.finish_reason,
+                prompt_sha256=prompt_digest(prompt),
+                max_tokens=max_tokens,
+                build=build,
             )
             if path is not None:
                 append_answer(answer, Path(path))
@@ -185,4 +198,4 @@ def run(
     return result
 
 
-__all__ = ["run", "build_prompt", "RunConfig", "RunResult", "INSTRUCTION"]
+__all__ = ["run", "build_prompt", "prompt_digest", "RunConfig", "RunResult", "INSTRUCTION"]

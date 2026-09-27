@@ -143,6 +143,32 @@ class TestAnswerRoundTrip(unittest.TestCase):
         self.assertEqual(recovered, answers)
 
 
+class TestAnswerConditions(unittest.TestCase):
+    def test_the_conditions_survive_a_round_trip(self):
+        answers = [
+            Answer("C-001", "modelo-x", "500 mg", datetime(2026, 9, 14, 10, 0),
+                   prompt_sha256="a" * 64, max_tokens=8192, build="0.1.0+abcdef012345"),
+        ]
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            write_answers(answers, path)
+            recovered = read_answers(path)
+        self.assertEqual(recovered, answers)
+
+    def test_an_answer_written_before_the_conditions_existed_reads_them_as_unknown(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            path.write_text(
+                '{"caso": "C-001", "modelo": "m", "texto": "x", '
+                '"perguntada_em": "2026-09-14T10:00:00"}\n',
+                encoding="utf-8",
+            )
+            recovered = read_answers(path)[0]
+        self.assertEqual(recovered.prompt_sha256, "")
+        self.assertIsNone(recovered.max_tokens)
+        self.assertEqual(recovered.build, "")
+
+
 class TestBankFormat(unittest.TestCase):
     def test_reads_the_annotated_bank_format(self):
         bank = {

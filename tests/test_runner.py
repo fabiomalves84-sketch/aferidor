@@ -9,7 +9,8 @@ from pathlib import Path
 from aferidor.models import Case, Criterion, Source
 from aferidor.providers import FakeProvider, Provider, ProviderError, Reply
 from aferidor.risk import FailureType
-from aferidor.runner import RunConfig, build_prompt, run
+from aferidor import build_id
+from aferidor.runner import RunConfig, build_prompt, prompt_digest, run
 from aferidor.storage import read_answers
 
 
@@ -238,6 +239,37 @@ class TestRepetitions(unittest.TestCase):
     def test_the_temperature_asked_for_is_recorded_on_the_answer(self):
         result = run([a_case()], FakeProvider(temperature=1.0))
         self.assertEqual(result.answers[0].temperature, 1.0)
+
+
+class TestConditions(unittest.TestCase):
+    """What an answer says about how it was obtained."""
+
+    def test_the_hash_of_the_exact_prompt_sent_is_recorded(self):
+        provider = FakeProvider()
+        result = run([a_case()], provider)
+        self.assertEqual(result.answers[0].prompt_sha256, prompt_digest(provider.prompts[0]))
+        self.assertEqual(len(result.answers[0].prompt_sha256), 64)
+
+    def test_a_different_question_gives_a_different_prompt_hash(self):
+        other = Case(
+            case_id="B", category="x", question="Outra pergunta?", reference="r",
+            source=Source(name="s", reference="p"), criteria=a_case().criteria,
+        )
+        result = run([a_case(), other], FakeProvider())
+        self.assertNotEqual(result.answers[0].prompt_sha256, result.answers[1].prompt_sha256)
+
+    def test_the_token_limit_given_to_the_provider_is_recorded(self):
+        provider = FakeProvider()
+        provider.max_tokens = 8192
+        self.assertEqual(run([a_case()], provider).answers[0].max_tokens, 8192)
+
+    def test_a_provider_without_a_token_limit_records_none(self):
+        self.assertIsNone(run([a_case()], FakeProvider()).answers[0].max_tokens)
+
+    def test_the_version_and_code_hash_are_recorded(self):
+        build = run([a_case()], FakeProvider()).answers[0].build
+        self.assertEqual(build, build_id())
+        self.assertRegex(build, r"^\d+\.\d+\.\d+\+[0-9a-f]{12}$")
 
 
 class TestConfig(unittest.TestCase):

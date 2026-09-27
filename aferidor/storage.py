@@ -166,6 +166,9 @@ def answer_to_dict(answer: Answer) -> dict:
         "amostra": answer.sample,
         "temperatura": answer.temperature,
         "fim": answer.finish_reason,
+        "prompt_sha256": answer.prompt_sha256,
+        "tokens_max": answer.max_tokens,
+        "versao": answer.build,
     }
 
 
@@ -180,6 +183,9 @@ def answer_from_dict(data: dict, where: str) -> Answer:
         sample=int(data.get("amostra", 1)),
         temperature=float(data.get("temperatura", 0.0)),
         finish_reason=str(data.get("fim", "stop")),
+        prompt_sha256=str(data.get("prompt_sha256", "")),
+        max_tokens=int(data["tokens_max"]) if data.get("tokens_max") is not None else None,
+        build=str(data.get("versao", "")),
     )
 
 

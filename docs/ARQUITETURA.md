@@ -20,7 +20,7 @@ flowchart LR
 | Ficheiro | Responsabilidade |
 |---|---|
 | `risk.py` | A taxonomia de falhas e o risco clínico de cada uma |
-| `models.py` | Caso, fonte, critério, resposta (com amostra e temperatura), veredito |
+| `models.py` | Caso, fonte, critério, resposta (com amostra e condições de obtenção), veredito |
 | `storage.py` | Ler e escrever tudo isto em JSON legível |
 | `providers.py` | Falar com um modelo, atrás de uma interface estreita |
 | `runner.py` | Percorrer os casos, com repetições, retentativas e retoma |
@@ -87,7 +87,12 @@ diferem no modelo e em mais nada.
 
 - `casos/casos.json` escrito à mão, em português, com uma fonte por caso
 - `casos/VERIFICACAO.md` a tabela de confirmação humana das fontes
-- `data/respostas.jsonl` uma resposta por linha, para permitir a retoma
+- `data/respostas.jsonl` uma resposta por linha, para permitir a retoma. Cada
+  linha guarda também as condições em que a resposta foi obtida: temperatura,
+  limite de tokens, o SHA-256 do texto exato enviado ao modelo e a versão do
+  Aferidor com o SHA-256 do seu código. Sem isso, uma mudança de uma palavra no
+  prompt dava uma medição diferente indistinguível da anterior no mesmo
+  ficheiro
 - `data/vereditos.json` o resultado da correção
 - `relatorios/relatorio.md` o documento final em Markdown
 - `relatorios/relatorio.html` o mesmo documento em HTML, quando pedido com
