@@ -130,7 +130,9 @@ passa se cumprir os critérios comuns do caso e todos os de pelo menos uma
 alternativa. Juntar os dois esquemas num só critério deixaria passar uma dose
 errada de amoxicilina só por a resposta nomear a benzatínica de passagem.
 Quando a resposta falha, é corrigida contra a alternativa de que ficou mais
-perto, e o relatório diz qual foi.
+perto, e o relatório diz qual foi. Se ficou igualmente perto de duas, conta a
+que tem a falha de risco mais alto: um empate nunca pode ser a razão para uma
+falha crítica desaparecer.
 
 Dois cuidados no confronto de texto: acentos e espaçamento são normalizados,
 para `1000mg` valer o mesmo que `1000 mg`; e um termo que é só um número tem de
@@ -224,7 +226,7 @@ em vigor.
 
 Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 325 testes,
+por tipo de falha e por risco, relatório legível e documentação. 326 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as

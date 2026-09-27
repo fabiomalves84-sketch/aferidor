@@ -65,11 +65,20 @@ def _judge(case: Case, text: str) -> tuple[tuple[CriterionResult, ...], str]:
 
     Without alternatives, the case's own criteria. With them, the case's own
     criteria plus the first alternative the answer meets in full; when it
-    meets none, the one it came closest to, by fewest failed criteria and then
-    by the lowest risk among those failures. Closest, not worst: an answer
-    that attempted the benzathine regimen and got its dose wrong should read
-    as a wrong benzathine dose, not as a missing amoxicillin course it never
-    meant to give. Ties go to the alternative written first.
+    meets none, the one it came closest to, by fewest failed criteria. Closest,
+    not worst: an answer that attempted the benzathine regimen and got its dose
+    wrong should read as a wrong benzathine dose, not as a missing amoxicillin
+    course it never meant to give.
+
+    Between alternatives equally close, the one whose failures carry the
+    highest risk wins. The opposite rule hid a wrong dose: "amoxicilina 1 g e
+    doxiciclina 100 mg de 12/12h" misses one criterion of the doxycycline
+    regimen (the 200 mg loading dose, critical) and one of the
+    clarithromycin regimen (the drug's name, medium), because the "12/12"
+    satisfies the latter's interval. Picking the lower risk reported an
+    incomplete answer and no dose failure at all. A tie must never be the
+    reason a critical failure disappears. Remaining ties go to the
+    alternative written first.
     """
     common = tuple(check(criterion, text) for criterion in case.criteria)
     if not case.alternatives:
@@ -80,7 +89,7 @@ def _judge(case: Case, text: str) -> tuple[tuple[CriterionResult, ...], str]:
         failed = [r for r in results if not r.passed]
         if not failed:
             return results, alternative.description
-        distance = (len(failed), max(r.criterion.failure.risk.value for r in failed))
+        distance = (len(failed), -max(r.criterion.failure.risk.value for r in failed))
         if closest is None or distance < closest[0]:
             closest = (distance, results, alternative.description)
     assert closest is not None

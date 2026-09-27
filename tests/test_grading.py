@@ -515,6 +515,26 @@ class TestAlternatives(unittest.TestCase):
         self.assertEqual(verdict.alternative, "penicilina benzatínica em dose única")
         self.assertEqual(verdict.failures, (FailureType.DOSE_INCORRETA,))
 
+    def test_a_tie_between_regimens_never_hides_a_critical_failure(self):
+        """Missing the benzathine dose (critical) and missing the word 'amoxicilina'
+        with everything else of that regimen present (medium) are one failure
+        each; the verdict must keep the critical one."""
+        import dataclasses
+
+        case = a_two_regimen_case()
+        amoxicillin = dataclasses.replace(
+            case.alternatives[0],
+            criteria=(
+                Criterion(kind="contem", terms=("amoxicilina",), failure=FailureType.RESPOSTA_INCOMPLETA),
+                Criterion(kind="contem", terms=("dose unica",), failure=FailureType.RESPOSTA_INCOMPLETA),
+            ),
+            reference="Amoxicilina em dose única.",
+        )
+        case = dataclasses.replace(case, alternatives=(amoxicillin, case.alternatives[1]))
+        verdict = grade(case, an_answer("Penicilina G benzatínica IM em dose única.", case_id="AMIG"))
+        self.assertEqual(verdict.failures, (FailureType.DOSE_INCORRETA,))
+        self.assertEqual(verdict.alternative, "penicilina benzatínica em dose única")
+
     def test_the_case_own_criteria_still_apply_to_every_regimen(self):
         verdict = self.grade("Penicilina G benzatínica 1.200.000 U IM em dose única, ou azitromicina.")
         self.assertEqual(verdict.failures, (FailureType.RESPOSTA_INCOMPLETA,))
