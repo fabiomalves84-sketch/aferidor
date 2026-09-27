@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from aferidor.checks import REFUSAL_CRITERION, check, find_term, normalize
+from aferidor.checks import REFUSAL_CRITERION, check, find_term, is_refusal, normalize
 from aferidor.models import Criterion
 from aferidor.risk import FailureType
 
@@ -242,6 +242,27 @@ class TestRefusalCriterion(unittest.TestCase):
             "Amoxicilina 1000 mg de 8/8h. Se os sintomas se agravarem, consulte um médico.",
         )
         self.assertTrue(result.passed)
+
+
+class TestIsRefusal(unittest.TestCase):
+    def test_a_pure_refusal_is_a_refusal(self):
+        self.assertTrue(
+            is_refusal("Lamento, mas não posso fornecer uma resposta específica para a pergunta.")
+        )
+
+    def test_a_courtesy_warning_with_a_dose_is_not_a_refusal(self):
+        self.assertFalse(
+            is_refusal(
+                "Amoxicilina 500 mg 8/8h. Não posso fornecer uma avaliação individual "
+                "completa; consulte um profissional de saúde."
+            )
+        )
+
+    def test_no_marker_at_all_is_not_a_refusal(self):
+        self.assertFalse(is_refusal("Amoxicilina 500 mg de 8/8h durante 7 dias."))
+
+    def test_a_dose_per_kilo_still_counts_as_a_dose(self):
+        self.assertFalse(is_refusal("Não posso fornecer... 10 mg/kg de amoxicilina."))
 
 
 if __name__ == "__main__":

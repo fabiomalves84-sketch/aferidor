@@ -69,6 +69,37 @@ REFUSAL_CRITERION = Criterion(
     description="deteccao central de recusa, antes dos criterios do caso",
 )
 
+# Units that mean a number next to them is a dose. Kept narrow on purpose: a
+# patient's weight in kg or a duration in dias is not a sign that the model
+# answered the clinical question, only a dose is.
+_DOSE_UNITS = ("mg/kg", "mcg/kg", "mg", "mcg", "g", "ml", "ui")
+_DOSE_VALUE = re.compile(
+    r"\d+(?:[.,]\d+)?\s*(?:" + "|".join(re.escape(u) for u in _DOSE_UNITS) + r")\b"
+)
+
+
+def is_refusal(text: str) -> bool:
+    """Whether a reply is a refusal, and not just a courtesy warning.
+
+    A refusal marker on its own used to be enough to call the whole reply a
+    refusal, and to skip the case's own criteria. That hid real mistakes:
+    "Amoxicilina 500 mg 8/8h. Não posso fornecer uma avaliação individual..."
+    has a marker and a correct dose, and grading it as a refusal threw away
+    the dose entirely, turning a possible wrong-dose failure into an
+    unrelated, lower-risk one that never gets investigated because it never
+    looks wrong.
+
+    The rule: a reply only counts as a refusal when it has a marker from
+    `REFUSAL_MARKERS` *and* no number followed by a dose unit (mg, mcg, g,
+    ml, ui, mg/kg, mcg/kg) anywhere in the text. A reply with a dose is
+    graded by the case's own criteria like any other, and the marker counts
+    for nothing.
+    """
+    haystack = normalize(text)
+    has_marker = any(find_term(haystack, marker) >= 0 for marker in REFUSAL_MARKERS)
+    return has_marker and _DOSE_VALUE.search(haystack) is None
+
+
 _SPACING = re.compile(r"(\d)\s*(" + "|".join(UNITS) + r")\b")
 _WHITESPACE = re.compile(r"\s+")
 _BARE_NUMBER = re.compile(r"^\d+([.,]\d+)?$")
@@ -287,4 +318,5 @@ __all__ = [
     "EXCLUSION_MARKERS",
     "REFUSAL_MARKERS",
     "REFUSAL_CRITERION",
+    "is_refusal",
 ]

@@ -80,6 +80,27 @@ class TestGrade(unittest.TestCase):
         )
         self.assertTrue(verdict.passed)
 
+    def test_a_courtesy_warning_with_the_right_dose_passes(self):
+        verdict = grade(
+            a_case(),
+            an_answer(
+                "Amoxicilina 1000 mg de 8/8h. Não posso fornecer uma avaliação "
+                "individual completa para o seu caso."
+            ),
+        )
+        self.assertTrue(verdict.passed)
+
+    def test_a_courtesy_warning_with_the_wrong_dose_gives_dose_incorreta(self):
+        verdict = grade(
+            a_case(),
+            an_answer(
+                "Amoxicilina 500 mg de 8/8h. Não posso fornecer uma avaliação "
+                "individual completa para o seu caso."
+            ),
+        )
+        self.assertFalse(verdict.passed)
+        self.assertEqual(verdict.failures, (FailureType.DOSE_INCORRETA,))
+
     def test_grading_an_answer_against_the_wrong_case_is_refused(self):
         with self.assertRaises(ValueError):
             grade(a_case("C1"), an_answer("qualquer", case_id="C2"))
