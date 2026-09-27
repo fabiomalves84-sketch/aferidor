@@ -28,6 +28,7 @@ from .grading import (
     missing_samples,
     run_conditions,
     tally_by_model,
+    wilson_interval,
 )
 from .models import Answer, Case, Verdict
 from .protocolo import Outcome, Protocol, evaluate, warnings as protocol_warnings
@@ -125,20 +126,38 @@ def protocol_findings(
     return found_warnings, [evaluate(protocol, summaries[m]) for m in sorted(summaries)]
 
 
+def interval_text(successes: int, total: int) -> str:
+    """A 95% Wilson interval, written the way the report writes percentages."""
+    low, high = wilson_interval(successes, total)
+    return f"IC 95% {_percent(low)} a {_percent(high)}"
+
+
 def _risk_line(critical_cases: int, total_cases: int) -> str:
-    """The headline number: cases, not samples.
+    """The headline number: cases, not samples, with how far it can be trusted.
 
     Um caso conta como falha crítica se qualquer amostra a produziu. Um médico
     só vê uma resposta e não escolhe qual das amostras lhe calha.
+
+    The interval is part of the number, not a footnote. With 27 cases, zero
+    critical failures is still compatible with a true rate above one in ten,
+    and a reader who sees only "0" reads a certainty the bench does not have.
     """
+    if not total_cases:
+        return "**Sem casos avaliados.**"
+    interval = interval_text(critical_cases, total_cases)
     if critical_cases:
         return (
             f"**{critical_cases} de {total_cases} casos com falha de risco crítico em "
-            "pelo menos uma amostra.** Uma falha crítica é um erro de dose, uma interação "
-            "ou contraindicação omitida, um encaminhamento urgente omitido, ou um facto "
-            "inventado."
+            f"pelo menos uma amostra** ({interval}). Uma falha crítica é um erro de dose, "
+            "uma interação ou contraindicação omitida, um encaminhamento urgente omitido, "
+            "ou um facto inventado."
         )
-    return "**Nenhum caso com falha de risco crítico em nenhuma amostra.**"
+    _, high = wilson_interval(0, total_cases)
+    return (
+        "**Nenhum caso com falha de risco crítico em nenhuma amostra.** Com "
+        f"{total_cases} casos, isto é compatível com uma proporção real de casos com falha "
+        f"crítica até {_percent(high)} ({interval})."
+    )
 
 
 def _failure_table(counts: Tally) -> list[str]:
@@ -303,15 +322,20 @@ def build(
         out.append("|---|---|---|---|")
         for model in per_model:
             summary = consistency_per_model[model]
+            counts = per_model[model]
             out.append(
-                f"| `{model}` | {summary.critical_cases} | {summary.unstable_cases} | "
-                f"{_percent(summary.sample_accuracy)} |"
+                f"| `{model}` | {summary.critical_cases} de {summary.cases} "
+                f"({interval_text(summary.critical_cases, summary.cases)}) | "
+                f"{summary.unstable_cases} de {summary.cases} | "
+                f"{_percent(summary.sample_accuracy)} ({interval_text(counts.passed, counts.total)}) |"
             )
         out.append("")
         out.append(
             "As duas primeiras colunas pesam mais do que a terceira: uma taxa de amostras "
             "corretas alta ainda pode esconder casos que falham sempre, ou casos instáveis "
-            "cuja resposta certa depende de que amostra o médico calhou a ver."
+            "cuja resposta certa depende de que amostra o médico calhou a ver. Os intervalos "
+            "são de Wilson a 95%. O da taxa de amostras trata cada amostra como independente, "
+            "e não o são (há várias por caso), por isso é mais estreito do que devia."
         )
         out.append("")
 
@@ -323,7 +347,7 @@ def build(
         out.append("")
         out.append(
             f"{counts.passed} de {counts.total} amostras passaram em todos os critérios "
-            f"({_percent(counts.accuracy)})."
+            f"({_percent(counts.accuracy)}, {interval_text(counts.passed, counts.total)})."
         )
         if summary.unstable_cases:
             out.append("")
@@ -358,6 +382,7 @@ __all__ = [
     "build",
     "conditions_rows",
     "protocol_findings",
+    "interval_text",
     "format_missing",
     "format_missing_samples",
     "HEADER_NOTE",

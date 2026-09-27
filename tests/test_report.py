@@ -110,6 +110,27 @@ class TestAlternativeShown(unittest.TestCase):
         self.assertIn("corrigida contra: penicilina benzatínica em dose única", page)
 
 
+class TestIntervals(unittest.TestCase):
+    def test_the_headline_carries_its_interval(self):
+        text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
+        self.assertIn("1 de 1 casos com falha de risco crítico", text)
+        self.assertIn("IC 95%", text)
+
+    def test_zero_critical_cases_says_how_high_the_true_rate_could_be(self):
+        cases = [a_case(f"C{i}") for i in range(27)]
+        answers = [an_answer("1000 mg", case_id=c.case_id) for c in cases]
+        text = build(cases, answers)
+        self.assertIn("compatível com uma proporção real de casos com falha crítica até 12%", text)
+
+    def test_the_html_headline_carries_the_interval_too(self):
+        from aferidor import html_report
+
+        answers = [an_answer("Amoxicilina 500 mg")]
+        verdicts = [grade(a_case(), answers[0])]
+        page = html_report.build([a_case()], answers, verdicts, today=date(2026, 9, 14))
+        self.assertIn("IC 95%", page)
+
+
 class TestHeader(unittest.TestCase):
     def test_it_states_it_is_not_a_medical_device(self):
         text = build([a_case()], [an_answer("1 g")])

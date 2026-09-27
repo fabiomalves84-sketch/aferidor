@@ -33,6 +33,7 @@ from .report import (
     conditions_rows,
     format_missing,
     format_missing_samples,
+    interval_text,
     protocol_findings,
 )
 
@@ -67,7 +68,8 @@ def _headline(models: list[str], summaries: dict[str, ConsistencySummary]) -> st
             "<li><span class=\"modelo\">" + _esc(model) + "</span>"
             "<span class=\"destaque\">" + str(summary.critical_cases) + "</span>"
             "<span class=\"legenda\">de " + str(summary.cases)
-            + " casos com falha crítica em alguma amostra</span></li>"
+            + " casos com falha crítica em alguma amostra ("
+            + _esc(interval_text(summary.critical_cases, summary.cases)) + ")</span></li>"
         )
     return "<ul class=\"headline\">" + "".join(items) + "</ul>"
 
