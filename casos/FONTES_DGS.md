@@ -221,6 +221,20 @@ nenhum caso foi alterado.
 | PED-05 | Infarmed, Circular Informativa n.º 075/CD/8.1.7, de 24/04/2015 | "Em crianças com idade inferior a 12 anos, a codeína está contraindicada no tratamento da tosse e constipação" | Coincide |
 | ADU-HTA-01 | DGS 020/2011, atualizada a 19/03/2013, ponto 1 e critério II C, pp. 1-2 | Diagnóstico por "elevação persistente, em várias medições e em diferentes ocasiões", em pelo menos duas consultas com uma semana de intervalo | O caso exige não diagnosticar numa consulta e aceita "medições repetidas". Coincide no que mede; a norma não dá preferência à MAPA e à AMPA, a ESC 2024 dá |
 
+## Decididas a 27/09/2026
+
+- **Coincidem (4):** passaram a citar a DGS e o Infarmed (commit 7153d51).
+- **DPOC:** o ATB-DPOC-002 aceita a amoxicilina simples (APMGF) ou a
+  amoxicilina com clavulânico (DGS); o ATB-DPOC-012 passou a 5 a 7 dias
+  (commit e19e0e3).
+- **SCORE:** aceita o SCORE2 ou o SCORE (commit e19e0e3).
+- **Hipertensão:** aceita a combinação ou a monoterapia de primeira linha
+  (commit e19e0e3).
+- **Prótese valvular:** fica só com a ESC; os critérios já aceitam
+  "contraindicado" e "não recomendado" (commit b645d98).
+
+Os casos continuam por confirmar pelo Fábio nos documentos que citam.
+
 ## Divergem, e é preciso decidir
 
 | Caso | Documento | O que diz | O caso diz |
