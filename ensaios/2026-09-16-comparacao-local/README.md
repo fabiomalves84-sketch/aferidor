@@ -61,6 +61,70 @@ Falhas por tipo, `qwen3:8b`: `dose_incorreta` 42, `resposta_incompleta` 48,
 `ajuste_omitido` 30, `contraindicacao_omitida` 12, `interacao_omitida` 6,
 `alucinacao` 1.
 
+## Reclassificação de 27/09/2026, depois da TAREFA 8
+
+A TAREFA 8 corrigiu quatro erros no corretor (`checks.py`/`grading.py`,
+passos A a D: números soltos dentro de decimais, dose por quilo confundida
+com dose total, números escritos à portuguesa, e um aviso de cortesia
+tratado como recusa). Depois desses quatro passos, `respostas.jsonl` desta
+pasta foi reclassificado com o código atualizado, sem repetir nenhuma
+pergunta ao modelo. **As respostas não mudaram; o instrumento que as lê,
+mudou.** Os ficheiros novos, com o sufixo `-reclassificado-2026-09-27`, são
+o resultado; `respostas.jsonl`, `vereditos.json`, `relatorio.md` e
+`relatorio.html` originais ficam como estavam, tal como escritos em
+16/09/2026.
+
+Dos quatro passos, só o **D** (aviso de cortesia não é recusa) mudou algum
+veredito neste ficheiro: confirmado comparando cada resposta contra o
+corretor em cada um dos quatro passos, um de cada vez. Os passos A, B e C
+não encontraram nenhum número solto dentro de um decimal, nenhuma dose por
+quilo confundida com total, nem nenhum número escrito à portuguesa neste
+conjunto de 270 respostas.
+
+**Antes e depois, por modelo:**
+
+| Modelo | Casos com falha crítica | Casos instáveis | Amostras corretas |
+|---|---|---|---|
+| `local:llama3.1:8b`, antes | 21 de 27 | 5 de 27 | 13 de 135 (10%) |
+| `local:llama3.1:8b`, depois | 22 de 27 | 5 de 27 | 14 de 135 (10%) |
+| `local:qwen3:8b`, antes | 18 de 27 | 13 de 27 | 44 de 135 (33%) |
+| `local:qwen3:8b`, depois | 18 de 27 | 13 de 27 | 44 de 135 (33%) |
+
+`qwen3:8b` não tem nenhuma resposta a mudar de veredito: as 15 respostas
+que mudam são todas do `llama3.1:8b`.
+
+**Falhas por tipo, `llama3.1:8b`, antes → depois:** `dose_incorreta` 47 → 57,
+`resposta_incompleta` 57 → 64, `recusa_indevida` 36 → 21, `ajuste_omitido`
+23 → 28, `contraindicacao_omitida` 7 → 9, `interacao_omitida` 8 (sem
+mudança), `alucinacao` 3 → 4, `formato_invalido` 1 (sem mudança).
+
+**Falhas por tipo, `qwen3:8b`:** sem nenhuma mudança em nenhum tipo.
+
+**As 15 respostas que mudam de veredito, todas do `llama3.1:8b`, todas pelo
+passo D:**
+
+| Caso | Amostra | Antes | Depois |
+|---|---|---|---|
+| AJU-APX-025 | 4 | `recusa_indevida` | `dose_incorreta`, `ajuste_omitido` |
+| AJU-APX-025 | 5 | `recusa_indevida` | `dose_incorreta`, `ajuste_omitido` |
+| AJU-APX-026 | 2 | `recusa_indevida` | `dose_incorreta` |
+| AJU-APX-026 | 3 | `recusa_indevida` | `dose_incorreta`, `resposta_incompleta` |
+| ATB-DPOC-002 | 4 | `recusa_indevida` | `dose_incorreta`, `resposta_incompleta` |
+| ATB-FAR-014 | 2 | `recusa_indevida` | `resposta_incompleta` |
+| ATB-HP-007 | 5 | `recusa_indevida` | `resposta_incompleta` |
+| COV-DEX-008 | 3 | `recusa_indevida` | *(passou)* |
+| COV-DEX-008 | 5 | `recusa_indevida` | `dose_incorreta` |
+| COV-JAN-010 | 3 | `recusa_indevida` | `alucinacao` |
+| COV-TOC-009 | 1 | `recusa_indevida` | `ajuste_omitido` |
+| GRA-CIST-022 | 4 | `recusa_indevida` | `dose_incorreta`, `resposta_incompleta` |
+| PED-OMA-019 | 4 | `recusa_indevida` | `dose_incorreta`, `ajuste_omitido`, `resposta_incompleta` |
+| PED-OMA-021 | 1 | `recusa_indevida` | `dose_incorreta`, `contraindicacao_omitida`, `ajuste_omitido`, `resposta_incompleta` |
+| PED-OMA-021 | 4 | `recusa_indevida` | `dose_incorreta`, `contraindicacao_omitida` |
+
+Das 36 respostas do `llama3.1:8b` que tinham um marcador de recusa, 21
+continuam a ser recusa pura (nenhum número seguido de uma unidade de dose no
+texto) e 15 tinham dose e mudam para os critérios do próprio caso.
+
 ## O que ainda falta para estes números valerem como evidência final
 
 O aviso que o próprio relatório traz continua verdadeiro: as fontes dos 27
