@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import html_report, report
+from . import html_report, report, revisao
 from .grading import grade_all, self_check, tally_by_model, uncaught_controls
 from .providers import (
     AnthropicProvider,
@@ -124,6 +124,25 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "modelos", help="perguntar ao fornecedor que modelos tem disponiveis"
     )
     modelos.add_argument("--fornecedor", choices=("openai", "anthropic", "local"), required=True)
+
+    rev = sub.add_parser(
+        "revisao",
+        help="exportar uma amostra de respostas para uma pessoa julgar, às cegas",
+    )
+    rev.add_argument("--casos", type=Path, default=DEFAULT_CASES)
+    rev.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
+    rev.add_argument("--n", type=int, default=60, help="quantas respostas (omissão 60)")
+    rev.add_argument("--semente", type=int, default=1, help="a mesma semente dá a mesma amostra")
+    rev.add_argument("--saida", type=Path, default=Path("relatorios/revisao.csv"))
+    rev.add_argument(
+        "--substituir", action="store_true",
+        help="escrever por cima de uma folha que já existe (perde os juízos que lá estejam)",
+    )
+
+    conc = sub.add_parser(
+        "concordancia", help="comparar os juízos de uma pessoa com os vereditos do corretor"
+    )
+    conc.add_argument("--revisao", type=Path, default=Path("relatorios/revisao.csv"))
 
     relatorio = sub.add_parser("relatorio", help="escrever o relatorio legivel")
     relatorio.add_argument("--casos", type=Path, default=DEFAULT_CASES)
@@ -317,6 +336,62 @@ def _cases_source(path: Path) -> tuple[str, str]:
     return label, hashlib.sha256(raw).hexdigest()
 
 
+def comando_revisao(args: argparse.Namespace) -> int:
+    key = revisao.key_path_for(args.saida)
+    if (args.saida.exists() or key.exists()) and not args.substituir:
+        print(
+            f"erro: {args.saida} já existe e pode ter juízos de uma pessoa; "
+            "escolhe outro --saida, ou usa --substituir se quiseres mesmo apagá-la",
+            file=sys.stderr,
+        )
+        return 2
+    if not args.respostas.exists():
+        print(f"erro: nao ha respostas em {args.respostas}", file=sys.stderr)
+        return 2
+    cases = read_cases(args.casos)
+    answers = read_answers(args.respostas)
+    try:
+        verdicts, _ = grade_all(cases, answers)
+        items = revisao.sample_for_review(cases, answers, verdicts, args.n, args.semente)
+    except ValueError as error:
+        print(f"erro: {error}", file=sys.stderr)
+        return 2
+    args.saida.parent.mkdir(parents=True, exist_ok=True)
+    revisao.write_review(items, args.saida, key, args.respostas)
+    unknown = sorted({
+        item.case.case_id for item in items
+        if revisao.asked_the_same_question(item.case, item.answer) is None
+    })
+    if unknown:
+        print(
+            "aviso: estas respostas não guardaram o texto que lhes foi enviado, por isso não se "
+            "sabe se a pergunta na folha é a que o modelo viu. Se algum destes casos mudou "
+            f"depois do ensaio, tira-o da revisão: {', '.join(unknown)}",
+            file=sys.stderr,
+        )
+    passed = sum(1 for item in items if item.grader_passed)
+    print(f"{len(items)} respostas para julgar em {args.saida} ({passed} que o corretor passou, "
+          f"{len(items) - passed} que chumbou; a folha não diz quais)")
+    print(f"chave em {key}; não a mostres a quem julga")
+    print("na coluna 'juizo' escreve 'certa' ou 'errada'; depois corre: "
+          f"python3 -m aferidor concordancia --revisao {args.saida}")
+    return 0
+
+
+def comando_concordancia(args: argparse.Namespace) -> int:
+    key = revisao.key_path_for(args.revisao)
+    if not args.revisao.exists() or not key.exists():
+        print(f"erro: falta {args.revisao} ou a sua chave {key}", file=sys.stderr)
+        return 2
+    try:
+        result = revisao.read_review(args.revisao, key)
+    except ValueError as error:
+        print(f"erro: {error}", file=sys.stderr)
+        return 2
+    print(revisao.format_agreement(result))
+    return 0 if result.judged else 1
+
+
 def comando_modelos(args: argparse.Namespace) -> int:
     try:
         provider = build_provider(args.fornecedor, None)
@@ -402,6 +477,10 @@ def main(argv: list[str] | None = None) -> int:
         return comando_ensaio(args)
     if args.comando == "modelos":
         return comando_modelos(args)
+    if args.comando == "revisao":
+        return comando_revisao(args)
+    if args.comando == "concordancia":
+        return comando_concordancia(args)
     return 2
 
 

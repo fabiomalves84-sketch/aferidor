@@ -165,6 +165,29 @@ assim que se encontrou a exclusão numa frase a desculpar a receita na frase
 seguinte. Estes controlos não apanham um termo que aparece por acaso dentro de
 outra palavra de uma resposta real: isso só se vê com respostas reais.
 
+## Validar o corretor contra uma pessoa
+
+O `verificar` mostra que cada critério passa a resposta certa e chumba uma
+resposta errada construída. Não diz com que frequência o corretor concorda com
+um clínico em respostas reais, e sem isso o corretor é um instrumento de medida
+que ninguém comparou com uma referência.
+
+```
+python -m aferidor revisao --respostas <ficheiro> --n 60   # folha para julgar
+python -m aferidor concordancia --revisao relatorios/revisao.csv
+```
+
+O primeiro comando escolhe uma amostra reprodutível, metade passada e metade
+chumbada pelo corretor, e escreve uma folha que abre numa folha de cálculo. A
+folha é cega: mostra a pergunta, a referência e a resposta, e nunca o veredito
+do corretor nem o modelo, que ficam num ficheiro-chave à parte. Quem julga
+escreve "certa" ou "errada" em cada linha. O segundo comando compara e diz,
+por esta ordem, as passagens falsas (respostas que a pessoa deu como erradas e
+o corretor deixou passar), as falhas falsas, a concordância e o kappa de
+Cohen, com intervalos de confiança de 95%. Respostas dadas a uma formulação
+diferente da pergunta ficam fora da amostra; as antigas, que não guardaram o
+texto enviado, entram com aviso.
+
 ## Relatório
 
 `python -m aferidor relatorio` escreve um documento em Markdown para quem não lê
@@ -239,7 +262,7 @@ em vigor.
 
 Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 329 testes,
+por tipo de falha e por risco, relatório legível e documentação. 346 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as 23

@@ -227,7 +227,26 @@ python -m aferidor ensaio --fornecedor openai --modelo <nome> --repeticoes 5 --t
 pedidos.** Nos modelos correntes isto fica em cêntimos ou poucos euros, não
 em dezenas, mas é bom saber o número antes de o correr, não depois.
 
-## 11. Recomeçar do zero
+## 11. Validar o corretor com um clínico
+
+Depois de um ensaio, e antes de apresentar os números, pede a um clínico que
+julgue uma amostra das respostas:
+
+```
+python -m aferidor revisao --respostas data/respostas.jsonl --n 60
+```
+
+Envia-lhe `relatorios/revisao.csv` e **não** o `revisao-chave.json`, que diz o
+que o corretor decidiu. Quando a folha voltar com a coluna `juizo` preenchida:
+
+```
+python -m aferidor concordancia --revisao relatorios/revisao.csv
+```
+
+O primeiro número é o que interessa: de quantas respostas erradas o corretor
+deixou passar. Se for alto, os números do ensaio sobrestimam o modelo.
+
+## 12. Recomeçar do zero
 
 ```
 python -m aferidor ensaio --fornecedor openai --modelo <nome> --recomecar

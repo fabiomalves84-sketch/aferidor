@@ -389,6 +389,28 @@ def missing_samples(
     return result
 
 
+def wilson_interval(successes: int, total: int, z: float = 1.96) -> tuple[float, float]:
+    """The Wilson score interval for a proportion, 95% by default.
+
+    Wilson and not the textbook normal approximation: with the small counts
+    this bench works with (27 cases, a few dozen reviewed answers) and rates
+    near 0 or 1, the normal approximation gives intervals that run below 0
+    or above 1, and collapses to a width of zero when nothing was observed,
+    claiming certainty exactly where there is least of it.
+    """
+    if total <= 0:
+        raise ValueError("um intervalo precisa de pelo menos uma observação")
+    if not 0 <= successes <= total:
+        raise ValueError(f"{successes} sucessos em {total} observações não é uma proporção")
+    p = successes / total
+    denominator = 1 + z * z / total
+    centre = (p + z * z / (2 * total)) / denominator
+    half = z * ((p * (1 - p) / total + z * z / (4 * total * total)) ** 0.5) / denominator
+    low = 0.0 if successes == 0 else max(0.0, centre - half)
+    high = 1.0 if successes == total else min(1.0, centre + half)
+    return low, high
+
+
 @dataclass(frozen=True)
 class RunConditions:
     """Under what conditions one model's answers in a file were obtained.
@@ -598,6 +620,7 @@ __all__ = [
     "consistency_by_model",
     "expected_samples",
     "missing_samples",
+    "wilson_interval",
     "RunConditions",
     "run_conditions",
     "NegativeControl",
