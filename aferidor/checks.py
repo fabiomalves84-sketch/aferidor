@@ -73,10 +73,14 @@ REFUSAL_CRITERION = Criterion(
 
 # Units that mean a number next to them is a dose. Kept narrow on purpose: a
 # patient's weight in kg or a duration in dias is not a sign that the model
-# answered the clinical question, only a dose is.
+# answered the clinical question, only a dose is. A dose unit divided by a
+# time or a volume is a measurement, not a dose: a clearance of 40 ml/min, a
+# creatinine of 1,5 mg/dl or a syrup of 40 mg/ml are copied from the question
+# and say nothing about whether the model answered it.
 _DOSE_UNITS = ("mg/kg", "mcg/kg", "mg", "mcg", "g", "ml", "ui")
 _DOSE_VALUE = re.compile(
     r"\d+(?:[.,]\d+)?\s*(?:" + "|".join(re.escape(u) for u in _DOSE_UNITS) + r")\b"
+    r"(?!\s*/\s*(?:min|dl|l|ml)\b)"
 )
 
 
@@ -95,7 +99,8 @@ def is_refusal(text: str) -> bool:
     `REFUSAL_MARKERS` *and* no number followed by a dose unit (mg, mcg, g,
     ml, ui, mg/kg, mcg/kg) anywhere in the text. A reply with a dose is
     graded by the case's own criteria like any other, and the marker counts
-    for nothing.
+    for nothing. A rate or a concentration (40 ml/min, 1,5 mg/dl, 40 mg/ml)
+    is not a dose: it is what a refusal repeats from the question.
     """
     haystack = normalize(text)
     has_marker = any(find_term(haystack, marker) >= 0 for marker in REFUSAL_MARKERS)
