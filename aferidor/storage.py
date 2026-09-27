@@ -96,6 +96,12 @@ def case_to_dict(case: Case) -> dict:
     return out
 
 
+# The review states the annotated bank format defines. Only a reviewed case
+# may score.
+REVIEW_STATES = ("revisto_fonte", "por_verificar")
+NO_SOURCE_PLACE = "sem versao nem seccao indicadas"
+
+
 def _bank_case_to_legacy(data: dict, where: str) -> dict:
     """Map one case from the annotated bank format onto the format `case_from_dict` reads.
 
@@ -105,19 +111,29 @@ def _bank_case_to_legacy(data: dict, where: str) -> dict:
     the parts the grader uses are carried across; the rest stays in the file for
     people to read. The risk level and any grading note travel in `notas` so the
     report can still show them.
+
+    The review state is enforced, not just carried. The bank itself says a
+    case marked `por_verificar` has no confirmed source and must not be used
+    to score, so such a case is refused with its id, rather than loaded and
+    counted like any other. An unknown state is refused too: a typo there
+    would otherwise decide silently whether a case counts.
+
+    A case with neither a source version nor a section keeps that gap in
+    plain sight: its reference reads "sem versao nem seccao indicadas", not a
+    placeholder that looks like a place in a document.
     """
     case_id = str(_require(data, "id", where))
     at = f"{where}, caso {case_id}"
     reference = " ".join(
         part for part in (data.get("fonte_versao", ""), data.get("fonte_seccao", "")) if part
-    ) or "ver fonte"
+    ) or NO_SOURCE_PLACE
     source: dict = {"nome": _require(data, "fonte", at), "referencia": reference}
     if data.get("data_verificacao"):
         source["consultada"] = data["data_verificacao"]
     notes = " ".join(
         part for part in (f"Risco {data.get('risco', '')}.", data.get("nota_avaliacao", "")) if part
     )
-    return {
+    mapped = {
         "id": case_id,
         "categoria": _require(data, "area", at),
         "pergunta": _require(data, "pergunta", at),
@@ -126,6 +142,17 @@ def _bank_case_to_legacy(data: dict, where: str) -> dict:
         "criterios": _require(data, "criterios", at),
         "notas": notes,
     }
+    state = str(_require(data, "estado", at))
+    if state not in REVIEW_STATES:
+        raise ValueError(
+            f"{at}: estado {state!r} desconhecido; esperava um de {', '.join(REVIEW_STATES)}"
+        )
+    if state == "por_verificar":
+        raise ValueError(
+            f"{at}: marcado por_verificar, sem fonte confirmada; nao pode pontuar."
+            " Retira-o do ficheiro ou confirma a fonte antes de correr este banco"
+        )
+    return mapped
 
 
 def read_cases(path: Path) -> list[Case]:

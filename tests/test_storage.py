@@ -192,6 +192,40 @@ class TestBankFormat(unittest.TestCase):
         self.assertEqual(case.source.consulted, date(2026, 9, 26))
         self.assertIn("Risco alto", case.notes)
 
+    def bank_with(self, **changes) -> Path:
+        case = {
+            "id": "B-001", "area": "pediatria", "risco": "alto", "estado": "revisto_fonte",
+            "pergunta": "p", "resposta_referencia": "Nao, risco de botulismo.",
+            "fonte": "Manual MSD", "fonte_versao": "2026", "fonte_seccao": "botulismo",
+            "criterios": [{"tipo": "contem", "termos": ["botulismo"], "falha": "contraindicacao_omitida"}],
+        }
+        case.update(changes)
+        case = {k: v for k, v in case.items() if v is not None}
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        path = Path(folder.name) / "banco.json"
+        path.write_text(json.dumps({"casos": [case]}), encoding="utf-8")
+        return path
+
+    def test_a_case_marked_por_verificar_is_refused_and_named(self):
+        with self.assertRaises(ValueError) as raised:
+            read_cases(self.bank_with(estado="por_verificar"))
+        self.assertIn("B-001", str(raised.exception))
+        self.assertIn("nao pode pontuar", str(raised.exception))
+
+    def test_an_unknown_review_state_is_refused(self):
+        with self.assertRaises(ValueError) as raised:
+            read_cases(self.bank_with(estado="revisto"))
+        self.assertIn("'revisto'", str(raised.exception))
+
+    def test_a_case_without_a_review_state_is_refused(self):
+        with self.assertRaises(ValueError):
+            read_cases(self.bank_with(estado=None))
+
+    def test_a_case_without_version_or_section_says_so_instead_of_pointing_nowhere(self):
+        [case] = read_cases(self.bank_with(fonte_versao=None, fonte_seccao=None))
+        self.assertEqual(case.source.reference, "sem versao nem seccao indicadas")
+
     def test_bank_case_without_criteria_is_refused(self):
         bank = {"casos": [{"id": "B-002", "area": "x", "pergunta": "p", "resposta_referencia": "r", "fonte": "f"}]}
         with tempfile.TemporaryDirectory() as tmp:
