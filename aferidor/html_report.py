@@ -27,7 +27,14 @@ from .grading import (
     tally_by_model,
 )
 from .models import Answer, Case, Verdict
-from .report import HEADER_NOTE, conditions_rows, format_missing, format_missing_samples
+from .protocolo import Protocol
+from .report import (
+    HEADER_NOTE,
+    conditions_rows,
+    format_missing,
+    format_missing_samples,
+    protocol_findings,
+)
 
 _CELL_CLASS = {
     ConsistencyState.ESTAVEL_CERTO: "ok",
@@ -275,6 +282,7 @@ def build(
     sources_verified: bool = False,
     today: date | None = None,
     cases_source: tuple[str, str] | None = None,
+    protocol: Protocol | None = None,
 ) -> str:
     """Write the whole report as one self contained HTML file."""
     per_model = tally_by_model(verdicts)
@@ -330,6 +338,27 @@ def build(
     summaries = consistency_by_model(consistency)
     pairs = pairs_by_case(cases, answers, verdicts)
 
+    if protocol is not None:
+        found_warnings, outcomes = protocol_findings(protocol, answers, summaries, cases_source)
+        out.append('<section class="protocolo"><h2>Critério de aprovação</h2>')
+        out.append(
+            f"<p>Protocolo <strong>{_esc(protocol.name)}</strong>, escrito a "
+            f"{_esc(protocol.written_on.isoformat())} (<code>{_esc(protocol.path)}</code>, "
+            f"SHA-256 {_esc(protocol.sha256[:12])}).</p>"
+        )
+        for warning in found_warnings:
+            out.append(f'<div class="aviso"><strong>Aviso.</strong> {_esc(warning)}.</div>')
+        out.append("<ul>")
+        for outcome in outcomes:
+            result = "aprovado" if outcome.approved else "reprovado"
+            details = "; ".join(
+                f"{c.label}: {c.observed} ({c.limit}{'' if c.met else ', não cumpre'})"
+                for c in outcome.checks
+            )
+            out.append(
+                f"<li><strong>{_esc(outcome.model)}: {result}</strong>. {_esc(details)}.</li>"
+            )
+        out.append("</ul></section>")
     out.append(_headline(models, summaries))
     out.append(_grid(cases, models, consistency))
     out.append(_detail(cases, models, consistency, pairs))

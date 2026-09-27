@@ -52,7 +52,20 @@ python -m aferidor ensaio --fornecedor <fornecedor> --modelo <nome> --casos caso
 
 Usa ficheiros de saída próprios (`--saida`, `--vereditos`, `--relatorio`) para não misturar as respostas dos dois bancos.
 
-## 4. Correr
+## 4. Antes de correr: o protocolo
+
+Decide, antes de ver uma única resposta, o que conta como aprovado:
+
+```
+python -m aferidor protocolo --nome "<nome do ensaio>" --saida protocolos/<nome>.json
+```
+
+Abre o ficheiro e acerta os limites em `criterios_de_aprovacao`. O modelo gerado
+começa no mais exigente (zero casos com falha crítica) de propósito: se o
+quiseres mais brando, muda-o conscientemente. Faz commit do protocolo **antes**
+de correr o ensaio, e passa-o ao `ensaio` com `--protocolo`.
+
+## 4.1. Correr
 
 Um comando faz tudo: pergunta, corrige e escreve o relatório.
 

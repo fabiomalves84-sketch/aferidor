@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import html_report, report, revisao
+from . import html_report, protocolo, report, revisao
 from .grading import grade_all, self_check, tally_by_model, uncaught_controls
 from .providers import (
     AnthropicProvider,
@@ -118,12 +118,23 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="limite de tokens da resposta; um modelo que raciocina antes de responder precisa de mais",
     )
     ensaio.add_argument("--recomecar", action="store_true")
+    ensaio.add_argument(
+        "--protocolo", type=Path, default=None,
+        help="protocolo com o critério de aprovação, escrito antes do ensaio",
+    )
     ensaio.add_argument("--fontes-confirmadas", action="store_true")
 
     modelos = sub.add_parser(
         "modelos", help="perguntar ao fornecedor que modelos tem disponiveis"
     )
     modelos.add_argument("--fornecedor", choices=("openai", "anthropic", "local"), required=True)
+
+    prot = sub.add_parser(
+        "protocolo", help="escrever um protocolo com o critério de aprovação, antes do ensaio"
+    )
+    prot.add_argument("--nome", required=True)
+    prot.add_argument("--casos", type=Path, default=DEFAULT_CASES)
+    prot.add_argument("--saida", type=Path, required=True)
 
     rev = sub.add_parser(
         "revisao",
@@ -152,6 +163,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     relatorio.add_argument(
         "--limite", type=int, default=0,
         help="0 usa todos os casos; tem de bater com o --limite usado em executar",
+    )
+    relatorio.add_argument(
+        "--protocolo", type=Path, default=None,
+        help="protocolo com o critério de aprovação, escrito antes do ensaio",
     )
     relatorio.add_argument(
         "--fontes-confirmadas",
@@ -307,6 +322,13 @@ def comando_relatorio(
     if saida is None:
         saida = DEFAULT_REPORT_HTML if formato == "html" else DEFAULT_REPORT
 
+    protocol = None
+    if getattr(args, "protocolo", None) is not None:
+        try:
+            protocol = protocolo.read_protocol(args.protocolo)
+        except (OSError, ValueError) as error:
+            print(f"erro: {error}", file=sys.stderr)
+            return 2
     builder = html_report.build if formato == "html" else report.build
     text = builder(
         cases,
@@ -316,6 +338,7 @@ def comando_relatorio(
         reasons=reasons,
         sources_verified=args.fontes_confirmadas,
         cases_source=_cases_source(args.casos),
+        protocol=protocol,
     )
     saida.parent.mkdir(parents=True, exist_ok=True)
     saida.write_text(text, encoding="utf-8")
@@ -334,6 +357,20 @@ def _cases_source(path: Path) -> tuple[str, str]:
     if version:
         label += f", versão {version}"
     return label, hashlib.sha256(raw).hexdigest()
+
+
+def comando_protocolo(args: argparse.Namespace) -> int:
+    if args.saida.exists():
+        print(f"erro: {args.saida} já existe; um protocolo não se reescreve depois de escrito",
+              file=sys.stderr)
+        return 2
+    data = protocolo.template(args.nome, args.casos)
+    args.saida.parent.mkdir(parents=True, exist_ok=True)
+    args.saida.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"protocolo em {args.saida}, para {args.casos} (SHA-256 {data['banco_sha256'][:12]})")
+    print("revê os limites em criterios_de_aprovacao, e faz commit antes de correr o ensaio:")
+    print("é o commit, e não a data escrita no ficheiro, que prova que o critério veio antes")
+    return 0
 
 
 def comando_revisao(args: argparse.Namespace) -> int:
@@ -449,6 +486,7 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     relatorio_args = argparse.Namespace(
         casos=args.casos, respostas=args.saida, saida=args.relatorio,
         fontes_confirmadas=args.fontes_confirmadas, limite=args.limite,
+        protocolo=getattr(args, "protocolo", None),
     )
     codigo_relatorio = comando_relatorio(relatorio_args, reasons=errors)
     if codigo_relatorio != 0:
@@ -477,6 +515,8 @@ def main(argv: list[str] | None = None) -> int:
         return comando_ensaio(args)
     if args.comando == "modelos":
         return comando_modelos(args)
+    if args.comando == "protocolo":
+        return comando_protocolo(args)
     if args.comando == "revisao":
         return comando_revisao(args)
     if args.comando == "concordancia":

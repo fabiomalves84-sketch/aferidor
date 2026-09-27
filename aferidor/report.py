@@ -30,6 +30,7 @@ from .grading import (
     tally_by_model,
 )
 from .models import Answer, Case, Verdict
+from .protocolo import Outcome, Protocol, evaluate, warnings as protocol_warnings
 from .risk import Risk
 
 HEADER_NOTE = (
@@ -104,6 +105,24 @@ def conditions_rows(
             f" tokens_max {tokens}; versão {builds}",
         ))
     return rows
+
+
+def protocol_findings(
+    protocol: Protocol,
+    answers: list[Answer],
+    summaries: dict,
+    cases_source: tuple[str, str] | None,
+) -> tuple[list[str], list[Outcome]]:
+    """The protocol's warnings and its verdict per model, shared by both reports."""
+    found = run_conditions(answers)
+    found_warnings = protocol_warnings(
+        protocol,
+        min((a.asked_at for a in answers), default=None),
+        cases_source[1] if cases_source else None,
+        expected_samples(answers),
+        {model: c.temperatures for model, c in found.items()},
+    )
+    return found_warnings, [evaluate(protocol, summaries[m]) for m in sorted(summaries)]
 
 
 def _risk_line(critical_cases: int, total_cases: int) -> str:
@@ -190,6 +209,7 @@ def build(
     sources_verified: bool = False,
     today: date | None = None,
     cases_source: tuple[str, str] | None = None,
+    protocol: Protocol | None = None,
 ) -> str:
     """Write the whole report as Markdown.
 
@@ -247,6 +267,31 @@ def build(
         out.append("Não há vereditos para relatar.")
         out.append("")
         return "\n".join(out)
+
+    if protocol is not None:
+        found_warnings, outcomes = protocol_findings(
+            protocol, answers, consistency_per_model, cases_source
+        )
+        out.append("## Critério de aprovação")
+        out.append("")
+        out.append(
+            f"Protocolo **{protocol.name}**, escrito a {protocol.written_on.isoformat()} "
+            f"(`{protocol.path}`, SHA-256 {protocol.sha256[:12]})."
+        )
+        out.append("")
+        for warning in found_warnings:
+            out.append(f"> **Aviso.** {warning[0].upper() + warning[1:]}.")
+            out.append("")
+        out.append("| Modelo | Resultado | " + " | ".join(c.label for c in outcomes[0].checks) + " |")
+        out.append("|---|---|" + "---|" * len(outcomes[0].checks))
+        for outcome in outcomes:
+            cells = [
+                f"{c.observed} ({c.limit}){'' if c.met else ', **não cumpre**'}"
+                for c in outcome.checks
+            ]
+            result = "aprovado" if outcome.approved else "**reprovado**"
+            out.append(f"| `{outcome.model}` | {result} | " + " | ".join(cells) + " |")
+        out.append("")
 
     if len(per_model) > 1:
         out.append("## Comparação")
@@ -312,6 +357,7 @@ def build(
 __all__ = [
     "build",
     "conditions_rows",
+    "protocol_findings",
     "format_missing",
     "format_missing_samples",
     "HEADER_NOTE",

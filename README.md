@@ -165,6 +165,27 @@ assim que se encontrou a exclusão numa frase a desculpar a receita na frase
 seguinte. Estes controlos não apanham um termo que aparece por acaso dentro de
 outra palavra de uma resposta real: isso só se vê com respostas reais.
 
+## Critério de aprovação, escrito antes
+
+Os critérios de cada caso dizem se uma resposta está certa. Não dizem se um
+modelo é aceitável. Isso decide-se num protocolo, escrito antes do ensaio:
+
+```
+python -m aferidor protocolo --nome "ensaio de outubro" --saida protocolos/outubro.json
+git add protocolos/outubro.json && git commit    # antes de correr
+python -m aferidor ensaio ... --protocolo protocolos/outubro.json
+```
+
+O protocolo fixa o máximo de casos com falha crítica, o máximo de casos
+instáveis e a taxa mínima de amostras corretas, as amostras por caso e a
+temperatura, e guarda o SHA-256 do banco de casos. O relatório diz, por
+modelo, aprovado ou reprovado e porquê. Diz também quando o protocolo não é o
+critério prévio que afirma ser: se tem data posterior à primeira resposta, se
+foi escrito para outro banco, ou se o ensaio correu com outras amostras ou
+outra temperatura. A data escrita no ficheiro é declarada; o que a prova é o
+commit do protocolo antes de o ensaio correr. O comando recusa reescrever um
+protocolo que já existe.
+
 ## Validar o corretor contra uma pessoa
 
 O `verificar` mostra que cada critério passa a resposta certa e chumba uma
@@ -262,7 +283,7 @@ em vigor.
 
 Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 346 testes,
+por tipo de falha e por risco, relatório legível e documentação. 358 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as 23
