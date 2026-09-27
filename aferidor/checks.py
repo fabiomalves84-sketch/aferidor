@@ -11,6 +11,8 @@ Two matching rules earn their complexity:
   `1000mg` matches `1000 mg`. A model is not wrong for typing a space.
 * A term that is only digits matches on word boundaries. Without that, the term
   `5` is found inside `500 mg` and a wrong dose passes as a right duration.
+  A term made of letters must start a word, and a short acronym must also end
+  one, or `tid` is found inside `mantida` and a missing interval passes.
 
 The `nao_prescreve` check is the one place where plain text matching was not
 enough, and where the replacement is openly a heuristic. Its limits are stated
@@ -125,8 +127,8 @@ def normalize(text: str) -> str:
     return _SPACING.sub(r"\1 \2", collapsed)
 
 
-def find_term(haystack: str, term: str) -> int:
-    """Position of `term` in already normalised text, or -1.
+def _term_pattern(needle: str) -> str:
+    """The regular expression that finds an already normalised term.
 
     Bare numbers match only as whole words, so `5` is not found inside `500`,
     nor inside a decimal such as `2,5` or `5,5`: a digit, or a digit followed
@@ -136,22 +138,33 @@ def find_term(haystack: str, term: str) -> int:
     `2,5 mg` or `25 mg`. A term ending in a bare mass unit (`mg`, `mcg`, `g`)
     is also not found when it is immediately followed by `/kg`: that is a
     dose per kilo, a different quantity from the total dose the term names.
+
+    A term that starts with a letter must start a word: `tid` is not found
+    inside `mantida`, nor `sumo` inside `consumo`. Longer terms may still end
+    mid-word, because the case bank uses stems on purpose (`urin` for
+    `urina` and `urinar`). A term of three letters or fewer is an acronym
+    (`tid`, `inr`, `ibp`) and must also end the word, allowing a plural `s`,
+    so `pes` is not found inside `peso` or `pessoas`.
     """
+    escaped = re.escape(needle)
+    if _BARE_NUMBER.match(needle):
+        return rf"(?<!\d)(?<!\d[.,]){escaped}(?!\d)(?![.,]\d)"
+    if needle[0].isdigit():
+        guard = _FOLLOWED_BY_PER_KG if _MASS_UNIT_SUFFIX.search(needle) else ""
+        return rf"(?<![\d])(?<![\d][.,]){escaped}{guard}"
+    if needle[0].isalpha():
+        end = r"s?(?![a-z0-9])" if len(needle) <= 3 and needle.isalpha() else ""
+        return rf"(?<![a-z0-9]){escaped}{end}"
+    return escaped
+
+
+def find_term(haystack: str, term: str) -> int:
+    """Position of `term` in already normalised text, or -1. See `_term_pattern`."""
     needle = normalize(term)
     if not needle:
         return -1
-    if _BARE_NUMBER.match(needle):
-        match = re.search(
-            rf"(?<!\d)(?<!\d[.,]){re.escape(needle)}(?!\d)(?![.,]\d)", haystack
-        )
-        return match.start() if match else -1
-    if needle[0].isdigit():
-        guard = _FOLLOWED_BY_PER_KG if _MASS_UNIT_SUFFIX.search(needle) else ""
-        match = re.search(
-            rf"(?<![\d])(?<![\d][.,]){re.escape(needle)}{guard}", haystack
-        )
-        return match.start() if match else -1
-    return haystack.find(needle)
+    match = re.search(_term_pattern(needle), haystack)
+    return match.start() if match else -1
 
 
 def snippet(haystack: str, position: int, width: int = 60) -> str:
@@ -272,14 +285,14 @@ def _check_not_prescribed(criterion: Criterion, haystack: str) -> CriterionResul
     """
     for term in criterion.terms:
         needle = normalize(term)
-        at = find_term(haystack, term)
-        while at >= 0:
-            if not _is_excluded_at(haystack, at, len(needle)):
+        if not needle:
+            continue
+        for match in re.finditer(_term_pattern(needle), haystack):
+            if not _is_excluded_at(haystack, match.start(), len(needle)):
                 return CriterionResult(
-                    criterion, False, f"prescreve {term!r} em: {snippet(haystack, at)}"
+                    criterion, False,
+                    f"prescreve {term!r} em: {snippet(haystack, match.start())}",
                 )
-            following = find_term(haystack[at + len(needle):], term)
-            at = at + len(needle) + following if following >= 0 else -1
     return CriterionResult(criterion, True, "nenhum farmaco excluido foi prescrito")
 
 

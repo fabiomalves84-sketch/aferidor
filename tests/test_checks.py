@@ -65,6 +65,31 @@ class TestFindTerm(unittest.TestCase):
     def test_a_total_dose_term_still_matches_a_daily_total(self):
         self.assertGreaterEqual(find_term(normalize("dar 1000 mg/dia"), "1000 mg"), 0)
 
+    def test_a_word_term_does_not_match_in_the_middle_of_another_word(self):
+        """Seen in the 16/09 run: two answers to ATB-PAC-001 gave no interval at all
+        and passed the interval criterion because `tid` was found in `mantida` and
+        `discutida`."""
+        self.assertEqual(find_term(normalize("terapeutica mantida"), "tid"), -1)
+        text = normalize("evitar o consumo de sumo")
+        self.assertEqual(find_term(text, "sumo"), text.rindex("sumo"))
+
+    def test_a_word_term_still_matches_at_the_start_of_a_word(self):
+        self.assertGreaterEqual(find_term(normalize("amoxicilina tid"), "tid"), 0)
+        self.assertGreaterEqual(find_term(normalize("(TID)"), "tid"), 0)
+        self.assertGreaterEqual(find_term(normalize("contraindicação"), "contraindica"), 0)
+
+    def test_a_longer_stem_may_still_end_in_the_middle_of_a_word(self):
+        self.assertGreaterEqual(find_term(normalize("diminuição da urina"), "urin"), 0)
+        self.assertGreaterEqual(find_term(normalize("não urinou"), "urin"), 0)
+
+    def test_a_short_acronym_must_end_the_word(self):
+        self.assertEqual(find_term(normalize("ajustar ao peso"), "pes"), -1)
+        self.assertEqual(find_term(normalize("pessoas com diabetes"), "pes"), -1)
+        self.assertGreaterEqual(find_term(normalize("exame dos pés"), "pes"), 0)
+
+    def test_a_short_acronym_may_take_a_plural_s(self):
+        self.assertGreaterEqual(find_term(normalize("os AVKs"), "avk"), 0)
+
 
 class TestContem(unittest.TestCase):
     def test_any_one_of_the_terms_is_enough(self):
@@ -163,6 +188,11 @@ class TestNaoPrescreve(unittest.TestCase):
             failure=FailureType.CONTRAINDICACAO_OMITIDA,
         )
         self.assertFalse(check(crit, "Dar cefuroxima 250 mg.").passed)
+
+    def test_a_term_inside_another_word_is_not_a_prescription(self):
+        crit = criterion("nao_prescreve", "sumo", failure=FailureType.AJUSTE_OMITIDO)
+        self.assertTrue(check(crit, "Soro de reidratacao oral; reduzir o consumo de leite.").passed)
+        self.assertFalse(check(crit, "Dar sumo de maca diluido.").passed)
 
 
 class TestValorNumerico(unittest.TestCase):
