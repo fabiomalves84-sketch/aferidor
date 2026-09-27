@@ -11,7 +11,7 @@ _to_delete/
 # os ensaios registados são evidência, não produto descartável
 !ensaios/
 
-# passagem de testemunho entre sessões; instruções, não código
+# caderno do projeto: decisões em aberto e registo de tarefas; não é código
 BRIEFING.md
 GUIA.md
 demo.py

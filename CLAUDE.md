@@ -64,27 +64,28 @@ python3 -m aferidor ensaio --fornecedor falso
 
 `docs/COMO_CORRER.md` cobre a execução contra um modelo real.
 
-## Divisão de trabalho entre sessões
+## Uma sessão só, no VS Code
 
-Este projeto é trabalhado por duas sessões ao mesmo tempo, com papéis separados
-de propósito. Respeita o teu papel e não invadas o outro.
+Desde 27 de setembro de 2026 o projeto é trabalhado numa sessão só, a do
+Claude Code dentro do VS Code, com o Fábio. É essa sessão que decide o desenho
+com ele, escreve o código, corre os testes, commita e faz push.
 
-**Sessão Opus, na aplicação Claude:** decide o desenho, investiga fontes,
-escreve o `BRIEFING.md`. Escreve ficheiros. **Não corre comandos git.**
-
-**Sessão Sonnet, no terminal:** lê o `BRIEFING.md`, escreve código, corre os
-testes, **commita e faz push**. É a única que mexe no git.
-
-A razão é concreta e não é teórica: no dia 14 de setembro de 2026 as duas
-sessões correram comandos git ao mesmo tempo e deixaram ficheiros de bloqueio
-presos em `.git`, que travaram todos os commits seguintes. E uma escreveu uma
-fase inteira que a outra já tinha escrito.
+Até essa data havia duas sessões com papéis separados: uma na aplicação Claude
+que decidia e escrevia o `BRIEFING.md`, e outra no terminal que executava e era
+a única a mexer no git. A separação acabou porque o código passou a ser escrito
+diretamente no VS Code. A regra que ela protegia continua a valer: **nunca duas
+sessões a correr git ao mesmo tempo.** No dia 14 de setembro de 2026 isso
+aconteceu, deixou ficheiros de bloqueio presos em `.git` que travaram todos os
+commits seguintes, e uma sessão escreveu uma fase inteira que a outra já tinha
+escrito. Se abrires outra sessão para ler ou pensar, ela não commita.
 
 Se encontrares ficheiros `.lock` presos dentro de `.git` sem nenhum git a
 correr, apaga-os. Foi isso que aconteceu.
 
-## Passagem de testemunho
+## O caderno
 
-`BRIEFING.md` é o caderno entre as duas sessões. Não entra no repositório. A
-sessão executora faz o que está em TAREFA, escreve em FEITO o que fez, e põe
-TAREFA a "nada pendente".
+`BRIEFING.md` não entra no repositório. Deixou de ser passagem de testemunho e
+passou a ser o caderno do projeto: no topo, as decisões em aberto que ainda são
+do Fábio; em baixo, o registo das tarefas antigas e do que foi feito em cada
+uma. Quando uma decisão em aberto for tomada e feita, sai do topo e fica
+registada em baixo, com os commits.
