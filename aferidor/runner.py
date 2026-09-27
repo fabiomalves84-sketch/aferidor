@@ -26,11 +26,18 @@ from .models import Answer, Case
 from .providers import Provider, ProviderError, Reply
 from .storage import append_answer, read_answers
 
+# The instruction is written in correct European Portuguese, accents
+# included. Until 27/09/2026 it went out without a single accent ("Responde
+# em portugues europeu a esta pergunta clinica"), which asked for European
+# Portuguese in a way no European Portuguese text is written. Changing it
+# changed the measurement; answers keep the hash of the exact text sent
+# (`prompt_digest`), so answers to the old and new wording never mix, and a
+# run cannot resume across the change.
 INSTRUCTION = (
-    "Responde em portugues europeu a esta pergunta clinica, dirigida a um medico.\n"
-    "Se a resposta envolver farmaco, indica dose, intervalo e duracao.\n"
-    "Assinala interacoes, contraindicacoes e ajustes relevantes.\n"
-    "Nao inventes referencias. Se nao souberes, di-lo.\n\n"
+    "Responde em português europeu a esta pergunta clínica, dirigida a um médico.\n"
+    "Se a resposta envolver um fármaco, indica a dose, o intervalo e a duração.\n"
+    "Assinala as interações, as contraindicações e os ajustes relevantes.\n"
+    "Não inventes referências. Se não souberes, di-lo.\n\n"
     "Pergunta: {question}"
 )
 

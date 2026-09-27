@@ -31,6 +31,12 @@ class TestPrompt(unittest.TestCase):
     def test_the_prompt_carries_the_question(self):
         self.assertIn(a_case().question, build_prompt(a_case()))
 
+    def test_the_instruction_is_written_in_accented_european_portuguese(self):
+        prompt = build_prompt(a_case())
+        for word in ("português europeu", "clínica", "médico", "duração", "Não inventes"):
+            with self.subTest(word=word):
+                self.assertIn(word, prompt)
+
     def test_the_prompt_never_carries_the_reference_answer(self):
         case = a_case()
         prompt = build_prompt(case)
