@@ -230,6 +230,36 @@ def _numbers_before(haystack: str, unit: str) -> list[float]:
     return [_parse_number(m.group(1)) for m in pattern.finditer(haystack)]
 
 
+def remove_term(text: str, term: str) -> str:
+    """`text` normalised, with every place `term` is found blanked out.
+
+    Blanked with a space, not deleted, so the text either side cannot join
+    into a new match. Used to build negative controls: the reference answer
+    with the thing a criterion asks for taken out.
+    """
+    haystack = normalize(text)
+    needle = normalize(term)
+    if not needle:
+        return haystack
+    return re.sub(_term_pattern(needle), " ", haystack)
+
+
+def replace_values(text: str, unit: str, value: float) -> str | None:
+    """`text` normalised, with every number written before `unit` set to `value`.
+
+    Uses the same reading as `valor_numerico` itself, so it replaces exactly
+    the numbers that criterion would see. Returns None when there is no such
+    number to replace.
+    """
+    haystack = normalize(text)
+    normalized_unit = normalize(unit)
+    guard = "" if normalized_unit.endswith("/kg") else _NOT_PER_KG_OR_VOLUME
+    pattern = re.compile(rf"({_NUMBER_TOKEN})(\s*{re.escape(normalized_unit)}\b{guard})")
+    written = f"{value:g}".replace(".", ",")
+    replaced, count = pattern.subn(lambda m: written + m.group(2), haystack)
+    return replaced if count else None
+
+
 def check(criterion: Criterion, text: str) -> CriterionResult:
     """Run one criterion against one answer."""
     haystack = normalize(text)
@@ -360,4 +390,6 @@ __all__ = [
     "REFUSAL_MARKERS",
     "REFUSAL_CRITERION",
     "is_refusal",
+    "remove_term",
+    "replace_values",
 ]

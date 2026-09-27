@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 from . import html_report, report
-from .grading import grade_all, self_check, tally_by_model
+from .grading import grade_all, self_check, tally_by_model, uncaught_controls
 from .providers import (
     AnthropicProvider,
     FakeProvider,
@@ -235,7 +235,20 @@ def comando_verificar(args: argparse.Namespace) -> int:
                     f" -> {result.evidence}",
                     file=sys.stderr,
                 )
-    return 1 if broken else 0
+
+    total, uncaught = uncaught_controls(cases)
+    print(f"{total - len(uncaught)}/{total} controlos negativos apanhados")
+    for control, verdict in uncaught:
+        print(
+            f"\n{control.case_id}: o criterio {control.criterion.kind}"
+            f" {list(control.criterion.terms)} nao apanha uma resposta errada"
+            f" ({control.change})",
+            file=sys.stderr,
+        )
+        if verdict is not None:
+            found = ", ".join(f.value for f in verdict.failures) or "nenhuma falha"
+            print(f"  o veredito deu: {found}", file=sys.stderr)
+    return 1 if broken or uncaught else 0
 
 
 def comando_relatorio(
@@ -287,15 +300,23 @@ def comando_modelos(args: argparse.Namespace) -> int:
 def comando_ensaio(args: argparse.Namespace) -> int:
     """Os tres passos de uma vez, parando ao primeiro que falhe.
 
-    A verificacao de coerencia dos casos corre primeiro e de proposito. Perguntar
-    a um modelo custa dinheiro; descobrir depois que um caso estava partido custa
-    o dinheiro outra vez.
+    A verificacao dos casos corre primeiro e de proposito, nos dois sentidos: a
+    resposta certa passa, e uma resposta errada construida para cada criterio
+    falha. Perguntar a um modelo custa dinheiro; descobrir depois que um caso
+    estava partido custa o dinheiro outra vez.
     """
     cases = read_cases(args.casos)
     broken = self_check(cases)
-    if broken:
+    _, uncaught = uncaught_controls(cases)
+    if broken or uncaught:
         for case, _ in broken:
             print(f"erro: {case.case_id} nao passa nos proprios criterios", file=sys.stderr)
+        for control, _ in uncaught:
+            print(
+                f"erro: {control.case_id} tem um criterio {control.criterion.kind}"
+                f" que nao apanha uma resposta errada ({control.change})",
+                file=sys.stderr,
+            )
         print("corrige os casos antes de gastar uma execucao", file=sys.stderr)
         return 2
 

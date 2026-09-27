@@ -13,9 +13,11 @@ from aferidor.grading import (
     grade,
     grade_all,
     missing_samples,
+    negative_controls,
     self_check,
     tally,
     tally_by_model,
+    uncaught_controls,
 )
 from aferidor.models import Answer, Case, Criterion, Source
 from aferidor.risk import FailureType, Risk
@@ -362,3 +364,69 @@ class TestSelfCheck(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def a_wide_case(tolerance: str) -> Case:
+    return Case(
+        case_id="LARGO",
+        category="dose",
+        question="Que dose?",
+        reference="Amoxicilina 1000 mg de 8/8h.",
+        source=Source(name="Guia", reference="p. 1"),
+        criteria=(
+            Criterion(
+                kind="valor_numerico", terms=("1000", "mg", tolerance),
+                failure=FailureType.DOSE_INCORRETA,
+            ),
+        ),
+    )
+
+
+class TestNegativeControls(unittest.TestCase):
+    """self_check shows the right answer passes; these show a wrong one fails."""
+
+    def test_a_contem_control_takes_every_accepted_term_out(self):
+        (dose,) = [c for c in negative_controls(a_case()) if "1000 mg" in c.criterion.terms]
+        self.assertNotIn("1000 mg", dose.text)
+        self.assertNotIn("1 g", dose.text)
+
+    def test_a_valor_numerico_control_doubles_and_halves_the_value(self):
+        texts = [c.text for c in negative_controls(a_wide_case("0"))]
+        self.assertEqual(len(texts), 2)
+        self.assertIn("2000 mg", texts[0])
+        self.assertIn("500 mg", texts[1])
+
+    def test_a_forbidden_term_is_prescribed_at_the_end(self):
+        case = Case(
+            case_id="C1", category="alergia", question="?",
+            reference="Azitromicina 500 mg. A amoxicilina esta contraindicada.",
+            source=Source(name="Guia", reference="p. 1"),
+            criteria=(
+                Criterion(
+                    kind="nao_prescreve", terms=("amoxicilina",),
+                    failure=FailureType.CONTRAINDICACAO_OMITIDA,
+                ),
+            ),
+        )
+        (control,) = negative_controls(case)
+        self.assertTrue(control.text.endswith("Iniciar amoxicilina."))
+        _, uncaught = uncaught_controls([case])
+        self.assertEqual(uncaught, [], "a reference ending in an exclusion must not excuse it")
+
+    def test_every_control_of_a_sound_case_is_caught(self):
+        total, uncaught = uncaught_controls([a_case()])
+        self.assertEqual(total, 2)
+        self.assertEqual(uncaught, [])
+
+    def test_a_tolerance_too_wide_to_fail_is_reported(self):
+        """A criterion that accepts both double and half the dose cannot be shown
+        failing, and that is reported rather than counted as proven."""
+        total, uncaught = uncaught_controls([a_wide_case("5000")])
+        self.assertEqual(total, 1)
+        self.assertEqual(len(uncaught), 1)
+        self.assertIsNone(uncaught[0][0].text)
+
+    def test_a_half_wide_tolerance_keeps_the_control_it_can_build(self):
+        total, uncaught = uncaught_controls([a_wide_case("600")])
+        self.assertEqual(total, 1)
+        self.assertEqual(uncaught, [])

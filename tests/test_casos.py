@@ -56,6 +56,12 @@ class TestShippedCases(unittest.TestCase):
         )
         self.assertEqual(thin, [])
 
+    def test_every_criterion_catches_its_negative_control(self):
+        from aferidor.grading import uncaught_controls
+
+        _, uncaught = uncaught_controls(self.cases)
+        self.assertEqual([(c.case_id, c.change) for c, _ in uncaught], [])
+
     def test_every_case_appears_in_the_verification_table(self):
         table = (CASES.parent / "VERIFICACAO.md").read_text(encoding="utf-8")
         for case in self.cases:
@@ -82,6 +88,12 @@ class TestAnnotatedBank(unittest.TestCase):
 
         broken = [case.case_id for case, _ in self_check(self.cases)]
         self.assertEqual(broken, [])
+
+    def test_every_criterion_catches_its_negative_control(self):
+        from aferidor.grading import uncaught_controls
+
+        _, uncaught = uncaught_controls(self.cases)
+        self.assertEqual([(c.case_id, c.change) for c, _ in uncaught], [])
 
     def test_every_case_records_a_source_a_type_and_a_verification_date(self):
         for item in self.raw["casos"]:

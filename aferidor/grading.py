@@ -12,8 +12,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
-from .checks import REFUSAL_CRITERION, check, is_refusal
-from .models import Answer, Case, CriterionResult, Verdict
+from .checks import REFUSAL_CRITERION, check, is_refusal, remove_term, replace_values
+from .models import Answer, Case, Criterion, CriterionResult, Verdict
 from .risk import FailureType, Risk
 
 
@@ -349,6 +349,100 @@ def self_check(cases: list[Case]) -> list[tuple[Case, Verdict]]:
     return broken
 
 
+@dataclass(frozen=True)
+class NegativeControl:
+    """A deliberately wrong answer that one criterion must catch.
+
+    Built from the case's own reference answer by breaking exactly what the
+    criterion checks, so no clinical content is invented: the terms a
+    `contem` asks for are taken out, the value a `valor_numerico` asks for is
+    doubled or halved, a term a `nao_contem` or `nao_prescreve` forbids is
+    prescribed at the end. `text` is None when no such answer can be built,
+    which is itself a finding: a criterion nobody can show failing proves
+    nothing.
+    """
+
+    case_id: str
+    criterion: Criterion
+    change: str
+    text: str | None
+
+
+def negative_controls(case: Case) -> list[NegativeControl]:
+    """Every negative control for every criterion of one case."""
+    controls: list[NegativeControl] = []
+    for criterion in case.criteria:
+        def add(change: str, text: str | None) -> None:
+            controls.append(NegativeControl(case.case_id, criterion, change, text))
+
+        if criterion.kind == "contem":
+            text = case.reference
+            for term in criterion.terms:
+                text = remove_term(text, term)
+            add("sem " + ", ".join(criterion.terms), text)
+        elif criterion.kind == "contem_todos":
+            for term in criterion.terms:
+                add(f"sem {term}", remove_term(case.reference, term))
+        elif criterion.kind == "valor_numerico":
+            expected = float(criterion.terms[0].replace(",", "."))
+            unit = criterion.terms[1]
+            tolerance = (
+                float(criterion.terms[2].replace(",", ".")) if len(criterion.terms) > 2 else 0.0
+            )
+            built = False
+            for wrong in (expected * 2, expected / 2):
+                if abs(wrong - expected) <= tolerance:
+                    continue
+                text = replace_values(case.reference, unit, wrong)
+                if text is not None:
+                    add(f"{expected:g} {unit} trocado por {wrong:g}", text)
+                    built = True
+            if not built:
+                add(f"sem valor errado possivel para {expected:g} {unit}", None)
+        else:
+            for term in criterion.terms:
+                add(f"com {term}", f"{case.reference} Iniciar {term}.")
+    return controls
+
+
+def uncaught_controls(
+    cases: list[Case],
+) -> tuple[int, list[tuple[NegativeControl, Verdict | None]]]:
+    """How many negative controls exist, and which ones got through.
+
+    `self_check` shows each criterion passes the right answer; this shows each
+    one can fail a wrong one, which `self_check` never tests. A control is
+    caught when its criterion fails and the whole verdict, refusal detection
+    included, carries that criterion's failure type. Without this, a
+    criterion that can never fail looks exactly like one that never needed
+    to.
+    """
+    total = 0
+    uncaught: list[tuple[NegativeControl, Verdict | None]] = []
+    for case in cases:
+        for control in negative_controls(case):
+            total += 1
+            if control.text is None:
+                uncaught.append((control, None))
+                continue
+            verdict = grade(
+                case,
+                Answer(
+                    case_id=case.case_id,
+                    model="controlo",
+                    text=control.text,
+                    asked_at=datetime.now(),
+                ),
+            )
+            caught = (
+                not check(control.criterion, control.text).passed
+                and control.criterion.failure in verdict.failures
+            )
+            if not caught:
+                uncaught.append((control, verdict))
+    return total, uncaught
+
+
 __all__ = [
     "grade",
     "grade_all",
@@ -365,4 +459,7 @@ __all__ = [
     "consistency_by_model",
     "expected_samples",
     "missing_samples",
+    "NegativeControl",
+    "negative_controls",
+    "uncaught_controls",
 ]

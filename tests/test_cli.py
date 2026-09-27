@@ -105,6 +105,49 @@ class TestVerificar(unittest.TestCase):
             self.assertIn("MAU", err)
 
 
+def _write_wide_case(path: Path) -> None:
+    """A case whose reference passes but whose criterion cannot fail."""
+    path.write_text(json.dumps([{
+        "id": "LARGO", "categoria": "dose", "pergunta": "Que dose?",
+        "referencia": "Amoxicilina 1000 mg",
+        "fonte": {"nome": "Guia", "referencia": "p. 1"},
+        "criterios": [{
+            "tipo": "valor_numerico", "termos": ["1000", "mg", "5000"],
+            "falha": "dose_incorreta",
+        }],
+    }], ensure_ascii=False), encoding="utf-8")
+
+
+class TestVerificarControlos(unittest.TestCase):
+    def test_the_shipped_cases_catch_every_negative_control(self):
+        code, out, _ = run("verificar", "--casos", str(REAL_CASES))
+        self.assertEqual(code, 0)
+        self.assertIn("controlos negativos apanhados", out)
+
+    def test_a_criterion_that_cannot_fail_exits_with_failure_and_names_it(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "casos.json"
+            _write_wide_case(path)
+            code, out, err = run("verificar", "--casos", str(path))
+            self.assertEqual(code, 1)
+            self.assertIn("1/1 casos coerentes", out)
+            self.assertIn("0/1 controlos negativos apanhados", out)
+            self.assertIn("LARGO", err)
+
+    def test_ensaio_refuses_to_run_a_case_whose_criterion_cannot_fail(self):
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            _write_wide_case(f / "casos.json")
+            code, _, err = run(
+                "ensaio", "--fornecedor", "falso", "--casos", str(f / "casos.json"),
+                "--saida", str(f / "r.jsonl"), "--vereditos", str(f / "v.json"),
+                "--relatorio", str(f / "r.md"),
+            )
+            self.assertEqual(code, 2)
+            self.assertIn("LARGO", err)
+            self.assertFalse((f / "r.jsonl").exists(), "nada pode ser perguntado")
+
+
 class TestClassificar(unittest.TestCase):
     def test_classifying_without_answers_refuses_instead_of_reporting_zero(self):
         with tempfile.TemporaryDirectory() as folder:

@@ -93,7 +93,7 @@ Sem dependências externas. Python 3.10 ou superior, biblioteca padrão apenas.
 
 ```
 python -m unittest discover -s tests             # testes
-python -m aferidor verificar                     # os casos passam nos proprios criterios?
+python -m aferidor verificar                     # a referencia passa e uma resposta errada falha?
 python -m aferidor executar --fornecedor falso   # ensaio a seco, sem chave nem custo
 python -m aferidor executar --fornecedor openai --modelo gpt-4o
 python -m aferidor classificar                   # avalia as respostas guardadas
@@ -132,6 +132,18 @@ dose errada passaria por uma duração certa.
 contra os critérios desse mesmo caso. Um caso cuja própria referência não passa
 está errado, e está errado na direção que mais custa: dá como errado um modelo
 que acertou. A verificação corre também na bateria de testes.
+
+O mesmo comando verifica o sentido contrário, que a referência sozinha não
+prova: que cada critério consegue apanhar uma resposta errada. Para cada
+critério, constrói a partir da referência uma resposta estragada exatamente no
+que o critério vê (tira os termos que um `contem` exige, dobra ou divide a meio
+o valor de um `valor_numerico`, receita no fim o fármaco que um `nao_prescreve`
+proíbe) e exige que o veredito traga a falha declarada. Não se inventa conteúdo
+clínico: só se parte o que já lá está. Um critério que não pode falhar parece-se
+exatamente com um que nunca precisou de falhar, e só assim se distinguem. Foi
+assim que se encontrou a exclusão numa frase a desculpar a receita na frase
+seguinte. Estes controlos não apanham um termo que aparece por acaso dentro de
+outra palavra de uma resposta real: isso só se vê com respostas reais.
 
 ## Relatório
 
@@ -196,7 +208,7 @@ em vigor.
 
 Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 273 testes,
+por tipo de falha e por risco, relatório legível e documentação. 284 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as

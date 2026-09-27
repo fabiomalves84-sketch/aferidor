@@ -31,6 +31,12 @@ está partido na direção que mais custa: dá como errado um modelo que acertou
 `python3 -m aferidor verificar` tem de dar 27 em 27 antes de qualquer execução
 paga, e corre também na bateria de testes.
 
+**Um critério que não apanha uma resposta errada também está partido**, na
+direção contrária: deixa passar um erro. O mesmo `verificar` constrói, para
+cada critério, uma resposta errada a partir da referência e exige que falhe.
+Tem de dar todos os controlos negativos apanhados. Se um sobreviver, a correção
+é no corretor ou no caso, com a razão escrita, nunca retirar o controlo.
+
 **Alargar um critério porque ele castiga uma forma diferente de dizer a mesma
 coisa é afinar. Alargá-lo para o modelo passar é batota.** As duas parecem iguais
 às três da manhã. O que as separa é o commit: cada alteração a um critério leva
@@ -57,8 +63,8 @@ demonstra.
 ## Como correr
 
 ```
-python3 -m unittest discover -s tests   # 273 testes
-python3 -m aferidor verificar           # 27/27 casos coerentes
+python3 -m unittest discover -s tests   # 284 testes
+python3 -m aferidor verificar           # 27/27 casos, 187/187 controlos negativos
 python3 -m aferidor ensaio --fornecedor falso
 ```
 

@@ -61,7 +61,8 @@ python -m aferidor ensaio --fornecedor openai --modelo <nome-da-lista>
 ```
 
 Antes de gastar um cêntimo, ele confirma que os 27 casos passam nos próprios
-critérios. Se algum estiver partido, para e não pergunta nada. Descobrir um caso
+critérios e que cada critério apanha uma resposta errada construída a partir
+da referência. Se algum estiver partido, para e não pergunta nada. Descobrir um caso
 errado depois de pagar a execução obriga a pagá-la outra vez.
 
 Para experimentar sem gastar tudo:

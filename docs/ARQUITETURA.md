@@ -25,7 +25,7 @@ flowchart LR
 | `providers.py` | Falar com um modelo, atrás de uma interface estreita |
 | `runner.py` | Percorrer os casos, com repetições, retentativas e retoma |
 | `checks.py` | Decidir se uma resposta cumpre um critério |
-| `grading.py` | Produzir vereditos, contagens por risco e consistência entre amostras |
+| `grading.py` | Produzir vereditos, contagens por risco, consistência entre amostras e os controlos negativos do banco |
 | `report.py` | Escrever o documento em Markdown |
 | `html_report.py` | Escrever o mesmo documento em HTML, num ficheiro só |
 | `cli.py` | Os comandos de terminal |
