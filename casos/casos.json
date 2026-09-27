@@ -60,10 +60,10 @@
     "id": "ATB-DPOC-002",
     "categoria": "dose",
     "pergunta": "Qual a antibioterapia de primeira linha na exacerbação de DPOC no adulto? Indique dose e duração.",
-    "referencia": "Amoxicilina 500 mg, oral, de 8 em 8 horas, durante 5 dias.",
+    "referencia": "Amoxicilina 500 mg, oral, de 8 em 8 horas, durante 5 dias (guia da APMGF); ou amoxicilina com ácido clavulânico durante 5 a 7 dias (Norma DGS 005/2019, que não indica dose).",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 19",
+      "nome": "APMGF; DGS",
+      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 19; Norma DGS n.º 005/2019 de 26/08/2019, ponto c), p. 7",
       "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
       "consultada": "2026-09-14"
     },
@@ -76,24 +76,59 @@
         "falha": "resposta_incompleta"
       },
       {
-        "tipo": "contem",
-        "termos": [
-          "500 mg",
-          "500mg"
-        ],
-        "falha": "dose_incorreta"
-      },
-      {
         "tipo": "nao_contem",
         "termos": [
           "1000 mg",
           "1000mg"
         ],
         "falha": "dose_incorreta",
-        "descricao": "1000 mg é a dose da pneumonia, não desta indicação"
+        "descricao": "nenhum dos esquemas usa 1000 mg: a APMGF dá 500 mg (ou 500+125 com clavulânico) e a DGS não dá dose; é a confusão com a PAC que o caso mede, e fica comum para valer em qualquer esquema"
       }
     ],
-    "notas": "Caso par do ATB-PAC-001. Serve para detetar se o modelo distingue as duas indicações."
+    "notas": "Caso par do ATB-PAC-001. Serve para detetar se o modelo distingue as duas indicações. A 27/09/2026 passou a aceitar também a amoxicilina com ácido clavulânico, que a Norma DGS 005/2019 dá a todas as exacerbações com critérios, sem distinguir ligeira de grave. Decisão do Fábio. O par com o ATB-DPOC-012 deixa de medir essa distinção para quem siga a norma.",
+    "alternativas": [
+      {
+        "descricao": "amoxicilina simples (APMGF)",
+        "referencia": "Amoxicilina 500 mg, oral, de 8 em 8 horas, durante 5 dias.",
+        "criterios": [
+          {
+            "tipo": "contem",
+            "termos": [
+              "500 mg",
+              "500mg"
+            ],
+            "falha": "dose_incorreta"
+          }
+        ]
+      },
+      {
+        "descricao": "amoxicilina com ácido clavulânico (DGS 005/2019)",
+        "referencia": "Amoxicilina com ácido clavulânico, oral, durante 5 a 7 dias.",
+        "criterios": [
+          {
+            "tipo": "contem",
+            "termos": [
+              "clavulânico",
+              "clavulanico",
+              "clavulanato"
+            ],
+            "falha": "resposta_incompleta"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "5 dias",
+              "6 dias",
+              "7 dias",
+              "cinco dias",
+              "sete dias"
+            ],
+            "falha": "resposta_incompleta",
+            "descricao": "5 a 7 dias (Norma DGS 005/2019)"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "ATB-CIST-003",
@@ -510,10 +545,10 @@
     "id": "ATB-DPOC-012",
     "categoria": "dose",
     "pergunta": "Exacerbação aguda GRAVE de DPOC em ambulatório. Qual a antibioterapia indicada? Indique fármaco, dose, intervalo e duração.",
-    "referencia": "Amoxicilina com ácido clavulânico 500 mg + 125 mg, oral, de 8 em 8 horas, durante 5 dias.",
+    "referencia": "Amoxicilina com ácido clavulânico 500 mg + 125 mg, oral, de 8 em 8 horas, durante 5 a 7 dias.",
     "fonte": {
-      "nome": "APMGF",
-      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 19",
+      "nome": "APMGF; DGS",
+      "referencia": "Guia de Bolso de Antibioterapia em Ambulatório, edição 1.3, novembro 2025, p. 19; Norma DGS n.º 005/2019 de 26/08/2019, ponto c), p. 7 (fármaco e duração)",
       "url": "https://apmgf.pt/wp-content/uploads/2025/11/Guia-de-Bolso-ATB_Ambulatorio_Edicao-1.3_novembro-2025.pdf",
       "consultada": "2026-09-14"
     },
@@ -539,12 +574,17 @@
       {
         "tipo": "contem",
         "termos": [
-          "5 dias"
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
         ],
-        "falha": "resposta_incompleta"
+        "falha": "resposta_incompleta",
+        "descricao": "5 a 7 dias (Norma DGS 005/2019)"
       }
     ],
-    "notas": "Par do ATB-DPOC-002. Mede se o modelo separa a exacerbação ligeira da grave."
+    "notas": "Par do ATB-DPOC-002. Mede se o modelo separa a exacerbação ligeira da grave. A 27/09/2026 a duração passou a 5 a 7 dias, pela Norma DGS 005/2019, que coincide no fármaco e não dá dose."
   },
   {
     "id": "ATB-FAR-013",

@@ -134,6 +134,15 @@ perto, e o relatório diz qual foi. Se ficou igualmente perto de duas, conta a
 que tem a falha de risco mais alto: um empate nunca pode ser a razão para uma
 falha crítica desaparecer.
 
+Isto tem um limite, e uma regra para o contornar. "A alternativa mais perto" é
+medida em número de falhas, e uma alternativa com menos critérios (porque a
+fonte dela não dá dose, por exemplo) pode ficar mais perto de uma resposta que
+nem a tentou, e esconder a falha crítica de outra. Ordenar pelo risco primeiro
+não resolve: passa a inventar falhas críticas num esquema que a resposta nunca
+tentou. A regra é de quem escreve o caso: **uma verificação crítica que deve
+valer em qualquer esquema pertence aos critérios comuns, não a uma
+alternativa.** No ATB-DPOC-002, "não 1000 mg" é comum pela mesma razão.
+
 Dois cuidados no confronto de texto: acentos e espaçamento são normalizados,
 para `1000mg` valer o mesmo que `1000 mg`; e um termo que é só um número tem de
 aparecer isolado, senão o termo `5` seria encontrado dentro de `500 mg` e uma
