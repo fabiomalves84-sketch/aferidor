@@ -35,6 +35,13 @@ class TestFindTerm(unittest.TestCase):
     def test_a_bare_number_matches_on_its_own(self):
         self.assertGreaterEqual(find_term(normalize("durante 5 a 7 dias"), "5"), 0)
 
+    def test_a_bare_number_does_not_match_inside_a_decimal(self):
+        self.assertEqual(find_term(normalize("2,5 mg"), "5"), -1)
+        self.assertEqual(find_term(normalize("5,5 dias"), "5"), -1)
+
+    def test_a_bare_number_matches_a_range(self):
+        self.assertGreaterEqual(find_term(normalize("5-7 dias"), "5"), 0)
+
     def test_a_term_with_a_slash_still_matches_when_glued_to_a_unit(self):
         self.assertGreaterEqual(find_term(normalize("8/8h"), "8/8"), 0)
 
