@@ -104,7 +104,10 @@ def _sample_block(answer: Answer, verdict: Verdict) -> str:
     if verdict.passed:
         out.append(f'<p class="passou">amostra {answer.sample}: passou em todos os critérios</p>')
         return "".join(out)
-    out.append(f'<p class="amostra-numero">amostra {answer.sample}</p>')
+    alternative = (
+        f" (corrigida contra: {_esc(verdict.alternative)})" if verdict.alternative else ""
+    )
+    out.append(f'<p class="amostra-numero">amostra {answer.sample}{alternative}</p>')
     out.append("<ul>")
     for result in verdict.results:
         if not result.passed:

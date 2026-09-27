@@ -11,7 +11,7 @@ import json
 from datetime import date, datetime
 from pathlib import Path
 
-from .models import Answer, Case, Criterion, CriterionResult, Source, Verdict
+from .models import Alternative, Answer, Case, Criterion, CriterionResult, Source, Verdict
 from .risk import failure_from_label
 
 
@@ -71,6 +71,9 @@ def case_from_dict(data: dict, where: str) -> Case:
     criteria = _require(data, "criterios", at)
     if not isinstance(criteria, list):
         raise ValueError(f"{at}: 'criterios' must be a list")
+    alternatives = data.get("alternativas", [])
+    if not isinstance(alternatives, list):
+        raise ValueError(f"{at}: 'alternativas' must be a list")
     return Case(
         case_id=case_id,
         category=str(_require(data, "categoria", at)),
@@ -79,7 +82,29 @@ def case_from_dict(data: dict, where: str) -> Case:
         source=source_from_dict(dict(_require(data, "fonte", at)), at),
         criteria=tuple(criterion_from_dict(dict(c), at) for c in criteria),
         notes=str(data.get("notas", "")),
+        alternatives=tuple(alternative_from_dict(dict(a), at) for a in alternatives),
     )
+
+
+def alternative_from_dict(data: dict, where: str) -> Alternative:
+    description = str(_require(data, "descricao", where))
+    at = f"{where}, alternativa {description!r}"
+    criteria = _require(data, "criterios", at)
+    if not isinstance(criteria, list):
+        raise ValueError(f"{at}: 'criterios' must be a list")
+    return Alternative(
+        description=description,
+        reference=str(_require(data, "referencia", at)),
+        criteria=tuple(criterion_from_dict(dict(c), at) for c in criteria),
+    )
+
+
+def alternative_to_dict(alternative: Alternative) -> dict:
+    return {
+        "descricao": alternative.description,
+        "referencia": alternative.reference,
+        "criterios": [criterion_to_dict(c) for c in alternative.criteria],
+    }
 
 
 def case_to_dict(case: Case) -> dict:
@@ -93,6 +118,8 @@ def case_to_dict(case: Case) -> dict:
     }
     if case.notes:
         out["notas"] = case.notes
+    if case.alternatives:
+        out["alternativas"] = [alternative_to_dict(a) for a in case.alternatives]
     return out
 
 
@@ -142,6 +169,8 @@ def _bank_case_to_legacy(data: dict, where: str) -> dict:
         "criterios": _require(data, "criterios", at),
         "notas": notes,
     }
+    if "alternativas" in data:
+        mapped["alternativas"] = data["alternativas"]
     state = str(_require(data, "estado", at))
     if state not in REVIEW_STATES:
         raise ValueError(
@@ -252,6 +281,7 @@ def verdict_to_dict(verdict: Verdict) -> dict:
         "passou": verdict.passed,
         "falhas": [f.value for f in verdict.failures],
         "risco": str(verdict.worst_risk) if verdict.worst_risk else "",
+        "alternativa": verdict.alternative,
         "criterios": [
             {
                 "tipo": r.criterion.kind,

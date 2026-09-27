@@ -52,8 +52,37 @@ class Criterion:
 
 
 @dataclass(frozen=True)
+class Alternative:
+    """One of several regimens the source accepts as correct for the same case.
+
+    When a source gives two first-line options (amoxicillin for ten days, or a
+    single dose of benzathine penicillin), each is written as its own set of
+    criteria with its own reference answer. Folding them into one criterion
+    ("amoxicilina" or "benzatinica") would let an answer pass with the wrong
+    amoxicillin dose just by naming the other drug in passing.
+    """
+
+    description: str
+    reference: str
+    criteria: tuple[Criterion, ...]
+
+    def __post_init__(self) -> None:
+        if not self.description.strip():
+            raise ValueError("an alternative needs a description")
+        if not self.reference.strip():
+            raise ValueError(f"alternative {self.description!r} needs a reference answer")
+        if not self.criteria:
+            raise ValueError(f"alternative {self.description!r} has no criteria")
+
+
+@dataclass(frozen=True)
 class Case:
-    """A clinical question with a known, sourced answer and explicit criteria."""
+    """A clinical question with a known, sourced answer and explicit criteria.
+
+    `criteria` always apply. `alternatives`, when there are any, are the
+    regimens the source accepts: an answer must also meet every criterion of
+    at least one of them.
+    """
 
     case_id: str
     category: str
@@ -62,6 +91,7 @@ class Case:
     source: Source
     criteria: tuple[Criterion, ...]
     notes: str = ""
+    alternatives: tuple[Alternative, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.case_id.strip():
@@ -70,16 +100,26 @@ class Case:
             raise ValueError(f"case {self.case_id} needs a question")
         if not self.reference.strip():
             raise ValueError(f"case {self.case_id} needs a reference answer")
-        if not self.criteria:
+        if not self.criteria and not self.alternatives:
             raise ValueError(
                 f"case {self.case_id} has no acceptance criteria; "
                 "a case nobody can fail measures nothing"
             )
+        if len(self.alternatives) == 1:
+            raise ValueError(
+                f"case {self.case_id} has a single alternative; "
+                "its criteria belong with the case's own"
+            )
+
+    @property
+    def all_criteria(self) -> tuple[Criterion, ...]:
+        """Every criterion in the case, its own and every alternative's."""
+        return self.criteria + tuple(c for a in self.alternatives for c in a.criteria)
 
     @property
     def worst_risk(self) -> Risk:
         """The heaviest failure this case can produce."""
-        return max((c.failure.risk for c in self.criteria), key=lambda r: r.value)
+        return max((c.failure.risk for c in self.all_criteria), key=lambda r: r.value)
 
 
 @dataclass(frozen=True)
@@ -132,11 +172,16 @@ class CriterionResult:
 
 @dataclass(frozen=True)
 class Verdict:
-    """The judgement on one answer: every criterion, and the failures found."""
+    """The judgement on one answer: every criterion, and the failures found.
+
+    `alternative` names the regimen the answer was judged against, when the
+    case has more than one: the one it met, or the one it came closest to.
+    """
 
     case_id: str
     model: str
     results: tuple[CriterionResult, ...] = field(default_factory=tuple)
+    alternative: str = ""
 
     @property
     def passed(self) -> bool:

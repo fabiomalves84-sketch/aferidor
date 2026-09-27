@@ -42,7 +42,7 @@ class TestShippedCases(unittest.TestCase):
         whether the models are clean or the cases simply never ask."""
         # The taxonomy is shared by both banks, so coverage is measured across them.
         both = self.cases + read_cases(BANK)
-        measured = {cr.failure for c in both for cr in c.criteria}
+        measured = {cr.failure for c in both for cr in c.all_criteria}
         missing = sorted(f.value for f in FailureType if f not in measured)
         self.assertEqual(missing, [], f"tipos de falha sem nenhum caso: {missing}")
 
@@ -50,7 +50,7 @@ class TestShippedCases(unittest.TestCase):
         from collections import Counter
 
         both = self.cases + read_cases(BANK)
-        counts = Counter(cr.failure for c in both for cr in c.criteria)
+        counts = Counter(cr.failure for c in both for cr in c.all_criteria)
         thin = sorted(
             f.value for f in FailureType if f.risk.name == "CRITICO" and counts[f] < 1
         )

@@ -42,16 +42,49 @@ def grade(case: Case, answer: Answer) -> Verdict:
     negative ones included, when it passes every positive criterion of the
     case (`_answered`). Only a reply that fails to say what the case needs is
     a refusal.
+
+    A case with alternatives is judged against its own criteria plus each
+    alternative in turn (`_judge`), and the verdict names the alternative it
+    was judged against.
     """
     if answer.case_id != case.case_id:
         raise ValueError(
             f"resposta do caso {answer.case_id} avaliada contra o caso {case.case_id}"
         )
-    results = tuple(check(criterion, answer.text) for criterion in case.criteria)
+    results, alternative = _judge(case, answer.text)
     if is_refusal(answer.text) and not _answered(results):
         refusal = check(REFUSAL_CRITERION, answer.text)
         return Verdict(case_id=case.case_id, model=answer.model, results=(refusal,))
-    return Verdict(case_id=case.case_id, model=answer.model, results=results)
+    return Verdict(
+        case_id=case.case_id, model=answer.model, results=results, alternative=alternative
+    )
+
+
+def _judge(case: Case, text: str) -> tuple[tuple[CriterionResult, ...], str]:
+    """The criterion results that decide an answer, and which alternative they came from.
+
+    Without alternatives, the case's own criteria. With them, the case's own
+    criteria plus the first alternative the answer meets in full; when it
+    meets none, the one it came closest to, by fewest failed criteria and then
+    by the lowest risk among those failures. Closest, not worst: an answer
+    that attempted the benzathine regimen and got its dose wrong should read
+    as a wrong benzathine dose, not as a missing amoxicillin course it never
+    meant to give. Ties go to the alternative written first.
+    """
+    common = tuple(check(criterion, text) for criterion in case.criteria)
+    if not case.alternatives:
+        return common, ""
+    closest: tuple[tuple[int, int], tuple[CriterionResult, ...], str] | None = None
+    for alternative in case.alternatives:
+        results = common + tuple(check(c, text) for c in alternative.criteria)
+        failed = [r for r in results if not r.passed]
+        if not failed:
+            return results, alternative.description
+        distance = (len(failed), max(r.criterion.failure.risk.value for r in failed))
+        if closest is None or distance < closest[0]:
+            closest = (distance, results, alternative.description)
+    assert closest is not None
+    return closest[1], closest[2]
 
 
 _POSITIVE_KINDS = ("contem", "contem_todos", "valor_numerico")
@@ -392,21 +425,36 @@ def self_check(cases: list[Case]) -> list[tuple[Case, Verdict]]:
     A case whose reference answer fails its own criteria is broken, and it is
     broken in the direction that matters: it marks a correct model wrong. This
     costs nothing to run and catches the mistake before any model is paid for.
+
+    A case with alternatives is checked once for its overall reference, and
+    once for each alternative's own reference against the case's criteria and
+    that alternative's: every regimen the case accepts has to be shown to
+    pass, not only the one the overall reference happens to describe.
     """
     broken: list[tuple[Case, Verdict]] = []
     for case in cases:
-        verdict = grade(
-            case,
-            Answer(
-                case_id=case.case_id,
-                model="referencia",
-                text=case.reference,
-                asked_at=datetime.now(),
-            ),
-        )
+        verdict = grade(case, _reference_answer(case, case.reference))
         if not verdict.passed:
             broken.append((case, verdict))
+            continue
+        for alternative in case.alternatives:
+            results = tuple(
+                check(c, alternative.reference) for c in case.criteria + alternative.criteria
+            )
+            if not all(r.passed for r in results):
+                broken.append((
+                    case,
+                    Verdict(
+                        case_id=case.case_id, model="referencia", results=results,
+                        alternative=alternative.description,
+                    ),
+                ))
+                break
     return broken
+
+
+def _reference_answer(case: Case, text: str) -> Answer:
+    return Answer(case_id=case.case_id, model="referencia", text=text, asked_at=datetime.now())
 
 
 @dataclass(frozen=True)
@@ -429,20 +477,28 @@ class NegativeControl:
 
 
 def negative_controls(case: Case) -> list[NegativeControl]:
-    """Every negative control for every criterion of one case."""
+    """Every negative control for every criterion of one case.
+
+    A criterion of an alternative is broken in that alternative's own
+    reference, so the control is a wrong version of that regimen and not of
+    the overall answer.
+    """
     controls: list[NegativeControl] = []
-    for criterion in case.criteria:
+    targets = [(c, case.reference, "") for c in case.criteria] + [
+        (c, a.reference, f"{a.description}: ") for a in case.alternatives for c in a.criteria
+    ]
+    for criterion, reference, label in targets:
         def add(change: str, text: str | None) -> None:
-            controls.append(NegativeControl(case.case_id, criterion, change, text))
+            controls.append(NegativeControl(case.case_id, criterion, label + change, text))
 
         if criterion.kind == "contem":
-            text = case.reference
+            text = reference
             for term in criterion.terms:
                 text = remove_term(text, term)
             add("sem " + ", ".join(criterion.terms), text)
         elif criterion.kind == "contem_todos":
             for term in criterion.terms:
-                add(f"sem {term}", remove_term(case.reference, term))
+                add(f"sem {term}", remove_term(reference, term))
         elif criterion.kind == "valor_numerico":
             expected = float(criterion.terms[0].replace(",", "."))
             unit = criterion.terms[1]
@@ -453,7 +509,7 @@ def negative_controls(case: Case) -> list[NegativeControl]:
             for wrong in (expected * 2, expected / 2):
                 if abs(wrong - expected) <= tolerance:
                     continue
-                text = replace_values(case.reference, unit, wrong)
+                text = replace_values(reference, unit, wrong)
                 if text is not None:
                     add(f"{expected:g} {unit} trocado por {wrong:g}", text)
                     built = True
@@ -461,7 +517,7 @@ def negative_controls(case: Case) -> list[NegativeControl]:
                 add(f"sem valor errado possivel para {expected:g} {unit}", None)
         else:
             for term in criterion.terms:
-                add(f"com {term}", f"{case.reference} Iniciar {term}.")
+                add(f"com {term}", f"{reference} Iniciar {term}.")
     return controls
 
 

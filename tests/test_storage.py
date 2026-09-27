@@ -169,6 +169,29 @@ class TestAnswerConditions(unittest.TestCase):
         self.assertEqual(recovered.build, "")
 
 
+class TestAlternativesOnDisk(unittest.TestCase):
+    def test_a_case_with_alternatives_survives_a_write_and_a_read(self):
+        from tests.test_grading import a_two_regimen_case
+
+        case = a_two_regimen_case()
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "casos.json"
+            write_cases([case], path)
+            [recovered] = read_cases(path)
+        self.assertEqual(recovered, case)
+
+    def test_the_verdict_on_disk_names_the_alternative(self):
+        from aferidor.grading import grade
+        from aferidor.storage import verdict_to_dict
+        from tests.test_grading import a_two_regimen_case, an_answer
+
+        verdict = grade(
+            a_two_regimen_case(),
+            an_answer("Penicilina G benzatínica 1.200.000 U IM em dose única.", case_id="AMIG"),
+        )
+        self.assertEqual(verdict_to_dict(verdict)["alternativa"], "penicilina benzatínica em dose única")
+
+
 class TestBankFormat(unittest.TestCase):
     def test_reads_the_annotated_bank_format(self):
         bank = {

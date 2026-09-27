@@ -123,6 +123,15 @@ próprio um modelo de linguagem tem dois sistemas em avaliação e nenhuma forma
 de saber qual deles errou. O preço é que cada critério tem de ser escrito com
 cuidado, e esse preço paga-se uma vez, quando o caso é escrito.
 
+Quando a fonte aceita mais do que um esquema como primeira linha (amoxicilina
+durante dez dias, ou penicilina benzatínica em dose única), o caso escreve cada
+um como uma alternativa, com a sua referência e os seus critérios. A resposta
+passa se cumprir os critérios comuns do caso e todos os de pelo menos uma
+alternativa. Juntar os dois esquemas num só critério deixaria passar uma dose
+errada de amoxicilina só por a resposta nomear a benzatínica de passagem.
+Quando a resposta falha, é corrigida contra a alternativa de que ficou mais
+perto, e o relatório diz qual foi.
+
 Dois cuidados no confronto de texto: acentos e espaçamento são normalizados,
 para `1000mg` valer o mesmo que `1000 mg`; e um termo que é só um número tem de
 aparecer isolado, senão o termo `5` seria encontrado dentro de `500 mg` e uma
@@ -215,7 +224,7 @@ em vigor.
 
 Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 312 testes,
+por tipo de falha e por risco, relatório legível e documentação. 325 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as

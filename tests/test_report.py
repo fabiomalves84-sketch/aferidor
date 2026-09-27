@@ -93,6 +93,23 @@ class TestConditions(unittest.TestCase):
                 self.assertIn(value, page)
 
 
+class TestAlternativeShown(unittest.TestCase):
+    def test_a_failed_answer_says_which_regimen_it_was_judged_against(self):
+        from aferidor import html_report
+        from tests.test_grading import a_two_regimen_case
+
+        case = a_two_regimen_case()
+        answer = Answer(
+            case_id="AMIG", model="falso", text="Penicilina G benzatínica 600.000 U IM em dose única.",
+            asked_at=datetime(2026, 9, 14),
+        )
+        verdicts = [grade(case, answer)]
+        text = report.build([case], [answer], verdicts, today=date(2026, 9, 14))
+        page = html_report.build([case], [answer], verdicts, today=date(2026, 9, 14))
+        self.assertIn("Corrigida contra a alternativa:** penicilina benzatínica em dose única", text)
+        self.assertIn("corrigida contra: penicilina benzatínica em dose única", page)
+
+
 class TestHeader(unittest.TestCase):
     def test_it_states_it_is_not_a_medical_device(self):
         text = build([a_case()], [an_answer("1 g")])

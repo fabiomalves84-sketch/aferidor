@@ -19,7 +19,7 @@ from aferidor.grading import (
     tally_by_model,
     uncaught_controls,
 )
-from aferidor.models import Answer, Case, Criterion, Source
+from aferidor.models import Alternative, Answer, Case, Criterion, Source
 from aferidor.risk import FailureType, Risk
 
 
@@ -447,3 +447,105 @@ class TestNegativeControls(unittest.TestCase):
         total, uncaught = uncaught_controls([a_wide_case("600")])
         self.assertEqual(total, 1)
         self.assertEqual(uncaught, [])
+
+
+def a_two_regimen_case() -> Case:
+    """Like ATB-FAR-013: ten days of amoxicillin, or one dose of benzathine penicillin."""
+    return Case(
+        case_id="AMIG",
+        category="pediatria",
+        question="Amigdalite estreptocócica numa criança de 30 kg. Primeira linha?",
+        reference="Amoxicilina 50 mg/kg/dia 12/12h durante 10 dias, ou penicilina G benzatínica 1.200.000 U IM em dose única.",
+        source=Source(name="DGS", reference="Norma 020/2012, ponto 10"),
+        criteria=(
+            Criterion(
+                kind="nao_prescreve", terms=("azitromicina",),
+                failure=FailureType.RESPOSTA_INCOMPLETA,
+            ),
+        ),
+        alternatives=(
+            Alternative(
+                description="amoxicilina 10 dias",
+                reference="Amoxicilina 50 mg/kg/dia de 12/12h durante 10 dias.",
+                criteria=(
+                    Criterion(kind="contem", terms=("amoxicilina",), failure=FailureType.RESPOSTA_INCOMPLETA),
+                    Criterion(kind="valor_numerico", terms=("50", "mg/kg/dia"), failure=FailureType.DOSE_INCORRETA),
+                    Criterion(kind="contem", terms=("10 dias",), failure=FailureType.RESPOSTA_INCOMPLETA),
+                ),
+            ),
+            Alternative(
+                description="penicilina benzatínica em dose única",
+                reference="Penicilina G benzatínica 1.200.000 U IM em dose única.",
+                criteria=(
+                    Criterion(kind="contem", terms=("benzatinica",), failure=FailureType.RESPOSTA_INCOMPLETA),
+                    Criterion(kind="contem", terms=("1.200.000", "1 200 000"), failure=FailureType.DOSE_INCORRETA),
+                    Criterion(kind="contem", terms=("dose unica", "toma unica"), failure=FailureType.DOSE_INCORRETA),
+                ),
+            ),
+        ),
+    )
+
+
+class TestAlternatives(unittest.TestCase):
+    """A case whose source accepts two regimens: either one is right, a mix is not."""
+
+    def grade(self, text: str):
+        return grade(a_two_regimen_case(), an_answer(text, case_id="AMIG"))
+
+    def test_the_first_regimen_passes_and_is_named(self):
+        verdict = self.grade("Amoxicilina 50 mg/kg/dia de 12/12h, 10 dias.")
+        self.assertTrue(verdict.passed)
+        self.assertEqual(verdict.alternative, "amoxicilina 10 dias")
+
+    def test_the_second_regimen_passes_and_is_named(self):
+        verdict = self.grade("Penicilina G benzatínica 1.200.000 U IM, dose única.")
+        self.assertTrue(verdict.passed)
+        self.assertEqual(verdict.alternative, "penicilina benzatínica em dose única")
+
+    def test_naming_the_other_drug_in_passing_does_not_rescue_a_wrong_dose(self):
+        verdict = self.grade(
+            "Amoxicilina 25 mg/kg/dia de 12/12h, 10 dias. A penicilina benzatínica é outra opção."
+        )
+        self.assertFalse(verdict.passed)
+        self.assertEqual(verdict.failures, (FailureType.DOSE_INCORRETA,))
+        self.assertEqual(verdict.alternative, "amoxicilina 10 dias")
+
+    def test_a_wrong_answer_is_judged_against_the_regimen_it_came_closest_to(self):
+        verdict = self.grade("Penicilina G benzatínica 600.000 U IM em dose única.")
+        self.assertEqual(verdict.alternative, "penicilina benzatínica em dose única")
+        self.assertEqual(verdict.failures, (FailureType.DOSE_INCORRETA,))
+
+    def test_the_case_own_criteria_still_apply_to_every_regimen(self):
+        verdict = self.grade("Penicilina G benzatínica 1.200.000 U IM em dose única, ou azitromicina.")
+        self.assertEqual(verdict.failures, (FailureType.RESPOSTA_INCOMPLETA,))
+
+    def test_self_check_passes_a_sound_case(self):
+        self.assertEqual(self_check([a_two_regimen_case()]), [])
+
+    def test_self_check_reports_an_alternative_whose_own_reference_fails(self):
+        import dataclasses
+
+        case = a_two_regimen_case()
+        broken_alt = dataclasses.replace(case.alternatives[1], reference="Penicilina benzatínica IM.")
+        case = dataclasses.replace(case, alternatives=(case.alternatives[0], broken_alt))
+        found = self_check([case])
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0][1].alternative, "penicilina benzatínica em dose única")
+
+    def test_every_control_of_every_regimen_is_built_and_caught(self):
+        total, uncaught = uncaught_controls([a_two_regimen_case()])
+        self.assertEqual(total, 1 + 4 + 3)
+        self.assertEqual(uncaught, [])
+
+    def test_a_control_of_an_alternative_is_built_from_that_alternative(self):
+        controls = negative_controls(a_two_regimen_case())
+        benzathine = [c for c in controls if c.change.startswith("penicilina benzat")]
+        self.assertEqual(len(benzathine), 3)
+        self.assertTrue(all("amoxicilina" not in c.text for c in benzathine))
+
+    def test_a_single_alternative_is_refused(self):
+        import dataclasses
+
+        case = a_two_regimen_case()
+        with self.assertRaises(ValueError):
+            dataclasses.replace(case, alternatives=case.alternatives[:1])

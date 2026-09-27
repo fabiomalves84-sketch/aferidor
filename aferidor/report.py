@@ -162,6 +162,9 @@ def _case_detail(pairs: list[tuple[Answer, Verdict]], cases: dict[str, Case]) ->
             lines.append("")
             lines.append(f"**Fonte.** {case.source.name}, {case.source.reference}")
             lines.append("")
+        if verdict.alternative:
+            lines.append(f"**Corrigida contra a alternativa:** {verdict.alternative}.")
+            lines.append("")
         lines.append(f"**O que o modelo respondeu (amostra {answer.sample}).**")
         lines.append("")
         lines.append("> " + answer.text.strip().replace("\n", "\n> "))
