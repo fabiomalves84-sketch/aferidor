@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import sys
 from pathlib import Path
 
@@ -294,6 +295,7 @@ def comando_relatorio(
         missing=missing,
         reasons=reasons,
         sources_verified=args.fontes_confirmadas,
+        cases_source=(str(args.casos), hashlib.sha256(args.casos.read_bytes()).hexdigest()),
     )
     saida.parent.mkdir(parents=True, exist_ok=True)
     saida.write_text(text, encoding="utf-8")

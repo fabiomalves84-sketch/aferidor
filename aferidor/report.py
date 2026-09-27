@@ -26,6 +26,7 @@ from .grading import (
     expected_samples,
     match_answers,
     missing_samples,
+    run_conditions,
     tally_by_model,
 )
 from .models import Answer, Case, Verdict
@@ -72,6 +73,37 @@ def format_missing_samples(
         have = wanted - len(gaps[(case_id, model)])
         parts.append(f"{case_id} ({model}, {have} de {wanted} amostras)")
     return ", ".join(parts)
+
+
+def conditions_rows(
+    answers: list[Answer], cases_source: tuple[str, str] | None = None
+) -> list[tuple[str, str]]:
+    """What was measured, with what, and when, as (label, value) rows.
+
+    Shared by the Markdown and the HTML report, so both identify the run the
+    same way. The date a report is written says nothing about when the
+    answers were obtained, and a report that cannot say under what
+    conditions its answers were obtained cannot be compared with any other.
+    """
+    rows: list[tuple[str, str]] = []
+    if cases_source:
+        path, digest = cases_source
+        rows.append(("Banco de casos", f"{path} (SHA-256 {digest[:12]})"))
+    for model, found in run_conditions(answers).items():
+        period = found.first_asked.strftime("%Y-%m-%d %H:%M")
+        if found.last_asked.date() == found.first_asked.date():
+            period += found.last_asked.strftime(" a %H:%M")
+        else:
+            period += found.last_asked.strftime(" a %Y-%m-%d %H:%M")
+        temperatures = ", ".join(f"{v:.1f}".replace(".", ",") for v in found.temperatures)
+        tokens = ", ".join("não registado" if v is None else str(v) for v in found.max_tokens)
+        builds = ", ".join(b or "não registada" for b in found.builds)
+        rows.append((
+            model,
+            f"{found.answers} respostas, recolhidas {period}; temperatura {temperatures};"
+            f" tokens_max {tokens}; versão {builds}",
+        ))
+    return rows
 
 
 def _risk_line(critical_cases: int, total_cases: int) -> str:
@@ -154,8 +186,12 @@ def build(
     reasons: dict[str, str] | None = None,
     sources_verified: bool = False,
     today: date | None = None,
+    cases_source: tuple[str, str] | None = None,
 ) -> str:
-    """Write the whole report as Markdown."""
+    """Write the whole report as Markdown.
+
+    `cases_source` is the case file's path and SHA-256, when known.
+    """
     by_case = {c.case_id: c for c in cases}
     pairs = match_answers(cases, answers, verdicts)
     per_model = tally_by_model(verdicts)
@@ -165,10 +201,17 @@ def build(
     out: list[str] = []
     out.append("# Relatório do Aferidor")
     out.append("")
-    out.append(f"Data: {(today or date.today()).isoformat()}")
+    out.append(f"Relatório escrito em {(today or date.today()).isoformat()}.")
     out.append("")
     out.append(HEADER_NOTE)
     out.append("")
+    rows = conditions_rows(answers, cases_source)
+    if rows:
+        out.append("## Condições do ensaio")
+        out.append("")
+        for label, value in rows:
+            out.append(f"- **{label}**: {value}")
+        out.append("")
 
     if not sources_verified:
         out.append(
@@ -263,4 +306,10 @@ def build(
     return "\n".join(out)
 
 
-__all__ = ["build", "format_missing", "format_missing_samples", "HEADER_NOTE"]
+__all__ = [
+    "build",
+    "conditions_rows",
+    "format_missing",
+    "format_missing_samples",
+    "HEADER_NOTE",
+]

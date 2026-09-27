@@ -27,7 +27,7 @@ from .grading import (
     tally_by_model,
 )
 from .models import Answer, Case, Verdict
-from .report import HEADER_NOTE, format_missing, format_missing_samples
+from .report import HEADER_NOTE, conditions_rows, format_missing, format_missing_samples
 
 _CELL_CLASS = {
     ConsistencyState.ESTAVEL_CERTO: "ok",
@@ -253,6 +253,8 @@ blockquote {
 }
 p.passou { color: var(--ok-fg); }
 p.amostra-numero { color: var(--muted); margin-bottom: 0.1rem; }
+section.condicoes dt { font-weight: 600; word-break: break-all; }
+section.condicoes dd { margin: 0 0 0.5rem 0; color: var(--muted); }
 code { background: var(--card); padding: 0.1rem 0.3rem; border-radius: 0.25rem; }
 @media (max-width: 30rem) {
   body { padding: 0.5rem; }
@@ -269,6 +271,7 @@ def build(
     reasons: dict[str, str] | None = None,
     sources_verified: bool = False,
     today: date | None = None,
+    cases_source: tuple[str, str] | None = None,
 ) -> str:
     """Write the whole report as one self contained HTML file."""
     per_model = tally_by_model(verdicts)
@@ -281,8 +284,16 @@ def build(
         f"<title>Relatório do Aferidor</title><style>{_STYLE}</style></head><body>",
     ]
     out.append("<h1>Relatório do Aferidor</h1>")
-    out.append(f'<p class="data">Data: {_esc((today or date.today()).isoformat())}</p>')
+    out.append(
+        f'<p class="data">Relatório escrito em {_esc((today or date.today()).isoformat())}.</p>'
+    )
     out.append(f"<p>{_esc(HEADER_NOTE)}</p>")
+    rows = conditions_rows(answers, cases_source)
+    if rows:
+        out.append('<section class="condicoes"><h2>Condições do ensaio</h2><dl>')
+        for label, value in rows:
+            out.append(f"<dt>{_esc(label)}</dt><dd>{_esc(value)}</dd>")
+        out.append("</dl></section>")
 
     if not sources_verified:
         out.append(

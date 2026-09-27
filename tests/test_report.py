@@ -35,6 +35,64 @@ def build(cases, answers, **kwargs) -> str:
     return report.build(cases, answers, verdicts, today=date(2026, 9, 14), **kwargs)
 
 
+class TestConditions(unittest.TestCase):
+    """The report says what was measured, with what, and when."""
+
+    def answer(self, **kwargs) -> Answer:
+        base = dict(case_id="C1", model="falso", text="1 g", asked_at=datetime(2026, 9, 16, 14, 40))
+        base.update(kwargs)
+        return Answer(**base)
+
+    def test_it_says_when_the_answers_were_obtained_not_only_when_it_was_written(self):
+        text = build(
+            [a_case()],
+            [
+                self.answer(sample=1, asked_at=datetime(2026, 9, 16, 14, 40)),
+                self.answer(sample=2, asked_at=datetime(2026, 9, 16, 15, 38)),
+            ],
+        )
+        self.assertIn("Relatório escrito em 2026-09-14", text)
+        self.assertIn("recolhidas 2026-09-16 14:40 a 15:38", text)
+
+    def test_it_names_the_temperature_token_limit_and_version(self):
+        text = build(
+            [a_case()],
+            [self.answer(temperature=1.0, max_tokens=8192, build="0.1.0+abcdef012345")],
+        )
+        self.assertIn("temperatura 1,0", text)
+        self.assertIn("tokens_max 8192", text)
+        self.assertIn("versão 0.1.0+abcdef012345", text)
+
+    def test_a_file_mixing_conditions_shows_every_value(self):
+        text = build(
+            [a_case()],
+            [
+                self.answer(sample=1, temperature=0.0, max_tokens=4096),
+                self.answer(sample=2, temperature=1.0),
+            ],
+        )
+        self.assertIn("temperatura 0,0, 1,0", text)
+        self.assertIn("tokens_max 4096, não registado", text)
+
+    def test_it_names_the_case_file_and_its_hash(self):
+        text = build([a_case()], [self.answer()], cases_source=("casos/casos.json", "ab" * 32))
+        self.assertIn("casos/casos.json (SHA-256 abababababab)", text)
+
+    def test_the_html_report_shows_the_same_conditions(self):
+        from aferidor import html_report
+
+        answers = [self.answer(temperature=1.0, max_tokens=8192)]
+        rows = report.conditions_rows(answers, ("casos/casos.json", "ab" * 32))
+        verdicts = [grade(a_case(), answers[0])]
+        page = html_report.build(
+            [a_case()], answers, verdicts, today=date(2026, 9, 14),
+            cases_source=("casos/casos.json", "ab" * 32),
+        )
+        for label, value in rows:
+            with self.subTest(label=label):
+                self.assertIn(value, page)
+
+
 class TestHeader(unittest.TestCase):
     def test_it_states_it_is_not_a_medical_device(self):
         text = build([a_case()], [an_answer("1 g")])

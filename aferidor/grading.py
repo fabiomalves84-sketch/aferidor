@@ -347,6 +347,45 @@ def missing_samples(
     return result
 
 
+@dataclass(frozen=True)
+class RunConditions:
+    """Under what conditions one model's answers in a file were obtained.
+
+    Every field is a sorted tuple of the distinct values seen, not a single
+    value: a file that mixes two temperatures shows both, which is the point.
+    `None` in `max_tokens` and "" in `builds` mean some answers predate those
+    fields being recorded.
+    """
+
+    model: str
+    answers: int
+    first_asked: datetime
+    last_asked: datetime
+    temperatures: tuple[float, ...]
+    max_tokens: tuple[int | None, ...]
+    builds: tuple[str, ...]
+
+
+def run_conditions(answers: list[Answer]) -> dict[str, RunConditions]:
+    """One `RunConditions` per model, sorted by model name."""
+    grouped: dict[str, list[Answer]] = {}
+    for answer in answers:
+        grouped.setdefault(answer.model, []).append(answer)
+    result: dict[str, RunConditions] = {}
+    for model, group in sorted(grouped.items()):
+        tokens = {a.max_tokens for a in group}
+        result[model] = RunConditions(
+            model=model,
+            answers=len(group),
+            first_asked=min(a.asked_at for a in group),
+            last_asked=max(a.asked_at for a in group),
+            temperatures=tuple(sorted({a.temperature for a in group})),
+            max_tokens=tuple(sorted(tokens - {None})) + ((None,) if None in tokens else ()),
+            builds=tuple(sorted({a.build for a in group})),
+        )
+    return result
+
+
 def self_check(cases: list[Case]) -> list[tuple[Case, Verdict]]:
     """Grade every case's own reference answer against its own criteria.
 
@@ -481,6 +520,8 @@ __all__ = [
     "consistency_by_model",
     "expected_samples",
     "missing_samples",
+    "RunConditions",
+    "run_conditions",
     "NegativeControl",
     "negative_controls",
     "uncaught_controls",

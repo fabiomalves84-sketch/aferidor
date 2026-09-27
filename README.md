@@ -156,6 +156,12 @@ Cada resposta errada aparece com a pergunta, a resposta de referência, a fonte,
 o que o modelo respondeu e o critério que falhou. Quem discordar de um veredito
 tem de conseguir ver o que o corretor viu e contestá-lo.
 
+Logo a seguir ao cabeçalho, o relatório diz em que condições as respostas foram
+obtidas: o ficheiro e o SHA-256 do banco de casos e, por modelo, quando as
+respostas foram recolhidas, a temperatura, o limite de tokens e a versão do
+Aferidor. Um ficheiro que misture condições mostra todos os valores, em vez de
+escolher um.
+
 Casos que ficaram sem resposta são nomeados e não entram em nenhuma contagem.
 Enquanto as fontes não forem confirmadas por uma pessoa, o relatório diz isso
 em aviso no topo.
@@ -208,7 +214,7 @@ em vigor.
 
 Roteiro concluído. 27 casos com fonte, executor com dois adaptadores reais e
 um fornecedor falso, correção determinista por critérios com contagem separada
-por tipo de falha e por risco, relatório legível e documentação. 301 testes,
+por tipo de falha e por risco, relatório legível e documentação. 306 testes,
 todos a passar. Sem dependências externas.
 
 Por fazer, e é o que falta para os números valerem alguma coisa: confirmar as

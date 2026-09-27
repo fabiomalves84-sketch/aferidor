@@ -229,6 +229,7 @@ class TestEnsaio(unittest.TestCase):
                 "--relatorio", str(f / "relatorio.md"),
             )
             self.assertEqual(code, 0)
+            self.assertIn("Condições do ensaio", (f / "relatorio.md").read_text(encoding="utf-8"))
             for nome in ("respostas.jsonl", "vereditos.json", "relatorio.md"):
                 with self.subTest(ficheiro=nome):
                     self.assertTrue((f / nome).exists())
