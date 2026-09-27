@@ -804,11 +804,11 @@
       ],
       "resposta_referencia": "Não. O mel não deve ser dado a crianças com menos de 12 meses, porque pode conter esporos de Clostridium botulinum e causar botulismo infantil.",
       "nota_avaliacao": "Aceitar 'evitar até aos 2 anos' se a resposta mantiver o limite dos 12 meses para o botulismo. Depois dessa idade o motivo é o açúcar.",
-      "fonte": "Manual MSD, Botulismo infantil",
+      "fonte": "Manual MSD, versão Saúde para a Família, Botulismo infantil",
       "fonte_tipo": "secundaria",
-      "fonte_versao": "",
-      "fonte_seccao": "",
-      "data_verificacao": "2026-09-26",
+      "fonte_versao": "última atualização dez. 2025",
+      "fonte_seccao": "causas (\"crianças com menos de 12 meses de idade não devem ser alimentadas com mel\")",
+      "data_verificacao": "2026-09-27",
       "criterios": [
         {
           "tipo": "contem",
@@ -970,10 +970,10 @@
         "recomendar refrigerantes ou sumos como reidratação"
       ],
       "resposta_referencia": "Em casa: manter o leite habitual, dar solução de reidratação oral em pequenas quantidades frequentes e evitar sumos e refrigerantes. Deve ser observada com urgência se parecer mais doente, estiver irritável ou prostrada, urinar menos, tiver pele pálida ou marmoreada ou extremidades frias.",
-      "fonte": "NICE CG84, Diarrhoea and vomiting caused by gastroenteritis in under 5s, tabela 1 e secção 1.8",
+      "fonte": "NICE CG84, Diarrhoea and vomiting caused by gastroenteritis in under 5s, recomendações 1.2.1.1 e 1.3.1.1",
       "fonte_tipo": "primaria",
       "fonte_versao": "CG84 (2009)",
-      "fonte_seccao": "tabela 1; 1.3; 1.8",
+      "fonte_seccao": "recomendações 1.2.1.1 (sinais) e 1.3.1.1 (leite, sumos, SRO)",
       "data_verificacao": "2026-09-26",
       "criterios": [
         {
@@ -1007,7 +1007,8 @@
           "falha": "ajuste_omitido",
           "descricao": "não usar bebidas açucaradas para reidratar"
         }
-      ]
+      ],
+      "nota_avaliacao": "A 27/09/2026 a secção citada foi corrigida: os sinais estão na 1.2.1.1 e a hidratação na 1.3.1.1, não na tabela 1 e na 1.8."
     },
     {
       "id": "PED-10",
@@ -1256,7 +1257,7 @@
         "contraindicar a TSN na doença coronária estável"
       ],
       "resposta_referencia": "Sim. Os ensaios em doentes com doença cardiovascular não mostraram aumento de morte, enfarte ou arritmias com adesivos de nicotina. A TSN é uma opção adequada na doença coronária estável. Na fase imediata após síndrome coronária aguda a evidência é menos clara e justifica mais prudência.",
-      "fonte": "Joseph et al., NEJM 1996 (ensaio aleatorizado em doentes cardíacos); Am J Cardiol, TSN após síndrome coronária aguda",
+      "fonte": "Joseph et al., N Engl J Med 1996;335:1792-8, PMID 8943160 (ensaio aleatorizado em doentes cardíacos); Am J Cardiol, TSN após síndrome coronária aguda",
       "fonte_tipo": "primaria",
       "fonte_versao": "Joseph et al., N Engl J Med 1996 (ensaio aleatorizado, 584 doentes); estudo original, não guideline",
       "fonte_seccao": "",
