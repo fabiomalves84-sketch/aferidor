@@ -84,7 +84,7 @@ class Provider(ABC):
         documentation is wrong within months, and a bench that points at a
         retired model fails for a reason that has nothing to do with the bench.
         """
-        raise ProviderError(f"{self.name} nao sabe listar modelos")
+        raise ProviderError(f"{self.name} não sabe listar modelos")
 
 
 class FakeProvider(Provider):
@@ -151,13 +151,13 @@ def _request_json(
             retryable=error.code == 429 or error.code >= 500,
         ) from None
     except urllib.error.URLError as error:
-        raise ProviderError(f"{url} inacessivel: {error.reason}", retryable=True) from None
+        raise ProviderError(f"{url} inacessível: {error.reason}", retryable=True) from None
     except (ConnectionResetError, http.client.RemoteDisconnected) as error:
         raise ProviderError(f"{url} desligou a meio da leitura: {error}", retryable=True) from None
     except TimeoutError:
         raise ProviderError(f"{url} excedeu {timeout}s", retryable=True) from None
     except json.JSONDecodeError:
-        raise ProviderError(f"{url} devolveu algo que nao e JSON", retryable=True) from None
+        raise ProviderError(f"{url} devolveu uma resposta que não é JSON", retryable=True) from None
 
 
 def _post_json(url: str, headers: dict[str, str], payload: dict, timeout: float) -> dict:
@@ -387,11 +387,11 @@ def _unreachable(base_url: str, error: ProviderError) -> bool:
     """Whether `error` looks like the Ollama server itself is not running.
 
     `_request_json` marks a `URLError` (connection refused, name not resolved,
-    ...) retryable and folds its message with "inacessivel". Retrying that
+    ...) retryable and folds its message with "inacessível". Retrying that
     against a local server that is simply not started wastes every attempt on
     the same failure, so it is turned into one clear, non-retryable message.
     """
-    return "inacessivel" in str(error)
+    return "inacessível" in str(error)
 
 
 class LocalProvider(Provider):
@@ -427,7 +427,7 @@ class LocalProvider(Provider):
 
     def _not_running(self) -> ProviderError:
         return ProviderError(
-            f"o Ollama nao responde em {self.base_url}; esta instalado e aberto?",
+            f"o Ollama não responde em {self.base_url}; confirmar que está instalado e aberto",
             retryable=False,
         )
 

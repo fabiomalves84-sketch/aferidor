@@ -126,7 +126,7 @@ def case_to_dict(case: Case) -> dict:
 # The review states the annotated bank format defines. Only a reviewed case
 # may score.
 REVIEW_STATES = ("revisto_fonte", "por_verificar")
-NO_SOURCE_PLACE = "sem versao nem seccao indicadas"
+NO_SOURCE_PLACE = "sem versão nem secção indicadas"
 
 
 def _bank_case_to_legacy(data: dict, where: str) -> dict:
@@ -146,7 +146,7 @@ def _bank_case_to_legacy(data: dict, where: str) -> dict:
     would otherwise decide silently whether a case counts.
 
     A case with neither a source version nor a section keeps that gap in
-    plain sight: its reference reads "sem versao nem seccao indicadas", not a
+    plain sight: its reference reads "sem versão nem secção indicadas", not a
     placeholder that looks like a place in a document.
     """
     case_id = str(_require(data, "id", where))
@@ -178,8 +178,8 @@ def _bank_case_to_legacy(data: dict, where: str) -> dict:
         )
     if state == "por_verificar":
         raise ValueError(
-            f"{at}: marcado por_verificar, sem fonte confirmada; nao pode pontuar."
-            " Retira-o do ficheiro ou confirma a fonte antes de correr este banco"
+            f"{at}: marcado por_verificar, sem fonte confirmada; não pode pontuar."
+            " Retirá-lo do ficheiro ou confirmar a fonte antes de correr este banco"
         )
     return mapped
 

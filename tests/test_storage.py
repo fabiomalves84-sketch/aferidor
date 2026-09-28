@@ -234,7 +234,7 @@ class TestBankFormat(unittest.TestCase):
         with self.assertRaises(ValueError) as raised:
             read_cases(self.bank_with(estado="por_verificar"))
         self.assertIn("B-001", str(raised.exception))
-        self.assertIn("nao pode pontuar", str(raised.exception))
+        self.assertIn("não pode pontuar", str(raised.exception))
 
     def test_an_unknown_review_state_is_refused(self):
         with self.assertRaises(ValueError) as raised:
@@ -247,7 +247,7 @@ class TestBankFormat(unittest.TestCase):
 
     def test_a_case_without_version_or_section_says_so_instead_of_pointing_nowhere(self):
         [case] = read_cases(self.bank_with(fonte_versao=None, fonte_seccao=None))
-        self.assertEqual(case.source.reference, "sem versao nem seccao indicadas")
+        self.assertEqual(case.source.reference, "sem versão nem secção indicadas")
 
     def test_bank_case_without_criteria_is_refused(self):
         bank = {"casos": [{"id": "B-002", "area": "x", "pergunta": "p", "resposta_referencia": "r", "fonte": "f"}]}

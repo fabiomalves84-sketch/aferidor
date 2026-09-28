@@ -681,7 +681,7 @@ def negative_controls(case: Case) -> list[NegativeControl]:
                     add(f"{expected:g} {unit} trocado por {wrong:g}", text)
                     built = True
             if not built:
-                add(f"sem valor errado possivel para {expected:g} {unit}", None)
+                add(f"sem valor errado possível para {expected:g} {unit}", None)
         else:
             for term in criterion.terms:
                 add(f"com {term}", f"{reference} Iniciar {term}.")

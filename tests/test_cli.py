@@ -185,7 +185,7 @@ class TestClassificar(unittest.TestCase):
                 "--saida", str(Path(folder) / "v.json"),
             )
             self.assertEqual(code, 2)
-            self.assertIn("nao ha respostas", err)
+            self.assertIn("não há respostas", err)
 
     def test_a_file_with_the_same_sample_twice_is_refused(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -216,7 +216,7 @@ class TestClassificar(unittest.TestCase):
                 "classificar", "--casos", str(REAL_CASES), "--limite", "3",
                 "--respostas", str(f / "respostas.jsonl"), "--saida", str(f / "v.json"),
             )
-            self.assertNotIn("sem resposta valida", err)
+            self.assertNotIn("sem resposta válida", err)
 
     def test_without_the_matching_limit_the_rest_shows_up_as_missing(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -229,7 +229,7 @@ class TestClassificar(unittest.TestCase):
                 "classificar", "--casos", str(REAL_CASES),
                 "--respostas", str(f / "respostas.jsonl"), "--saida", str(f / "v.json"),
             )
-            self.assertIn("sem resposta valida", err)
+            self.assertIn("sem resposta válida", err)
 
 
 class TestEnsaio(unittest.TestCase):
@@ -247,7 +247,7 @@ class TestEnsaio(unittest.TestCase):
             for nome in ("respostas.jsonl", "vereditos.json", "relatorio.md"):
                 with self.subTest(ficheiro=nome):
                     self.assertTrue((f / nome).exists())
-            self.assertIn("relatorio em", out)
+            self.assertIn("relatório em", out)
 
     def test_broken_cases_stop_the_run_before_anything_is_asked(self):
         """The point of the check: a bad case must not cost a paid run."""
@@ -317,7 +317,7 @@ class TestEnsaio(unittest.TestCase):
                 "--vereditos", str(f / "vereditos.json"),
                 "--relatorio", str(f / "relatorio.md"),
             )
-            self.assertNotIn("sem resposta valida", err)
+            self.assertNotIn("sem resposta válida", err)
             texto = (f / "relatorio.md").read_text(encoding="utf-8")
             self.assertNotIn("Casos sem resposta", texto)
 
@@ -386,7 +386,7 @@ class TestExecutar(unittest.TestCase):
                      "--limite", "3", "--saida", str(saida))
             run(*comum)
             _, out, _ = run(*comum)
-            self.assertIn("ja existentes", out)
+            self.assertIn("já existentes", out)
 
     def test_recomecar_keeps_the_other_models_answers(self):
         from aferidor.storage import read_answers

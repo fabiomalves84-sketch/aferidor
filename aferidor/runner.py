@@ -84,9 +84,9 @@ class RunResult:
         return not self.errors
 
     def summary(self) -> str:
-        parts = [f"execucao {self.run_id}", f"modelo {self.model}", f"{len(self.answers)} respostas"]
+        parts = [f"execução {self.run_id}", f"modelo {self.model}", f"{len(self.answers)} respostas"]
         if self.skipped:
-            parts.append(f"{len(self.skipped)} ja existentes")
+            parts.append(f"{len(self.skipped)} já existentes")
         if self.errors:
             parts.append(f"{len(self.errors)} por responder")
         return ", ".join(parts)
@@ -134,7 +134,7 @@ def _check_same_conditions(
         shown = "; ".join(differences[:5])
         more = f" (e mais {len(differences) - 5})" if len(differences) > 5 else ""
         raise ConditionsMismatch(
-            f"{path} tem respostas de {provider.name} obtidas noutras condicoes: "
+            f"{path} tem respostas de {provider.name} obtidas noutras condições: "
             f"{shown}{more}"
         )
 
@@ -219,7 +219,7 @@ def run(
             if (case.case_id, sample) in done:
                 result.skipped.append(case.case_id)
                 if progress:
-                    progress(case, None, "ja respondido")
+                    progress(case, None, "já respondido")
                 continue
 
             prompt = build_prompt(case)

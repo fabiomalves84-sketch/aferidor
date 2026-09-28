@@ -55,7 +55,7 @@ def build_provider(
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog="aferidor", description="Banco de ensaio clinico")
+    parser = argparse.ArgumentParser(prog="aferidor", description="Banco de ensaio clínico")
     sub = parser.add_subparsers(dest="comando", required=True)
 
     executar = sub.add_parser("executar", help="enviar os casos a um modelo")
@@ -65,7 +65,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     executar.add_argument("--modelo", default=None, help="identificador do modelo")
     executar.add_argument("--casos", type=Path, default=DEFAULT_CASES)
     executar.add_argument("--saida", type=Path, default=DEFAULT_OUTPUT)
-    executar.add_argument("--limite", type=int, default=0, help="0 corre todos")
+    executar.add_argument("--limite", type=int, default=0, help="0 executa todos")
     executar.add_argument("--tentativas", type=int, default=3)
     executar.add_argument(
         "--repeticoes", type=int, default=1, help="quantas vezes perguntar cada caso"
@@ -84,7 +84,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
 
     verificar = sub.add_parser(
-        "verificar", help="conferir se cada caso passa nos seus proprios criterios"
+        "verificar", help="verificar se cada caso cumpre os próprios critérios"
     )
     verificar.add_argument("--casos", type=Path, default=DEFAULT_CASES)
 
@@ -94,11 +94,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     classificar.add_argument("--saida", type=Path, default=DEFAULT_VERDICTS)
     classificar.add_argument(
         "--limite", type=int, default=0,
-        help="0 usa todos os casos; tem de bater com o --limite usado em executar",
+        help="0 usa todos os casos; tem de coincidir com o --limite usado em executar",
     )
 
     ensaio = sub.add_parser(
-        "ensaio", help="executar, classificar e escrever o relatorio de uma vez"
+        "ensaio", help="executar, classificar e escrever o relatório numa só operação"
     )
     ensaio.add_argument(
         "--fornecedor", choices=("falso", "openai", "anthropic", "gemini", "local"), default="falso"
@@ -128,7 +128,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     ensaio.add_argument("--fontes-confirmadas", action="store_true")
 
     modelos = sub.add_parser(
-        "modelos", help="perguntar ao fornecedor que modelos tem disponiveis"
+        "modelos", help="listar os modelos disponíveis no fornecedor"
     )
     modelos.add_argument("--fornecedor", choices=("openai", "anthropic", "gemini", "local"), required=True)
 
@@ -158,14 +158,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     conc.add_argument("--revisao", type=Path, default=Path("relatorios/revisao.csv"))
 
-    relatorio = sub.add_parser("relatorio", help="escrever o relatorio legivel")
+    relatorio = sub.add_parser("relatorio", help="escrever o relatório")
     relatorio.add_argument("--casos", type=Path, default=DEFAULT_CASES)
     relatorio.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
     relatorio.add_argument("--saida", type=Path, default=None)
     relatorio.add_argument("--formato", choices=("md", "html"), default="md")
     relatorio.add_argument(
         "--limite", type=int, default=0,
-        help="0 usa todos os casos; tem de bater com o --limite usado em executar",
+        help="0 usa todos os casos; tem de coincidir com o --limite usado em executar",
     )
     relatorio.add_argument(
         "--protocolo", type=Path, default=None,
@@ -174,7 +174,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     relatorio.add_argument(
         "--fontes-confirmadas",
         action="store_true",
-        help="omitir o aviso de fontes por confirmar (so depois de as confirmar)",
+        help="omitir o aviso de fontes por confirmar (apenas depois de confirmadas)",
     )
 
     return parser.parse_args(argv)
@@ -207,7 +207,7 @@ def comando_executar(
     print(f"{len(cases)} casos x {args.repeticoes} amostra(s), modelo {provider.name}")
 
     def progress(case, answer, status) -> None:
-        mark = "." if status == "ok" else ("-" if status == "ja respondido" else "!")
+        mark = "." if status == "ok" else ("-" if status == "já respondido" else "!")
         detail = f" {status}" if status not in ("ok",) else ""
         print(f"  {mark} {case.case_id}{detail}")
 
@@ -223,8 +223,8 @@ def comando_executar(
     except ConditionsMismatch as error:
         print(f"erro: {error}", file=sys.stderr)
         print(
-            "para continuar esta medicao, usa as mesmas condicoes; para comecar outra,"
-            " usa --recomecar ou outro --saida",
+            "para continuar esta medição, usar as mesmas condições; para iniciar outra,"
+            " usar --recomecar ou outro --saida",
             file=sys.stderr,
         )
         return 2
@@ -243,7 +243,7 @@ def comando_classificar(args: argparse.Namespace) -> int:
     if getattr(args, "limite", 0) > 0:
         cases = cases[: args.limite]
     if not args.respostas.exists():
-        print(f"erro: nao ha respostas em {args.respostas}", file=sys.stderr)
+        print(f"erro: não há respostas em {args.respostas}", file=sys.stderr)
         return 2
 
     answers = read_answers(args.respostas)
@@ -260,14 +260,14 @@ def comando_classificar(args: argparse.Namespace) -> int:
         print(f"\n{model}")
         print(f"  {counts.passed}/{counts.total} corretas ({counts.accuracy:.0%})")
         if counts.critical:
-            print(f"  {counts.critical} respostas com falha de risco critico")
+            print(f"  {counts.critical} respostas com falha de risco crítico")
         for failure, number in counts.worst_first():
             print(f"    {failure.value:<26} {number:>3}  risco {failure.risk}")
         for case_id, failures in sorted(counts.failed_cases.items()):
             print(f"    {case_id}: {', '.join(failures)}")
 
     if missing:
-        print(f"\ncasos sem resposta valida: {', '.join(sorted(set(missing)))}", file=sys.stderr)
+        print(f"\ncasos sem resposta válida: {', '.join(sorted(set(missing)))}", file=sys.stderr)
     print(f"\nvereditos em {args.saida}")
     return 0
 
@@ -278,12 +278,12 @@ def comando_verificar(args: argparse.Namespace) -> int:
 
     print(f"{len(cases) - len(broken)}/{len(cases)} casos coerentes")
     for case, verdict in broken:
-        print(f"\n{case.case_id}: a propria referencia nao passa", file=sys.stderr)
-        print(f"  referencia: {case.reference}", file=sys.stderr)
+        print(f"\n{case.case_id}: a própria referência não passa", file=sys.stderr)
+        print(f"  referência: {case.reference}", file=sys.stderr)
         for result in verdict.results:
             if not result.passed:
                 print(
-                    f"  criterio {result.criterion.kind} {list(result.criterion.terms)}"
+                    f"  critério {result.criterion.kind} {list(result.criterion.terms)}"
                     f" -> {result.evidence}",
                     file=sys.stderr,
                 )
@@ -292,8 +292,8 @@ def comando_verificar(args: argparse.Namespace) -> int:
     print(f"{total - len(uncaught)}/{total} controlos negativos apanhados")
     for control, verdict in uncaught:
         print(
-            f"\n{control.case_id}: o criterio {control.criterion.kind}"
-            f" {list(control.criterion.terms)} nao apanha uma resposta errada"
+            f"\n{control.case_id}: o critério {control.criterion.kind}"
+            f" {list(control.criterion.terms)} não deteta uma resposta errada"
             f" ({control.change})",
             file=sys.stderr,
         )
@@ -310,7 +310,7 @@ def comando_relatorio(
     if getattr(args, "limite", 0) > 0:
         cases = cases[: args.limite]
     if not args.respostas.exists():
-        print(f"erro: nao ha respostas em {args.respostas}", file=sys.stderr)
+        print(f"erro: não há respostas em {args.respostas}", file=sys.stderr)
         return 2
 
     answers = read_answers(args.respostas)
@@ -345,7 +345,7 @@ def comando_relatorio(
     )
     saida.parent.mkdir(parents=True, exist_ok=True)
     saida.write_text(text, encoding="utf-8")
-    print(f"relatorio em {saida} ({len(text.splitlines())} linhas)")
+    print(f"relatório em {saida} ({len(text.splitlines())} linhas)")
     return 0
 
 
@@ -371,7 +371,7 @@ def comando_protocolo(args: argparse.Namespace) -> int:
     args.saida.parent.mkdir(parents=True, exist_ok=True)
     args.saida.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"protocolo em {args.saida}, para {args.casos} (SHA-256 {data['banco_sha256'][:12]})")
-    print("revê os limites em criterios_de_aprovacao, e faz commit antes de correr o ensaio:")
+    print("rever os limites em criterios_de_aprovacao e fazer commit antes de correr o ensaio:")
     print("é o commit, e não a data escrita no ficheiro, que prova que o critério veio antes")
     return 0
 
@@ -386,7 +386,7 @@ def comando_revisao(args: argparse.Namespace) -> int:
         )
         return 2
     if not args.respostas.exists():
-        print(f"erro: nao ha respostas em {args.respostas}", file=sys.stderr)
+        print(f"erro: não há respostas em {args.respostas}", file=sys.stderr)
         return 2
     cases = read_cases(args.casos)
     answers = read_answers(args.respostas)
@@ -406,14 +406,14 @@ def comando_revisao(args: argparse.Namespace) -> int:
         print(
             "aviso: estas respostas não guardaram o texto que lhes foi enviado, por isso não se "
             "sabe se a pergunta na folha é a que o modelo viu. Se algum destes casos mudou "
-            f"depois do ensaio, tira-o da revisão: {', '.join(unknown)}",
+            f"depois do ensaio, deve ser retirado da revisão: {', '.join(unknown)}",
             file=sys.stderr,
         )
     passed = sum(1 for item in items if item.grader_passed)
     print(f"{len(items)} respostas para julgar em {args.saida} ({passed} que o corretor passou, "
           f"{len(items) - passed} que chumbou; a folha não diz quais)")
-    print(f"chave em {key}; não a mostres a quem julga")
-    print("na coluna 'juizo' escreve 'certa' ou 'errada'; depois corre: "
+    print(f"chave em {key}; não deve ser mostrada a quem julga")
+    print("na coluna 'juizo', escrever 'certa' ou 'errada'; depois, correr: "
           f"python3 -m aferidor concordancia --revisao {args.saida}")
     return 0
 
@@ -458,14 +458,14 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     _, uncaught = uncaught_controls(cases)
     if broken or uncaught:
         for case, _ in broken:
-            print(f"erro: {case.case_id} nao passa nos proprios criterios", file=sys.stderr)
+            print(f"erro: {case.case_id} não passa nos próprios critérios", file=sys.stderr)
         for control, _ in uncaught:
             print(
-                f"erro: {control.case_id} tem um criterio {control.criterion.kind}"
-                f" que nao apanha uma resposta errada ({control.change})",
+                f"erro: {control.case_id} tem um critério {control.criterion.kind}"
+                f" que não deteta uma resposta errada ({control.change})",
                 file=sys.stderr,
             )
-        print("corrige os casos antes de gastar uma execucao", file=sys.stderr)
+        print("corrigir os casos antes de gastar uma execução", file=sys.stderr)
         return 2
 
     executar_args = argparse.Namespace(
@@ -497,7 +497,7 @@ def comando_ensaio(args: argparse.Namespace) -> int:
 
     if codigo == 1:
         print(
-            "\naviso: houve casos sem resposta; o relatorio nomeia-os e nao os conta",
+            "\naviso: houve casos sem resposta; o relatório identifica-os e não os conta",
             file=sys.stderr,
         )
         return 1

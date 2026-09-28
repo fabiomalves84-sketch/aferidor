@@ -242,7 +242,7 @@ class TestLocalReplies(unittest.TestCase):
         ):
             with self.assertRaises(ProviderError) as caught:
                 provider.ask("p")
-        self.assertIn("o Ollama nao responde em http://localhost:11434", str(caught.exception))
+        self.assertIn("o Ollama não responde em http://localhost:11434", str(caught.exception))
         self.assertFalse(caught.exception.retryable)
 
     def test_a_model_error_that_is_not_a_connection_problem_is_not_rewritten(self):
