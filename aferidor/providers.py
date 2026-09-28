@@ -317,13 +317,16 @@ class GeminiProvider(Provider):
     Google answers the same chat completions shape as OpenAI, so asking reuses
     `_chat_completion`. The free tier caps requests per minute; rather than
     spend retries on rate limits that a steady pace avoids, the provider waits
-    `min_interval_s` between the start of one request and the next.
+    `min_interval_s` between the start of one request and the next. The
+    default, 13 seconds, fits the strictest free limit (5 requests a minute);
+    lighter models allow more and the interval can be shortened from the
+    environment.
     """
 
     BASE = "https://generativelanguage.googleapis.com/v1beta/openai"
     ENV_KEY = "GEMINI_API_KEY"
     ENV_INTERVAL = "AFERIDOR_GEMINI_INTERVALO"
-    DEFAULT_INTERVAL_S = 7.0
+    DEFAULT_INTERVAL_S = 13.0
 
     def __init__(
         self,

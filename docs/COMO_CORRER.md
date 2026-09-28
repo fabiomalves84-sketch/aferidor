@@ -11,9 +11,13 @@ primeiro; o mínimo costuma ser cinco ou dez euros.
 **Anthropic:** console.anthropic.com, secção API keys. Igual, saldo à parte.
 
 **Google Gemini:** aistudio.google.com, secção API keys. Tem um nível gratuito,
-sem cartão, com um limite de pedidos por minuto e por dia. O fornecedor
-`gemini` espaça os pedidos 7 segundos entre si para ficar abaixo desse limite
-(muda-se com `AFERIDOR_GEMINI_INTERVALO`). No nível gratuito a Google pode
+sem cartão, com um limite de pedidos por minuto e por dia que muda de modelo
+para modelo e se vê em aistudio.google.com/rate-limit. Os Flash dão 20 pedidos
+por dia, o que não chega para um ensaio de 27 casos × 5 amostras; os Flash
+Lite dão 500. O fornecedor `gemini` espaça os pedidos 13 segundos entre si,
+para caber no limite mais apertado (5 por minuto); para um modelo com mais
+folga, encurta-se com `AFERIDOR_GEMINI_INTERVALO`. Um pedido recusado por
+sobrecarga (503) também conta para o limite diário: poucas tentativas. No nível gratuito a Google pode
 usar os pedidos para melhorar os seus produtos, exceto para quem está no
 Espaço Económico Europeu; aqui não há dados de doentes, mas convém sabê-lo.
 
