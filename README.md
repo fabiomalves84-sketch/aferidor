@@ -4,8 +4,9 @@ Banco de ensaio para respostas clínicas de modelos de linguagem em português
 europeu. Avalia; não aconselha.
 
 **Relatório de exemplo:**
-https://fabiomalves84-sketch.github.io/aferidor/exemplo/ (dois modelos locais,
-27 casos, 5 amostras por caso, ensaio de 16/09/2026).
+https://fabiomalves84-sketch.github.io/aferidor/exemplo/ (Gemini 3.5 Flash Lite
+pela API e dois modelos locais, 27 casos, 5 amostras por caso, ensaios de 27 e
+28/09/2026; em português, inglês, espanhol, francês e alemão).
 
 ## Instalação e primeira execução
 
