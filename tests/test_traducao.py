@@ -1,0 +1,175 @@
+"""The report's interface in five languages; the cases and the answers never translated."""
+
+from __future__ import annotations
+
+import ast
+import io
+import json
+import re
+import tempfile
+import unittest
+from contextlib import redirect_stderr, redirect_stdout
+from datetime import date, datetime
+from pathlib import Path
+
+from aferidor import html_report, traducao
+from aferidor.cli import main
+from aferidor.grading import CASE_RULES, ConsistencyState, grade_all
+from aferidor.models import Answer
+from aferidor.protocolo import read_protocol, template
+from aferidor.storage import read_answers, read_cases
+from aferidor.traducao import CATALOG, LANGS, t
+from tests.test_html_report import a_case, an_answer, build as page_of
+
+ROOT = Path(__file__).resolve().parent.parent
+TRIAL = ROOT / "ensaios" / "2026-09-16-comparacao-local"
+
+
+def placeholders(text: str) -> list[str]:
+    return sorted(re.findall(r"\{(\w+)\}", text))
+
+
+def interface_strings() -> set[str]:
+    """Every Portuguese string the code hands to the catalogue, found in the source."""
+    found: set[str] = set()
+    for name in ("html_report", "report", "protocolo", "lingua"):
+        tree = ast.parse((ROOT / "aferidor" / f"{name}.py").read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call) or getattr(node.func, "id", None) not in ("_t", "t", "_plural"):
+                continue
+            args = node.args[1:] if node.func.id == "_plural" else node.args[:1]
+            for arg in args:
+                options = [arg.body, arg.orelse] if isinstance(arg, ast.IfExp) else [arg]
+                found.update(o.value for o in options if isinstance(o, ast.Constant) and isinstance(o.value, str))
+    tables = (html_report._FAILURE_LABEL, html_report._CATEGORY_LABEL, html_report._CODE_PARTS, html_report._HOW)
+    for table in tables:
+        found.update(table.values())
+    found.update("risco " + v for v in html_report._RISK_LABEL.values())
+    found.update(html_report.GLOSSARY)
+    found.update(html_report.GLOSSARY.values())
+    found.update(sentence for _, sentence in html_report._EVIDENCE)
+    found.update(CASE_RULES.values())
+    found.update(state.label for state in ConsistencyState)
+    return found
+
+
+class TestCatalogue(unittest.TestCase):
+    def test_every_interface_string_is_translated_into_every_language(self):
+        missing = [
+            (lang, text) for text in interface_strings() for lang in LANGS[1:]
+            if lang not in CATALOG.get(text, {})
+        ]
+        self.assertEqual(missing, [])
+
+    def test_every_translation_keeps_the_placeholders(self):
+        for text, versions in CATALOG.items():
+            for lang, translated in versions.items():
+                with self.subTest(text=text[:40], lang=lang):
+                    self.assertEqual(placeholders(translated), placeholders(text))
+
+    def test_portuguese_is_the_source_and_never_looked_up(self):
+        self.assertEqual(t("Resumo"), "Resumo")
+        self.assertEqual(t("{n} respostas", n=3), "3 respostas")
+
+    def test_a_missing_translation_falls_back_to_portuguese_and_is_recorded(self):
+        traducao.MISSING.clear()
+        self.assertEqual(t("texto que não existe no catálogo", "en"), "texto que não existe no catálogo")
+        self.assertIn(("en", "texto que não existe no catálogo"), traducao.MISSING)
+        traducao.MISSING.clear()
+
+
+class TestReportInEveryLanguage(unittest.TestCase):
+    """A real trial, with a protocol, built in each language, uses no string the catalogue lacks."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cases = read_cases(TRIAL / "casos.json")
+        cls.answers = read_answers(TRIAL / "respostas.jsonl")
+        cls.verdicts, cls.missing = grade_all(cls.cases, cls.answers)
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "p.json"
+            path.write_text(json.dumps(template("x", TRIAL / "casos.json", today=date(2026, 9, 1))), encoding="utf-8")
+            cls.protocol = read_protocol(path)
+        alternates = {lang: f"index.{lang}.html" for lang in LANGS}
+        traducao.MISSING.clear()
+        cls.pages = {
+            lang: html_report.build(
+                cls.cases, cls.answers, cls.verdicts, missing=cls.missing,
+                today=date(2026, 9, 28), protocol=cls.protocol, lingua=lang, alternates=alternates,
+            )
+            for lang in LANGS
+        }
+
+    def test_no_string_was_left_untranslated(self):
+        self.assertEqual(traducao.MISSING, set())
+
+    def test_the_page_declares_its_language(self):
+        self.assertIn('<html lang="en">', self.pages["en"])
+        self.assertIn('<html lang="pt-PT">', self.pages["pt"])
+
+    def test_the_interface_is_in_the_chosen_language(self):
+        self.assertIn("About this report", self.pages["en"])
+        self.assertNotIn("Sobre este relatório", self.pages["en"])
+        self.assertIn("Sobre este informe", self.pages["es"])
+        self.assertIn("À propos de ce rapport", self.pages["fr"])
+        self.assertIn("Über diesen Bericht", self.pages["de"])
+
+    def test_the_answers_and_the_cases_stay_in_portuguese(self):
+        answer = html_report._esc(self.answers[0].text)
+        question = html_report._esc(self.cases[0].question)
+        for lang, page in self.pages.items():
+            with self.subTest(lang=lang):
+                self.assertIn(question, page)
+        self.assertIn(answer[:80], self.pages["pt"])
+        self.assertIn("Language of the cases.", self.pages["en"])
+
+    def test_the_menu_links_every_language_and_marks_the_current_one(self):
+        page = self.pages["fr"]
+        for lang in LANGS:
+            self.assertIn(f'href="index.{lang}.html"', page)
+        self.assertIn('lang="fr" aria-current="page"', page)
+
+    def test_still_no_script_in_any_language(self):
+        for page in self.pages.values():
+            self.assertNotIn("<script", page)
+
+
+class TestSingleLanguage(unittest.TestCase):
+    def test_without_alternates_there_is_no_menu(self):
+        page = page_of([a_case()], [an_answer("1 g")])
+        self.assertNotIn('class="linguas"', page)
+
+    def test_an_unknown_language_is_refused(self):
+        with self.assertRaises(ValueError):
+            page_of([a_case()], [an_answer("1 g")], lingua="xx")
+
+
+class TestCommand(unittest.TestCase):
+    def run_cli(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = main(list(argv))
+        return code, out.getvalue(), err.getvalue()
+
+    def test_one_file_per_language_next_to_the_first(self):
+        with tempfile.TemporaryDirectory() as folder:
+            out = Path(folder) / "index.html"
+            code, _, _ = self.run_cli(
+                "relatorio", "--formato", "html", "--casos", str(TRIAL / "casos.json"),
+                "--respostas", str(TRIAL / "respostas.jsonl"), "--saida", str(out),
+                "--linguas", "pt,en,de",
+            )
+            self.assertEqual(code, 0)
+            self.assertEqual(sorted(p.name for p in Path(folder).iterdir()),
+                             ["index.de.html", "index.en.html", "index.html"])
+            self.assertIn('href="index.html"', (Path(folder) / "index.de.html").read_text(encoding="utf-8"))
+
+    def test_languages_are_refused_for_markdown(self):
+        code, _, err = self.run_cli("relatorio", "--linguas", "en", "--respostas", str(TRIAL / "respostas.jsonl"),
+                                    "--casos", str(TRIAL / "casos.json"))
+        self.assertEqual(code, 2)
+        self.assertIn("só se aplica ao formato html", err)
+
+
+if __name__ == "__main__":
+    unittest.main()

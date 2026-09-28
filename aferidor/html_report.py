@@ -21,6 +21,7 @@ changes it; the switch is CSS alone, so the no-script promise holds.
 
 from __future__ import annotations
 
+import contextvars
 import html as _html
 import re
 from datetime import date
@@ -42,6 +43,7 @@ from .grading import (
     right_cases_by_model,
     states_by_model,
     tally_by_model,
+    wilson_interval,
     worst_examples,
 )
 from .lingua import LanguageSummary, language_by_model, language_line
@@ -56,6 +58,16 @@ from .report import (
     protocol_findings,
 )
 from .risk import FailureType, Risk
+from .traducao import HTML_LANG, NAMES, decimal, t as _translate
+
+# The language the page being built is written in. Set by `build`, read by
+# every helper through `_t`, so the helpers keep their signatures.
+_LANG: contextvars.ContextVar[str] = contextvars.ContextVar("lingua", default="pt")
+
+
+def _t(text: str, **values: object) -> str:
+    """Interface text in the language of the page being built."""
+    return _translate(text, _LANG.get(), **values)
 
 # Each consistency state: css class and icon; the written label comes from the state.
 _STATE_STYLE = {
@@ -93,11 +105,9 @@ def _esc(value: object) -> str:
 
 
 def _plural(n: int, one: str, many: str) -> str:
-    return f"{n} {one if n == 1 else many}"
+    return f"{n} {_t(one) if n == 1 else _t(many)}"
 
 
-# Model families this report knows how to name, and who makes them. A model
-# outside this list is shown by its identifier, never guessed at.
 _FAMILIES = {
     "llama": ("Llama", "Meta"),
     "qwen": ("Qwen", "Alibaba"),
@@ -130,7 +140,7 @@ def model_label(model_id: str) -> tuple[str, str]:
     if provider not in _HOW and provider != "falso":
         provider, rest = "", model_id
     if provider == "falso":
-        return "Fornecedor de teste", "respostas fixas, sem modelo real (ensaio a seco)"
+        return _t("Fornecedor de teste"), _t("respostas fixas, sem modelo real")
     base, _, tag = rest.partition(":")
     details: list[str] = []
     name = base or model_id
@@ -148,16 +158,15 @@ def model_label(model_id: str) -> tuple[str, str]:
         details.append(maker)
     size = re.match(r"(\d+(?:\.\d+)?)b\b", tag.lower())
     if size:
-        amount = size.group(1).replace(".", ",")
-        details.append(f"{amount} mil milhões de parâmetros")
+        details.append(_t("{n} mil milhões de parâmetros", n=decimal(size.group(1), _LANG.get())))
     elif tag:
         details.append(tag)
     if provider in _HOW:
-        details.append(_HOW[provider])
+        details.append(_t(_HOW[provider]))
     return name, " · ".join(details)
 
 
-def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo") -> str:
+def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo", show_id: bool = True) -> str:
     name, description = model_label(model_id)
     sub = (
         f'<span class="modelo-desc">{_gloss(_esc(description), ("Ollama", "parâmetros"))}</span>'
@@ -165,7 +174,8 @@ def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo") -> str:
     )
     return (
         f'<div class="{css}"><{tag} class="modelo-nome">{_esc(name)}</{tag}>{sub}'
-        f'<code class="modelo-id">{_esc(model_id)}</code></div>'
+        + (f'<code class="modelo-id">{_esc(model_id)}</code>' if show_id else "")
+        + "</div>"
     )
 
 
@@ -187,9 +197,9 @@ def _evidence(text: str) -> str:
     """The grader's evidence as a sentence; the quoted text itself is left as it is."""
     for prefix, sentence in _EVIDENCE:
         if text.startswith(prefix):
-            text = sentence + text[len(prefix):]
+            text = _t(sentence) + text[len(prefix):]
             break
-    return text.replace(" em: ", " no trecho: ")
+    return text.replace(" em: ", _t(" no trecho: "))
 
 
 _CATEGORY_LABEL = {
@@ -207,7 +217,7 @@ _CATEGORY_LABEL = {
 
 
 def _category(name: str) -> str:
-    return _CATEGORY_LABEL.get(name, name[:1].upper() + name[1:])
+    return _t(_CATEGORY_LABEL[name]) if name in _CATEGORY_LABEL else name[:1].upper() + name[1:]
 
 
 def _pct(value: float) -> str:
@@ -260,10 +270,14 @@ GLOSSARY: dict[str, str] = {
     "parcialmente correto": "Parte das amostras cumpriu os critérios e parte não: o resultado dependeu da tentativa.",
     "nunca correto": "Nenhuma amostra cumpriu os critérios. Não implica falha crítica: a falha pode ser apenas uma resposta incompleta.",
     "falha crítica": "Erro de dose, interação ou contraindicação omitida, encaminhamento urgente omitido, ou facto inventado.",
+    "respostas corretas": "Contagem de respostas (casos × amostras), não de casos. Uma taxa alta pode ocultar casos nunca corretos.",
     "casos corretos": "Veredicto binário por caso, segundo a regra indicada no relatório. Por omissão, um caso é correto apenas se todas as amostras forem corretas.",
 }
 # The report's own vocabulary: marked where the report uses it, never in case texts.
-_REPORT_TERMS = ("amostra", "sempre correto", "parcialmente correto", "nunca correto", "falha crítica", "casos corretos")
+_REPORT_TERMS = (
+    "amostra", "sempre correto", "parcialmente correto", "nunca correto", "falha crítica",
+    "casos corretos", "respostas corretas",
+)
 # Clinical and source abbreviations marked automatically in case texts.
 _CASE_TERMS = tuple(
     k for k in GLOSSARY
@@ -299,9 +313,9 @@ def case_code_meaning(case_id: str) -> str:
     words = []
     for part in case_id.split("-"):
         if part.isdigit():
-            words.append(f"caso n.º {int(part)}")
+            words.append(_t("caso n.º {n}", n=int(part)))
         else:
-            words.append(_CODE_PARTS.get(part, part))
+            words.append(_t(_CODE_PARTS[part]) if part in _CODE_PARTS else part)
     return " · ".join(words)
 
 
@@ -320,11 +334,15 @@ def _slug(term: str) -> str:
 
 
 def _term(term: str, shown: str | None = None) -> str:
-    """One glossary term, marked for hover, focus and tap."""
+    """One glossary term, marked for hover, focus and tap.
+
+    `term` is the glossary key, always the Portuguese form; what the reader
+    sees is `shown`, or the key in the page's language.
+    """
     return (
         f'<abbr class="termo" tabindex="0" data-termo="{_esc(term)}" '
-        f'data-def="{_esc(GLOSSARY[term])}" aria-describedby="{_slug(term)}">'
-        f"{_esc(shown or term)}</abbr>"
+        f'data-def="{_esc(_t(GLOSSARY[term]))}" aria-describedby="{_slug(term)}">'
+        f"{_esc(shown or _t(term))}</abbr>"
     )
 
 
@@ -336,12 +354,12 @@ def _gloss(escaped: str, terms: tuple[str, ...] = _CASE_TERMS) -> str:
     match whole words and case exactly: "MAPA" is the blood pressure
     monitoring, "mapa" is just a map.
     """
-    ordered = sorted(terms, key=len, reverse=True)
+    shown = {_esc(_t(term)): term for term in terms}
+    ordered = sorted(shown, key=len, reverse=True)
     pattern = re.compile(
-        r"(?<![\w-])(" + "|".join(re.escape(_esc(t)) for t in ordered) + r")(?![\w-])"
+        r"(?<![\w-])(" + "|".join(re.escape(s) for s in ordered) + r")(?![\w-])"
     )
-    by_escaped = {_esc(t): t for t in ordered}
-    return pattern.sub(lambda m: _term(by_escaped[m.group(1)]), escaped)
+    return pattern.sub(lambda m: _term(shown[m.group(1)]), escaped)
 
 
 def _glossary_section(page: str) -> str:
@@ -349,17 +367,18 @@ def _glossary_section(page: str) -> str:
     found = set(re.findall(r'data-termo="([^"]+)"', page))
     if 'class="termo caso-cod' in page:
         found.add(_CODE_ENTRY)
-    used = sorted(found, key=lambda s: s.casefold())
+    keys = [_html.unescape(term) for term in found]
+    used = sorted(keys, key=lambda k: _t(k).casefold())
     if not used:
         return ""
     items = "".join(
-        f'<div><dt id="{_slug(_html.unescape(term))}">{term}</dt>'
-        f"<dd>{_esc(GLOSSARY[_html.unescape(term)])}</dd></div>"
-        for term in used
+        f'<div><dt id="{_slug(key)}">{_esc(_t(key))}</dt>'
+        f"<dd>{_esc(_t(GLOSSARY[key]))}</dd></div>"
+        for key in used
     )
     return (
-        '<details class="glossario" id="glossario"><summary>Glossário: '
-        f"{len(used)} siglas e termos usados neste relatório</summary><dl>{items}</dl></details>"
+        f'<div class="glossario" id="glossario"><h3>{_t("Glossário")}</h3>'
+        f"<dl>{items}</dl></div>"
     )
 
 
@@ -379,8 +398,19 @@ def _risk_chip(failure: FailureType) -> str:
     risk = failure.risk
     return (
         f'<span class="chip {_RISK_CLASS[risk]}"><span class="dot" aria-hidden="true"></span>'
-        f'{_esc(_FAILURE_LABEL[failure])}<span class="chip-risco">risco {_RISK_LABEL[risk]}</span></span>'
+        f'{_esc(_t(_FAILURE_LABEL[failure]))}<span class="chip-risco">{_esc(_risk_text(risk))}</span></span>'
     )
+
+
+def _risk_text(risk: Risk) -> str:
+    return _t("risco " + _RISK_LABEL[risk])
+
+
+def _interval(successes: int, total: int) -> str:
+    """The 95% Wilson interval, in the page's language, glossary term marked."""
+    low, high = wilson_interval(successes, total)
+    text = _t("IC 95% {low} a {high}", low=_pct(low), high=_pct(high))
+    return _gloss(_esc(text), ("IC 95%",))
 
 
 def _aviso(title: str, body: str) -> str:
@@ -394,7 +424,7 @@ def _aviso(title: str, body: str) -> str:
 # ---------------------------------------------------------------- opening
 
 
-def _intro(cases: list[Case], models: list[str], answers: list[Answer]) -> str:
+def _intro(cases: list[Case], models: list[str], answers: list[Answer], how_counted: str) -> str:
     samples = max(expected_samples(answers).values(), default=0)
     facts = [
         _plural(len(cases), "caso clínico", "casos clínicos"),
@@ -403,30 +433,29 @@ def _intro(cases: list[Case], models: list[str], answers: list[Answer]) -> str:
     if samples:
         facts.append(_plural(samples, "amostra por caso", "amostras por caso"))
     fact_items = "".join(f"<li>{_esc(f)}</li>" for f in facts)
+    reading = _t(
+        "<li><strong>O valor em destaque</strong> indica os casos com pelo menos uma "
+        "{falha}. Na prática clínica é observada uma única resposta; uma falha crítica é "
+        "suficiente.</li><li><strong>A barra de estados</strong> indica a consistência de "
+        "cada modelo: casos {sempre}, {parcial} e {nunca}.</li><li><strong>A secção Casos "
+        "com falha</strong> apresenta, para cada caso, a pergunta, a referência, a resposta "
+        "do modelo e o critério não cumprido, para que cada veredicto possa ser verificado.</li>",
+        falha=_term("falha crítica"),
+        sempre=_term("sempre correto", _t("sempre corretos")),
+        parcial=_term("parcialmente correto", _t("parcialmente corretos")),
+        nunca=_term("nunca correto", _t("nunca corretos")),
+    )
     return f"""
 <section class="intro" aria-labelledby="sobre">
-  <div class="intro-texto">
-    <h2 id="sobre">Sobre este relatório</h2>
-    <p class="lead">O <strong>Aferidor</strong> avalia a exatidão de modelos de linguagem em
-    perguntas clínicas em português europeu e classifica os erros pelo risco clínico.</p>
-    <p>Cada pergunta tem uma resposta de referência com fonte pública (normas da {_term("DGS")},
-    {_term("Infarmed")}, diretrizes europeias) e critérios de aceitação definidos antes do
-    ensaio. Cada pergunta é colocada várias vezes a cada modelo, uma vez que as respostas
-    variam; cada resposta constitui uma <em>amostra</em>. A correção é automática e
-    determinista. Como a média de respostas corretas oculta os erros relevantes, o relatório
-    apresenta primeiro as falhas críticas.</p>
-    <ul class="factos">{fact_items}</ul>
-  </div>
-  <ol class="como-ler" aria-label="Como interpretar este relatório">
-    <li><strong>O valor em destaque</strong> indica os casos com pelo menos uma falha de risco
-    crítico. Na prática clínica é observada uma única resposta; uma falha crítica é suficiente.</li>
-    <li><strong>A barra de estados</strong> indica a consistência de cada modelo: casos
-    {_term("sempre correto", "sempre corretos")}, {_term("parcialmente correto", "parcialmente corretos")}
-    e {_term("nunca correto", "nunca corretos")} (ver <a href="#como-se-conta">Método de contagem</a>).</li>
-    <li><strong>A secção Casos com falha</strong> apresenta, para cada caso, a pergunta, a
-    referência, a resposta do modelo e o critério não cumprido, para que cada veredicto possa
-    ser verificado.</li>
-  </ol>
+  <h2 id="sobre" class="vh">{_t("Sobre este relatório")}</h2>
+  <p class="lead">{_t("O <strong>Aferidor</strong> avalia a exatidão de modelos de linguagem em perguntas clínicas em português europeu e classifica os erros pelo risco clínico.")}</p>
+  <ul class="factos">{fact_items}</ul>
+  <details class="recolhe ler">
+    <summary>{_t("Como interpretar este relatório")}</summary>
+    <p>{_t("Cada pergunta tem uma resposta de referência com fonte pública (normas da {dgs}, {infarmed}, diretrizes europeias) e critérios de aceitação definidos antes do ensaio. Cada pergunta é colocada várias vezes a cada modelo, uma vez que as respostas variam; cada resposta constitui uma {amostra}. A correção é automática e determinista. Como a média de respostas corretas oculta os erros relevantes, o relatório apresenta primeiro as falhas críticas.", dgs=_term("DGS"), infarmed=_term("Infarmed"), amostra=_term("amostra"))}</p>
+    <ol class="como-ler">{reading}</ol>
+    {how_counted}
+  </details>
 </section>"""
 
 
@@ -438,25 +467,31 @@ def _notices(
     sources_verified: bool,
 ) -> list[str]:
     out: list[str] = []
+    if _LANG.get() != "pt":
+        out.append(_aviso(
+            _t("Língua dos casos."),
+            _t("As perguntas, as respostas de referência e as respostas dos modelos são "
+               "apresentadas no original, em português europeu: são o objeto da avaliação."),
+        ))
     if not sources_verified:
         out.append(_aviso(
-            "Aviso.",
-            "Nem todas as fontes destes casos foram confirmadas por uma pessoa. Até essa "
-            "confirmação, os resultados medem o modelo contra valores transcritos "
-            "automaticamente. Ver <code>casos/VERIFICACAO.md</code>.",
+            _t("Aviso."),
+            _t("Nem todas as fontes destes casos foram confirmadas por uma pessoa. Até essa "
+               "confirmação, os resultados medem o modelo contra valores transcritos "
+               "automaticamente. Ver {ficheiro}.", ficheiro="<code>casos/VERIFICACAO.md</code>"),
         ))
     if missing:
         out.append(_aviso(
-            "Casos sem resposta.",
+            _t("Casos sem resposta."),
             _esc(format_missing(missing, reasons))
-            + " Não entram em nenhuma contagem deste relatório.",
+            + " " + _t("Não entram em nenhuma contagem deste relatório."),
         ))
     gaps = missing_samples(cases, answers)
     if gaps:
         out.append(_aviso(
-            "Amostras em falta.",
-            _esc(format_missing_samples(gaps, expected_samples(answers)))
-            + " Não muda nenhuma contagem abaixo; só nomeia o que já era invisível nelas.",
+            _t("Amostras em falta."),
+            _esc(format_missing_samples(gaps, expected_samples(answers), _LANG.get()))
+            + " " + _t("Não muda nenhuma contagem abaixo; só nomeia o que já era invisível nelas."),
         ))
     return out
 
@@ -477,21 +512,14 @@ def _state_bar(model: str, counts: dict[ConsistencyState, int], total: int) -> s
         if n:
             segments.append(
                 f'<span class="seg {css}" style="flex-grow:{n}" '
-                f'title="{_esc(state.label)}: {n} de {total} casos"></span>'
+                f'title="{_esc(_t(state.label))}: {_esc(_t("{n} de {total} casos", n=n, total=total))}"></span>'
             )
-    description = ", ".join(f"{counts.get(s, 0)} {s.label}" for s in _STATE_ORDER)
+    description = ", ".join(f"{counts.get(s, 0)} {_t(s.label)}" for s in _STATE_ORDER)
     return (
         f'<div class="barra" role="img" aria-label="{_esc(_model_short(model))}: {_esc(description)}, '
-        f'em {total} casos">{"".join(segments)}</div>'
+        f'{_esc(_t("em {total} casos", total=total))}">{"".join(segments)}</div>'
         f'<ul class="legenda-estados">{"".join(legend)}</ul>'
     )
-
-
-def _units(cases: int, samples: int, total: int) -> str:
-    """Why the answer count is not the case count: cases times attempts."""
-    if samples > 1 and cases * samples == total:
-        return f"{cases} casos × {samples} amostras; contagem de respostas, não de casos"
-    return "contagem de respostas, não de casos"
 
 
 def _dots(pairs: list[tuple[Answer, Verdict]], expected: int) -> str:
@@ -505,14 +533,14 @@ def _dots(pairs: list[tuple[Answer, Verdict]], expected: int) -> str:
     for n in range(1, max(expected, max(by_sample, default=0)) + 1):
         if n not in by_sample:
             marks.append('<span class="pt falta">○</span>')
-            words.append(f"{n} sem resposta")
+            words.append(_t("{n} sem resposta", n=n))
         elif by_sample[n]:
             marks.append('<span class="pt certa">●</span>')
-            words.append(f"{n} correta")
+            words.append(_t("{n} correta", n=n))
         else:
             marks.append('<span class="pt errada">✕</span>')
-            words.append(f"{n} incorreta")
-    label = "Amostras: " + ", ".join(words)
+            words.append(_t("{n} incorreta", n=n))
+    label = _esc(_t("Amostras: {lista}", lista=", ".join(words)))
     return f'<span class="pontos" role="img" aria-label="{label}" title="{label}">{"".join(marks)}</span>'
 
 
@@ -533,22 +561,18 @@ def _how_counted(samples: int, rule: str) -> str:
     ]
     items = "".join(
         f'<li><span class="pontos" aria-hidden="true">{row(pattern)}</span>'
-        f'<span class="swatch {css}" aria-hidden="true"></span>{icon} {_term(name)}: {_esc(meaning)}</li>'
+        f'<span class="swatch {css}" aria-hidden="true"></span>{icon} {_term(name)}: {_esc(_t(meaning))}</li>'
         # With one sample a case cannot be partly right, so that state is left out.
         for css, icon, name, pattern, meaning in (patterns if n > 1 else patterns[::2])
     )
+    times = _plural(n, "vez", "vezes")
     return f"""
 <div class="como-se-conta" id="como-se-conta">
-  <h3>Método de contagem</h3>
-  <p>Cada caso foi colocado {_esc(_plural(n, "vez", "vezes"))} a cada modelo; cada resposta é uma
-  {_term("amostra")}. Na grelha, cada ponto representa uma amostra, pela ordem de execução:
-  <span class="pt certa">●</span> correta, <span class="pt errada">✕</span> incorreta,
-  <span class="pt falta">○</span> sem resposta.</p>
+  <h3>{_t("Método de contagem")}</h3>
+  <p>{_t("Cada caso foi colocado {vezes} a cada modelo; cada resposta é uma {amostra}. Na grelha, cada ponto representa uma amostra, pela ordem de execução: {certa} correta, {errada} incorreta, {falta} sem resposta.", vezes=_esc(times), amostra=_term("amostra"), certa='<span class="pt certa">●</span>', errada='<span class="pt errada">✕</span>', falta='<span class="pt falta">○</span>')}</p>
   <ul>{items}</ul>
-  <p><strong>{_term("casos corretos", "Casos corretos")}</strong>: veredicto binário por caso. Regra
-  deste relatório: um caso é correto quando {_esc(CASE_RULES[rule])}.</p>
-  <p><strong>Um caso nunca correto não tem necessariamente uma {_term("falha crítica")}</strong>, e um
-  caso parcialmente correto pode ter uma. Por esse motivo, as falhas críticas são contadas à parte.</p>
+  <p>{_t("{casos}: veredicto binário por caso. Regra deste relatório: um caso é correto quando {regra}.", casos="<strong>" + _term("casos corretos", _t("Casos corretos")) + "</strong>", regra=_esc(_t(CASE_RULES[rule])))}</p>
+  <p>{_t("<strong>Um caso nunca correto não tem necessariamente uma {falha}</strong>, e um caso parcialmente correto pode ter uma. Por esse motivo, as falhas críticas são contadas à parte.", falha=_term("falha crítica"))}</p>
 </div>"""
 
 
@@ -557,29 +581,33 @@ def _model_card(
     summary: ConsistencySummary,
     tally: Tally,
     states: dict[ConsistencyState, int],
-    language: LanguageSummary,
     verdict: bool | None,
     right: tuple[int, int],
-    rule: str,
-    samples: int,
 ) -> str:
     badge = ""
     if verdict is not None:
         badge = (
-            '<span class="selo aprovado">✓ aprovado pelo protocolo</span>'
+            f'<span class="selo aprovado">✓ {_t("aprovado pelo protocolo")}</span>'
             if verdict
-            else '<span class="selo reprovado">✕ reprovado pelo protocolo</span>'
+            else f'<span class="selo reprovado">✕ {_t("reprovado pelo protocolo")}</span>'
         )
+    legend = _t(
+        "de {total} casos com {falha} em alguma amostra ({ic})",
+        total=summary.cases, falha=_term("falha crítica"),
+        ic=_interval(summary.critical_cases, summary.cases),
+    )
+    line = _t(
+        "{casos}: <strong>{a} de {b}</strong> · {respostas}: <strong>{c} de {d}</strong>",
+        casos=_term("casos corretos", _t("Casos corretos")), a=right[0], b=right[1],
+        respostas=_term("respostas corretas", _t("Respostas corretas")),
+        c=tally.passed, d=tally.total,
+    )
     return f"""
 <article class="cartao-modelo">
-  <header>{_model_heading(model)}{badge}</header>
-  <p class="numero-principal"><span class="destaque">{summary.critical_cases}</span><span class="legenda">de {summary.cases} casos com falha crítica em alguma amostra ({_gloss(_esc(interval_text(summary.critical_cases, summary.cases)), ("IC 95%",))})</span></p>
+  <header>{_model_heading(model, show_id=False)}{badge}</header>
+  <p class="numero-principal"><span class="destaque">{summary.critical_cases}</span><span class="legenda">{legend}</span></p>
   {_state_bar(model, states, summary.cases)}
-  <dl class="metricas">
-    <div><dt>{_term("casos corretos", "Casos corretos")}</dt><dd>{right[0]} de {right[1]} casos ({_gloss(_esc(interval_text(*right)), ("IC 95%",))})</dd><dd class="unidade">regra: {_esc(CASE_RULES[rule])}</dd></div>
-    <div><dt>Respostas corretas</dt><dd>{tally.passed} de {tally.total} respostas ({_gloss(_esc(interval_text(tally.passed, tally.total)), ("IC 95%",))})</dd><dd class="unidade">{_esc(_units(summary.cases, samples, tally.total))}</dd></div>
-  </dl>
-  <p class="lingua-linha"><strong>Português europeu:</strong> {language.brazilian} de {language.answers} respostas com formas do Brasil, {language.pre_agreement} com grafia anterior ao Acordo.</p>
+  <p class="card-linha">{line}</p>
 </article>"""
 
 
@@ -594,13 +622,17 @@ def _context_note(models: list[str]) -> str:
     if not local:
         return ""
     shorts = [_model_short(m) for m in local]
-    names = shorts[0] if len(shorts) == 1 else ", ".join(shorts[:-1]) + " e " + shorts[-1]
-    return (
-        '<p class="contexto"><strong>Contexto.</strong> '
-        f"{_esc(names)} {'foi executado' if len(local) == 1 else 'foram executados'} localmente, "
-        "num computador portátil, através do Ollama. São modelos abertos de pequena dimensão; "
-        "os resultados não são extrapoláveis para os modelos comerciais disponibilizados por API.</p>"
+    names = shorts[0] if len(shorts) == 1 else ", ".join(shorts[:-1]) + _t(" e ") + shorts[-1]
+    sentence = _t(
+        "{nomes} foi executado localmente, num computador portátil, através do Ollama. São "
+        "modelos abertos de pequena dimensão; os resultados não são extrapoláveis para os "
+        "modelos comerciais disponibilizados por API." if len(local) == 1 else
+        "{nomes} foram executados localmente, num computador portátil, através do Ollama. São "
+        "modelos abertos de pequena dimensão; os resultados não são extrapoláveis para os "
+        "modelos comerciais disponibilizados por API.",
+        nomes=_esc(names),
     )
+    return f'<p class="contexto"><strong>{_t("Contexto.")}</strong> {sentence}</p>'
 
 
 def _comparison(summaries: dict[str, ConsistencySummary]) -> str:
@@ -610,40 +642,48 @@ def _comparison(summaries: dict[str, ConsistencySummary]) -> str:
         return ""
     best, second = result.rows[0], result.rows[1]
     if best[1] * second[2] == second[1] * best[2]:
-        sentence = (
-            f"{_esc(_model_short(best[0]))} e {_esc(_model_short(second[0]))} tiveram a mesma "
-            "proporção de casos com falha crítica."
+        sentence = _t(
+            "{a} e {b} tiveram a mesma proporção de casos com falha crítica.",
+            a=_esc(_model_short(best[0])), b=_esc(_model_short(second[0])),
         )
     else:
-        sentence = (
-            f"<strong>{_esc(_model_short(best[0]))}</strong> teve menos casos com falha crítica "
-            f"({best[1]} de {best[2]}, contra {second[1]} de {second[2]} de "
-            f"{_esc(_model_short(second[0]))})"
-            + (
-                f", mas os intervalos de confiança sobrepõem-se: com {best[2]} casos, a "
-                "diferença pode dever-se ao acaso."
-                if result.overlap else
-                ", e os intervalos de confiança não se sobrepõem."
-            )
+        values = dict(
+            melhor=f"<strong>{_esc(_model_short(best[0]))}</strong>", a=best[1], n=best[2],
+            b=second[1], m=second[2], outro=_esc(_model_short(second[0])),
+        )
+        sentence = _t(
+            "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
+            "{outro}), mas os intervalos de confiança sobrepõem-se: com {n} casos, a diferença "
+            "pode dever-se ao acaso."
+            if result.overlap else
+            "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
+            "{outro}), e os intervalos de confiança não se sobrepõem.",
+            **values,
         )
     rows = []
     for model, critical, cases_n, low, high in result.rows:
         share = critical / cases_n
+        label = _t(
+            "{modelo}: {a} de {n} casos com falha crítica, intervalo de {low} a {high}",
+            modelo=_model_short(model), a=critical, n=cases_n, low=_pct(low), high=_pct(high),
+        )
         rows.append(
             f'<li><span class="comp-nome">{_esc(_model_short(model))}</span>'
-            f'<span class="comp-pista" role="img" aria-label="{_esc(_model_short(model))}: '
-            f'{critical} de {cases_n} casos com falha crítica, intervalo de {_pct(low)} a {_pct(high)}">'
+            f'<span class="comp-pista" role="img" aria-label="{_esc(label)}">'
             f'<span class="comp-ic" style="left:{low * 100:.2f}%;width:{(high - low) * 100:.2f}%"></span>'
             f'<span class="comp-ponto" style="left:{share * 100:.2f}%"></span></span>'
-            f'<span class="comp-valor">{critical} de {cases_n} · {_pct(share)}</span></li>'
+            f'<span class="comp-valor">{_esc(_t("{a} de {n}", a=critical, n=cases_n))} · {_pct(share)}</span></li>'
         )
     ticks = "".join(f'<span style="left:{v}%">{v}%</span>' for v in (0, 25, 50, 75, 100))
+    note = _t(
+        "Percentagem de casos com falha crítica em alguma amostra. O ponto é o observado; a "
+        "linha, o intervalo de confiança a 95%."
+    )
     return (
         f'<div class="comparacao"><p class="comp-frase">{sentence}</p>'
         f'<ul class="comp-lista">{"".join(rows)}</ul>'
         f'<div class="comp-eixo" aria-hidden="true"><span></span><span class="comp-ticks">{ticks}</span><span></span></div>'
-        '<p class="comp-nota">Percentagem de casos com falha crítica em alguma amostra. O ponto '
-        "é o observado; a linha, o intervalo de confiança a 95%.</p></div>"
+        f'<p class="comp-nota">{note}</p></div>'
     )
 
 
@@ -657,17 +697,18 @@ def _failure_chart(model: str, tally: Tally, top: int) -> str:
     if not rows:
         return (
             f'<div class="falhas-modelo">{_model_heading(model)}'
-            "<p>Nenhuma falha registada.</p></div>"
+            f"<p>{_t('Nenhuma falha registada.')}</p></div>"
         )
     out = [f'<div class="falhas-modelo">{_model_heading(model)}<ul class="barras-falhas">']
     for failure, n in rows:
         risk = failure.risk
+        name = _esc(_t(_FAILURE_LABEL[failure]))
         out.append(
-            f'<li><span class="rotulo">{_esc(_FAILURE_LABEL[failure])}'
-            f'<span class="sub">risco {_RISK_LABEL[risk]}</span></span>'
+            f'<li><span class="rotulo">{name}'
+            f'<span class="sub">{_esc(_risk_text(risk))}</span></span>'
             f'<span class="pista"><span class="fill {_RISK_CLASS[risk]}" '
             f'style="flex-basis:calc({n} / {top} * 100%)" '
-            f'title="{_esc(_FAILURE_LABEL[failure])}: {n} respostas"></span></span>'
+            f'title="{name}: {_esc(_t("{n} respostas", n=n))}"></span></span>'
             f'<span class="valor">{n}</span></li>'
         )
     out.append("</ul></div>")
@@ -676,7 +717,7 @@ def _failure_chart(model: str, tally: Tally, top: int) -> str:
 
 def _risk_legend() -> str:
     items = "".join(
-        f'<li><span class="swatch {_RISK_CLASS[r]}" aria-hidden="true"></span>risco {_RISK_LABEL[r]}</li>'
+        f'<li><span class="swatch {_RISK_CLASS[r]}" aria-hidden="true"></span>{_esc(_risk_text(r))}</li>'
         for r in (Risk.CRITICO, Risk.ALTO, Risk.MEDIO, Risk.BAIXO)
     )
     return f'<ul class="legenda-riscos">{items}</ul>'
@@ -698,27 +739,29 @@ def _worst(cases, consistency, pairs) -> str:
     if not examples:
         return ""
     out = [
-        '<section id="erros"><h2>Erros mais graves</h2>',
-        '<p class="seccao-intro">Casos em que todas as amostras falharam, com pelo menos uma falha '
-        "de risco crítico. Selecionados por regra fixa: os primeiros casos que a cumprem, "
-        "alternando entre modelos.</p><div class=\"erros\">",
+        f'<section id="erros"><h2>{_t("Erros mais graves")}</h2>',
+        '<p class="seccao-intro">'
+        + _t("Casos em que todas as amostras falharam, com pelo menos uma falha de risco "
+             "crítico. Selecionados por regra fixa: os primeiros casos que a cumprem, "
+             "alternando entre modelos.")
+        + '</p><div class="erros">',
     ]
     for case, answer, verdict in examples:
         text = _plain(answer.text)
-        short = text if len(text) <= 420 else text[:420].rsplit(" ", 1)[0] + " …"
+        short = text if len(text) <= 240 else text[:240].rsplit(" ", 1)[0] + " …"
         chips = "".join(_risk_chip(f) for f in verdict.failures)
         out.append(
             '<article class="erro-cartao">'
             f'<p class="erro-topo"><span class="caso-id">{_case_code(case.case_id)}</span>'
             f'<span class="erro-modelo">{_esc(_model_short(answer.model))}</span></p>'
-            f'<p class="erro-pergunta">{_gloss(_esc(case.question))}</p>'
-            f'<div class="erro-par"><div><p class="erro-rotulo">O modelo respondeu</p>'
-            f"<blockquote>{_esc(short)}</blockquote></div>"
-            f'<div><p class="erro-rotulo">A referência diz</p>'
-            f'<p class="erro-ref">{_gloss(_esc(case.reference))}</p>'
+            f'<p class="erro-pergunta" lang="pt-PT">{_gloss(_esc(case.question))}</p>'
+            f'<div class="erro-par"><div><p class="erro-rotulo">{_t("O modelo respondeu")}</p>'
+            f'<blockquote lang="pt-PT">{_esc(short)}</blockquote></div>'
+            f'<div><p class="erro-rotulo">{_t("A referência diz")}</p>'
+            f'<p class="erro-ref" lang="pt-PT">{_gloss(_esc(case.reference))}</p>'
             f'<p class="fonte">{_gloss(_esc(case.source.name))}, {_esc(case.source.reference)}</p></div></div>'
             f'<p class="erro-chips">{chips}</p>'
-            f'<p><a href="#caso-{_esc(case.case_id)}">Ver o caso completo</a></p></article>'
+            f'<p><a href="#caso-{_esc(case.case_id)}">{_t("Ver o caso completo")}</a></p></article>'
         )
     out.append("</div></section>")
     return "".join(out)
@@ -733,21 +776,24 @@ def _areas(cases, models, consistency) -> str:
         for model in models:
             critical, answered = table.get(model, {}).get(category, (0, 0))
             if not answered:
-                cells.append('<td class="area-cel vazio">sem resposta</td>')
+                cells.append(f'<td class="area-cel vazio">{_t("sem resposta")}</td>')
                 continue
             share = critical / answered
             cells.append(
                 f'<td class="area-cel" style="--a:{0.08 + 0.62 * share:.3f}" '
-                f'title="{_esc(_category(category))}, {_esc(_model_short(model))}: {critical} de {answered}">'
-                f"<strong>{critical}</strong> de {answered}</td>"
+                f'title="{_esc(_category(category))}, {_esc(_model_short(model))}: '
+                f'{_esc(_t("{a} de {n}", a=critical, n=answered))}">'
+                + _t("<strong>{a}</strong> de {n}", a=critical, n=answered) + "</td>"
             )
         rows.append(f'<tr><th scope="row">{_esc(_category(category))}</th>{"".join(cells)}</tr>')
     return (
-        '<section id="areas"><h2>Falhas críticas por área clínica</h2>'
-        '<p class="seccao-intro">Casos com falha crítica em pelo menos uma amostra, por área. Um '
-        "resultado médio aceitável pode ocultar uma área de risco. A intensidade da cor é "
-        "proporcional à fração de casos com falha crítica.</p>"
-        f'<div class="grade-wrap"><table class="areas"><thead><tr><th scope="col">Área</th>{head}</tr></thead>'
+        f'<section id="areas"><h2>{_t("Falhas críticas por área clínica")}</h2>'
+        '<p class="seccao-intro">'
+        + _t("Casos com falha crítica em pelo menos uma amostra, por área. Um resultado médio "
+             "aceitável pode ocultar uma área de risco. A intensidade da cor é proporcional à "
+             "fração de casos com falha crítica.")
+        + "</p>"
+        f'<div class="grade-wrap"><table class="areas"><thead><tr><th scope="col">{_t("Área")}</th>{head}</tr></thead>'
         f'<tbody>{"".join(rows)}</tbody></table></div></section>'
     )
 
@@ -757,17 +803,17 @@ def _areas(cases, models, consistency) -> str:
 
 def _cell(entry: Consistency | None, dots: str) -> tuple[str, str]:
     if entry is None:
-        return "sem-resposta", '<span class="ic" aria-hidden="true">○</span> sem resposta'
+        return "sem-resposta", f'<span class="ic" aria-hidden="true">○</span> {_t("sem resposta")}'
     css, icon = _STATE_STYLE[entry.state]
-    label = f'<span class="ic" aria-hidden="true">{icon}</span> {_esc(entry.state.label)}{dots}'
-    if entry.state is ConsistencyState.ESTAVEL_CERTO:
-        return css, label
-    failure = _esc(_FAILURE_LABEL[entry.worst_failure]) if entry.worst_failure else ""
-    detail = (
-        f" · {entry.passed} de {entry.samples} corretas"
-        if entry.state is ConsistencyState.INSTAVEL else ""
+    # The state is written out for screen readers; sighted readers get the
+    # icon, the dots and the legend above the table.
+    label = (
+        f'<span class="ic" aria-hidden="true">{icon}</span>'
+        f'<span class="vh">{_esc(_t(entry.state.label))}</span>{dots}'
     )
-    return css, f'{label}<br><span class="cel-falha">{failure}{detail}</span>'
+    if entry.state is ConsistencyState.ESTAVEL_CERTO or not entry.worst_failure:
+        return css, label
+    return css, f'{label}<br><span class="cel-falha">{_esc(_t(_FAILURE_LABEL[entry.worst_failure]))}</span>'
 
 
 def _grid(
@@ -779,19 +825,20 @@ def _grid(
 ) -> str:
     out = ['<div class="grade-wrap"><table class="grade">']
     out.append(
-        '<thead><tr><th scope="col">Caso</th>'
-        + "".join(f'<th scope="col">{_model_heading(model, "span", "cabecalho-modelo")}</th>' for model in models)
+        f'<thead><tr><th scope="col">{_t("Caso")}</th>'
+        + "".join(f'<th scope="col"><span class="modelo-nome">{_esc(_model_short(model))}</span></th>' for model in models)
         + "</tr></thead>"
     )
     out.append("<tbody>")
-    for category, group in _grouped_cases(cases):
+    shown = [c for c in cases if not _always_right(c, models, consistency, expected)]
+    for category, group in _grouped_cases(shown):
         out.append(
-            f'<tr class="categoria"><td colspan="{len(models) + 1}">{_esc(category)}</td></tr>'
+            f'<tr class="categoria"><td colspan="{len(models) + 1}">{_esc(_category(category))}</td></tr>'
         )
         for case in group:
             out.append(
                 f'<tr><th scope="row"><span class="caso-id">{_case_code(case.case_id, side=True)}</span>'
-                f'<span class="caso-pergunta">{_esc(case.question)}</span></th>'
+                f'<span class="caso-pergunta" lang="pt-PT" title="{_esc(case.question)}">{_esc(case.question)}</span></th>'
             )
             for model in models:
                 key = (case.case_id, model)
@@ -801,7 +848,27 @@ def _grid(
                 out.append(f'<td class="cel {css_class}">{text}</td>')
             out.append("</tr>")
     out.append("</tbody></table></div>")
+    if not shown:
+        out = [f"<p>{_t('Nenhum caso com falha.')}</p>"]
+    right = [c for c in cases if _always_right(c, models, consistency, expected)]
+    if right:
+        items = "".join(
+            f'<li>{_case_code(c.case_id)} <span lang="pt-PT">{_esc(c.question)}</span></li>' for c in right
+        )
+        out.append(
+            f'<details class="recolhe"><summary>{_esc(_plural(len(right), "caso sempre correto em todos os modelos", "casos sempre corretos em todos os modelos"))}'
+            f'</summary><ul class="lista-certos">{items}</ul></details>'
+        )
     return "".join(out)
+
+
+def _always_right(case: Case, models: list[str], consistency, expected: dict[str, int]) -> bool:
+    """Every model answered every sample of this case, and every one was right."""
+    entries = [(consistency.get((case.case_id, m)), expected.get(m, 0)) for m in models]
+    return all(
+        e is not None and e.state is ConsistencyState.ESTAVEL_CERTO and e.samples >= n
+        for e, n in entries
+    )
 
 
 def _grid_legend() -> str:
@@ -809,7 +876,9 @@ def _grid_legend() -> str:
         f'<li><span class="swatch {css}" aria-hidden="true"></span>{icon} {_term(state.label)}</li>'
         for state, (css, icon) in _STATE_STYLE.items()
     ]
-    items.append('<li><span class="swatch sem-resposta" aria-hidden="true"></span>○ sem resposta</li>')
+    items.append(
+        f'<li><span class="swatch sem-resposta" aria-hidden="true"></span>○ {_t("sem resposta")}</li>'
+    )
     return f'<ul class="legenda-estados">{"".join(items)}</ul>'
 
 
@@ -819,14 +888,17 @@ def _grid_legend() -> str:
 def _sample_block(answer: Answer, verdict: Verdict) -> str:
     out = ['<div class="amostra">']
     if verdict.passed:
-        out.append(f'<p class="passou">✓ amostra {answer.sample}: cumpre todos os critérios</p>')
-        out.append(f"<blockquote>{_esc(answer.text)}</blockquote></div>")
+        out.append(
+            f'<p class="passou">✓ {_esc(_t("amostra {n}: cumpre todos os critérios", n=answer.sample))}</p>'
+        )
+        out.append(f'<blockquote lang="pt-PT">{_esc(answer.text)}</blockquote></div>')
         return "".join(out)
     alternative = (
-        f" (corrigida contra: {_esc(verdict.alternative)})" if verdict.alternative else ""
+        " " + _t("(corrigida contra: {alternativa})", alternativa=_esc(verdict.alternative))
+        if verdict.alternative else ""
     )
-    out.append(f'<p class="amostra-numero">✕ amostra {answer.sample}{alternative}</p>')
-    out.append(f"<blockquote>{_esc(answer.text)}</blockquote>")
+    out.append(f'<p class="amostra-numero">✕ {_esc(_t("amostra {n}", n=answer.sample))}{alternative}</p>')
+    out.append(f'<blockquote lang="pt-PT">{_esc(answer.text)}</blockquote>')
     out.append('<ul class="criterios-falhados">')
     for result in verdict.results:
         if not result.passed:
@@ -845,11 +917,13 @@ def _detail(
     pairs: dict[tuple[str, str], list[tuple[Answer, Verdict]]],
 ) -> str:
     out = [
-        '<section class="detalhe" id="casos-com-falha"><h2>Casos com falha</h2>',
-        '<p class="seccao-intro">Cada caso apresenta a pergunta, a resposta de referência com '
-        "a fonte e cada resposta distinta do modelo, com o critério não cumprido e a evidência "
-        "encontrada pelo corretor. Os círculos à direita indicam o estado do caso em cada "
-        f"modelo, por esta ordem: {_esc(', '.join(_model_short(m) for m in models))}.</p>",
+        f'<section class="detalhe" id="casos-com-falha"><h2>{_t("Casos com falha")}</h2>',
+        '<p class="seccao-intro">'
+        + _t("Cada caso apresenta a pergunta, a resposta de referência com a fonte e cada "
+             "resposta distinta do modelo, com o critério não cumprido e a evidência encontrada "
+             "pelo corretor. Os círculos à direita indicam o estado do caso em cada modelo, por "
+             "esta ordem: {modelos}.", modelos=_esc(", ".join(_model_short(m) for m in models)))
+        + "</p>",
     ]
     any_case = False
     for case in cases:
@@ -869,20 +943,22 @@ def _detail(
                 continue
             css, icon = _STATE_STYLE[entry.state]
             minis.append(
-                f'<span class="mini {css}" title="{_esc(_model_short(model))}: {_esc(entry.state.label)}">{icon}</span>'
+                f'<span class="mini {css}" title="{_esc(_model_short(model))}: {_esc(_t(entry.state.label))}">{icon}</span>'
             )
         out.append("<details>")
         out.append(
             f'<summary id="caso-{_esc(case.case_id)}"><span class="caso-id">{_case_code(case.case_id)}</span>'
-            f'<span class="resumo-pergunta">{_esc(case.question)}</span>'
+            f'<span class="resumo-pergunta" lang="pt-PT">{_esc(case.question)}</span>'
             f'<span class="minis" aria-hidden="true">{"".join(minis)}</span></summary>'
         )
         out.append('<div class="detalhe-corpo">')
-        out.append(f"<p><strong>Pergunta.</strong> {_gloss(_esc(case.question))}</p>")
         out.append(
-            f'<div class="referencia"><p><strong>Resposta de referência.</strong> '
-            f"{_gloss(_esc(case.reference))}</p>"
-            f'<p class="fonte"><strong>Fonte.</strong> {_gloss(_esc(case.source.name))}, '
+            f'<p><strong>{_t("Pergunta.")}</strong> <span lang="pt-PT">{_gloss(_esc(case.question))}</span></p>'
+        )
+        out.append(
+            f'<div class="referencia"><p><strong>{_t("Resposta de referência.")}</strong> '
+            f'<span lang="pt-PT">{_gloss(_esc(case.reference))}</span></p>'
+            f'<p class="fonte"><strong>{_t("Fonte.")}</strong> {_gloss(_esc(case.source.name))}, '
             f"{_esc(case.source.reference)}</p></div>"
         )
         for model in failing_models:
@@ -890,8 +966,8 @@ def _detail(
             css, icon = _STATE_STYLE[entry.state]
             out.append(
                 f'<h4><span class="mini {css}" aria-hidden="true">{icon}</span> {_esc(_model_short(model))} '
-                f'<span class="h4-sub">{_esc(entry.state.label)}, {entry.passed} de '
-                f"{entry.samples} amostras corretas</span></h4>"
+                f'<span class="h4-sub">{_esc(_t(entry.state.label))}, '
+                f'{_esc(_t("{a} de {n} amostras corretas", a=entry.passed, n=entry.samples))}</span></h4>'
             )
             seen: set[str] = set()
             for answer, verdict in pairs.get((case.case_id, model), []):
@@ -901,7 +977,7 @@ def _detail(
                 out.append(_sample_block(answer, verdict))
         out.append("</div></details>")
     if not any_case:
-        out.append("<p>Nenhum caso com falha.</p>")
+        out.append(f"<p>{_t('Nenhum caso com falha.')}</p>")
     out.append("</section>")
     return "".join(out)
 
@@ -959,7 +1035,20 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
   background: var(--surface-2); padding: 0.1rem 0.3rem; border-radius: 4px; }
 section { margin-top: 2.5rem; scroll-margin-top: 3.5rem; }
 .topo { padding: 2rem 0 1rem; position: relative; }
-.tema { position: absolute; top: 1.6rem; right: 0; display: inline-flex; padding: 3px; gap: 2px;
+.controlos { position: absolute; top: 1.6rem; right: 0; display: flex; gap: 0.5rem; align-items: flex-start; }
+.linguas { position: relative; }
+.linguas > summary { list-style: none; cursor: pointer; padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.85rem;
+  color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--border); user-select: none; }
+.linguas > summary::-webkit-details-marker { display: none; }
+.linguas > summary:hover { color: var(--ink); }
+.linguas > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.linguas ul { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; list-style: none; margin: 0; padding: 0.35rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 4px 14px var(--tooltip-shadow); min-width: 9rem; }
+.linguas a { display: block; padding: 0.35rem 0.6rem; border-radius: 6px; color: var(--ink); text-decoration: none; font-size: 0.9rem; }
+.linguas a:hover, .linguas a:focus-visible { background: var(--surface-2); }
+.linguas a[aria-current="page"] { font-weight: 650; }
+.linguas a[aria-current="page"]::after { content: " ✓"; color: var(--success-text); }
+.tema { display: inline-flex; padding: 3px; gap: 2px;
   background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; }
 .tema input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
 .tema label { cursor: pointer; padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 0.85rem;
@@ -985,7 +1074,7 @@ nav.indice { position: sticky; top: 0; z-index: 2; background: var(--page);
 nav.indice ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; }
 nav.indice a { color: var(--ink-2); text-decoration: none; font-size: 0.92rem; }
 nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-decoration: underline; }
-.intro { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem; margin-top: 1.5rem;
+.intro { margin-top: 1.5rem;
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
 .lead { font-size: 1.12rem; }
 .factos { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -1000,7 +1089,7 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .seccao-intro { color: var(--ink-2); max-width: 48rem; }
 .cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; }
 .cartao-modelo { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
-.cartao-modelo header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.5rem; min-height: 6.5rem; }
+.cartao-modelo header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.5rem; min-height: 3.5rem; }
 .modelo-nome { font-size: 1.15rem; font-weight: 650; display: block; }
 .modelo-desc { display: block; color: var(--ink-2); font-size: 0.85rem; margin-top: 0.1rem; }
 .modelo-id { display: inline-block; margin-top: 0.3rem; font-size: 0.72rem; color: var(--muted); background: none; padding: 0; }
@@ -1094,7 +1183,7 @@ table.grade th, table.grade td { border-bottom: 1px solid var(--grid); padding: 
 table.grade thead th { font-size: 0.82rem; color: var(--ink); background: var(--surface); min-width: 12rem; }
 table.grade tbody th { font-weight: 400; min-width: 16rem; max-width: 30rem; }
 .caso-id { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; font-weight: 600; }
-.caso-pergunta { display: block; color: var(--ink-2); font-size: 0.82rem; line-height: 1.35; margin-top: 0.15rem; }
+.caso-pergunta { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--ink-2); font-size: 0.82rem; line-height: 1.35; margin-top: 0.15rem; }
 tr.categoria td { background: var(--surface-2); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2); }
 td.cel { white-space: nowrap; }
 td.cel.ok { background: var(--good-bg); }
@@ -1144,11 +1233,22 @@ abbr.termo:hover::after, abbr.termo:focus::after {
   text-transform: none; letter-spacing: normal; white-space: normal; text-align: left;
   box-shadow: 0 4px 14px var(--tooltip-shadow); pointer-events: none; }
 abbr.termo.lado:hover::after, abbr.termo.lado:focus::after { left: calc(100% + 8px); top: -0.3rem; }
-details.glossario { margin-top: 2.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; scroll-margin-top: 3.5rem; }
-details.glossario summary { cursor: pointer; padding: 0.9rem 1.25rem; font-weight: 650; }
-details.glossario dl { margin: 0; padding: 0 1.25rem 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.4rem 1.5rem; }
-details.glossario dt { font-weight: 650; font-size: 0.9rem; }
-details.glossario dd { margin: 0 0 0.5rem; color: var(--ink-2); font-size: 0.86rem; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+details.recolhe { margin-top: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; scroll-margin-top: 3.5rem; }
+details.recolhe > summary { cursor: pointer; padding: 0.8rem 1.25rem; font-weight: 650; }
+details.recolhe[open] > summary { border-bottom: 1px solid var(--grid); }
+details.recolhe > :not(summary) { margin-left: 1.25rem; margin-right: 1.25rem; }
+details.recolhe > :last-child { margin-bottom: 1rem; }
+details.mais, details.tecnico { margin-top: 2.5rem; }
+details.recolhe h3 { margin-top: 1.25rem; }
+.intro details.ler { margin-top: 1rem; background: var(--surface-2); }
+.card-linha { font-size: 0.9rem; color: var(--ink-2); margin: 0.75rem 0 0; }
+.card-linha strong { color: var(--ink); }
+.lista-certos { list-style: none; padding: 0; margin: 0.75rem 1.25rem 1rem; font-size: 0.88rem; color: var(--ink-2); }
+.lista-certos li { margin: 0.3rem 0; }
+.glossario dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.4rem 1.5rem; }
+.glossario dt { font-weight: 650; font-size: 0.9rem; }
+.glossario dd { margin: 0 0 0.5rem; color: var(--ink-2); font-size: 0.86rem; }
 footer.rodape { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--grid); color: var(--ink-2); font-size: 0.88rem; scroll-margin-top: 3.5rem; }
 footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 @media (max-width: 46rem) {
@@ -1158,7 +1258,7 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
   .barras-falhas li { grid-template-columns: 8.5rem 1fr 2rem; }
   .destaque { font-size: 2.6rem; }
   .topo h1 { font-size: 1.6rem; }
-  .tema { position: static; margin-top: 0.75rem; }
+  .controlos { position: static; margin-top: 0.75rem; }
   .metricas { grid-template-columns: 1fr; }
   .erros { grid-template-columns: 1fr; }
   .erro-par { grid-template-columns: 1fr; }
@@ -1166,7 +1266,7 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 }
 @media print {
   nav.indice { position: static; }
-  .tema { display: none; }
+  .controlos { display: none; }
   details { break-inside: avoid; }
 }
 """
@@ -1179,21 +1279,24 @@ def _protocol_section(
     protocol: Protocol, answers: list[Answer], summaries: dict, cases_source, case_ids: list[str]
 ) -> tuple[str, dict[str, bool]]:
     found_warnings, outcomes = protocol_findings(
-        protocol, answers, summaries, cases_source, case_ids
+        protocol, answers, summaries, cases_source, case_ids, _LANG.get()
     )
-    parts = ['<section class="protocolo" id="criterio"><h2>Critério de aprovação</h2><div class="cartao">']
-    parts.append(
-        f"<p>Protocolo <strong>{_esc(protocol.name)}</strong>, escrito a "
-        f"{_esc(protocol.written_on.isoformat())} (<code>{_esc(protocol.path)}</code>, "
-        f"{_term('SHA-256')} {_esc(protocol.sha256[:12])}).</p>"
-    )
+    parts = [
+        f'<section class="protocolo" id="criterio"><h2>{_t("Critério de aprovação")}</h2><div class="cartao">'
+    ]
+    parts.append("<p>" + _t(
+        "Protocolo {nome}, escrito a {data} ({ficheiro}, {sha} {resumo}).",
+        nome=f"<strong>{_esc(protocol.name)}</strong>", data=_esc(protocol.written_on.isoformat()),
+        ficheiro=f"<code>{_esc(protocol.path)}</code>", sha=_term("SHA-256"),
+        resumo=_esc(protocol.sha256[:12]),
+    ) + "</p>")
     for warning in found_warnings:
-        parts.append(_aviso("Aviso.", _esc(warning) + "."))
+        parts.append(_aviso(_t("Aviso."), _esc(warning) + "."))
     parts.append("<ul>")
     for outcome in outcomes:
-        result = "aprovado" if outcome.approved else "reprovado"
+        result = _t("aprovado") if outcome.approved else _t("reprovado")
         details = "; ".join(
-            f"{c.label}: {c.observed} ({c.limit}{'' if c.met else ', não cumpre'})"
+            f"{c.label}: {c.observed} ({c.limit}{'' if c.met else _t(', não cumpre')})"
             for c in outcome.checks
         )
         parts.append(
@@ -1202,6 +1305,25 @@ def _protocol_section(
         )
     parts.append("</ul></div></section>")
     return "".join(parts), {o.model: o.approved for o in outcomes}
+
+
+def _language_menu(alternates: dict[str, str]) -> str:
+    """A 🌐 menu linking to the same report in the other languages.
+
+    A `<details>` element, so it opens and closes without a script. Each
+    language is written in itself, and the current one is marked.
+    """
+    current = _LANG.get()
+    items = "".join(
+        f'<li><a href="{_esc(href)}" hreflang="{HTML_LANG[lang]}" lang="{HTML_LANG[lang]}"'
+        + (' aria-current="page"' if lang == current else "")
+        + f">{_esc(NAMES[lang])}</a></li>"
+        for lang, href in alternates.items()
+    )
+    return (
+        f'<details class="linguas"><summary aria-label="{_esc(_t("Língua"))}: {_esc(NAMES[current])}">'
+        f'<span aria-hidden="true">🌐</span> {current.upper()}</summary><ul>{items}</ul></details>'
+    )
 
 
 def build(
@@ -1214,32 +1336,58 @@ def build(
     today: date | None = None,
     cases_source: tuple[str, str] | None = None,
     protocol: Protocol | None = None,
+    lingua: str = "pt",
+    alternates: dict[str, str] | None = None,
 ) -> str:
-    """Write the whole report as one self contained HTML file."""
+    """Write the whole report as one self contained HTML file.
+
+    `lingua` is the language of the interface; the cases and the answers are
+    always shown in the original Portuguese. `alternates` maps each language
+    to the address of the same report in it, for the language menu; without
+    it, the page has no menu.
+    """
+    if lingua not in HTML_LANG:
+        raise ValueError(f"língua desconhecida {lingua!r}; esperava uma de {', '.join(HTML_LANG)}")
+    token = _LANG.set(lingua)
+    try:
+        return _build(
+            cases, answers, verdicts, missing, reasons, sources_verified, today,
+            cases_source, protocol, alternates,
+        )
+    finally:
+        _LANG.reset(token)
+
+
+def _build(
+    cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
+    protocol, alternates,
+) -> str:
     per_model = tally_by_model(verdicts)
     models = list(per_model)
     written = (today or date.today()).isoformat()
+    title = _t("Relatório do Aferidor")
 
     out: list[str] = [
         "<!DOCTYPE html>",
-        '<html lang="pt-PT"><head><meta charset="utf-8">',
+        f'<html lang="{HTML_LANG[_LANG.get()]}"><head><meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
-        f"<title>Relatório do Aferidor</title><style>{_STYLE}</style></head><body>",
+        f"<title>{title}</title><style>{_STYLE}</style></head><body>",
     ]
+    menu = _language_menu(alternates) if alternates else ""
     out.append(
-        '<header class="topo"><div class="marca">Aferidor · banco de ensaio clínico</div>'
-        '<div class="tema" role="radiogroup" aria-label="Tema">'
+        f'<header class="topo"><div class="marca">{_t("Aferidor · banco de ensaio clínico")}</div>'
+        '<div class="controlos">' + menu
+        + f'<div class="tema" role="radiogroup" aria-label="{_esc(_t("Tema"))}">'
         '<input type="radio" name="tema" id="tema-claro"><label for="tema-claro">'
-        '<span aria-hidden="true">☀</span> Claro</label>'
+        f'<span aria-hidden="true">☀</span> {_t("Claro")}</label>'
         '<input type="radio" name="tema" id="tema-escuro"><label for="tema-escuro">'
-        '<span aria-hidden="true">☾</span> Escuro</label></div>'
-        "<h1>Relatório do Aferidor</h1>"
-        '<p class="subtitulo">Respostas clínicas de modelos de linguagem, medidas contra '
-        "casos de referência com fonte pública.</p>"
-        f'<p class="data">Relatório escrito em {_esc(written)}.</p></header>'
+        f'<span aria-hidden="true">☾</span> {_t("Escuro")}</label></div></div>'
+        f"<h1>{title}</h1>"
+        f'<p class="subtitulo">{_t("Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública.")}</p>'
+        f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(written))}</p></header>'
     )
 
-    sections = [("sobre", "Sobre este relatório")]
+    sections = []
     if models:
         sections.append(("resumo", "Resumo"))
         if protocol is not None:
@@ -1248,21 +1396,23 @@ def build(
             ("erros", "Erros mais graves"),
             ("areas", "Por área clínica"),
             ("grelha", "Resultados por caso"),
-            ("falhas", "Falhas por tipo"),
             ("casos-com-falha", "Casos com falha"),
+            ("falhas", "Mais indicadores"),
         ]
-    sections += [("condicoes", "Condições do ensaio"), ("glossario", "Glossário"), ("metodo", "Método")]
+    sections.append(("detalhes", "Detalhes técnicos"))
     out.append(
-        '<nav class="indice" aria-label="Secções"><ul>'
-        + "".join(f'<li><a href="#{anchor}">{_esc(label)}</a></li>' for anchor, label in sections)
+        f'<nav class="indice" aria-label="{_esc(_t("Secções"))}"><ul>'
+        + "".join(f'<li><a href="#{anchor}">{_esc(_t(label))}</a></li>' for anchor, label in sections)
         + "</ul></nav>"
     )
 
-    out.append(_intro(cases, models, answers))
+    rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
+    samples_n = max(expected_samples(answers).values(), default=0)
+    out.append(_intro(cases, models, answers, _how_counted(samples_n, rule) if models else ""))
     out.extend(_notices(cases, answers, missing, reasons, sources_verified))
 
     if not models:
-        out.append('<section id="resumo"><p>Não há vereditos para relatar.</p></section>')
+        out.append(f'<section id="resumo"><p>{_t("Não há vereditos para relatar.")}</p></section>')
     else:
         consistency = consistency_by_case(cases, answers, verdicts)
         summaries = consistency_by_model(consistency)
@@ -1270,7 +1420,6 @@ def build(
         pairs = pairs_by_case(cases, answers, verdicts)
         languages = language_by_model(answers)
         expected = expected_samples(answers)
-        rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
         right = right_cases_by_model(consistency, rule)
 
         protocol_html, approved = ("", {})
@@ -1279,12 +1428,7 @@ def build(
                 protocol, answers, summaries, cases_source, [c.case_id for c in cases]
             )
 
-        out.append('<section id="resumo"><h2>Resumo</h2>')
-        out.append(
-            '<p class="seccao-intro">Falha crítica: erro de dose, interação ou contraindicação '
-            "omitida, encaminhamento urgente omitido, ou facto inventado. Os intervalos de "
-            "confiança são a 95%; com poucos casos, são largos.</p>"
-        )
+        out.append(f'<section id="resumo"><h2>{_t("Resumo")}</h2>')
         out.append(_context_note(models))
         out.append(_comparison(summaries))
         out.append('<div class="cartoes">')
@@ -1292,83 +1436,91 @@ def build(
             out.append(
                 _model_card(
                     model, summaries[model], per_model[model], states[model],
-                    languages[model], approved.get(model), right[model], rule,
-                    expected.get(model, 0),
+                    approved.get(model), right[model],
                 )
             )
         out.append("</div>")
-        out.append(_how_counted(max(expected.values(), default=0), rule))
         out.append("</section>")
         out.append(protocol_html)
         out.append(_worst(cases, consistency, pairs))
         out.append(_areas(cases, models, consistency))
 
-        out.append('<section id="grelha"><h2>Resultados por caso</h2>')
+        out.append(f'<section id="grelha"><h2>{_t("Resultados por caso")}</h2>')
         out.append(
-            '<p class="seccao-intro">Linhas: casos. Colunas: modelos. Os pontos representam as '
-            "amostras pela ordem de execução (● correta, ✕ incorreta, ○ sem resposta). Nos casos "
-            "com falha indica-se o tipo de falha mais grave "
-            '(ver <a href="#como-se-conta">Método de contagem</a>).</p>'
+            '<p class="seccao-intro">'
+            + _t("Casos com falha em pelo menos um modelo. Cada ponto é uma amostra (● correta, "
+                 "✕ incorreta, ○ sem resposta); por baixo, o tipo de falha mais grave.")
+            + "</p>"
         )
         out.append(_grid_legend())
         out.append(_grid(cases, models, consistency, pairs, expected))
         out.append("</section>")
-
-        out.append('<section id="falhas"><h2>Falhas por tipo</h2>')
-        out.append(
-            '<p class="seccao-intro">Quantas respostas tiveram cada tipo de falha, do risco '
-            "mais alto para o mais baixo. Uma resposta pode ter mais do que um tipo.</p>"
-        )
-        out.append(_risk_legend())
-        out.append('<div class="falhas-grelha">')
-        top = max((n for tally in per_model.values() for _, n in tally.worst_first()), default=1)
-        for model in models:
-            out.append(_failure_chart(model, per_model[model], top))
-        out.append("</div></section>")
-
-        out.append(
-            '<section class="lingua"><h2>Português europeu</h2><ul>'
-            + "".join(
-                f"<li><strong>{_esc(_model_short(m))}</strong> <code>{_esc(m)}</code>: "
-                f"{_gloss(_esc(language_line(languages[m])), ('Acordo Ortográfico',))}</li>"
-                for m in models
-            )
-            + '</ul><p class="seccao-intro">Indicador independente, baseado numa lista curta de '
-            "formas alheias ao português europeu atual. Não entra na contagem de falhas e "
-            "subestima a frequência real.</p></section>"
-        )
         out.append(_detail(cases, models, consistency, pairs))
 
-    rows = conditions_rows(answers, cases_source)
-    out.append('<section class="condicoes" id="condicoes"><h2>Condições do ensaio</h2>')
+        more = [
+            f'<details class="recolhe mais" id="falhas"><summary>{_t("Mais indicadores: falhas por tipo e português europeu")}</summary>',
+            f"<h3>{_t('Falhas por tipo')}</h3>",
+            '<p class="seccao-intro">'
+            + _t("Quantas respostas tiveram cada tipo de falha, do risco mais alto para o mais "
+                 "baixo. Uma resposta pode ter mais do que um tipo.")
+            + "</p>",
+            _risk_legend(),
+            '<div class="falhas-grelha">',
+        ]
+        top = max((n for tally in per_model.values() for _, n in tally.worst_first()), default=1)
+        for model in models:
+            more.append(_failure_chart(model, per_model[model], top))
+        more.append("</div>")
+        more.append(
+            f'<div class="lingua"><h3>{_t("Português europeu")}</h3><ul>'
+            + "".join(
+                f"<li><strong>{_esc(_model_short(m))}</strong> <code>{_esc(m)}</code>: "
+                f"{_gloss(_esc(language_line(languages[m], _LANG.get())), ('Acordo Ortográfico',))}</li>"
+                for m in models
+            )
+            + '</ul><p class="seccao-intro">'
+            + _t("Indicador independente, baseado numa lista curta de formas alheias ao "
+                 "português europeu atual. Não entra na contagem de falhas e subestima a "
+                 "frequência real.")
+            + "</p></div></details>"
+        )
+        out.extend(more)
+
+    rows = conditions_rows(answers, cases_source, _LANG.get())
+    out.append(
+        f'<details class="recolhe tecnico" id="detalhes"><summary>{_t("Detalhes técnicos: condições do ensaio, glossário e método")}</summary>'
+    )
+    out.append(f'<div class="condicoes" id="condicoes"><h3>{_t("Condições do ensaio")}</h3>')
     if rows:
         out.append("<dl>")
         for label, value in rows:
-            shown = label if label == "Banco de casos" else f"{_model_short(label)} ({label})"
+            shown = _t(label) if label == "Banco de casos" else f"{_model_short(label)} ({label})"
             out.append(
                 f"<dt>{_esc(shown)}</dt>"
                 f"<dd>{_gloss(_esc(value), ('SHA-256', 'tokens_max'))}</dd>"
             )
         out.append("</dl>")
     else:
-        out.append("<p>Sem respostas registadas.</p>")
-    out.append("</section>")
+        out.append(f"<p>{_t('Sem respostas registadas.')}</p>")
+    out.append("</div>")
 
     out.append(_glossary_section("".join(out)))
     out.append(
-        '<footer class="rodape" id="metodo"><h2>Método</h2>'
-        f"<p>{_esc(HEADER_NOTE)}</p>"
-        "<p>A correção é textual e determinista: cada critério procura termos e valores na "
-        "resposta, e o mesmo texto dá sempre o mesmo veredito. O próprio corretor é ensaiado "
-        "nos dois sentidos: a resposta de referência de cada caso tem de passar, e uma resposta "
-        "errada construída para cada critério tem de falhar. O modelo nunca vê a resposta de "
-        "referência nem os critérios.</p>"
-        "<p>O método completo, os limites conhecidos e a confirmação das fontes estão no "
-        "repositório do Aferidor, em <code>docs/METODO.md</code> e "
-        "<code>casos/VERIFICACAO.md</code>.</p></footer>"
+        f'<div class="metodo" id="metodo"><h3>{_t("Método")}</h3>'
+        "<p>" + _t(
+            "A correção é textual e determinista: cada critério procura termos e valores na "
+            "resposta, e o mesmo texto dá sempre o mesmo veredicto. O próprio corretor é "
+            "ensaiado nos dois sentidos: a resposta de referência de cada caso tem de passar, e "
+            "uma resposta errada construída para cada critério tem de falhar. O modelo nunca vê "
+            "a resposta de referência nem os critérios."
+        ) + "</p><p>" + _t(
+            "O método completo, os limites conhecidos e a confirmação das fontes estão no "
+            "repositório do Aferidor, em {metodo} e {verificacao}.",
+            metodo="<code>docs/METODO.md</code>", verificacao="<code>casos/VERIFICACAO.md</code>",
+        ) + "</p></div></details>"
+        f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p></footer>'
     )
     out.append("</body></html>")
     return "".join(out)
-
 
 __all__ = ["build", "model_label", "case_code_meaning", "GLOSSARY"]

@@ -26,6 +26,7 @@ from .providers import (
 )
 from .runner import ConditionsMismatch, RunConfig, run
 from .storage import read_answers, read_cases, write_answers, write_verdicts
+from .traducao import LANGS
 
 DEFAULT_CASES = Path("casos/casos.json")
 DEFAULT_OUTPUT = Path("data/respostas.jsonl")
@@ -163,6 +164,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     relatorio.add_argument("--respostas", type=Path, default=DEFAULT_OUTPUT)
     relatorio.add_argument("--saida", type=Path, default=None)
     relatorio.add_argument("--formato", choices=("md", "html"), default="md")
+    relatorio.add_argument(
+        "--linguas", default="pt",
+        help="línguas da interface do relatório HTML, separadas por vírgulas (pt, en, es, fr, de); "
+        "a primeira fica em --saida e cada outra num ficheiro ao lado, com um menu entre elas",
+    )
     relatorio.add_argument(
         "--limite", type=int, default=0,
         help="0 usa todos os casos; tem de coincidir com o --limite usado em executar",
@@ -348,20 +354,35 @@ def comando_relatorio(
         if _protocol_problem(args) is not None:
             return 2
         protocol = protocolo.read_protocol(args.protocolo)
-    builder = html_report.build if formato == "html" else report.build
-    text = builder(
-        cases,
-        answers,
-        verdicts,
-        missing=missing,
-        reasons=reasons,
-        sources_verified=args.fontes_confirmadas,
-        cases_source=_cases_source(args.casos),
-        protocol=protocol,
+    langs = [x.strip() for x in getattr(args, "linguas", "pt").split(",") if x.strip()]
+    unknown = [x for x in langs if x not in LANGS]
+    if unknown or not langs:
+        print(f"erro: língua desconhecida {', '.join(unknown)}; usar {', '.join(LANGS)}", file=sys.stderr)
+        return 2
+    if formato != "html" and langs != ["pt"]:
+        print("erro: --linguas só se aplica ao formato html", file=sys.stderr)
+        return 2
+    common = dict(
+        missing=missing, reasons=reasons, sources_verified=args.fontes_confirmadas,
+        cases_source=_cases_source(args.casos), protocol=protocol,
     )
     saida.parent.mkdir(parents=True, exist_ok=True)
-    saida.write_text(text, encoding="utf-8")
-    print(f"relatório em {saida} ({len(text.splitlines())} linhas)")
+    if formato != "html":
+        text = report.build(cases, answers, verdicts, **common)
+        saida.write_text(text, encoding="utf-8")
+        print(f"relatório em {saida} ({len(text.splitlines())} linhas)")
+        return 0
+    paths = {
+        lang: saida if i == 0 else saida.with_name(f"{saida.stem}.{lang}{saida.suffix}")
+        for i, lang in enumerate(langs)
+    }
+    alternates = {lang: path.name for lang, path in paths.items()} if len(langs) > 1 else None
+    for lang, path in paths.items():
+        text = html_report.build(
+            cases, answers, verdicts, lingua=lang, alternates=alternates, **common
+        )
+        path.write_text(text, encoding="utf-8")
+        print(f"relatório em {path} ({len(text.splitlines())} linhas)")
     return 0
 
 

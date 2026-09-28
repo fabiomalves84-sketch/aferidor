@@ -28,6 +28,7 @@ flowchart LR
 | `grading.py` | Vereditos, contagens por risco, consistência entre amostras e controlos negativos |
 | `report.py` | Relatório em Markdown |
 | `html_report.py` | O mesmo relatório em HTML, num único ficheiro |
+| `traducao.py` | A interface do relatório HTML em inglês, espanhol, francês e alemão; os casos e as respostas ficam em português |
 | `lingua.py` | Indicador de português europeu, independente da correção clínica |
 | `protocolo.py` | Critério de aprovação prévio e verificação da sua anterioridade |
 | `revisao.py` | Comparação do corretor com o juízo de uma pessoa, em folha cega |
@@ -78,6 +79,15 @@ de amostras corretas: na prática clínica é observada uma única resposta.
 que `report.py`, pelo que os dois formatos coincidem por construção.
 `grading.match_answers` e `grading.pairs_by_case` garantem que ambos usam o
 mesmo emparelhamento entre resposta e veredicto.
+
+**Só a interface muda de língua.** `traducao.py` traduz títulos, explicações,
+legendas e glossário a partir de um catálogo indexado pelo texto português,
+que continua a ser a fonte: o relatório em português é idêntico com ou sem
+tradução. As perguntas, as referências e as respostas dos modelos são o
+objeto medido e nunca são traduzidas. Cada língua é um ficheiro próprio, com
+um menu entre elas, para o relatório continuar sem script e com o mesmo
+peso. Um teste gera um ensaio real nas cinco línguas e exige que nenhum texto
+fique sem tradução.
 
 ## Sem dependências externas
 
