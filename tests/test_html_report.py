@@ -32,6 +32,13 @@ def an_answer(text: str, case_id: str = "C1", model: str = "falso", sample: int 
     )
 
 
+def visible(page: str) -> str:
+    """The page as a reader sees it: tags out, whitespace collapsed."""
+    import html as _h
+    text = " ".join(_h.unescape(re.sub(r"<[^>]+>", " ", page)).split())
+    return re.sub(r" ([:;,.)])", r"\1", text)
+
+
 def build(cases, answers, **kwargs) -> str:
     verdicts, missing = grade_all(cases, answers)
     return html_report.build(
@@ -74,15 +81,22 @@ class TestHeadline(unittest.TestCase):
     def test_the_critical_case_count_is_shown_per_model(self):
         text = build([a_case()], [an_answer("500 mg")])
         self.assertIn('<span class="destaque">1</span>', text)
-        self.assertIn("de 1 casos com falha crítica em alguma amostra", text)
+        self.assertIn("de 1 casos com falha crítica em alguma amostra", visible(text))
 
 
 class TestGrid(unittest.TestCase):
     def test_cases_are_grouped_by_category(self):
         cases = [a_case("C1", category="dose"), a_case("C2", category="interacao")]
-        text = build(cases, [an_answer("1 g", case_id="C1"), an_answer("1 g", case_id="C2")])
-        self.assertIn("dose", text)
-        self.assertIn("interacao", text)
+        text = build(cases, [an_answer("500 mg", case_id="C1"), an_answer("500 mg", case_id="C2")])
+        self.assertIn(">Dose<", text)
+        self.assertIn(">Interações<", text)
+
+    def test_the_grid_shows_failing_cases_and_lists_the_rest_collapsed(self):
+        cases = [a_case("C1"), a_case("C2")]
+        text = build(cases, [an_answer("500 mg", case_id="C1"), an_answer("1 g", case_id="C2")])
+        grid = text[text.index('id="grelha"'):text.index('id="casos-com-falha"')]
+        self.assertIn("C1", grid[:grid.index("<details")])
+        self.assertIn("1 caso sempre correto em todos os modelos", grid)
 
     def test_the_state_is_written_out_not_just_shown_in_colour(self):
         text = build([a_case()], [an_answer("500 mg")])
@@ -138,15 +152,15 @@ class TestHowItIsCounted(unittest.TestCase):
 
     def test_the_card_counts_right_cases_by_the_rule_and_names_the_rule(self):
         text = build([a_case()], [an_answer("1 g", sample=1), an_answer("500 mg", sample=2)])
-        self.assertIn("0 de 1 casos", text)
-        self.assertIn("regra: todas as amostras são corretas", text)
+        self.assertIn("Casos corretos: 0 de 1", visible(text))
+        self.assertIn("um caso é correto quando todas as amostras são corretas", visible(text))
 
     def test_the_card_says_answers_are_cases_times_attempts(self):
         cases = [a_case("C1"), a_case("C2")]
         answers = [an_answer("1 g", case_id=c, sample=s) for c in ("C1", "C2") for s in (1, 2, 3)]
         text = build(cases, answers)
-        self.assertIn("6 de 6 respostas", text)
-        self.assertIn("2 casos × 3 amostras", text)
+        self.assertIn("Respostas corretas: 6 de 6", visible(text))
+        self.assertIn("casos × amostras", text)
 
 
 class TestMissingSamples(unittest.TestCase):
@@ -208,7 +222,7 @@ class TestNumbersMatchMarkdown(unittest.TestCase):
 
         self.assertIn(f"{summary.critical_cases} de {summary.cases} casos", markdown)
         self.assertIn(f'<span class="destaque">{summary.critical_cases}</span>', page)
-        self.assertIn(f"de {summary.cases} casos com falha crítica em alguma amostra", page)
+        self.assertIn(f"de {summary.cases} casos com falha crítica em alguma amostra", visible(page))
 
 
 class TestReadableByAnOutsider(unittest.TestCase):
@@ -221,7 +235,7 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_every_section_is_reachable_from_the_index(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        for anchor in ("resumo", "grelha", "falhas", "casos-com-falha", "condicoes", "metodo"):
+        for anchor in ("resumo", "erros", "areas", "grelha", "casos-com-falha", "falhas", "detalhes"):
             with self.subTest(anchor=anchor):
                 self.assertIn(f'href="#{anchor}"', text)
                 self.assertIn(f'id="{anchor}"', text)

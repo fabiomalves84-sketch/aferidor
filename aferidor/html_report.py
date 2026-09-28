@@ -157,7 +157,7 @@ def model_label(model_id: str) -> tuple[str, str]:
     return name, " · ".join(details)
 
 
-def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo") -> str:
+def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo", show_id: bool = True) -> str:
     name, description = model_label(model_id)
     sub = (
         f'<span class="modelo-desc">{_gloss(_esc(description), ("Ollama", "parâmetros"))}</span>'
@@ -165,7 +165,8 @@ def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo") -> str:
     )
     return (
         f'<div class="{css}"><{tag} class="modelo-nome">{_esc(name)}</{tag}>{sub}'
-        f'<code class="modelo-id">{_esc(model_id)}</code></div>'
+        + (f'<code class="modelo-id">{_esc(model_id)}</code>' if show_id else "")
+        + "</div>"
     )
 
 
@@ -260,10 +261,14 @@ GLOSSARY: dict[str, str] = {
     "parcialmente correto": "Parte das amostras cumpriu os critérios e parte não: o resultado dependeu da tentativa.",
     "nunca correto": "Nenhuma amostra cumpriu os critérios. Não implica falha crítica: a falha pode ser apenas uma resposta incompleta.",
     "falha crítica": "Erro de dose, interação ou contraindicação omitida, encaminhamento urgente omitido, ou facto inventado.",
+    "respostas corretas": "Contagem de respostas (casos × amostras), não de casos. Uma taxa alta pode ocultar casos nunca corretos.",
     "casos corretos": "Veredicto binário por caso, segundo a regra indicada no relatório. Por omissão, um caso é correto apenas se todas as amostras forem corretas.",
 }
 # The report's own vocabulary: marked where the report uses it, never in case texts.
-_REPORT_TERMS = ("amostra", "sempre correto", "parcialmente correto", "nunca correto", "falha crítica", "casos corretos")
+_REPORT_TERMS = (
+    "amostra", "sempre correto", "parcialmente correto", "nunca correto", "falha crítica",
+    "casos corretos", "respostas corretas",
+)
 # Clinical and source abbreviations marked automatically in case texts.
 _CASE_TERMS = tuple(
     k for k in GLOSSARY
@@ -358,8 +363,8 @@ def _glossary_section(page: str) -> str:
         for term in used
     )
     return (
-        '<details class="glossario" id="glossario"><summary>Glossário: '
-        f"{len(used)} siglas e termos usados neste relatório</summary><dl>{items}</dl></details>"
+        '<div class="glossario" id="glossario"><h3>Glossário</h3>'
+        f"<dl>{items}</dl></div>"
     )
 
 
@@ -394,7 +399,7 @@ def _aviso(title: str, body: str) -> str:
 # ---------------------------------------------------------------- opening
 
 
-def _intro(cases: list[Case], models: list[str], answers: list[Answer]) -> str:
+def _intro(cases: list[Case], models: list[str], answers: list[Answer], how_counted: str) -> str:
     samples = max(expected_samples(answers).values(), default=0)
     facts = [
         _plural(len(cases), "caso clínico", "casos clínicos"),
@@ -405,28 +410,31 @@ def _intro(cases: list[Case], models: list[str], answers: list[Answer]) -> str:
     fact_items = "".join(f"<li>{_esc(f)}</li>" for f in facts)
     return f"""
 <section class="intro" aria-labelledby="sobre">
-  <div class="intro-texto">
-    <h2 id="sobre">Sobre este relatório</h2>
-    <p class="lead">O <strong>Aferidor</strong> avalia a exatidão de modelos de linguagem em
-    perguntas clínicas em português europeu e classifica os erros pelo risco clínico.</p>
+  <h2 id="sobre" class="vh">Sobre este relatório</h2>
+  <p class="lead">O <strong>Aferidor</strong> avalia a exatidão de modelos de linguagem em
+  perguntas clínicas em português europeu e classifica os erros pelo risco clínico.</p>
+  <ul class="factos">{fact_items}</ul>
+  <details class="recolhe ler">
+    <summary>Como interpretar este relatório</summary>
     <p>Cada pergunta tem uma resposta de referência com fonte pública (normas da {_term("DGS")},
     {_term("Infarmed")}, diretrizes europeias) e critérios de aceitação definidos antes do
     ensaio. Cada pergunta é colocada várias vezes a cada modelo, uma vez que as respostas
-    variam; cada resposta constitui uma <em>amostra</em>. A correção é automática e
+    variam; cada resposta constitui uma {_term("amostra")}. A correção é automática e
     determinista. Como a média de respostas corretas oculta os erros relevantes, o relatório
     apresenta primeiro as falhas críticas.</p>
-    <ul class="factos">{fact_items}</ul>
-  </div>
-  <ol class="como-ler" aria-label="Como interpretar este relatório">
-    <li><strong>O valor em destaque</strong> indica os casos com pelo menos uma falha de risco
-    crítico. Na prática clínica é observada uma única resposta; uma falha crítica é suficiente.</li>
-    <li><strong>A barra de estados</strong> indica a consistência de cada modelo: casos
-    {_term("sempre correto", "sempre corretos")}, {_term("parcialmente correto", "parcialmente corretos")}
-    e {_term("nunca correto", "nunca corretos")} (ver <a href="#como-se-conta">Método de contagem</a>).</li>
-    <li><strong>A secção Casos com falha</strong> apresenta, para cada caso, a pergunta, a
-    referência, a resposta do modelo e o critério não cumprido, para que cada veredicto possa
-    ser verificado.</li>
-  </ol>
+    <ol class="como-ler">
+      <li><strong>O valor em destaque</strong> indica os casos com pelo menos uma
+      {_term("falha crítica")}. Na prática clínica é observada uma única resposta; uma falha
+      crítica é suficiente.</li>
+      <li><strong>A barra de estados</strong> indica a consistência de cada modelo: casos
+      {_term("sempre correto", "sempre corretos")}, {_term("parcialmente correto", "parcialmente corretos")}
+      e {_term("nunca correto", "nunca corretos")}.</li>
+      <li><strong>A secção Casos com falha</strong> apresenta, para cada caso, a pergunta, a
+      referência, a resposta do modelo e o critério não cumprido, para que cada veredicto possa
+      ser verificado.</li>
+    </ol>
+    {how_counted}
+  </details>
 </section>"""
 
 
@@ -572,14 +580,10 @@ def _model_card(
         )
     return f"""
 <article class="cartao-modelo">
-  <header>{_model_heading(model)}{badge}</header>
-  <p class="numero-principal"><span class="destaque">{summary.critical_cases}</span><span class="legenda">de {summary.cases} casos com falha crítica em alguma amostra ({_gloss(_esc(interval_text(summary.critical_cases, summary.cases)), ("IC 95%",))})</span></p>
+  <header>{_model_heading(model, show_id=False)}{badge}</header>
+  <p class="numero-principal"><span class="destaque">{summary.critical_cases}</span><span class="legenda">de {summary.cases} casos com {_term("falha crítica")} em alguma amostra ({_gloss(_esc(interval_text(summary.critical_cases, summary.cases)), ("IC 95%",))})</span></p>
   {_state_bar(model, states, summary.cases)}
-  <dl class="metricas">
-    <div><dt>{_term("casos corretos", "Casos corretos")}</dt><dd>{right[0]} de {right[1]} casos ({_gloss(_esc(interval_text(*right)), ("IC 95%",))})</dd><dd class="unidade">regra: {_esc(CASE_RULES[rule])}</dd></div>
-    <div><dt>Respostas corretas</dt><dd>{tally.passed} de {tally.total} respostas ({_gloss(_esc(interval_text(tally.passed, tally.total)), ("IC 95%",))})</dd><dd class="unidade">{_esc(_units(summary.cases, samples, tally.total))}</dd></div>
-  </dl>
-  <p class="lingua-linha"><strong>Português europeu:</strong> {language.brazilian} de {language.answers} respostas com formas do Brasil, {language.pre_agreement} com grafia anterior ao Acordo.</p>
+  <p class="card-linha">{_term("casos corretos", "Casos corretos")}: <strong>{right[0]} de {right[1]}</strong> · {_term("respostas corretas", "Respostas corretas")}: <strong>{tally.passed} de {tally.total}</strong></p>
 </article>"""
 
 
@@ -705,7 +709,7 @@ def _worst(cases, consistency, pairs) -> str:
     ]
     for case, answer, verdict in examples:
         text = _plain(answer.text)
-        short = text if len(text) <= 420 else text[:420].rsplit(" ", 1)[0] + " …"
+        short = text if len(text) <= 240 else text[:240].rsplit(" ", 1)[0] + " …"
         chips = "".join(_risk_chip(f) for f in verdict.failures)
         out.append(
             '<article class="erro-cartao">'
@@ -759,15 +763,15 @@ def _cell(entry: Consistency | None, dots: str) -> tuple[str, str]:
     if entry is None:
         return "sem-resposta", '<span class="ic" aria-hidden="true">○</span> sem resposta'
     css, icon = _STATE_STYLE[entry.state]
-    label = f'<span class="ic" aria-hidden="true">{icon}</span> {_esc(entry.state.label)}{dots}'
-    if entry.state is ConsistencyState.ESTAVEL_CERTO:
-        return css, label
-    failure = _esc(_FAILURE_LABEL[entry.worst_failure]) if entry.worst_failure else ""
-    detail = (
-        f" · {entry.passed} de {entry.samples} corretas"
-        if entry.state is ConsistencyState.INSTAVEL else ""
+    # The state is written out for screen readers; sighted readers get the
+    # icon, the dots and the legend above the table.
+    label = (
+        f'<span class="ic" aria-hidden="true">{icon}</span>'
+        f'<span class="vh">{_esc(entry.state.label)}</span>{dots}'
     )
-    return css, f'{label}<br><span class="cel-falha">{failure}{detail}</span>'
+    if entry.state is ConsistencyState.ESTAVEL_CERTO or not entry.worst_failure:
+        return css, label
+    return css, f'{label}<br><span class="cel-falha">{_esc(_FAILURE_LABEL[entry.worst_failure])}</span>'
 
 
 def _grid(
@@ -780,18 +784,19 @@ def _grid(
     out = ['<div class="grade-wrap"><table class="grade">']
     out.append(
         '<thead><tr><th scope="col">Caso</th>'
-        + "".join(f'<th scope="col">{_model_heading(model, "span", "cabecalho-modelo")}</th>' for model in models)
+        + "".join(f'<th scope="col"><span class="modelo-nome">{_esc(_model_short(model))}</span></th>' for model in models)
         + "</tr></thead>"
     )
     out.append("<tbody>")
-    for category, group in _grouped_cases(cases):
+    shown = [c for c in cases if not _always_right(c, models, consistency, expected)]
+    for category, group in _grouped_cases(shown):
         out.append(
-            f'<tr class="categoria"><td colspan="{len(models) + 1}">{_esc(category)}</td></tr>'
+            f'<tr class="categoria"><td colspan="{len(models) + 1}">{_esc(_category(category))}</td></tr>'
         )
         for case in group:
             out.append(
                 f'<tr><th scope="row"><span class="caso-id">{_case_code(case.case_id, side=True)}</span>'
-                f'<span class="caso-pergunta">{_esc(case.question)}</span></th>'
+                f'<span class="caso-pergunta" title="{_esc(case.question)}">{_esc(case.question)}</span></th>'
             )
             for model in models:
                 key = (case.case_id, model)
@@ -801,7 +806,27 @@ def _grid(
                 out.append(f'<td class="cel {css_class}">{text}</td>')
             out.append("</tr>")
     out.append("</tbody></table></div>")
+    if not shown:
+        out = ["<p>Nenhum caso com falha.</p>"]
+    right = [c for c in cases if _always_right(c, models, consistency, expected)]
+    if right:
+        items = "".join(
+            f"<li>{_case_code(c.case_id)} {_esc(c.question)}</li>" for c in right
+        )
+        out.append(
+            f'<details class="recolhe"><summary>{_plural(len(right), "caso sempre correto", "casos sempre corretos")} '
+            f"em todos os modelos</summary><ul class=\"lista-certos\">{items}</ul></details>"
+        )
     return "".join(out)
+
+
+def _always_right(case: Case, models: list[str], consistency, expected: dict[str, int]) -> bool:
+    """Every model answered every sample of this case, and every one was right."""
+    entries = [(consistency.get((case.case_id, m)), expected.get(m, 0)) for m in models]
+    return all(
+        e is not None and e.state is ConsistencyState.ESTAVEL_CERTO and e.samples >= n
+        for e, n in entries
+    )
 
 
 def _grid_legend() -> str:
@@ -985,7 +1010,7 @@ nav.indice { position: sticky; top: 0; z-index: 2; background: var(--page);
 nav.indice ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; }
 nav.indice a { color: var(--ink-2); text-decoration: none; font-size: 0.92rem; }
 nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-decoration: underline; }
-.intro { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem; margin-top: 1.5rem;
+.intro { margin-top: 1.5rem;
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
 .lead { font-size: 1.12rem; }
 .factos { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -1000,7 +1025,7 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .seccao-intro { color: var(--ink-2); max-width: 48rem; }
 .cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; }
 .cartao-modelo { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
-.cartao-modelo header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.5rem; min-height: 6.5rem; }
+.cartao-modelo header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 0.5rem; min-height: 3.5rem; }
 .modelo-nome { font-size: 1.15rem; font-weight: 650; display: block; }
 .modelo-desc { display: block; color: var(--ink-2); font-size: 0.85rem; margin-top: 0.1rem; }
 .modelo-id { display: inline-block; margin-top: 0.3rem; font-size: 0.72rem; color: var(--muted); background: none; padding: 0; }
@@ -1094,7 +1119,7 @@ table.grade th, table.grade td { border-bottom: 1px solid var(--grid); padding: 
 table.grade thead th { font-size: 0.82rem; color: var(--ink); background: var(--surface); min-width: 12rem; }
 table.grade tbody th { font-weight: 400; min-width: 16rem; max-width: 30rem; }
 .caso-id { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; font-weight: 600; }
-.caso-pergunta { display: block; color: var(--ink-2); font-size: 0.82rem; line-height: 1.35; margin-top: 0.15rem; }
+.caso-pergunta { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--ink-2); font-size: 0.82rem; line-height: 1.35; margin-top: 0.15rem; }
 tr.categoria td { background: var(--surface-2); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2); }
 td.cel { white-space: nowrap; }
 td.cel.ok { background: var(--good-bg); }
@@ -1144,11 +1169,22 @@ abbr.termo:hover::after, abbr.termo:focus::after {
   text-transform: none; letter-spacing: normal; white-space: normal; text-align: left;
   box-shadow: 0 4px 14px var(--tooltip-shadow); pointer-events: none; }
 abbr.termo.lado:hover::after, abbr.termo.lado:focus::after { left: calc(100% + 8px); top: -0.3rem; }
-details.glossario { margin-top: 2.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; scroll-margin-top: 3.5rem; }
-details.glossario summary { cursor: pointer; padding: 0.9rem 1.25rem; font-weight: 650; }
-details.glossario dl { margin: 0; padding: 0 1.25rem 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.4rem 1.5rem; }
-details.glossario dt { font-weight: 650; font-size: 0.9rem; }
-details.glossario dd { margin: 0 0 0.5rem; color: var(--ink-2); font-size: 0.86rem; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+details.recolhe { margin-top: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; scroll-margin-top: 3.5rem; }
+details.recolhe > summary { cursor: pointer; padding: 0.8rem 1.25rem; font-weight: 650; }
+details.recolhe[open] > summary { border-bottom: 1px solid var(--grid); }
+details.recolhe > :not(summary) { margin-left: 1.25rem; margin-right: 1.25rem; }
+details.recolhe > :last-child { margin-bottom: 1rem; }
+details.mais, details.tecnico { margin-top: 2.5rem; }
+details.recolhe h3 { margin-top: 1.25rem; }
+.intro details.ler { margin-top: 1rem; background: var(--surface-2); }
+.card-linha { font-size: 0.9rem; color: var(--ink-2); margin: 0.75rem 0 0; }
+.card-linha strong { color: var(--ink); }
+.lista-certos { list-style: none; padding: 0; margin: 0.75rem 1.25rem 1rem; font-size: 0.88rem; color: var(--ink-2); }
+.lista-certos li { margin: 0.3rem 0; }
+.glossario dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.4rem 1.5rem; }
+.glossario dt { font-weight: 650; font-size: 0.9rem; }
+.glossario dd { margin: 0 0 0.5rem; color: var(--ink-2); font-size: 0.86rem; }
 footer.rodape { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--grid); color: var(--ink-2); font-size: 0.88rem; scroll-margin-top: 3.5rem; }
 footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 @media (max-width: 46rem) {
@@ -1239,7 +1275,7 @@ def build(
         f'<p class="data">Relatório escrito em {_esc(written)}.</p></header>'
     )
 
-    sections = [("sobre", "Sobre este relatório")]
+    sections = []
     if models:
         sections.append(("resumo", "Resumo"))
         if protocol is not None:
@@ -1248,17 +1284,19 @@ def build(
             ("erros", "Erros mais graves"),
             ("areas", "Por área clínica"),
             ("grelha", "Resultados por caso"),
-            ("falhas", "Falhas por tipo"),
             ("casos-com-falha", "Casos com falha"),
+            ("falhas", "Mais indicadores"),
         ]
-    sections += [("condicoes", "Condições do ensaio"), ("glossario", "Glossário"), ("metodo", "Método")]
+    sections.append(("detalhes", "Detalhes técnicos"))
     out.append(
         '<nav class="indice" aria-label="Secções"><ul>'
         + "".join(f'<li><a href="#{anchor}">{_esc(label)}</a></li>' for anchor, label in sections)
         + "</ul></nav>"
     )
 
-    out.append(_intro(cases, models, answers))
+    rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
+    samples_n = max(expected_samples(answers).values(), default=0)
+    out.append(_intro(cases, models, answers, _how_counted(samples_n, rule) if models else ""))
     out.extend(_notices(cases, answers, missing, reasons, sources_verified))
 
     if not models:
@@ -1270,7 +1308,6 @@ def build(
         pairs = pairs_by_case(cases, answers, verdicts)
         languages = language_by_model(answers)
         expected = expected_samples(answers)
-        rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
         right = right_cases_by_model(consistency, rule)
 
         protocol_html, approved = ("", {})
@@ -1280,11 +1317,6 @@ def build(
             )
 
         out.append('<section id="resumo"><h2>Resumo</h2>')
-        out.append(
-            '<p class="seccao-intro">Falha crítica: erro de dose, interação ou contraindicação '
-            "omitida, encaminhamento urgente omitido, ou facto inventado. Os intervalos de "
-            "confiança são a 95%; com poucos casos, são largos.</p>"
-        )
         out.append(_context_note(models))
         out.append(_comparison(summaries))
         out.append('<div class="cartoes">')
@@ -1297,7 +1329,6 @@ def build(
                 )
             )
         out.append("</div>")
-        out.append(_how_counted(max(expected.values(), default=0), rule))
         out.append("</section>")
         out.append(protocol_html)
         out.append(_worst(cases, consistency, pairs))
@@ -1305,29 +1336,29 @@ def build(
 
         out.append('<section id="grelha"><h2>Resultados por caso</h2>')
         out.append(
-            '<p class="seccao-intro">Linhas: casos. Colunas: modelos. Os pontos representam as '
-            "amostras pela ordem de execução (● correta, ✕ incorreta, ○ sem resposta). Nos casos "
-            "com falha indica-se o tipo de falha mais grave "
-            '(ver <a href="#como-se-conta">Método de contagem</a>).</p>'
+            '<p class="seccao-intro">Casos com falha em pelo menos um modelo. Cada ponto é uma '
+            "amostra (● correta, ✕ incorreta, ○ sem resposta); por baixo, o tipo de falha mais grave.</p>"
         )
         out.append(_grid_legend())
         out.append(_grid(cases, models, consistency, pairs, expected))
         out.append("</section>")
 
-        out.append('<section id="falhas"><h2>Falhas por tipo</h2>')
-        out.append(
+        out.append(_detail(cases, models, consistency, pairs))
+        more = ['<details class="recolhe mais" id="falhas"><summary>Mais indicadores: falhas por tipo e português europeu</summary>',
+                '<h3>Falhas por tipo</h3>']
+        more.append(
             '<p class="seccao-intro">Quantas respostas tiveram cada tipo de falha, do risco '
             "mais alto para o mais baixo. Uma resposta pode ter mais do que um tipo.</p>"
         )
-        out.append(_risk_legend())
-        out.append('<div class="falhas-grelha">')
+        more.append(_risk_legend())
+        more.append('<div class="falhas-grelha">')
         top = max((n for tally in per_model.values() for _, n in tally.worst_first()), default=1)
         for model in models:
-            out.append(_failure_chart(model, per_model[model], top))
-        out.append("</div></section>")
+            more.append(_failure_chart(model, per_model[model], top))
+        more.append("</div>")
 
-        out.append(
-            '<section class="lingua"><h2>Português europeu</h2><ul>'
+        more.append(
+            '<div class="lingua"><h3>Português europeu</h3><ul>'
             + "".join(
                 f"<li><strong>{_esc(_model_short(m))}</strong> <code>{_esc(m)}</code>: "
                 f"{_gloss(_esc(language_line(languages[m])), ('Acordo Ortográfico',))}</li>"
@@ -1335,12 +1366,16 @@ def build(
             )
             + '</ul><p class="seccao-intro">Indicador independente, baseado numa lista curta de '
             "formas alheias ao português europeu atual. Não entra na contagem de falhas e "
-            "subestima a frequência real.</p></section>"
+            "subestima a frequência real.</p></div></details>"
         )
-        out.append(_detail(cases, models, consistency, pairs))
+        out.extend(more)
 
     rows = conditions_rows(answers, cases_source)
-    out.append('<section class="condicoes" id="condicoes"><h2>Condições do ensaio</h2>')
+    out.append(
+        '<details class="recolhe tecnico" id="detalhes"><summary>Detalhes técnicos: condições '
+        "do ensaio, glossário e método</summary>"
+    )
+    out.append('<div class="condicoes" id="condicoes"><h3>Condições do ensaio</h3>')
     if rows:
         out.append("<dl>")
         for label, value in rows:
@@ -1352,12 +1387,11 @@ def build(
         out.append("</dl>")
     else:
         out.append("<p>Sem respostas registadas.</p>")
-    out.append("</section>")
+    out.append("</div>")
 
     out.append(_glossary_section("".join(out)))
     out.append(
-        '<footer class="rodape" id="metodo"><h2>Método</h2>'
-        f"<p>{_esc(HEADER_NOTE)}</p>"
+        '<div class="metodo" id="metodo"><h3>Método</h3>'
         "<p>A correção é textual e determinista: cada critério procura termos e valores na "
         "resposta, e o mesmo texto dá sempre o mesmo veredito. O próprio corretor é ensaiado "
         "nos dois sentidos: a resposta de referência de cada caso tem de passar, e uma resposta "
@@ -1365,7 +1399,8 @@ def build(
         "referência nem os critérios.</p>"
         "<p>O método completo, os limites conhecidos e a confirmação das fontes estão no "
         "repositório do Aferidor, em <code>docs/METODO.md</code> e "
-        "<code>casos/VERIFICACAO.md</code>.</p></footer>"
+        "<code>casos/VERIFICACAO.md</code>.</p></div></details>"
+        f'<footer class="rodape"><p>{_esc(HEADER_NOTE)}</p></footer>'
     )
     out.append("</body></html>")
     return "".join(out)
