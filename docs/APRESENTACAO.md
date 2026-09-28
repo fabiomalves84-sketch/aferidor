@@ -77,9 +77,10 @@ Limitações conhecidas:
   a um; 24 declarados confirmados em grupo; dos 23 restantes, 16 lidos no
   documento original por ferramenta e 7 (ESC e ADA) por confirmar. Detalhe em
   `casos/VERIFICACAO.md`.
-- **Ainda não houve um ensaio completo pela API.** Os ensaios registados usam
-  modelos locais (8 e 12 a 14 mil milhões de parâmetros) e uma execução
-  limitada através de uma sessão de assistente.
+- **Um único modelo comercial medido.** O ensaio de 28/09 mediu o Gemini 3.5
+  Flash Lite pela API gratuita (11 de 27 casos com falha crítica, reprovado pelo
+  protocolo); os restantes ensaios usam modelos locais de 8 a 14 mil milhões de
+  parâmetros.
 - **A correção é textual.** A distinção entre prescrever um fármaco e
   mencioná-lo para o excluir é heurística; `docs/METODO.md` descreve onde falha.
 

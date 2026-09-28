@@ -90,9 +90,10 @@ documentos públicos ou são sintéticos.
 - Fontes: 34 de 57 confirmadas por uma pessoa; das restantes, 16 lidas no
   documento original e 7 por confirmar. Detalhe em `casos/VERIFICACAO.md`.
 
-Em falta: a revisão de uma amostra de respostas por um clínico, a confirmação
-das fontes restantes e um ensaio pela API com protocolo definido antes da
-execução.
+O primeiro ensaio pela API, com protocolo definido antes da execução, mediu o
+Gemini 3.5 Flash Lite (`ensaios/2026-09-28-gemini-flash/`). Em falta: a revisão
+de uma amostra de respostas por um clínico e a confirmação das fontes
+restantes.
 
 ## Documentação
 

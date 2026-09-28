@@ -195,6 +195,7 @@ resultados.
 | `2026-09-16-comparacao-local-invalida/` | Medição invalidada por defeito do instrumento: o limite de tokens truncava as respostas de um modelo que raciocina antes de responder, e o corretor contava-as como erros. Mantida como registo. |
 | `2026-09-16-comparacao-local/` | A mesma comparação em condições válidas: dois modelos locais, 27 casos, 5 amostras. Reclassificada a 27/09 com o corretor corrigido, sem repetir perguntas nem alterar os originais. |
 | `2026-09-27-locais-12-14b/` | Primeiro ensaio com o instrumento completo: protocolo commitado antes da primeira pergunta, condições registadas em cada resposta, casos de infeção com fontes da DGS. Gemma 3 12B e Phi-4 14B, 27 casos, 5 amostras; 270 de 270 respostas; ambos reprovados pelo protocolo. |
+| `2026-09-28-gemini-flash/` | Primeiro ensaio com um modelo comercial: Gemini 3.5 Flash Lite pela API gratuita, com protocolo commitado antes da primeira resposta. 27 casos, 5 amostras; 135 de 135 respostas; 11 de 27 casos com falha crítica; reprovado pelo protocolo. |
 
 Depois de 27/09, vários casos mudaram de fonte e de formulação. Os resultados
 registados em cada ensaio correspondem ao instrumento da altura e não são
@@ -213,5 +214,6 @@ comparáveis com ensaios posteriores.
   indicador de português europeu, intervalos de confiança
 - [x] **Fase 8** Ferramentas de validação (27/09/2026): protocolo de aprovação
   prévio e folha cega para revisão clínica
-- [ ] **Fase 9** Validação: revisão clínica de uma amostra de respostas reais,
-  confirmação das fontes restantes e ensaio pela API com protocolo prévio
+- [ ] **Fase 9** Validação: revisão clínica de uma amostra de respostas reais e
+  confirmação das fontes restantes (o ensaio pela API com protocolo prévio foi
+  feito a 28/09/2026)
