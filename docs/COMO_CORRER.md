@@ -1,31 +1,25 @@
-# Correr contra um modelo a sério
+# Execução contra um modelo real
 
-Guia para o dia em que houver chave de API. Até lá, tudo o que está aqui
-funciona com `--fornecedor falso`, sem chave e sem custo.
+Guia de execução com um fornecedor real. Todos os comandos funcionam também
+com `--fornecedor falso`, sem chave e sem custo.
 
-## 1. Obter a chave
+## 1. Chave de API
 
-**OpenAI:** platform.openai.com, secção API keys. É preciso carregar saldo
-primeiro; o mínimo costuma ser cinco ou dez euros.
+- **OpenAI:** platform.openai.com, secção API keys. Requer saldo prévio.
+- **Anthropic:** console.anthropic.com, secção API keys. Requer saldo prévio.
+- **Google Gemini:** aistudio.google.com, secção API keys. Tem um nível
+  gratuito, sem cartão, com limites por modelo consultáveis em
+  aistudio.google.com/rate-limit. Os modelos Flash permitem 20 pedidos por
+  dia, insuficientes para 27 casos × 5 amostras; os Flash Lite permitem 500.
+  O fornecedor `gemini` espaça os pedidos 13 segundos (limite de 5 por
+  minuto); para modelos com limites mais altos, o intervalo reduz-se com
+  `AFERIDOR_GEMINI_INTERVALO`. Pedidos recusados por sobrecarga (503) também
+  contam para o limite diário. Fora do Espaço Económico Europeu, a Google pode
+  usar os pedidos do nível gratuito para melhorar os seus produtos.
 
-**Anthropic:** console.anthropic.com, secção API keys. Igual, saldo à parte.
+As subscrições do ChatGPT e do Claude não incluem acesso à API.
 
-**Google Gemini:** aistudio.google.com, secção API keys. Tem um nível gratuito,
-sem cartão, com um limite de pedidos por minuto e por dia que muda de modelo
-para modelo e se vê em aistudio.google.com/rate-limit. Os Flash dão 20 pedidos
-por dia, o que não chega para um ensaio de 27 casos × 5 amostras; os Flash
-Lite dão 500. O fornecedor `gemini` espaça os pedidos 13 segundos entre si,
-para caber no limite mais apertado (5 por minuto); para um modelo com mais
-folga, encurta-se com `AFERIDOR_GEMINI_INTERVALO`. Um pedido recusado por
-sobrecarga (503) também conta para o limite diário: poucas tentativas. No nível gratuito a Google pode
-usar os pedidos para melhorar os seus produtos, exceto para quem está no
-Espaço Económico Europeu; aqui não há dados de doentes, mas convém sabê-lo.
-
-A subscrição do ChatGPT ou do Claude não serve. A API é paga em separado.
-
-## 2. Pôr a chave no ambiente, nunca no projeto
-
-No terminal, antes de correr:
+## 2. Chave no ambiente, nunca no projeto
 
 ```
 export OPENAI_API_KEY="sk-..."
@@ -33,15 +27,12 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 export GEMINI_API_KEY="..."
 ```
 
-Isto vale só para aquela janela do terminal e desaparece quando a fechas, que é
-exatamente o que se quer. Uma chave escrita num ficheiro do projeto acaba no
-histórico do git, e do histórico do git não sai. O `.gitignore` já ignora `.env`,
-mas a forma segura é esta.
+A variável vale apenas para a sessão de terminal. Uma chave escrita num
+ficheiro do projeto fica no histórico do git de forma permanente. Para uma
+configuração persistente, as linhas podem ser acrescentadas a `~/.zshrc`, que
+não pertence ao projeto.
 
-Se a quiseres permanente, põe as linhas no fim de `~/.zshrc`. Esse ficheiro não
-faz parte do projeto.
-
-## 3. Ver que modelos existem
+## 3. Modelos disponíveis
 
 ```
 python -m aferidor modelos --fornecedor openai
@@ -49,176 +40,126 @@ python -m aferidor modelos --fornecedor anthropic
 python -m aferidor modelos --fornecedor gemini
 ```
 
-A lista vem do próprio fornecedor. Não está escrita em lado nenhum deste projeto
-de propósito: uma lista de nomes de modelos escrita num documento está errada
-dentro de meses, e apontar a um modelo retirado dá um erro que não tem nada a ver
-com o banco de ensaio.
+A lista é obtida do fornecedor e não é mantida no projeto, porque os nomes de
+modelos mudam com frequência.
 
-## Qual banco de casos correr
+## 4. Banco de casos
 
-Há dois bancos. O `casos/casos.json` (27 casos, antibioterapia e alergias) é o predefinido. O `casos/consulta.json` (30 casos de consulta de adulto, criança e cessação tabágica, com nível de risco, fonte e data de verificação por caso) corre com `--casos`:
+`casos/casos.json` (27 casos: antibioterapia, interações, gravidez e ajuste de
+dose) é o banco por omissão. `casos/consulta.json` (30 casos de consulta de
+adulto, criança e cessação tabágica) seleciona-se com `--casos`:
 
 ```
 python -m aferidor verificar --casos casos/consulta.json
 python -m aferidor ensaio --fornecedor <fornecedor> --modelo <nome> --casos casos/consulta.json --limite 3
 ```
 
-Usa ficheiros de saída próprios (`--saida`, `--vereditos`, `--relatorio`) para não misturar as respostas dos dois bancos.
+Recomenda-se usar ficheiros de saída próprios (`--saida`, `--vereditos`,
+`--relatorio`) para cada banco.
 
-## 4. Antes de correr: o protocolo
+## 5. Protocolo, antes do ensaio
 
-Decide, antes de ver uma única resposta, o que conta como aprovado:
+O critério de aprovação define-se antes de ver qualquer resposta:
 
 ```
 python -m aferidor protocolo --nome "<nome do ensaio>" --saida protocolos/<nome>.json
 ```
 
-Abre o ficheiro e acerta os limites em `criterios_de_aprovacao`. O modelo gerado
-começa no mais exigente (zero casos com falha crítica) de propósito: se o
-quiseres mais brando, muda-o conscientemente. Faz commit do protocolo **antes**
-de correr o ensaio, e passa-o ao `ensaio` com `--protocolo`.
+Os limites em `criterios_de_aprovacao` começam no valor mais exigente (zero
+casos com falha crítica); qualquer alívio deve ser uma decisão explícita. O
+protocolo deve ser commitado **antes** do ensaio e passado ao comando com
+`--protocolo`.
 
-## 4.1. Correr
-
-Um comando faz tudo: pergunta, corrige e escreve o relatório.
+## 6. Execução
 
 ```
-python -m aferidor ensaio --fornecedor openai --modelo <nome-da-lista>
+python -m aferidor ensaio --fornecedor openai --modelo <nome>
+python -m aferidor ensaio --fornecedor openai --modelo <nome> --limite 3   # teste curto
 ```
 
-Antes de gastar um cêntimo, ele confirma que os 27 casos passam nos próprios
-critérios e que cada critério apanha uma resposta errada construída a partir
-da referência. Se algum estiver partido, para e não pergunta nada. Descobrir um caso
-errado depois de pagar a execução obriga a pagá-la outra vez.
+O comando executa, corrige e escreve o relatório. Antes do primeiro pedido,
+confirma que todos os casos cumprem os próprios critérios e que cada critério
+deteta uma resposta errada construída; se algum falhar, interrompe sem custo.
 
-Para experimentar sem gastar tudo:
+As respostas ficam em `data/respostas.jsonl`, e uma nova execução retoma os
+casos em falta desse modelo. A retoma recusa condições diferentes
+(`--temperatura`, `--tokens-max` ou texto de um caso alterado); para uma nova
+medição, usar `--recomecar` ou outro `--saida`. Com 27 perguntas curtas, o
+custo nos modelos correntes é da ordem dos cêntimos.
 
-```
-python -m aferidor ensaio --fornecedor openai --modelo <nome> --limite 3
-```
+## 7. Afinação de critérios
 
-## 5. Custo
-
-Vinte e sete perguntas curtas com respostas de um ou dois parágrafos. Nos modelos
-correntes isto fica em cêntimos, não em euros. O que custa dinheiro é repetir a
-execução muitas vezes, e o projeto foi feito para não precisar disso: as
-respostas ficam guardadas em `data/respostas.jsonl` e uma segunda execução salta
-os casos que já foram respondidos por aquele modelo.
-
-Só salta se for a mesma medição. Se a segunda execução pedir outra
-`--temperatura`, outro `--tokens-max`, ou se o texto de algum caso tiver mudado,
-recusa antes de perguntar o que quer que seja. Para uma medição nova, usa
-`--recomecar` ou outro `--saida`.
-
-## 6. O passo que vai dar trabalho
-
-Até hoje o banco só foi corrido contra respostas de mentira, curtas e limpas. Um
-modelo a sério responde com parágrafos, listas, tabelas e avisos.
-
-**Conta com critérios a dar como errado respostas que estão certas.** Não é
-falha do modelo nem sinal de que o banco não presta. É o trabalho normal de
-afinar um instrumento de medida contra dados reais.
-
-O importante é que afinar não custa dinheiro:
+Com respostas reais (parágrafos, listas, tabelas, avisos), é normal que alguns
+critérios reprovem respostas corretas. A afinação não tem custo:
 
 ```
 python -m aferidor classificar
 ```
 
-Este comando volta a corrigir as respostas **já guardadas**, com os critérios
-como estão nesse momento. Editas um critério em `casos/casos.json`, voltas a
-correr, vês o efeito. Quantas vezes quiseres, sem perguntar nada a ninguém.
+O comando volta a corrigir as respostas já guardadas com os critérios atuais,
+sem novos pedidos.
 
-A regra ao afinar: alarga um critério quando ele castiga uma forma diferente de
-dizer a mesma coisa. Não o alargues para o modelo passar. A diferença entre as
-duas coisas é a única que interessa neste projeto inteiro, e quem afina é sempre
-tentado a esquecê-la.
+**Regra:** alargar um critério que penaliza outra forma de dizer a mesma coisa
+é afinação; alargá-lo para o modelo passar não é aceitável. Cada alteração a
+um critério é registada no commit com a justificação.
 
-Cada critério que alargares fica registado no git com a razão. É isso que
-distingue afinar de fazer batota.
-
-## 7. Repetir a mesma pergunta
+## 8. Amostras repetidas
 
 ```
 python -m aferidor ensaio --fornecedor openai --modelo <nome> --repeticoes 5 --temperatura 1.0
 ```
 
-Um modelo que acerta a dose 4 vezes em 5 é, na prática, um modelo que erra a
-dose: o médico só vê uma resposta e não escolhe qual das cinco lhe calha. É
-por isso que o relatório passa a contar casos com falha crítica em pelo menos
-uma amostra, não respostas certas em média.
+Um modelo que acerta a dose em 4 de 5 amostras erra a dose na prática: o
+médico observa uma única resposta. Por isso o relatório conta casos com falha
+crítica em pelo menos uma amostra.
 
-**Usa `--temperatura 1,0` para isto, não o valor por omissão.** A temperatura
-0 pede ao modelo a resposta mais provável sempre, e por isso esconde
-exatamente a variabilidade que um ensaio de consistência quer medir. Um
-produto real, o que o utilizador final usa, normalmente não corre a
-temperatura 0. Medir a 0 e reportar como se fosse o produto é medir outra
-coisa.
+**Recomenda-se `--temperatura 1.0`.** A temperatura 0 devolve sempre a
+resposta mais provável e oculta a variabilidade que o ensaio pretende medir;
+os produtos reais raramente usam temperatura 0.
 
-## 8. Comparar dois modelos
-
-Corre os dois. As respostas dos dois convivem no mesmo ficheiro, separadas por
-modelo, e o relatório passa a trazer uma tabela de comparação no topo.
+## 9. Comparação de modelos
 
 ```
 python -m aferidor ensaio --fornecedor openai --modelo <nome>
 python -m aferidor ensaio --fornecedor anthropic --modelo <nome>
 ```
 
-A tabela mostra, por modelo, os casos com falha crítica em alguma amostra, os
-casos certos pela regra do relatório, os casos em que às vezes acertou e as
-amostras certas, por esta ordem, e cada número com o seu intervalo de
-confiança. As três primeiras colunas contam casos; a última conta respostas.
-Ler as primeiras antes da última.
+As respostas dos vários modelos coexistem no mesmo ficheiro e o relatório
+inclui uma tabela de comparação: casos com falha crítica, casos corretos pela
+regra do relatório, casos parcialmente corretos e amostras corretas, cada um
+com intervalo de confiança. As três primeiras colunas contam casos; a última
+conta respostas.
 
-## 9. O limite de tokens, e o modelo que raciocina antes de responder
+## 10. Limite de tokens e modelos que raciocinam
 
-`--tokens-max` (omissão 4096) é o número máximo de tokens que o fornecedor
-pode gastar numa resposta. Um modelo comum gasta isso tudo no texto que o
-médico lê. Um modelo que raciocina antes de responder (o `qwen3:8b`, por
-exemplo) gasta parte do orçamento a pensar em voz alta antes da primeira
-palavra da resposta, e só o resto fica para o texto.
-
-**Isto já aconteceu aqui.** A `omissão` era 1024 até o ensaio de comparação
-de 16/09/2026 correr com dois modelos locais: 35 das 135 respostas do
-`qwen3:8b` chegaram vazias e 75 acabaram a meio da frase, porque o
-raciocínio consumiu o limite antes de a resposta começar. O runner trata uma
-resposta cortada por `max_tokens` como um caso por responder, não como uma
-resposta errada, mas um caso por responder também não mede nada, e um
-ensaio com 80% dos casos por responder não serve de evidência. Ver
-`ensaios/2026-09-16-comparacao-local-invalida/README.md` para o relato
-completo.
-
-Se um modelo local ou pago costuma pensar antes de responder, sobe o
-limite:
+`--tokens-max` (por omissão 4096) limita o tamanho de cada resposta. Um modelo
+que raciocina antes de responder (por exemplo, `qwen3:8b`) consome parte desse
+limite antes do texto da resposta. No ensaio de 16/09/2026, com o limite
+anterior de 1024, 35 de 135 respostas do `qwen3:8b` chegaram vazias e 75
+truncadas (ver `ensaios/2026-09-16-comparacao-local-invalida/README.md`).
+Para estes modelos, recomenda-se:
 
 ```
 python -m aferidor ensaio --fornecedor local --modelo qwen3:8b --tokens-max 8192
 ```
 
-Não há uma retentativa automática com mais tokens quando uma resposta chega
-cortada: isso mudaria a medição a meio do ensaio e deixaria duas medições
-diferentes no mesmo ficheiro. Se um ensaio tiver casos por responder com o
-motivo "resposta truncada no limite de tokens", a resposta é correr de novo
-com um `--tokens-max` maior, do zero.
+Uma resposta truncada fica por responder e não é repetida automaticamente com
+mais tokens, para não misturar duas medições no mesmo ficheiro. A solução é
+repetir o ensaio desde o início com um `--tokens-max` maior.
 
-**Os modelos de raciocínio da OpenAI (`o1`, `o3`, `gpt-5` e semelhantes) só
-aceitam `--temperatura 1.0`.** Recusam qualquer outro valor com um erro 400,
-que não é retentável. Também recusam o parâmetro `max_tokens` que os outros
-fornecedores aceitam; o `OpenAIProvider` já manda `max_completion_tokens` em
-vez disso, mas isto nunca foi confirmado contra a API real, só com pedidos
-HTTP simulados nos testes. Antes de uma execução completa com um destes
-modelos, confirma com `--limite 1`.
+**Os modelos de raciocínio da OpenAI (`o1`, `o3`, `gpt-5` e semelhantes)
+aceitam apenas `--temperatura 1.0`** e usam `max_completion_tokens` em vez de
+`max_tokens`. O `OpenAIProvider` envia o parâmetro correto, verificado apenas
+com pedidos simulados; recomenda-se confirmar com `--limite 1`
+antes de uma execução completa.
 
-## 10. Ensaio de comparação
+## 11. Ensaio de comparação completo
 
-O ensaio completo, para uma candidatura ou uma decisão a sério: três modelos,
-cinco amostras por caso, a temperatura que esconde menos variabilidade.
+Três modelos, cinco amostras por caso, temperatura 1,0.
 
-**Caminho principal: modelos locais, pelo Ollama.** Não se paga nada, nada sai
-da máquina, e é repetível quantas vezes for preciso. Instala o Ollama
-(ollama.com), descarrega os modelos, confirma que está aberto
-(`ollama list`), e corre:
+**Modelos locais, através do Ollama** (sem custo e sem envio de dados para o
+exterior). Após instalar o Ollama (ollama.com) e descarregar os modelos
+(`ollama list` confirma que está ativo):
 
 ```
 python -m aferidor ensaio --fornecedor local --modelo <nome-a> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
@@ -227,59 +168,40 @@ python -m aferidor ensaio --fornecedor local --modelo <nome-c> --repeticoes 5 --
 python -m aferidor relatorio --formato html
 ```
 
-**O custo aqui é zero em dinheiro; o custo é tempo.** Um modelo local num
-portátil demora muito mais por resposta do que uma API. 27 casos × 5
-repetições × 3 modelos são 405 pedidos; a duração real varia com o hardware e
-o tamanho do modelo, por isso o tempo total gasto deve ficar escrito no
-README do ensaio, não só o número de pedidos.
+São 405 pedidos (27 × 5 × 3). Num portátil, a duração depende do hardware e do
+modelo; recomenda-se registar o tempo total no README do ensaio.
+`relatorios/relatorio.html` é um ficheiro único, com a grelha de estados por
+caso e um ponto por amostra.
 
-**`--tokens-max 8192`, não a omissão, para um modelo que raciocina antes de
-responder.** Ver secção 9: a omissão de 4096 já chega para a maioria, mas um
-modelo como o `qwen3:8b` gasta parte do orçamento a pensar antes da primeira
-palavra da resposta.
+**APIs comerciais.** Para medir os modelos que o utilizador final usa,
+substituir `--fornecedor local` por `openai`, `anthropic` ou `gemini`. O custo
+de 405 pedidos nos modelos correntes é da ordem dos cêntimos a poucos euros.
 
-O último comando escreve `relatorios/relatorio.html`, um ficheiro só que abre
-com duplo clique: a grelha de casos por modelo, com o estado de cada um
-(acertou sempre, às vezes acertou, nunca acertou) e um ponto por amostra, é
-mais fácil de ler ali do que na tabela em Markdown.
+## 12. Validação por um clínico
 
-**Opção: as APIs pagas.** Se preferires medir os modelos que o utilizador
-final vai mesmo usar, e não uma versão aberta equivalente, troca
-`--fornecedor local` por `--fornecedor openai` ou `--fornecedor anthropic`.
-Aqui o custo é o inverso do local: dinheiro em vez de tempo.
-
-```
-python -m aferidor ensaio --fornecedor openai --modelo <nome> --repeticoes 5 --temperatura 1.0
-```
-
-**Custo aproximado desta opção: 27 casos × 5 repetições × 3 modelos = 405
-pedidos.** Nos modelos correntes isto fica em cêntimos ou poucos euros, não
-em dezenas, mas é bom saber o número antes de o correr, não depois.
-
-## 11. Validar o corretor com um clínico
-
-Depois de um ensaio, e antes de apresentar os números, pede a um clínico que
-julgue uma amostra das respostas:
+Antes de apresentar resultados, um clínico deve julgar uma amostra das
+respostas:
 
 ```
 python -m aferidor revisao --respostas data/respostas.jsonl --n 60
 ```
 
-Envia-lhe `relatorios/revisao.csv` e **não** o `revisao-chave.json`, que diz o
-que o corretor decidiu. Quando a folha voltar com a coluna `juizo` preenchida:
+Enviar `relatorios/revisao.csv`, **nunca** `revisao-chave.json`, que contém as
+decisões do corretor. Com a coluna `juizo` preenchida:
 
 ```
 python -m aferidor concordancia --revisao relatorios/revisao.csv
 ```
 
-O primeiro número é o que interessa: de quantas respostas erradas o corretor
-deixou passar. Se for alto, os números do ensaio sobrestimam o modelo.
+O primeiro valor apresentado é o mais relevante: o número de respostas erradas
+aprovadas pelo corretor. Se for elevado, os resultados do ensaio sobrestimam o
+modelo.
 
-## 12. Recomeçar do zero
+## 13. Recomeçar do zero
 
 ```
 python -m aferidor ensaio --fornecedor openai --modelo <nome> --recomecar
 ```
 
-Só quando quiseres mesmo perguntar tudo de novo, porque paga-se tudo de novo. E
-a resposta que vem à segunda não é a mesma que veio à primeira.
+Descarta as respostas anteriores do modelo e repete todos os pedidos, com o
+custo correspondente. As novas respostas não serão iguais às anteriores.

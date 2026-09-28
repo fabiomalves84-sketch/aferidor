@@ -441,9 +441,9 @@ def _notices(
     if not sources_verified:
         out.append(_aviso(
             "Aviso.",
-            "As fontes deste conjunto de casos ainda não foram todas confirmadas por uma "
-            "pessoa. Até isso acontecer, os números abaixo medem o modelo contra valores "
-            "transcritos automaticamente. Ver <code>casos/VERIFICACAO.md</code>.",
+            "Nem todas as fontes destes casos foram confirmadas por uma pessoa. Até essa "
+            "confirmação, os resultados medem o modelo contra valores transcritos "
+            "automaticamente. Ver <code>casos/VERIFICACAO.md</code>.",
         ))
     if missing:
         out.append(_aviso(

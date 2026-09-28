@@ -143,11 +143,11 @@ class TestHeader(unittest.TestCase):
         self.assertIn("2026-09-14", build([a_case()], [an_answer("1 g")]))
 
     def test_unverified_sources_are_warned_about_by_default(self):
-        self.assertIn("ainda não foram confirmadas", build([a_case()], [an_answer("1 g")]))
+        self.assertIn("Nem todas as fontes destes casos foram confirmadas", build([a_case()], [an_answer("1 g")]))
 
     def test_the_warning_goes_away_only_when_told_so(self):
         text = build([a_case()], [an_answer("1 g")], sources_verified=True)
-        self.assertNotIn("ainda não foram confirmadas", text)
+        self.assertNotIn("Nem todas as fontes destes casos foram confirmadas", text)
 
 
 class TestCounts(unittest.TestCase):

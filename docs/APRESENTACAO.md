@@ -1,134 +1,117 @@
-# Aferidor, em cinco minutos
+# Aferidor: apresentação
 
-Documento de apresentação do projeto. Para leitura por quem não vai abrir o
-código.
+Documento de apresentação do projeto, para leitura sem abrir o código.
 
-## A pergunta que está por trás
+## Contexto
 
 Um assistente de inteligência artificial que responde a um médico sobre dose,
-interação ou contraindicação está a participar numa decisão terapêutica. A
-pergunta que importa sobre esse assistente não é se escreve bem. É com que
-frequência está certo, em que erra quando erra, e quanto custa cada tipo de
-erro.
+interação ou contraindicação participa numa decisão terapêutica. A questão
+relevante não é a qualidade da redação, mas a frequência com que acerta, o
+tipo de erro que comete e o custo clínico de cada erro.
 
-Um sistema que acerta 92% das perguntas parece bom. Se os 8% que falha forem
-todos doses pediátricas, não é bom, é perigoso. A média esconde exatamente
-aquilo que precisa de ser visto.
+Um sistema com 92% de respostas corretas parece adequado. Se os 8% de erros
+forem doses pediátricas, é perigoso. A média oculta precisamente o que
+importa.
 
-## O que este projeto é
+## O projeto
 
-Um instrumento de medida. Guarda perguntas clínicas cuja resposta correta é
-conhecida e citável, envia-as a um modelo de linguagem, classifica cada
-resposta contra critérios escritos de antemão, e categoriza cada falha por tipo
-e por risco clínico.
+O Aferidor é um instrumento de medida. Mantém perguntas clínicas com resposta
+correta conhecida e citável, envia-as a um modelo de linguagem, corrige cada
+resposta contra critérios definidos previamente e classifica cada falha por
+tipo e por risco clínico.
 
-O resultado é um documento que diz, antes de qualquer percentagem, quantas
-respostas continham uma falha de risco crítico, e mostra cada uma delas com a
-pergunta, a resposta de referência, a fonte e o texto que o modelo escreveu.
+O relatório apresenta, antes de qualquer percentagem, os casos com falha de
+risco crítico, cada um com a pergunta, a resposta de referência, a fonte e o
+texto do modelo.
 
-## Como se usa: a ferramenta faz a triagem, o especialista valida
+## Utilização: triagem pela ferramenta, validação pelo especialista
 
-O Aferidor não substitui o clínico que avalia um modelo: prepara-lhe o
-trabalho. Pergunta cada caso várias vezes, corrige todas as respostas de forma
-determinista e classifica cada falha pelo risco. O que chega ao especialista é
-curto e ordenado: primeiro as falhas críticas, cada uma com a pergunta, a
-referência, a fonte e o texto exato do modelo, para poder confirmar ou
-contestar cada veredicto. Uma folha cega (`aferidor revisao`) dá-lhe uma
-amostra de respostas para julgar sem ver o que o corretor decidiu, e
-`aferidor concordancia` mede o acordo entre os dois. É essa medida que diz
-quanto se pode confiar na triagem automática no ensaio seguinte.
+O Aferidor não substitui o clínico que avalia um modelo; prepara-lhe o
+trabalho. Coloca cada caso várias vezes, corrige todas as respostas de forma
+determinista e ordena as falhas por risco. O especialista recebe primeiro as
+falhas críticas, com a evidência necessária para confirmar ou contestar cada
+veredicto. A folha cega (`aferidor revisao`) permite-lhe julgar uma amostra de
+respostas sem conhecer a decisão do corretor, e `aferidor concordancia` mede o
+acordo entre ambos. Essa medida indica o grau de confiança que a triagem
+automática merece em ensaios seguintes.
 
-## O que este projeto não é
+## Âmbito
 
-**Não é um dispositivo médico.** Não aconselha, não trata, não substitui
-julgamento clínico. Mede um sistema, não um doente.
+**Não é um dispositivo médico.** Não aconselha, não trata e não substitui o
+julgamento clínico.
 
-**Não contém dados de doentes.** Todos os casos vêm de documentos públicos
-(normas portuguesas e diretrizes internacionais) ou são sintéticos. Nenhum registo clínico real entra aqui.
+**Não contém dados de doentes.** Todos os casos provêm de documentos públicos
+(normas portuguesas e diretrizes internacionais) ou são sintéticos.
 
-**Não avalia nenhum produto comercial.** Os casos são genéricos.
+**Não avalia nenhum produto comercial específico.** Os casos são genéricos.
 
-## Estado honesto, hoje
+## Estado atual
 
-- **Dois bancos de casos, 57 ao todo**, cada um com fonte pública identificada:
-  27 de antibioterapia, interações, gravidez e ajuste de dose, e 30 de consulta
-  de adulto, criança e cessação tabágica. Muitos em pares que medem uma
-  distinção que um modelo pode não fazer (pneumonia com e sem comorbilidades,
-  hipersensibilidade tipo I e não tipo I, um só critério de ajuste de
-  apixabano contra dois). Os casos de infeção seguem as normas da DGS; onde duas
-  fontes reconhecidas divergem de forma defensável, o caso aceita as duas.
-- **Um corretor que se ensaia a si próprio nos dois sentidos.** A resposta de
-  referência de cada caso tem de passar, e uma resposta errada construída para
-  cada critério tem de falhar: 206 e 83 destes controlos, todos apanhados.
-- **Rastreabilidade.** Cada resposta guarda o texto exato enviado (por hash), a
-  temperatura, o limite de tokens e a versão do código; uma retoma recusa
-  misturar condições; o relatório diz o que mediu, com que banco e quando.
-- **Critério de aprovação escrito antes**, num protocolo, e um relatório que
-  diz aprovado ou reprovado e avisa quando o protocolo foi escrito depois.
-- **Uma folha cega para um clínico julgar o corretor**, e a medida da
-  concordância entre os dois, com as passagens falsas primeiro.
-- Intervalos de confiança nos números principais, e um indicador de português
-  europeu à parte das falhas clínicas.
-- Adaptadores para OpenAI, Anthropic, Google Gemini e modelos locais pelo Ollama.
-- 413 testes automáticos, todos a passar, sem dependências externas.
+- **Dois bancos, 57 casos**, cada um com fonte pública identificada: 27 de
+  antibioterapia, interações, gravidez e ajuste de dose; 30 de consulta de
+  adulto, criança e cessação tabágica. Vários casos formam pares que testam
+  uma distinção clínica (pneumonia com e sem comorbilidades; hipersensibilidade
+  tipo I e não tipo I). Os casos de infeção seguem as normas da DGS; quando
+  duas fontes reconhecidas divergem de forma defensável, o caso aceita ambas.
+- **Corretor verificado nos dois sentidos.** A resposta de referência de cada
+  caso tem de passar e uma resposta errada construída para cada critério tem
+  de falhar: 206 e 83 controlos negativos, todos detetados.
+- **Rastreabilidade.** Cada resposta regista o SHA-256 do texto enviado, a
+  temperatura, o limite de tokens e a versão do código. Uma retoma recusa
+  condições diferentes. O relatório indica o banco, as condições e as datas.
+- **Critério de aprovação prévio**, definido num protocolo. O relatório indica
+  aprovado ou reprovado e assinala protocolos escritos depois do ensaio.
+- **Folha cega para revisão clínica** e medida de concordância com o corretor.
+- Intervalos de confiança nos resultados principais e um indicador de
+  português europeu independente das falhas clínicas.
+- Adaptadores para OpenAI, Anthropic, Google Gemini e modelos locais através
+  do Ollama.
+- 413 testes automáticos, sem dependências externas.
 
-E o que falta, dito com a mesma clareza:
+Limitações conhecidas:
 
-- **O passo do especialista ainda não foi dado nos ensaios registados.** O
-  circuito está pronto (`revisao` e `concordancia`); falta um clínico julgar a
-  folha. Até lá, os números dos relatórios são a triagem do corretor, e não se
-  sabe ainda com que frequência ele deixa passar uma resposta errada.
-- **As fontes estão confirmadas a meio.** 10 casos foram confirmados nos PDF da
-  DGS, um a um; 24 foram declarados confirmados por grupo; dos 23 restantes,
-  16 foram lidos no documento original por ferramenta e batem, e 7 (ESC e ADA)
-  esperam leitura humana. `casos/VERIFICACAO.md` diz qual é qual.
-- **Ainda não houve um ensaio pela API.** Houve uma execução limitada com um
-  modelo por uma sessão de assistente (18 perguntas) e uma comparação de dois
-  modelos locais de 8 mil milhões de parâmetros, com 5 amostras por caso. Os
-  casos mudaram depois dessa comparação, e os números dela não servem para
-  comparar com um ensaio novo.
-- **A correção é textual.** Numa só revisão apareceram oito erros do corretor,
-  todos corrigidos e fixados em testes; cada ensaio real vai trazer mais. A
-  distinção entre receitar um fármaco e o nomear para o excluir é heurística, e
-  `docs/METODO.md` diz onde erra.
+- **A validação pelo especialista ainda não foi feita nos ensaios
+  registados.** O circuito está pronto; falta um clínico julgar a folha. Até
+  lá, os resultados correspondem à triagem do corretor.
+- **Fontes parcialmente confirmadas.** 10 casos confirmados nos PDF da DGS, um
+  a um; 24 declarados confirmados em grupo; dos 23 restantes, 16 lidos no
+  documento original por ferramenta e 7 (ESC e ADA) por confirmar. Detalhe em
+  `casos/VERIFICACAO.md`.
+- **Ainda não houve um ensaio completo pela API.** Os ensaios registados usam
+  modelos locais (8 e 12 a 14 mil milhões de parâmetros) e uma execução
+  limitada através de uma sessão de assistente.
+- **A correção é textual.** A distinção entre prescrever um fármaco e
+  mencioná-lo para o excluir é heurística; `docs/METODO.md` descreve onde falha.
 
-Estas linhas estão aqui de propósito. Um instrumento de medida que esconde os
-seus próprios limites não serve como instrumento de medida.
+## Relação com normas de qualidade
 
-## O que demonstra sobre método
+A ISO/IEC 42001 exige avaliação de desempenho documentada e tratamento dos
+riscos identificados. A ISO 13485 e o Regulamento de Dispositivos Médicos
+exigem verificação e validação com critérios de aceitação definidos **antes**
+do ensaio. O projeto produz, à escala de uma demonstração, esse tipo de
+evidência:
 
-A ISO/IEC 42001 exige que um sistema de gestão de IA demonstre avaliação de
-desempenho documentada e tratamento dos riscos identificados. A ISO 13485 e o
-Regulamento de Dispositivos Médicos exigem verificação e validação com
-critérios de aceitação definidos **antes** do ensaio.
-
-Este projeto produz, à escala de uma demonstração, o tipo de evidência que
-essas normas pedem:
-
-| Exigência | Onde está |
+| Exigência | Implementação |
 |---|---|
-| Critérios de aceitação definidos antes do ensaio | os critérios de cada caso, escritos antes da primeira execução e alterados depois só com a razão no commit; o protocolo de aprovação do sistema (`aferidor protocolo`) |
-| Rastreabilidade à fonte | cada caso guarda documento e página |
-| Verificação dos dados de origem | `casos/VERIFICACAO.md` e o comando `verificar` |
+| Critérios de aceitação prévios | critérios de cada caso, alterados apenas com justificação no commit; protocolo de aprovação (`aferidor protocolo`) |
+| Rastreabilidade à fonte | documento e página em cada caso |
+| Verificação dos dados de origem | `casos/VERIFICACAO.md` e comando `verificar` |
 | Classificação de falhas por risco | `aferidor/risk.py` |
-| Registo íntegro dos resultados | `data/respostas.jsonl`, escrito à medida que chega |
-| Relatório para revisão humana | `relatorios/relatorio.md` e `.html`, com as condições do ensaio e intervalos de confiança |
-| Validação do método de medida | `aferidor revisao` e `concordancia`: o corretor contra um clínico, às cegas |
+| Registo íntegro dos resultados | `data/respostas.jsonl`, escrito à medida que as respostas chegam |
+| Relatório para revisão humana | `relatorios/relatorio.md` e `.html`, com condições do ensaio e intervalos de confiança |
+| Validação do método de medida | `aferidor revisao` e `concordancia`: corretor contra clínico, às cegas |
 
-O comando `verificar` merece nota. Avalia a resposta de referência de cada caso
-contra os critérios desse mesmo caso. Quando foi escrito, apanhou logo dois
-casos partidos em dez, ambos na direção que mais custa: dariam como errado um
-modelo que tinha acertado. Um banco de ensaio precisa de ser ensaiado a si
-próprio.
+O comando `verificar` avalia a resposta de referência de cada caso contra os
+seus próprios critérios. Na primeira execução detetou dois casos defeituosos
+em dez, ambos no sentido mais grave: classificariam como errado um modelo que
+acertou. Desde setembro de 2026 verifica também o sentido inverso: para cada
+critério, altera a resposta de referência no ponto que o critério avalia e
+exige que a falha seja detetada. Na primeira execução, dez respostas erradas
+passaram (um fármaco contraindicado, prescrito na frase seguinte à
+contraindicação, era dado como excluído). A correção foi feita no corretor,
+não nos casos.
 
-Desde setembro de 2026 ensaia-se também no sentido contrário. Para cada
-critério, o `verificar` estraga a resposta de referência exatamente no que o
-critério vê e exige que ele a apanhe. Da primeira vez que correu, dez destas
-respostas erradas passaram: um fármaco proibido, receitado na frase a seguir a
-uma contraindicação, era dado como excluído. Foi corrigido no corretor, não nos
-casos.
-
-## Como ver em cinco minutos
+## Demonstração
 
 ```
 python -m unittest discover -s tests   # 413 testes
@@ -138,8 +121,8 @@ python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```
 
-Nada disto precisa de chave de API nem de ligação à internet.
+Nenhum destes comandos requer chave de API nem ligação à internet.
 
-Para ler o código, por ordem: `risk.py`, `models.py`, `checks.py`. São os três
-que carregam as decisões. `docs/ARQUITETURA.md` explica as fronteiras entre
-módulos e a razão de cada uma.
+Para ler o código, a ordem recomendada é `risk.py`, `models.py` e `checks.py`,
+que concentram as decisões principais. `docs/ARQUITETURA.md` descreve as
+fronteiras entre módulos.

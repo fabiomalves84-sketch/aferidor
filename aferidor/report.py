@@ -280,10 +280,10 @@ def build(
 
     if not sources_verified:
         out.append(
-            "> **Aviso.** As fontes deste conjunto de casos ainda não foram confirmadas "
-            "por uma pessoa. Até isso acontecer, os números abaixo medem o modelo contra "
-            "valores transcritos automaticamente, e um valor de referência errado aparece "
-            "aqui como erro do modelo. Ver `casos/VERIFICACAO.md`."
+            "> **Aviso.** Nem todas as fontes destes casos foram confirmadas por uma pessoa. "
+            "Até essa confirmação, os resultados medem o modelo contra valores transcritos "
+            "automaticamente, e um valor de referência errado surge como erro do modelo. "
+            "Ver `casos/VERIFICACAO.md`."
         )
         out.append("")
 

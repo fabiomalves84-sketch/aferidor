@@ -1,112 +1,105 @@
 # Aferidor
 
 Banco de ensaio para respostas clínicas de modelos de linguagem em português
-europeu. Mede, não aconselha.
+europeu. Avalia; não aconselha.
 
-**Ver um relatório de exemplo:**
+**Relatório de exemplo:**
 https://fabiomalves84-sketch.github.io/aferidor/exemplo/ (dois modelos locais,
 27 casos, 5 amostras por caso, ensaio de 16/09/2026).
 
-## Começar
+## Instalação e primeira execução
 
-Precisa de Python 3.10 ou superior e de nada mais: só a biblioteca padrão.
+Requer Python 3.10 ou superior. Não tem dependências externas.
 
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
 python3 -m unittest discover -s tests          # 413 testes
-python3 -m aferidor verificar                  # os casos e o corretor estão coerentes?
-python3 -m aferidor ensaio --fornecedor falso  # ensaio a seco, sem chave nem custo
+python3 -m aferidor verificar                  # coerência dos casos e do corretor
+python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
 
-O último comando escreve `relatorios/relatorio.md`. Com `relatorio --formato
-html` sai o mesmo relatório num ficheiro HTML. Para atualizar uma cópia já
-clonada: `git pull`.
+O último comando escreve `relatorios/relatorio.md`; `relatorio --formato html`
+gera a versão HTML. Para atualizar uma cópia existente: `git pull`.
 
-Para correr contra um modelo real (OpenAI, Anthropic, Google Gemini, ou local pelo Ollama),
-ver `docs/COMO_CORRER.md`. As chaves vêm do ambiente, nunca do repositório.
+A execução contra um modelo real (OpenAI, Anthropic, Google Gemini ou local
+através do Ollama) está descrita em `docs/COMO_CORRER.md`. As chaves de API
+são lidas do ambiente e nunca do repositório.
 
 ## O problema
 
-Um assistente clínico que responde a um médico sobre dose, interação ou
-contraindicação está a participar numa decisão terapêutica. Um modelo que acerta
-92% das perguntas parece bom; se os 8% que falha forem todos doses pediátricas, é
-perigoso. A média esconde exatamente aquilo que precisa de ser visto.
+Um assistente que responde a um médico sobre dose, interação ou
+contraindicação participa numa decisão terapêutica. Um modelo com 92% de
+respostas corretas parece adequado; se os 8% de erros forem doses pediátricas,
+é perigoso. A média oculta precisamente o que importa.
 
-## O que faz
+## Funcionamento
 
-1. Guarda casos clínicos de referência, cada um com a resposta correta, a fonte
-   pública que a sustenta e critérios de aceitação escritos antes de correr
-   qualquer modelo.
-2. Envia cada pergunta ao modelo, várias vezes, e guarda cada resposta com as
+1. Mantém casos clínicos de referência, cada um com a resposta correta, a
+   fonte pública e critérios de aceitação definidos antes de qualquer ensaio.
+2. Coloca cada pergunta ao modelo várias vezes e regista cada resposta com as
    condições em que foi obtida. O modelo nunca vê a resposta de referência.
 3. Corrige cada resposta contra os critérios, de forma textual e determinista,
    e classifica cada falha por tipo e por risco clínico.
-4. Produz um relatório que começa pelos casos com falha crítica, e não pela
-   percentagem de acerto, com intervalos de confiança e as condições do ensaio.
-5. Entrega ao especialista o que ele tem de validar: cada falha com a pergunta,
-   a referência, a fonte e o texto do modelo, e uma folha cega para julgar uma
-   amostra de respostas sem ver o veredicto do corretor.
+4. Produz um relatório que começa pelos casos com falha crítica, com
+   intervalos de confiança e as condições do ensaio.
+5. Prepara a validação pelo especialista: cada falha com a pergunta, a
+   referência, a fonte e a resposta do modelo, e uma folha cega para julgar
+   uma amostra de respostas sem conhecer o veredicto do corretor.
 
-**A ferramenta faz a triagem; o especialista valida.** O corretor é rápido,
-reprodutível e incansável, mas é textual: o veredicto dele é uma proposta. A
-decisão sobre se um modelo serve para responder a médicos é de um clínico, e o
-Aferidor existe para que esse clínico gaste o seu tempo nas respostas que
-importam, e não a ler centenas delas. A concordância entre os dois mede-se
-(`revisao` e `concordancia`, com kappa de Cohen), para se saber quanto confiar
-na triagem da próxima vez.
+**A ferramenta faz a triagem; o especialista valida.** O veredicto do corretor
+é uma proposta. A decisão sobre a adequação de um modelo é clínica, e o
+Aferidor concentra o tempo do especialista nas respostas relevantes. A
+concordância entre ambos é medida (`revisao` e `concordancia`, kappa de
+Cohen).
 
-O próprio instrumento é verificado antes de chegar ao especialista: cada
-critério tem de aceitar a resposta certa e de rejeitar uma resposta errada
-construída de propósito.
+O instrumento é verificado antes do ensaio: cada critério tem de aceitar a
+resposta de referência e rejeitar uma resposta errada construída para o
+efeito.
 
-## O que não é
+## Âmbito
 
-**Não é um dispositivo médico.** Não aconselha, não trata e não substitui
-julgamento clínico. Mede um sistema, não um doente. **Não contém dados de
-doentes:** todos os casos vêm de documentos públicos ou são sintéticos.
+**Não é um dispositivo médico.** Não aconselha, não trata e não substitui o
+julgamento clínico. **Não contém dados de doentes:** todos os casos provêm de
+documentos públicos ou são sintéticos.
 
 ## Taxonomia de falhas
 
-| Tipo | O que significa | Risco |
+| Tipo | Significado | Risco |
 |---|---|---|
 | `dose_incorreta` | Valor, unidade ou intervalo errados | Crítico |
-| `interacao_omitida` | Não assinalou uma interação relevante | Crítico |
-| `contraindicacao_omitida` | Não assinalou uma contraindicação | Crítico |
-| `alucinacao` | Afirmou facto inexistente ou fonte inventada | Crítico |
-| `encaminhamento_omitido` | Não encaminhou uma situação urgente | Crítico |
-| `ajuste_omitido` | Faltou ajuste renal, hepático ou pediátrico | Alto |
-| `resposta_incompleta` | Certa mas insuficiente para decidir | Médio |
-| `recusa_indevida` | Recusou uma pergunta legítima | Baixo |
-| `formato_invalido` | Não respeitou o formato pedido | Baixo |
-
-Um sistema com 5% de `dose_incorreta` e um com 5% de `formato_invalido` têm a
-mesma exatidão e não têm nada a ver um com o outro.
+| `interacao_omitida` | Interação relevante não assinalada | Crítico |
+| `contraindicacao_omitida` | Contraindicação não assinalada | Crítico |
+| `alucinacao` | Facto inexistente ou fonte inventada | Crítico |
+| `encaminhamento_omitido` | Situação urgente não encaminhada | Crítico |
+| `ajuste_omitido` | Ajuste renal, hepático ou pediátrico em falta | Alto |
+| `resposta_incompleta` | Correta, mas insuficiente para decidir | Médio |
+| `recusa_indevida` | Recusa de uma pergunta legítima | Baixo |
+| `formato_invalido` | Formato pedido não respeitado | Baixo |
 
 ## Estado
 
-**O instrumento está completo; a validação ainda não.**
+**O instrumento está completo; a validação clínica está por fazer.**
 
 - Dois bancos, 57 casos: antibioterapia, interações, gravidez e ajuste de dose
-  (`casos/casos.json`), e consulta de adulto, criança e cessação tabágica
+  (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
-- `verificar` dá 27/27 e 30/30 casos coerentes, e 206/206 e 83/83 respostas
-  erradas construídas apanhadas. 413 testes, em Python 3.10 a 3.14 na CI.
-- Fontes: 34 de 57 confirmadas por uma pessoa, com duas qualidades de
-  evidência; das restantes, 16 lidas no original e 7 à espera de leitura
-  humana. Tudo em `casos/VERIFICACAO.md`.
+- `verificar`: 27/27 e 30/30 casos coerentes; 206/206 e 83/83 controlos
+  negativos detetados. 413 testes, em Python 3.10 a 3.14 na integração
+  contínua.
+- Fontes: 34 de 57 confirmadas por uma pessoa; das restantes, 16 lidas no
+  documento original e 7 por confirmar. Detalhe em `casos/VERIFICACAO.md`.
 
-Por fazer, e é o que falta para os números valerem como evidência: um clínico
-julgar uma amostra de respostas reais, confirmar as fontes que faltam, e um
-ensaio pela API com um protocolo escrito antes de correr.
+Em falta: a revisão de uma amostra de respostas por um clínico, a confirmação
+das fontes restantes e um ensaio pela API com protocolo definido antes da
+execução.
 
 ## Documentação
 
-- `docs/APRESENTACAO.md` o projeto em cinco minutos, para quem não abre o código
-- `docs/METODO.md` como mede: fontes, correção, protocolo, revisão por um
-  clínico, relatório, limites conhecidos e ensaios registados
-- `docs/ARQUITETURA.md` os módulos, as fronteiras entre eles e a razão de cada uma
-- `docs/COMO_CORRER.md` como correr contra um modelo real, e como afinar depois
-- `casos/VERIFICACAO.md` a confirmação das fontes, caso a caso
-- `casos/FONTES_DGS.md` as normas da DGS usadas, e onde divergiam dos casos
-- `ensaios/` as execuções registadas, cada uma com o seu README
+- `docs/APRESENTACAO.md`: apresentação do projeto, para leitura sem código
+- `docs/METODO.md`: método de medição, limites conhecidos e ensaios registados
+- `docs/ARQUITETURA.md`: módulos, fronteiras entre eles e respetiva justificação
+- `docs/COMO_CORRER.md`: execução contra um modelo real e afinação de critérios
+- `casos/VERIFICACAO.md`: confirmação das fontes, caso a caso
+- `casos/FONTES_DGS.md`: normas da DGS utilizadas e divergências encontradas
+- `ensaios/`: execuções registadas, cada uma com o respetivo README
