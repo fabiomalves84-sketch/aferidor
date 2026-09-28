@@ -235,9 +235,9 @@ class ConsistencyState(Enum):
 
 
 _CONSISTENCY_LABELS: dict[ConsistencyState, str] = {
-    ConsistencyState.ESTAVEL_CERTO: "acertou sempre",
-    ConsistencyState.ESTAVEL_ERRADO: "nunca acertou",
-    ConsistencyState.INSTAVEL: "às vezes acertou",
+    ConsistencyState.ESTAVEL_CERTO: "sempre correto",
+    ConsistencyState.ESTAVEL_ERRADO: "nunca correto",
+    ConsistencyState.INSTAVEL: "parcialmente correto",
 }
 
 
@@ -353,9 +353,9 @@ def consistency_by_model(
 # strictest applies, because a clinician sees one answer and does not choose
 # which sample it is.
 CASE_RULES: dict[str, str] = {
-    "todas": "acertou em todas as amostras",
-    "maioria_sem_critica": "acertou na maioria das amostras e nenhuma teve falha crítica",
-    "nenhuma_critica": "nenhuma amostra teve falha crítica",
+    "todas": "todas as amostras são corretas",
+    "maioria_sem_critica": "a maioria das amostras é correta e nenhuma tem falha crítica",
+    "nenhuma_critica": "nenhuma amostra tem falha crítica",
 }
 DEFAULT_CASE_RULE = "todas"
 

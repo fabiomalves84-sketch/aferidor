@@ -108,11 +108,13 @@ _FAMILIES = {
     "deepseek": ("DeepSeek", "DeepSeek"),
     "gpt": ("GPT", "OpenAI"),
     "claude": ("Claude", "Anthropic"),
+    "gemini": ("Gemini", "Google"),
 }
 _HOW = {
-    "local": "corrido localmente, pelo Ollama",
-    "openai": "pela API da OpenAI",
-    "anthropic": "pela API da Anthropic",
+    "local": "executado localmente através do Ollama",
+    "gemini": "acedido por API",
+    "openai": "acedido por API",
+    "anthropic": "acedido por API",
 }
 
 
@@ -120,7 +122,7 @@ def model_label(model_id: str) -> tuple[str, str]:
     """A readable name and a one-line description for a model identifier.
 
     "local:llama3.1:8b" reads as ("Llama 3.1", "Meta · 8 mil milhões de
-    parâmetros · corrido localmente, pelo Ollama"). The identifier itself is
+    parâmetros · executado localmente através do Ollama"). The identifier itself is
     always shown next to it, small, so the name never replaces what was
     actually run.
     """
@@ -254,14 +256,14 @@ GLOSSARY: dict[str, str] = {
     "tokens_max": "Limite de tamanho da resposta que o modelo podia dar.",
     "Acordo Ortográfico": "O Acordo Ortográfico de 1990, em vigor em Portugal: escreve-se infeção e não infecção.",
     "amostra": "Uma das respostas do modelo à mesma pergunta. Cada caso é perguntado várias vezes, porque o modelo não responde sempre igual.",
-    "acertou sempre": "Todas as amostras deste caso passaram em todos os critérios.",
-    "às vezes acertou": "Algumas amostras passaram e outras não: a resposta certa dependeu da tentativa que o médico calhasse a ver.",
-    "nunca acertou": "Nenhuma amostra passou. Não quer dizer falha crítica: pode ter falhado sempre só por uma resposta incompleta.",
+    "sempre correto": "Todas as amostras do caso cumpriram todos os critérios.",
+    "parcialmente correto": "Parte das amostras cumpriu os critérios e parte não: o resultado dependeu da tentativa.",
+    "nunca correto": "Nenhuma amostra cumpriu os critérios. Não implica falha crítica: a falha pode ser apenas uma resposta incompleta.",
     "falha crítica": "Erro de dose, interação ou contraindicação omitida, encaminhamento urgente omitido, ou facto inventado.",
-    "casos certos": "Veredicto sim ou não por caso, pela regra escrita no relatório. Por omissão, um caso está certo só quando acertou em todas as amostras.",
+    "casos corretos": "Veredicto binário por caso, segundo a regra indicada no relatório. Por omissão, um caso é correto apenas se todas as amostras forem corretas.",
 }
 # The report's own vocabulary: marked where the report uses it, never in case texts.
-_REPORT_TERMS = ("amostra", "acertou sempre", "às vezes acertou", "nunca acertou", "falha crítica", "casos certos")
+_REPORT_TERMS = ("amostra", "sempre correto", "parcialmente correto", "nunca correto", "falha crítica", "casos corretos")
 # Clinical and source abbreviations marked automatically in case texts.
 _CASE_TERMS = tuple(
     k for k in GLOSSARY
@@ -402,29 +404,28 @@ def _intro(cases: list[Case], models: list[str], answers: list[Answer]) -> str:
         facts.append(_plural(samples, "amostra por caso", "amostras por caso"))
     fact_items = "".join(f"<li>{_esc(f)}</li>" for f in facts)
     return f"""
-<section class="intro" aria-labelledby="o-que-e">
+<section class="intro" aria-labelledby="sobre">
   <div class="intro-texto">
-    <h2 id="o-que-e">O que é isto</h2>
-    <p class="lead">O <strong>Aferidor</strong> mede com que frequência um modelo de
-    linguagem responde certo a perguntas clínicas em português europeu, e que tipo de
-    erro comete quando erra.</p>
+    <h2 id="sobre">Sobre este relatório</h2>
+    <p class="lead">O <strong>Aferidor</strong> avalia a exatidão de modelos de linguagem em
+    perguntas clínicas em português europeu e classifica os erros pelo risco clínico.</p>
     <p>Cada pergunta tem uma resposta de referência com fonte pública (normas da {_term("DGS")},
-    {_term("Infarmed")}, diretrizes europeias) e critérios de aceitação escritos antes do ensaio.
-    A mesma pergunta é feita várias vezes a cada modelo, porque um modelo não responde
-    sempre igual: cada uma dessas respostas é uma <em>amostra</em>. Cada amostra é
-    corrigida de forma automática e determinista, e cada falha é classificada pelo risco
-    clínico que carrega. Uma média de respostas certas esconde o que importa; por isso
-    este relatório começa pelos erros graves.</p>
+    {_term("Infarmed")}, diretrizes europeias) e critérios de aceitação definidos antes do
+    ensaio. Cada pergunta é colocada várias vezes a cada modelo, uma vez que as respostas
+    variam; cada resposta constitui uma <em>amostra</em>. A correção é automática e
+    determinista. Como a média de respostas corretas oculta os erros relevantes, o relatório
+    apresenta primeiro as falhas críticas.</p>
     <ul class="factos">{fact_items}</ul>
   </div>
-  <ol class="como-ler" aria-label="Como ler este relatório">
-    <li><strong>O número grande</strong> é o de casos em que o modelo cometeu, pelo menos
-    uma vez, um erro de risco crítico. Um médico só vê uma resposta, por isso basta uma.</li>
-    <li><strong>A barra</strong> mostra a consistência: em quantos casos o modelo
-    {_term("acertou sempre")}, {_term("às vezes acertou")} ou {_term("nunca acertou")}.
-    A secção <a href="#como-se-conta">Como se conta</a> explica cada um com um exemplo.</li>
-    <li><strong>Em baixo</strong>, cada caso com falha mostra a pergunta, a referência, o que
-    o modelo respondeu e o critério que falhou, para qualquer veredito poder ser contestado.</li>
+  <ol class="como-ler" aria-label="Como interpretar este relatório">
+    <li><strong>O valor em destaque</strong> indica os casos com pelo menos uma falha de risco
+    crítico. Na prática clínica é observada uma única resposta; uma falha crítica é suficiente.</li>
+    <li><strong>A barra de estados</strong> indica a consistência de cada modelo: casos
+    {_term("sempre correto", "sempre corretos")}, {_term("parcialmente correto", "parcialmente corretos")}
+    e {_term("nunca correto", "nunca corretos")} (ver <a href="#como-se-conta">Método de contagem</a>).</li>
+    <li><strong>A secção Casos com falha</strong> apresenta, para cada caso, a pergunta, a
+    referência, a resposta do modelo e o critério não cumprido, para que cada veredicto possa
+    ser verificado.</li>
   </ol>
 </section>"""
 
@@ -489,8 +490,8 @@ def _state_bar(model: str, counts: dict[ConsistencyState, int], total: int) -> s
 def _units(cases: int, samples: int, total: int) -> str:
     """Why the answer count is not the case count: cases times attempts."""
     if samples > 1 and cases * samples == total:
-        return f"{cases} casos × {samples} tentativas; conta respostas, não casos"
-    return "conta respostas, não casos"
+        return f"{cases} casos × {samples} amostras; contagem de respostas, não de casos"
+    return "contagem de respostas, não de casos"
 
 
 def _dots(pairs: list[tuple[Answer, Verdict]], expected: int) -> str:
@@ -507,10 +508,10 @@ def _dots(pairs: list[tuple[Answer, Verdict]], expected: int) -> str:
             words.append(f"{n} sem resposta")
         elif by_sample[n]:
             marks.append('<span class="pt certa">●</span>')
-            words.append(f"{n} certa")
+            words.append(f"{n} correta")
         else:
             marks.append('<span class="pt errada">✕</span>')
-            words.append(f"{n} errada")
+            words.append(f"{n} incorreta")
     label = "Amostras: " + ", ".join(words)
     return f'<span class="pontos" role="img" aria-label="{label}" title="{label}">{"".join(marks)}</span>'
 
@@ -525,10 +526,10 @@ def _how_counted(samples: int, rule: str) -> str:
         )
     half = max(1, n // 2)
     patterns = [
-        ("ok", "✓", "acertou sempre", "●" * n, "todas as amostras passaram"),
-        ("instavel", "◐", "às vezes acertou", ("●" * (n - half) + "✕" * half) if n > 1 else "●",
-         "umas passaram, outras não"),
-        ("erro", "✕", "nunca acertou", "✕" * n, "nenhuma amostra passou"),
+        ("ok", "✓", "sempre correto", "●" * n, "todas as amostras corretas"),
+        ("instavel", "◐", "parcialmente correto", ("●" * (n - half) + "✕" * half) if n > 1 else "●",
+         "algumas amostras corretas"),
+        ("erro", "✕", "nunca correto", "✕" * n, "nenhuma amostra correta"),
     ]
     items = "".join(
         f'<li><span class="pontos" aria-hidden="true">{row(pattern)}</span>'
@@ -538,17 +539,16 @@ def _how_counted(samples: int, rule: str) -> str:
     )
     return f"""
 <div class="como-se-conta" id="como-se-conta">
-  <h3>Como se conta</h3>
-  <p>Cada caso foi perguntado {_esc(_plural(n, "vez", "vezes"))} a cada modelo; cada resposta é uma
-  {_term("amostra")}. Na grelha, cada ponto é uma amostra, pela ordem em que foi pedida:
-  <span class="pt certa">●</span> passou, <span class="pt errada">✕</span> falhou,
-  <span class="pt falta">○</span> ficou sem resposta.</p>
+  <h3>Método de contagem</h3>
+  <p>Cada caso foi colocado {_esc(_plural(n, "vez", "vezes"))} a cada modelo; cada resposta é uma
+  {_term("amostra")}. Na grelha, cada ponto representa uma amostra, pela ordem de execução:
+  <span class="pt certa">●</span> correta, <span class="pt errada">✕</span> incorreta,
+  <span class="pt falta">○</span> sem resposta.</p>
   <ul>{items}</ul>
-  <p><strong>{_term("casos certos", "Casos certos")}</strong> é o veredicto sim ou não por caso. A regra deste
-  relatório: um caso está certo quando {_esc(CASE_RULES[rule])}.</p>
-  <p><strong>Nunca acertou não é o mesmo que {_term("falha crítica")}.</strong> Um caso pode falhar
-  sempre só por uma resposta incompleta, e um caso que às vezes acertou pode ter tido um erro de
-  dose numa das amostras. Por isso o número grande de cada cartão conta as falhas críticas à parte.</p>
+  <p><strong>{_term("casos corretos", "Casos corretos")}</strong>: veredicto binário por caso. Regra
+  deste relatório: um caso é correto quando {_esc(CASE_RULES[rule])}.</p>
+  <p><strong>Um caso nunca correto não tem necessariamente uma {_term("falha crítica")}</strong>, e um
+  caso parcialmente correto pode ter uma. Por esse motivo, as falhas críticas são contadas à parte.</p>
 </div>"""
 
 
@@ -576,8 +576,8 @@ def _model_card(
   <p class="numero-principal"><span class="destaque">{summary.critical_cases}</span><span class="legenda">de {summary.cases} casos com falha crítica em alguma amostra ({_gloss(_esc(interval_text(summary.critical_cases, summary.cases)), ("IC 95%",))})</span></p>
   {_state_bar(model, states, summary.cases)}
   <dl class="metricas">
-    <div><dt>{_term("casos certos", "Casos certos")}</dt><dd>{right[0]} de {right[1]} casos ({_gloss(_esc(interval_text(*right)), ("IC 95%",))})</dd><dd class="unidade">regra: {_esc(CASE_RULES[rule])}</dd></div>
-    <div><dt>Respostas certas</dt><dd>{tally.passed} de {tally.total} respostas ({_gloss(_esc(interval_text(tally.passed, tally.total)), ("IC 95%",))})</dd><dd class="unidade">{_esc(_units(summary.cases, samples, tally.total))}</dd></div>
+    <div><dt>{_term("casos corretos", "Casos corretos")}</dt><dd>{right[0]} de {right[1]} casos ({_gloss(_esc(interval_text(*right)), ("IC 95%",))})</dd><dd class="unidade">regra: {_esc(CASE_RULES[rule])}</dd></div>
+    <div><dt>Respostas corretas</dt><dd>{tally.passed} de {tally.total} respostas ({_gloss(_esc(interval_text(tally.passed, tally.total)), ("IC 95%",))})</dd><dd class="unidade">{_esc(_units(summary.cases, samples, tally.total))}</dd></div>
   </dl>
   <p class="lingua-linha"><strong>Português europeu:</strong> {language.brazilian} de {language.answers} respostas com formas do Brasil, {language.pre_agreement} com grafia anterior ao Acordo.</p>
 </article>"""
@@ -597,9 +597,9 @@ def _context_note(models: list[str]) -> str:
     names = shorts[0] if len(shorts) == 1 else ", ".join(shorts[:-1]) + " e " + shorts[-1]
     return (
         '<p class="contexto"><strong>Contexto.</strong> '
-        f"{_esc(names)} {'correu' if len(local) == 1 else 'correram'} localmente, num "
-        "computador portátil, pelo Ollama. São modelos abertos e pequenos, muito menores do "
-        "que os modelos comerciais usados por API, e os seus números não descrevem esses.</p>"
+        f"{_esc(names)} {'foi executado' if len(local) == 1 else 'foram executados'} localmente, "
+        "num computador portátil, através do Ollama. São modelos abertos de pequena dimensão; "
+        "os resultados não são extrapoláveis para os modelos comerciais disponibilizados por API.</p>"
     )
 
 
@@ -621,7 +621,7 @@ def _comparison(summaries: dict[str, ConsistencySummary]) -> str:
             f"{_esc(_model_short(second[0]))})"
             + (
                 f", mas os intervalos de confiança sobrepõem-se: com {best[2]} casos, a "
-                "diferença pode ser acaso."
+                "diferença pode dever-se ao acaso."
                 if result.overlap else
                 ", e os intervalos de confiança não se sobrepõem."
             )
@@ -698,10 +698,10 @@ def _worst(cases, consistency, pairs) -> str:
     if not examples:
         return ""
     out = [
-        '<section id="erros"><h2>Os erros mais graves</h2>',
-        '<p class="seccao-intro">Casos em que o modelo errou em todas as amostras, com um erro de '
-        "risco crítico. Escolhidos por regra, não à mão: por cada modelo, à vez, os primeiros "
-        "casos que cumprem a regra.</p><div class=\"erros\">",
+        '<section id="erros"><h2>Erros mais graves</h2>',
+        '<p class="seccao-intro">Casos em que todas as amostras falharam, com pelo menos uma falha '
+        "de risco crítico. Selecionados por regra fixa: os primeiros casos que a cumprem, "
+        "alternando entre modelos.</p><div class=\"erros\">",
     ]
     for case, answer, verdict in examples:
         text = _plain(answer.text)
@@ -743,10 +743,10 @@ def _areas(cases, models, consistency) -> str:
             )
         rows.append(f'<tr><th scope="row">{_esc(_category(category))}</th>{"".join(cells)}</tr>')
     return (
-        '<section id="areas"><h2>Por área clínica</h2>'
-        '<p class="seccao-intro">Casos com falha crítica em alguma amostra, por área. Um modelo '
-        "pode parecer razoável na média e ser perigoso numa área: é aqui que isso se vê. Quanto "
-        "mais escura a célula, maior a proporção de casos com falha crítica.</p>"
+        '<section id="areas"><h2>Falhas críticas por área clínica</h2>'
+        '<p class="seccao-intro">Casos com falha crítica em pelo menos uma amostra, por área. Um '
+        "resultado médio aceitável pode ocultar uma área de risco. A intensidade da cor é "
+        "proporcional à fração de casos com falha crítica.</p>"
         f'<div class="grade-wrap"><table class="areas"><thead><tr><th scope="col">Área</th>{head}</tr></thead>'
         f'<tbody>{"".join(rows)}</tbody></table></div></section>'
     )
@@ -764,7 +764,7 @@ def _cell(entry: Consistency | None, dots: str) -> tuple[str, str]:
         return css, label
     failure = _esc(_FAILURE_LABEL[entry.worst_failure]) if entry.worst_failure else ""
     detail = (
-        f" · {entry.passed} de {entry.samples} certas"
+        f" · {entry.passed} de {entry.samples} corretas"
         if entry.state is ConsistencyState.INSTAVEL else ""
     )
     return css, f'{label}<br><span class="cel-falha">{failure}{detail}</span>'
@@ -819,7 +819,7 @@ def _grid_legend() -> str:
 def _sample_block(answer: Answer, verdict: Verdict) -> str:
     out = ['<div class="amostra">']
     if verdict.passed:
-        out.append(f'<p class="passou">✓ amostra {answer.sample}: passou em todos os critérios</p>')
+        out.append(f'<p class="passou">✓ amostra {answer.sample}: cumpre todos os critérios</p>')
         out.append(f"<blockquote>{_esc(answer.text)}</blockquote></div>")
         return "".join(out)
     alternative = (
@@ -846,10 +846,10 @@ def _detail(
 ) -> str:
     out = [
         '<section class="detalhe" id="casos-com-falha"><h2>Casos com falha</h2>',
-        '<p class="seccao-intro">Cada caso abre para mostrar a pergunta, a resposta de '
-        "referência com a fonte, e cada resposta diferente que o modelo deu, com o critério "
-        "que falhou e a evidência que o corretor viu. Os círculos à direita dão o estado do "
-        f"caso em cada modelo, por esta ordem: {_esc(', '.join(_model_short(m) for m in models))}.</p>",
+        '<p class="seccao-intro">Cada caso apresenta a pergunta, a resposta de referência com '
+        "a fonte e cada resposta distinta do modelo, com o critério não cumprido e a evidência "
+        "encontrada pelo corretor. Os círculos à direita indicam o estado do caso em cada "
+        f"modelo, por esta ordem: {_esc(', '.join(_model_short(m) for m in models))}.</p>",
     ]
     any_case = False
     for case in cases:
@@ -891,7 +891,7 @@ def _detail(
             out.append(
                 f'<h4><span class="mini {css}" aria-hidden="true">{icon}</span> {_esc(_model_short(model))} '
                 f'<span class="h4-sub">{_esc(entry.state.label)}, {entry.passed} de '
-                f"{entry.samples} amostras certas</span></h4>"
+                f"{entry.samples} amostras corretas</span></h4>"
             )
             seen: set[str] = set()
             for answer, verdict in pairs.get((case.case_id, model), []):
@@ -1237,7 +1237,7 @@ def build(
         f'<p class="data">Relatório escrito em {_esc(written)}.</p></header>'
     )
 
-    sections = [("o-que-e", "O que é isto")]
+    sections = [("sobre", "Sobre este relatório")]
     if models:
         sections.append(("resumo", "Resumo"))
         if protocol is not None:
@@ -1245,7 +1245,7 @@ def build(
         sections += [
             ("erros", "Erros mais graves"),
             ("areas", "Por área clínica"),
-            ("grelha", "Caso a caso"),
+            ("grelha", "Resultados por caso"),
             ("falhas", "Falhas por tipo"),
             ("casos-com-falha", "Casos com falha"),
         ]
@@ -1277,10 +1277,9 @@ def build(
 
         out.append('<section id="resumo"><h2>Resumo</h2>')
         out.append(
-            '<p class="seccao-intro">Uma falha crítica é um erro de dose, uma interação ou '
-            "contraindicação omitida, um encaminhamento urgente omitido, ou um facto inventado. "
-            "Os intervalos são de confiança a 95%: com poucos casos, o número real pode estar "
-            "longe do observado.</p>"
+            '<p class="seccao-intro">Falha crítica: erro de dose, interação ou contraindicação '
+            "omitida, encaminhamento urgente omitido, ou facto inventado. Os intervalos de "
+            "confiança são a 95%; com poucos casos, são largos.</p>"
         )
         out.append(_context_note(models))
         out.append(_comparison(summaries))
@@ -1300,12 +1299,12 @@ def build(
         out.append(_worst(cases, consistency, pairs))
         out.append(_areas(cases, models, consistency))
 
-        out.append('<section id="grelha"><h2>Caso a caso</h2>')
+        out.append('<section id="grelha"><h2>Resultados por caso</h2>')
         out.append(
-            '<p class="seccao-intro">Cada linha é um caso; cada coluna, um modelo. Os pontos '
-            "são as amostras, pela ordem em que foram pedidas (● passou, ✕ falhou, ○ sem "
-            "resposta). Nas falhas aparece o tipo de falha mais grave. "
-            '<a href="#como-se-conta">Como se conta</a>.</p>'
+            '<p class="seccao-intro">Linhas: casos. Colunas: modelos. Os pontos representam as '
+            "amostras pela ordem de execução (● correta, ✕ incorreta, ○ sem resposta). Nos casos "
+            "com falha indica-se o tipo de falha mais grave "
+            '(ver <a href="#como-se-conta">Método de contagem</a>).</p>'
         )
         out.append(_grid_legend())
         out.append(_grid(cases, models, consistency, pairs, expected))
@@ -1330,9 +1329,9 @@ def build(
                 f"{_gloss(_esc(language_line(languages[m])), ('Acordo Ortográfico',))}</li>"
                 for m in models
             )
-            + '</ul><p class="seccao-intro">Indicador à parte, por uma lista curta de formas '
-            "que o português europeu atual não usa: não entra em nenhuma contagem de falhas, e "
-            "conta por baixo.</p></section>"
+            + '</ul><p class="seccao-intro">Indicador independente, baseado numa lista curta de '
+            "formas alheias ao português europeu atual. Não entra na contagem de falhas e "
+            "subestima a frequência real.</p></section>"
         )
         out.append(_detail(cases, models, consistency, pairs))
 

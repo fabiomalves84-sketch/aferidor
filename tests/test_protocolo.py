@@ -92,7 +92,7 @@ class TestCaseRule(unittest.TestCase):
         case = a_case()
         answers = [Answer("C1", "falso", "Amoxicilina 1 g", datetime(2026, 9, 2))]
         text = report.build([case], answers, [grade(case, answers[0])], protocol=protocol)
-        self.assertIn("nenhuma amostra teve falha crítica", text)
+        self.assertIn("nenhuma amostra tem falha crítica", text)
 
 
 class TestEvaluate(unittest.TestCase):

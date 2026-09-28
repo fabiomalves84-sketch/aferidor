@@ -147,7 +147,7 @@ def evaluate(protocol: Protocol, summary: ConsistencySummary) -> Outcome:
             summary.critical_cases <= protocol.max_critical_cases,
         ),
         Check(
-            "casos em que às vezes acertou",
+            "casos parcialmente corretos",
             f"no máximo {protocol.max_unstable_cases}",
             f"{summary.unstable_cases} de {summary.cases}",
             summary.unstable_cases <= protocol.max_unstable_cases,

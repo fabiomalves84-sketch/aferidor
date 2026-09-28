@@ -86,18 +86,18 @@ class TestGrid(unittest.TestCase):
 
     def test_the_state_is_written_out_not_just_shown_in_colour(self):
         text = build([a_case()], [an_answer("500 mg")])
-        self.assertIn("nunca acertou", text)
+        self.assertIn("nunca correto", text)
 
     def test_a_stable_pass_says_so(self):
         text = build([a_case()], [an_answer("1 g")])
-        self.assertIn("acertou sempre", text)
+        self.assertIn("sempre correto", text)
 
     def test_a_mixed_result_across_samples_is_unstable(self):
         text = build(
             [a_case()],
             [an_answer("1 g", sample=1), an_answer("500 mg", sample=2)],
         )
-        self.assertIn("às vezes acertou", text)
+        self.assertIn("parcialmente correto", text)
 
     def test_a_case_never_asked_to_a_model_says_so(self):
         cases = [a_case("C1"), a_case("C2")]
@@ -121,7 +121,7 @@ class TestHowItIsCounted(unittest.TestCase):
             [a_case()],
             [an_answer("1 g", sample=1), an_answer("500 mg", sample=2), an_answer("1 g", sample=3)],
         )
-        self.assertIn('aria-label="Amostras: 1 certa, 2 errada, 3 certa"', text)
+        self.assertIn('aria-label="Amostras: 1 correta, 2 incorreta, 3 correta"', text)
 
     def test_a_sample_never_answered_is_a_dot_of_its_own(self):
         answers = [an_answer("1 g", sample=1), an_answer("1 g", sample=3)]
@@ -131,22 +131,22 @@ class TestHowItIsCounted(unittest.TestCase):
     def test_the_page_explains_the_states_and_that_never_right_is_not_critical(self):
         text = build([a_case()], [an_answer("1 g", sample=1), an_answer("500 mg", sample=2)])
         self.assertIn('id="como-se-conta"', text)
-        self.assertIn("Nunca acertou não é o mesmo que", text)
-        for state in ("acertou sempre", "às vezes acertou", "nunca acertou"):
+        self.assertIn("Um caso nunca correto não tem necessariamente", text)
+        for state in ("sempre correto", "parcialmente correto", "nunca correto"):
             with self.subTest(state=state):
                 self.assertIn(f'data-termo="{state}"', text)
 
     def test_the_card_counts_right_cases_by_the_rule_and_names_the_rule(self):
         text = build([a_case()], [an_answer("1 g", sample=1), an_answer("500 mg", sample=2)])
         self.assertIn("0 de 1 casos", text)
-        self.assertIn("regra: acertou em todas as amostras", text)
+        self.assertIn("regra: todas as amostras são corretas", text)
 
     def test_the_card_says_answers_are_cases_times_attempts(self):
         cases = [a_case("C1"), a_case("C2")]
         answers = [an_answer("1 g", case_id=c, sample=s) for c in ("C1", "C2") for s in (1, 2, 3)]
         text = build(cases, answers)
         self.assertIn("6 de 6 respostas", text)
-        self.assertIn("2 casos × 3 tentativas", text)
+        self.assertIn("2 casos × 3 amostras", text)
 
 
 class TestMissingSamples(unittest.TestCase):
@@ -216,8 +216,8 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_it_opens_by_saying_what_the_aferidor_is_and_how_to_read_it(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        self.assertLess(text.index("O que é isto"), text.index('<span class="destaque">'))
-        self.assertIn("Como ler este relatório", text)
+        self.assertLess(text.index("Sobre este relatório"), text.index('<span class="destaque">'))
+        self.assertIn("Como interpretar este relatório", text)
 
     def test_every_section_is_reachable_from_the_index(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
@@ -228,7 +228,7 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_a_state_is_never_shown_by_colour_alone(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        self.assertRegex(text, r'✕ <abbr class="termo"[^>]*>nunca acertou</abbr>')
+        self.assertRegex(text, r'✕ <abbr class="termo"[^>]*>nunca correto</abbr>')
 
     def test_failure_charts_share_one_scale_across_models(self):
         """Two charts on their own scales make a smaller count look as long as a bigger one."""
@@ -247,10 +247,11 @@ class TestModelNames(unittest.TestCase):
 
         self.assertEqual(
             model_label("local:llama3.1:8b"),
-            ("Llama 3.1", "Meta · 8 mil milhões de parâmetros · corrido localmente, pelo Ollama"),
+            ("Llama 3.1", "Meta · 8 mil milhões de parâmetros · executado localmente através do Ollama"),
         )
         self.assertEqual(model_label("anthropic:claude-sonnet-4-5")[0], "Claude Sonnet 4.5")
         self.assertEqual(model_label("openai:gpt-4o")[0], "GPT-4o")
+        self.assertEqual(model_label("gemini:gemini-3.5-flash-lite"), ("Gemini 3.5 Flash Lite", "Google · acedido por API"))
 
     def test_an_unknown_model_is_shown_by_its_identifier_not_guessed(self):
         from aferidor.html_report import model_label
@@ -285,7 +286,7 @@ class TestWhatJumpsOut(unittest.TestCase):
     def test_the_comparison_names_the_better_model_and_says_when_it_can_be_chance(self):
         text = self.two_models()
         self.assertIn("<strong>Qwen 3</strong> teve menos casos com falha crítica (1 de 2, contra 2 de 2", text)
-        self.assertIn("a diferença pode ser acaso", text)
+        self.assertIn("a diferença pode dever-se ao acaso", text)
 
     def test_the_gravest_mistakes_are_highlighted_with_what_should_have_been_said(self):
         text = self.two_models()
@@ -296,11 +297,11 @@ class TestWhatJumpsOut(unittest.TestCase):
         self.assertIn('id="caso-C1"', text)
 
     def test_small_local_models_are_put_in_context(self):
-        self.assertIn("modelos abertos e pequenos", self.two_models())
+        self.assertIn("modelos abertos de pequena dimensão", self.two_models())
 
     def test_models_not_run_locally_get_no_such_note(self):
         text = build([a_case()], [an_answer("1 g", model="openai:gpt-4o")])
-        self.assertNotIn("modelos abertos e pequenos", text)
+        self.assertNotIn("modelos abertos de pequena dimensão", text)
 
 
 class TestGlossary(unittest.TestCase):

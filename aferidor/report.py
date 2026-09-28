@@ -145,13 +145,13 @@ def how_counted(samples: int, rule: str) -> str:
     """
     n = samples or 1
     return (
-        f"Cada caso foi perguntado {n} {'vez' if n == 1 else 'vezes'} a cada modelo; cada "
-        "resposta é uma amostra. Um caso **acertou sempre** quando todas as amostras passaram, "
-        f"**nunca acertou** quando nenhuma passou, e **às vezes acertou** no meio. Para um "
-        f"veredicto sim ou não por caso, a regra deste relatório é: o caso está certo quando "
-        f"{CASE_RULES[rule]}. Nunca acertou não é o mesmo que falha crítica: um caso pode falhar "
-        "sempre só por uma resposta incompleta, e um caso que às vezes acertou pode ter tido um "
-        "erro de dose numa das amostras."
+        f"Cada caso foi colocado {n} {'vez' if n == 1 else 'vezes'} a cada modelo; cada "
+        "resposta é uma amostra. Um caso é **sempre correto** quando todas as amostras são "
+        "corretas, **nunca correto** quando nenhuma o é, e **parcialmente correto** nos "
+        "restantes. Veredicto binário por caso: um caso é correto quando "
+        f"{CASE_RULES[rule]}. Um caso nunca correto não tem necessariamente uma falha crítica, "
+        "e um caso parcialmente correto pode ter uma; por isso as falhas críticas são contadas "
+        "à parte."
     )
 
 
@@ -178,7 +178,7 @@ def _risk_line(critical_cases: int, total_cases: int) -> str:
     _, high = wilson_interval(0, total_cases)
     return (
         "**Nenhum caso com falha de risco crítico em nenhuma amostra.** Com "
-        f"{total_cases} casos, isto é compatível com uma proporção real de casos com falha "
+        f"{total_cases} casos, o resultado é compatível com uma proporção real de casos com falha "
         f"crítica até {_percent(high)} ({interval})."
     )
 
@@ -337,7 +337,7 @@ def build(
 
     rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
     right = right_cases_by_model(consistency, rule)
-    out.append("## Como se conta")
+    out.append("## Método de contagem")
     out.append("")
     out.append(how_counted(max(expected_samples(answers).values(), default=0), rule))
     out.append("")
@@ -346,8 +346,8 @@ def build(
         out.append("## Comparação")
         out.append("")
         out.append(
-            "| Modelo | Casos com falha crítica em alguma amostra | Casos certos | "
-            "Casos em que às vezes acertou | Amostras certas |"
+            "| Modelo | Casos com falha crítica em alguma amostra | Casos corretos | "
+            "Casos parcialmente corretos | Amostras corretas |"
         )
         out.append("|---|---|---|---|---|")
         for model in per_model:
@@ -364,10 +364,10 @@ def build(
         out.append("")
         out.append(
             "As três primeiras colunas contam casos; a última conta amostras (casos × "
-            "tentativas). Uma taxa de amostras certas alta ainda pode esconder casos que "
-            "nunca acertam, ou casos em que a resposta certa depende da amostra que o médico "
-            "calhou a ver. Os intervalos são de Wilson a 95%; o das amostras trata cada amostra "
-            "como independente, e não o são, por isso é mais estreito do que devia."
+            "amostras por caso). Uma taxa elevada de amostras corretas pode ocultar casos "
+            "nunca corretos ou casos cujo resultado depende da amostra. Intervalos de Wilson a "
+            "95%; o intervalo das amostras assume independência entre amostras, que não se "
+            "verifica, pelo que é mais estreito do que deveria."
         )
         out.append("")
 
@@ -380,19 +380,19 @@ def build(
         out.append("")
         ok, total = right[model]
         out.append(
-            f"**Casos certos: {ok} de {total}** ({interval_text(ok, total)}), pela regra: "
+            f"**Casos corretos: {ok} de {total}** ({interval_text(ok, total)}), pela regra: "
             f"{CASE_RULES[rule]}."
         )
         out.append("")
         out.append(
-            f"{counts.passed} de {counts.total} amostras passaram em todos os critérios "
+            f"{counts.passed} de {counts.total} amostras cumprem todos os critérios "
             f"({_percent(counts.accuracy)}, {interval_text(counts.passed, counts.total)})."
         )
         if summary.unstable_cases:
             out.append("")
             out.append(
-                f"Em {summary.unstable_cases} de {summary.cases} casos o modelo às vezes "
-                "acertou: deu respostas diferentes em amostras diferentes."
+                f"{summary.unstable_cases} de {summary.cases} casos parcialmente corretos: o "
+                "resultado variou entre amostras."
             )
         out.append("")
         out.append("### Falhas por tipo")
@@ -404,8 +404,8 @@ def build(
         out.append(language_line(languages[model]))
         out.append("")
         out.append(
-            "Indicador à parte, por uma lista curta de formas que o português europeu atual "
-            "não usa: não entra em nenhuma contagem de falhas, e conta por baixo."
+            "Indicador independente, baseado numa lista curta de formas alheias ao português "
+            "europeu atual. Não entra na contagem de falhas e subestima a frequência real."
         )
         out.append("")
         out.append("### Respostas que falharam")
@@ -414,13 +414,13 @@ def build(
         out.extend(_case_detail(model_pairs, by_case))
         out.append("")
 
-    out.append("## Como ler isto")
+    out.append("## Interpretação")
     out.append("")
     out.append(
-        "A taxa de respostas corretas sozinha não serve. Um sistema que erra 5% das "
-        "doses e outro que erra 5% do formato tem a mesma taxa e nada em comum. Por isso "
-        "cada falha é classificada por tipo e cada tipo carrega um risco clínico, e a "
-        "leitura começa sempre pelas falhas críticas."
+        "A taxa de respostas corretas, isolada, é insuficiente: um sistema que erra 5% das "
+        "doses e outro que erra 5% do formato têm a mesma taxa e riscos muito diferentes. "
+        "Cada falha é por isso classificada por tipo e por risco clínico, e a leitura começa "
+        "pelas falhas críticas."
     )
     out.append("")
     return "\n".join(out)

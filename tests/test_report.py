@@ -153,7 +153,7 @@ class TestHeader(unittest.TestCase):
 class TestCounts(unittest.TestCase):
     def test_critical_failures_are_stated_before_the_percentage(self):
         text = build([a_case()], [an_answer("500 mg")])
-        self.assertLess(text.index("risco crítico"), text.index("passaram em todos"))
+        self.assertLess(text.index("risco crítico"), text.index("cumprem todos os critérios"))
 
     def test_a_clean_run_says_so_plainly(self):
         text = build([a_case()], [an_answer("1 g")])
@@ -244,8 +244,8 @@ class TestComparison(unittest.TestCase):
         text = report.build(cases, answers, verdicts, today=date(2026, 9, 14))
         self.assertIn("## Comparação", text)
         self.assertIn(
-            "| Modelo | Casos com falha crítica em alguma amostra | Casos certos | "
-            "Casos em que às vezes acertou | Amostras certas |",
+            "| Modelo | Casos com falha crítica em alguma amostra | Casos corretos | "
+            "Casos parcialmente corretos | Amostras corretas |",
             text,
         )
 
