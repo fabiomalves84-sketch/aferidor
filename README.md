@@ -44,10 +44,21 @@ perigoso. A média esconde exatamente aquilo que precisa de ser visto.
    e classifica cada falha por tipo e por risco clínico.
 4. Produz um relatório que começa pelos casos com falha crítica, e não pela
    percentagem de acerto, com intervalos de confiança e as condições do ensaio.
+5. Entrega ao especialista o que ele tem de validar: cada falha com a pergunta,
+   a referência, a fonte e o texto do modelo, e uma folha cega para julgar uma
+   amostra de respostas sem ver o veredicto do corretor.
 
-O próprio instrumento é verificado: cada critério tem de aceitar a resposta
-certa e de rejeitar uma resposta errada construída de propósito, e há uma
-ferramenta para comparar o corretor com um clínico, às cegas.
+**A ferramenta faz a triagem; o especialista valida.** O corretor é rápido,
+reprodutível e incansável, mas é textual: o veredicto dele é uma proposta. A
+decisão sobre se um modelo serve para responder a médicos é de um clínico, e o
+Aferidor existe para que esse clínico gaste o seu tempo nas respostas que
+importam, e não a ler centenas delas. A concordância entre os dois mede-se
+(`revisao` e `concordancia`, com kappa de Cohen), para se saber quanto confiar
+na triagem da próxima vez.
+
+O próprio instrumento é verificado antes de chegar ao especialista: cada
+critério tem de aceitar a resposta certa e de rejeitar uma resposta errada
+construída de propósito.
 
 ## O que não é
 

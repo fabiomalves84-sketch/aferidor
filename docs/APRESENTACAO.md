@@ -26,6 +26,18 @@ O resultado é um documento que diz, antes de qualquer percentagem, quantas
 respostas continham uma falha de risco crítico, e mostra cada uma delas com a
 pergunta, a resposta de referência, a fonte e o texto que o modelo escreveu.
 
+## Como se usa: a ferramenta faz a triagem, o especialista valida
+
+O Aferidor não substitui o clínico que avalia um modelo: prepara-lhe o
+trabalho. Pergunta cada caso várias vezes, corrige todas as respostas de forma
+determinista e classifica cada falha pelo risco. O que chega ao especialista é
+curto e ordenado: primeiro as falhas críticas, cada uma com a pergunta, a
+referência, a fonte e o texto exato do modelo, para poder confirmar ou
+contestar cada veredicto. Uma folha cega (`aferidor revisao`) dá-lhe uma
+amostra de respostas para julgar sem ver o que o corretor decidiu, e
+`aferidor concordancia` mede o acordo entre os dois. É essa medida que diz
+quanto se pode confiar na triagem automática no ensaio seguinte.
+
 ## O que este projeto não é
 
 **Não é um dispositivo médico.** Não aconselha, não trata, não substitui
@@ -62,9 +74,10 @@ julgamento clínico. Mede um sistema, não um doente.
 
 E o que falta, dito com a mesma clareza:
 
-- **O corretor ainda não foi comparado com um clínico.** A ferramenta existe
-  (`revisao` e `concordancia`); falta alguém julgar a folha. Até lá, não se sabe
-  com que frequência o corretor deixa passar uma resposta errada.
+- **O passo do especialista ainda não foi dado nos ensaios registados.** O
+  circuito está pronto (`revisao` e `concordancia`); falta um clínico julgar a
+  folha. Até lá, os números dos relatórios são a triagem do corretor, e não se
+  sabe ainda com que frequência ele deixa passar uma resposta errada.
 - **As fontes estão confirmadas a meio.** 10 casos foram confirmados nos PDF da
   DGS, um a um; 24 foram declarados confirmados por grupo; dos 23 restantes,
   16 foram lidos no documento original por ferramenta e batem, e 7 (ESC e ADA)
