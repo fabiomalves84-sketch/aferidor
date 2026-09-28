@@ -13,9 +13,11 @@ from __future__ import annotations
 import http.client
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 
 USER_AGENT = "aferidor/0.1"
@@ -309,6 +311,75 @@ class AnthropicProvider(Provider):
         return sorted(str(m.get("id", "")) for m in data.get("data", []) if m.get("id"))
 
 
+class GeminiProvider(Provider):
+    """Google Gemini, through its OpenAI-compatible endpoint.
+
+    Google answers the same chat completions shape as OpenAI, so asking reuses
+    `_chat_completion`. The free tier caps requests per minute; rather than
+    spend retries on rate limits that a steady pace avoids, the provider waits
+    `min_interval_s` between the start of one request and the next.
+    """
+
+    BASE = "https://generativelanguage.googleapis.com/v1beta/openai"
+    ENV_KEY = "GEMINI_API_KEY"
+    ENV_INTERVAL = "AFERIDOR_GEMINI_INTERVALO"
+    DEFAULT_INTERVAL_S = 7.0
+
+    def __init__(
+        self,
+        model: str = "gemini-2.5-flash",
+        api_key: str | None = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        timeout: float = 120.0,
+        min_interval_s: float | None = None,
+        clock: Callable[[], float] = time.monotonic,
+        sleep: Callable[[float], None] = time.sleep,
+    ) -> None:
+        self.name = f"gemini:{model}"
+        self.model = model
+        self.api_key = _key_from_env(self.ENV_KEY, api_key)
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.timeout = timeout
+        if min_interval_s is None:
+            min_interval_s = float(os.environ.get(self.ENV_INTERVAL, self.DEFAULT_INTERVAL_S))
+        self.min_interval_s = min_interval_s
+        self._clock = clock
+        self._sleep = sleep
+        self._last_start: float | None = None
+
+    def _pace(self) -> None:
+        now = self._clock()
+        if self._last_start is not None:
+            wait = self.min_interval_s - (now - self._last_start)
+            if wait > 0:
+                self._sleep(wait)
+                now = self._clock()
+        self._last_start = now
+
+    def ask(self, prompt: str) -> Reply:
+        self._pace()
+        return _chat_completion(
+            f"{self.BASE}/chat/completions",
+            {"authorization": f"Bearer {self.api_key}"},
+            self.model,
+            prompt,
+            self.temperature,
+            self.max_tokens,
+            self.timeout,
+            "do Gemini",
+        )
+
+    def available_models(self) -> list[str]:
+        data = _request_json(
+            f"{self.BASE}/models", {"authorization": f"Bearer {self.api_key}"}, None, self.timeout
+        )
+        return sorted(
+            str(m.get("id", "")).removeprefix("models/") for m in data.get("data", []) if m.get("id")
+        )
+
+
 def _unreachable(base_url: str, error: ProviderError) -> bool:
     """Whether `error` looks like the Ollama server itself is not running.
 
@@ -393,4 +464,5 @@ __all__ = [
     "OpenAIProvider",
     "AnthropicProvider",
     "LocalProvider",
+    "GeminiProvider",
 ]

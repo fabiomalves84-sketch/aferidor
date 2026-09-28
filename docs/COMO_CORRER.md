@@ -10,6 +10,13 @@ primeiro; o mínimo costuma ser cinco ou dez euros.
 
 **Anthropic:** console.anthropic.com, secção API keys. Igual, saldo à parte.
 
+**Google Gemini:** aistudio.google.com, secção API keys. Tem um nível gratuito,
+sem cartão, com um limite de pedidos por minuto e por dia. O fornecedor
+`gemini` espaça os pedidos 7 segundos entre si para ficar abaixo desse limite
+(muda-se com `AFERIDOR_GEMINI_INTERVALO`). No nível gratuito a Google pode
+usar os pedidos para melhorar os seus produtos, exceto para quem está no
+Espaço Económico Europeu; aqui não há dados de doentes, mas convém sabê-lo.
+
 A subscrição do ChatGPT ou do Claude não serve. A API é paga em separado.
 
 ## 2. Pôr a chave no ambiente, nunca no projeto
@@ -19,6 +26,7 @@ No terminal, antes de correr:
 ```
 export OPENAI_API_KEY="sk-..."
 export ANTHROPIC_API_KEY="sk-ant-..."
+export GEMINI_API_KEY="..."
 ```
 
 Isto vale só para aquela janela do terminal e desaparece quando a fechas, que é
@@ -34,6 +42,7 @@ faz parte do projeto.
 ```
 python -m aferidor modelos --fornecedor openai
 python -m aferidor modelos --fornecedor anthropic
+python -m aferidor modelos --fornecedor gemini
 ```
 
 A lista vem do próprio fornecedor. Não está escrita em lado nenhum deste projeto

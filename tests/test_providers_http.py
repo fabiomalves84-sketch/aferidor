@@ -18,7 +18,13 @@ import unittest
 import urllib.error
 from unittest import mock
 
-from aferidor.providers import AnthropicProvider, LocalProvider, OpenAIProvider, ProviderError
+from aferidor.providers import (
+    AnthropicProvider,
+    GeminiProvider,
+    LocalProvider,
+    OpenAIProvider,
+    ProviderError,
+)
 
 
 class FakeResponse(io.BytesIO):
@@ -248,6 +254,62 @@ class TestLocalReplies(unittest.TestCase):
             with self.assertRaises(ProviderError) as caught:
                 provider.ask("p")
         self.assertIn("model not found", str(caught.exception))
+
+
+class TestGeminiReplies(unittest.TestCase):
+    def gemini(self, **kwargs) -> GeminiProvider:
+        kwargs.setdefault("min_interval_s", 0.0)
+        return GeminiProvider(model="gemini-2.5-flash", api_key="k", **kwargs)
+
+    def test_it_asks_googles_openai_compatible_endpoint_with_the_key(self):
+        captured = {}
+
+        def fake_urlopen(request, timeout):
+            captured["url"] = request.full_url
+            captured["headers"] = dict(request.header_items())
+            return FakeResponse(json.dumps({"choices": [{"message": {"content": "1 g"}}]}).encode())
+
+        with mock.patch("aferidor.providers.urllib.request.urlopen", fake_urlopen):
+            self.assertEqual(self.gemini().ask("p").text, "1 g")
+        self.assertEqual(
+            captured["url"],
+            "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        )
+        self.assertEqual(captured["headers"]["Authorization"], "Bearer k")
+
+    def test_the_model_is_named_with_its_provider(self):
+        self.assertEqual(self.gemini().name, "gemini:gemini-2.5-flash")
+
+    def test_listing_models_drops_googles_prefix(self):
+        payload = {"data": [{"id": "models/gemini-2.5-pro"}, {"id": "models/gemini-2.5-flash"}]}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
+            self.assertEqual(self.gemini().available_models(), ["gemini-2.5-flash", "gemini-2.5-pro"])
+
+    def test_requests_are_spaced_to_stay_under_the_free_rate_limit(self):
+        """The free tier counts requests per minute; a steady pace avoids the
+        rate limit instead of spending retries on it."""
+        now = [100.0]
+        waits: list[float] = []
+
+        def sleep(seconds):
+            waits.append(seconds)
+            now[0] += seconds
+
+        provider = self.gemini(min_interval_s=7.0, clock=lambda: now[0], sleep=sleep)
+        payload = {"choices": [{"message": {"content": "x"}}]}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", side_effect=lambda *a, **k: FakeResponse(json.dumps(payload).encode())):
+            provider.ask("p")
+            now[0] += 2.0
+            provider.ask("p")
+            now[0] += 10.0
+            provider.ask("p")
+        self.assertEqual(waits, [5.0])
+
+    def test_without_a_key_it_says_which_variable_to_set(self):
+        with mock.patch.dict("os.environ", {}, clear=True):
+            with self.assertRaises(ProviderError) as caught:
+                GeminiProvider()
+        self.assertIn("GEMINI_API_KEY", str(caught.exception))
 
 
 if __name__ == "__main__":

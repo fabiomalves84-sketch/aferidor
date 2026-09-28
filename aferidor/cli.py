@@ -18,6 +18,7 @@ from .grading import grade_all, self_check, tally_by_model, uncaught_controls
 from .providers import (
     AnthropicProvider,
     FakeProvider,
+    GeminiProvider,
     LocalProvider,
     OpenAIProvider,
     Provider,
@@ -48,6 +49,8 @@ def build_provider(
         return AnthropicProvider(model=model, **kwargs) if model else AnthropicProvider(**kwargs)
     if kind == "local":
         return LocalProvider(model=model, **kwargs) if model else LocalProvider(**kwargs)
+    if kind == "gemini":
+        return GeminiProvider(model=model, **kwargs) if model else GeminiProvider(**kwargs)
     raise ValueError(f"fornecedor desconhecido {kind!r}")
 
 
@@ -57,7 +60,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
     executar = sub.add_parser("executar", help="enviar os casos a um modelo")
     executar.add_argument(
-        "--fornecedor", choices=("falso", "openai", "anthropic", "local"), default="falso"
+        "--fornecedor", choices=("falso", "openai", "anthropic", "gemini", "local"), default="falso"
     )
     executar.add_argument("--modelo", default=None, help="identificador do modelo")
     executar.add_argument("--casos", type=Path, default=DEFAULT_CASES)
@@ -98,7 +101,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "ensaio", help="executar, classificar e escrever o relatorio de uma vez"
     )
     ensaio.add_argument(
-        "--fornecedor", choices=("falso", "openai", "anthropic", "local"), default="falso"
+        "--fornecedor", choices=("falso", "openai", "anthropic", "gemini", "local"), default="falso"
     )
     ensaio.add_argument("--modelo", default=None)
     ensaio.add_argument("--casos", type=Path, default=DEFAULT_CASES)
@@ -127,7 +130,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     modelos = sub.add_parser(
         "modelos", help="perguntar ao fornecedor que modelos tem disponiveis"
     )
-    modelos.add_argument("--fornecedor", choices=("openai", "anthropic", "local"), required=True)
+    modelos.add_argument("--fornecedor", choices=("openai", "anthropic", "gemini", "local"), required=True)
 
     prot = sub.add_parser(
         "protocolo", help="escrever um protocolo com o critério de aprovação, antes do ensaio"
