@@ -256,6 +256,49 @@ _CASE_TERMS = tuple(
 )
 
 
+# The parts a case code is made of: area, then topic, then a number.
+# "ATB-PAC-001" reads as antibiotic therapy, community-acquired pneumonia, case 1.
+_CODE_PARTS = {
+    "ATB": "Antibioterapia", "COV": "COVID-19", "INT": "Interação medicamentosa",
+    "FMT": "Formato de resposta imposto", "AJU": "Ajuste de dose", "PED": "Pediatria",
+    "GRA": "Gravidez", "DOS": "Dose", "ADU": "Adulto", "TAB": "Cessação tabágica",
+    "PAC": "Pneumonia adquirida na comunidade", "DPOC": "Doença pulmonar obstrutiva crónica",
+    "CIST": "Cistite", "FAR": "Faringite", "PIEL": "Pielonefrite", "HP": "Helicobacter pylori",
+    "DEX": "Dexametasona", "TOC": "Tocilizumab", "JAN": "Janela para iniciar o antivírico",
+    "CLA": "Claritromicina", "COL": "Colquicina", "MET": "Metformina",
+    "OMA": "Otite média aguda", "IECA": "Inibidor da enzima de conversão da angiotensina",
+    "VPA": "Valproato", "APX": "Apixabano", "MTX": "Metotrexato",
+    "HTA": "Hipertensão arterial", "DM": "Diabetes", "CV": "Risco cardiovascular",
+    "FA": "Fibrilhação auricular",
+}
+_CODE_ENTRY = "Código do caso"
+GLOSSARY[_CODE_ENTRY] = (
+    "Cada caso tem um código com a área, o tema e o número: ATB-PAC-001 é antibioterapia, "
+    "pneumonia adquirida na comunidade, caso n.º 1. Passe o rato por cima de um código para o ler."
+)
+
+
+def case_code_meaning(case_id: str) -> str:
+    """A case code spelled out; a part this report does not know is left as it is."""
+    words = []
+    for part in case_id.split("-"):
+        if part.isdigit():
+            words.append(f"caso n.º {int(part)}")
+        else:
+            words.append(_CODE_PARTS.get(part, part))
+    return " · ".join(words)
+
+
+def _case_code(case_id: str, side: bool = False) -> str:
+    """A case code that spells itself out on hover, focus and tap."""
+    css = "termo caso-cod lado" if side else "termo caso-cod"
+    meaning = case_code_meaning(case_id)
+    return (
+        f'<abbr class="{css}" tabindex="0" data-def="{_esc(meaning)}" '
+        f'aria-label="{_esc(case_id)}: {_esc(meaning)}">{_esc(case_id)}</abbr>'
+    )
+
+
 def _slug(term: str) -> str:
     return "g-" + re.sub(r"[^a-z0-9]+", "-", term.lower()).strip("-")
 
@@ -287,7 +330,10 @@ def _gloss(escaped: str, terms: tuple[str, ...] = _CASE_TERMS) -> str:
 
 def _glossary_section(page: str) -> str:
     """The glossary, listing only the terms the page actually marks."""
-    used = sorted(set(re.findall(r'data-termo="([^"]+)"', page)), key=lambda s: s.casefold())
+    found = set(re.findall(r'data-termo="([^"]+)"', page))
+    if 'class="termo caso-cod' in page:
+        found.add(_CODE_ENTRY)
+    used = sorted(found, key=lambda s: s.casefold())
     if not used:
         return ""
     items = "".join(
@@ -579,7 +625,7 @@ def _worst(cases, consistency, pairs) -> str:
         chips = "".join(_risk_chip(f) for f in verdict.failures)
         out.append(
             '<article class="erro-cartao">'
-            f'<p class="erro-topo"><span class="caso-id">{_esc(case.case_id)}</span>'
+            f'<p class="erro-topo"><span class="caso-id">{_case_code(case.case_id)}</span>'
             f'<span class="erro-modelo">{_esc(_model_short(answer.model))}</span></p>'
             f'<p class="erro-pergunta">{_gloss(_esc(case.question))}</p>'
             f'<div class="erro-par"><div><p class="erro-rotulo">O modelo respondeu</p>'
@@ -656,7 +702,7 @@ def _grid(
         )
         for case in group:
             out.append(
-                f'<tr><th scope="row"><span class="caso-id">{_esc(case.case_id)}</span>'
+                f'<tr><th scope="row"><span class="caso-id">{_case_code(case.case_id, side=True)}</span>'
                 f'<span class="caso-pergunta">{_esc(case.question)}</span></th>'
             )
             for model in models:
@@ -736,7 +782,7 @@ def _detail(
             )
         out.append("<details>")
         out.append(
-            f'<summary id="caso-{_esc(case.case_id)}"><span class="caso-id">{_esc(case.case_id)}</span>'
+            f'<summary id="caso-{_esc(case.case_id)}"><span class="caso-id">{_case_code(case.case_id)}</span>'
             f'<span class="resumo-pergunta">{_esc(case.question)}</span>'
             f'<span class="minis" aria-hidden="true">{"".join(minis)}</span></summary>'
         )
@@ -965,6 +1011,7 @@ abbr.termo:hover::after, abbr.termo:focus::after {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   text-transform: none; letter-spacing: normal; white-space: normal; text-align: left;
   box-shadow: 0 4px 14px rgba(0,0,0,0.18); pointer-events: none; }
+abbr.termo.lado:hover::after, abbr.termo.lado:focus::after { left: calc(100% + 8px); top: -0.3rem; }
 details.glossario { margin-top: 2.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; scroll-margin-top: 3.5rem; }
 details.glossario summary { cursor: pointer; padding: 0.9rem 1.25rem; font-weight: 650; }
 details.glossario dl { margin: 0; padding: 0 1.25rem 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.4rem 1.5rem; }
@@ -1176,4 +1223,4 @@ def build(
     return "".join(out)
 
 
-__all__ = ["build", "model_label"]
+__all__ = ["build", "model_label", "case_code_meaning", "GLOSSARY"]

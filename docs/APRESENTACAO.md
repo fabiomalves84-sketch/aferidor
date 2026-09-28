@@ -58,7 +58,7 @@ julgamento clínico. Mede um sistema, não um doente.
 - Intervalos de confiança nos números principais, e um indicador de português
   europeu à parte das falhas clínicas.
 - Adaptadores para OpenAI, Anthropic e modelos locais pelo Ollama.
-- 385 testes automáticos, todos a passar, sem dependências externas.
+- 389 testes automáticos, todos a passar, sem dependências externas.
 
 E o que falta, dito com a mesma clareza:
 
@@ -118,7 +118,7 @@ casos.
 ## Como ver em cinco minutos
 
 ```
-python -m unittest discover -s tests   # 385 testes
+python -m unittest discover -s tests   # 389 testes
 python -m aferidor verificar           # 27/27 casos, 206/206 controlos negativos
 python -m aferidor verificar --casos casos/consulta.json   # 30/30, 83/83
 python -m aferidor executar --fornecedor falso

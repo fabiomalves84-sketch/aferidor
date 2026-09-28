@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
 from datetime import date, datetime
 
 from aferidor import html_report, report
@@ -302,6 +303,37 @@ class TestGlossary(unittest.TestCase):
         for target in re.findall(r'aria-describedby="([^"]+)"', text):
             with self.subTest(target=target):
                 self.assertIn(f'id="{target}"', text)
+
+
+class TestCaseCodes(unittest.TestCase):
+    def test_a_case_code_is_spelled_out(self):
+        from aferidor.html_report import case_code_meaning
+
+        self.assertEqual(
+            case_code_meaning("ATB-PAC-001"),
+            "Antibioterapia · Pneumonia adquirida na comunidade · caso n.º 1",
+        )
+        self.assertEqual(case_code_meaning("TAB-03"), "Cessação tabágica · caso n.º 3")
+
+    def test_an_unknown_part_is_left_as_it_is(self):
+        from aferidor.html_report import case_code_meaning
+
+        self.assertEqual(case_code_meaning("XYZ-9"), "XYZ · caso n.º 9")
+
+    def test_every_case_code_in_the_banks_is_fully_spelled_out(self):
+        from aferidor.html_report import case_code_meaning
+        from aferidor.storage import read_cases
+
+        root = Path(__file__).resolve().parent.parent / "casos"
+        for case in read_cases(root / "casos.json") + read_cases(root / "consulta.json"):
+            with self.subTest(case=case.case_id):
+                for part in case_code_meaning(case.case_id).split(" · "):
+                    self.assertNotIn(part, case.case_id.split("-"))
+
+    def test_codes_carry_their_meaning_on_the_page_and_the_glossary_explains_them(self):
+        text = build([a_case("ATB-PAC-001")], [an_answer("Amoxicilina 500 mg", case_id="ATB-PAC-001")])
+        self.assertIn('data-def="Antibioterapia · Pneumonia adquirida na comunidade · caso n.º 1"', text)
+        self.assertIn(">Código do caso</dt>", text)
 
 
 class TestEmpty(unittest.TestCase):
