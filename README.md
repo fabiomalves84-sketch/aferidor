@@ -14,13 +14,16 @@ Requer Python 3.10 ou superior. Não tem dependências externas.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 423 testes
+python3 -m unittest discover -s tests          # 437 testes
 python3 -m aferidor verificar                  # coerência dos casos e do corretor
 python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
 
 O último comando escreve `relatorios/relatorio.md`; `relatorio --formato html`
-gera a versão HTML. Para atualizar uma cópia existente: `git pull`.
+gera a versão HTML, e `--linguas pt,en,es,fr,de` gera-a também em inglês,
+espanhol, francês e alemão, com um menu entre elas (só a interface é
+traduzida; casos e respostas ficam em português). Para atualizar uma cópia
+existente: `git pull`.
 
 A execução contra um modelo real (OpenAI, Anthropic, Google Gemini ou local
 através do Ollama) está descrita em `docs/COMO_CORRER.md`. As chaves de API
@@ -85,7 +88,7 @@ documentos públicos ou são sintéticos.
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar`: 27/27 e 30/30 casos coerentes; 307/307 e 137/137 controlos
-  negativos detetados. 423 testes, em Python 3.10 a 3.14 na integração
+  negativos detetados. 437 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 34 de 57 confirmadas por uma pessoa; das restantes, 16 lidas no
   documento original e 7 por confirmar. Detalhe em `casos/VERIFICACAO.md`.

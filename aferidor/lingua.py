@@ -31,6 +31,7 @@ from collections import Counter
 from dataclasses import dataclass
 
 from .models import Answer
+from .traducao import t
 
 BRAZILIAN = "formas do Brasil"
 PRE_AGREEMENT = "grafia anterior ao Acordo Ortográfico"
@@ -99,15 +100,20 @@ def language_by_model(answers: list[Answer]) -> dict[str, LanguageSummary]:
     return result
 
 
-def language_line(summary: LanguageSummary) -> str:
-    """The indicator in one sentence, for either report."""
-    line = (
-        f"{summary.brazilian} de {summary.answers} respostas com formas do português do "
-        f"Brasil, e {summary.pre_agreement} com grafia anterior ao Acordo Ortográfico."
+def language_line(summary: LanguageSummary, lang: str = "pt") -> str:
+    """The indicator in one sentence, for either report.
+
+    The marker labels stay in Portuguese in every language: they name
+    Portuguese spellings.
+    """
+    line = t(
+        "{a} de {n} respostas com formas do português do Brasil, e {b} com grafia anterior "
+        "ao Acordo Ortográfico.",
+        lang, a=summary.brazilian, n=summary.answers, b=summary.pre_agreement,
     )
     if summary.by_marker:
         top = "; ".join(f"{label}: {count}" for label, count in summary.by_marker[:5])
-        line += f" Mais frequentes: {top}."
+        line += " " + t("Mais frequentes: {lista}.", lang, lista=top)
     return line
 
 

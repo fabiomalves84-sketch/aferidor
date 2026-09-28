@@ -37,6 +37,7 @@ from .lingua import language_by_model, language_line
 from .models import Answer, Case, Verdict
 from .protocolo import Outcome, Protocol, evaluate, warnings as protocol_warnings
 from .risk import Risk
+from .traducao import decimal, t
 
 HEADER_NOTE = (
     "Este documento mede um sistema, não um doente. Não aconselha, não trata e "
@@ -65,7 +66,7 @@ def format_missing(missing: list[str], reasons: dict[str, str] | None = None) ->
 
 
 def format_missing_samples(
-    gaps: dict[tuple[str, str], tuple[int, ...]], expected: dict[str, int]
+    gaps: dict[tuple[str, str], tuple[int, ...]], expected: dict[str, int], lang: str = "pt"
 ) -> str:
     """Every (caso, modelo) with fewer samples than that model was actually asked for.
 
@@ -77,12 +78,12 @@ def format_missing_samples(
     for case_id, model in sorted(gaps):
         wanted = expected[model]
         have = wanted - len(gaps[(case_id, model)])
-        parts.append(f"{case_id} ({model}, {have} de {wanted} amostras)")
+        parts.append(t("{caso} ({modelo}, {a} de {n} amostras)", lang, caso=case_id, modelo=model, a=have, n=wanted))
     return ", ".join(parts)
 
 
 def conditions_rows(
-    answers: list[Answer], cases_source: tuple[str, str] | None = None
+    answers: list[Answer], cases_source: tuple[str, str] | None = None, lang: str = "pt"
 ) -> list[tuple[str, str]]:
     """What was measured, with what, and when, as (label, value) rows.
 
@@ -90,6 +91,9 @@ def conditions_rows(
     same way. The date a report is written says nothing about when the
     answers were obtained, and a report that cannot say under what
     conditions its answers were obtained cannot be compared with any other.
+
+    The label of the case-file row is always "Banco de casos", in any
+    language: it is how a caller tells it from a model's row.
     """
     rows: list[tuple[str, str]] = []
     if cases_source:
@@ -98,16 +102,20 @@ def conditions_rows(
     for model, found in run_conditions(answers).items():
         period = found.first_asked.strftime("%Y-%m-%d %H:%M")
         if found.last_asked.date() == found.first_asked.date():
-            period += found.last_asked.strftime(" a %H:%M")
+            period += t(" a {fim}", lang, fim=found.last_asked.strftime("%H:%M"))
         else:
-            period += found.last_asked.strftime(" a %Y-%m-%d %H:%M")
-        temperatures = ", ".join(f"{v:.1f}".replace(".", ",") for v in found.temperatures)
-        tokens = ", ".join("não registado" if v is None else str(v) for v in found.max_tokens)
-        builds = ", ".join(b or "não registada" for b in found.builds)
+            period += t(" a {fim}", lang, fim=found.last_asked.strftime("%Y-%m-%d %H:%M"))
+        temperatures = ", ".join(decimal(f"{v:.1f}", lang) for v in found.temperatures)
+        tokens = ", ".join(t("não registado", lang) if v is None else str(v) for v in found.max_tokens)
+        builds = ", ".join(b or t("não registada", lang) for b in found.builds)
         rows.append((
             model,
-            f"{found.answers} respostas, recolhidas {period}; temperatura {temperatures};"
-            f" tokens_max {tokens}; versão {builds}",
+            t(
+                "{n} respostas, recolhidas {periodo}; temperatura {temperatura}; tokens_max "
+                "{tokens}; versão {versao}",
+                lang, n=found.answers, periodo=period, temperatura=temperatures,
+                tokens=tokens, versao=builds,
+            ),
         ))
     return rows
 
@@ -130,6 +138,7 @@ def protocol_findings(
     summaries: dict,
     cases_source: tuple[str, str] | None,
     case_ids: list[str] | None = None,
+    lang: str = "pt",
 ) -> tuple[list[str], list[Outcome]]:
     """The protocol's warnings and its verdict per model, shared by both reports.
 
@@ -143,12 +152,13 @@ def protocol_findings(
         cases_source[1] if cases_source else None,
         expected_samples(answers),
         {model: c.temperatures for model, c in found.items()},
+        lang,
     )
     if case_ids is None:
-        return found_warnings, [evaluate(protocol, summaries[m]) for m in sorted(summaries)]
+        return found_warnings, [evaluate(protocol, summaries[m], lang=lang) for m in sorted(summaries)]
     complete = complete_cases_by_model(answers, case_ids, protocol.samples)
     return found_warnings, [
-        evaluate(protocol, summaries[m], complete.get(m, 0), len(case_ids))
+        evaluate(protocol, summaries[m], complete.get(m, 0), len(case_ids), lang)
         for m in sorted(summaries)
     ]
 

@@ -337,7 +337,7 @@ class TestGlossary(unittest.TestCase):
 
     def test_the_model_answer_is_never_marked(self):
         text = self.page()
-        self.assertIn("<blockquote>Amoxicilina 500 mg na DPOC</blockquote>", text)
+        self.assertIn("<blockquote lang=\"pt-PT\">Amoxicilina 500 mg na DPOC</blockquote>", text)
 
     def test_a_lowercase_word_is_not_taken_for_an_abbreviation(self):
         self.assertNotIn('data-termo="MAPA"', self.page())

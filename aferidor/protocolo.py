@@ -23,6 +23,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 from .grading import CASE_RULES, DEFAULT_CASE_RULE, ConsistencySummary
+from .traducao import t
 
 LIMITS = (
     "casos_com_falha_critica_max",
@@ -142,6 +143,7 @@ def evaluate(
     summary: ConsistencySummary,
     complete_cases: int | None = None,
     total_cases: int | None = None,
+    lang: str = "pt",
 ) -> Outcome:
     """Apply each limit of the protocol to one model's consistency summary.
 
@@ -155,28 +157,28 @@ def evaluate(
         done = complete_cases or 0
         completeness = (
             Check(
-                f"casos com as {protocol.samples} amostras",
-                f"todos os {total_cases}",
-                f"{done} de {total_cases}",
+                t("casos com as {n} amostras", lang, n=protocol.samples),
+                t("todos os {n}", lang, n=total_cases),
+                t("{a} de {n}", lang, a=done, n=total_cases),
                 done == total_cases,
             ),
         )
     checks = completeness + (
         Check(
-            "casos com falha crítica em alguma amostra",
-            f"no máximo {protocol.max_critical_cases}",
-            f"{summary.critical_cases} de {summary.cases}",
+            t("casos com falha crítica em alguma amostra", lang),
+            t("no máximo {n}", lang, n=protocol.max_critical_cases),
+            t("{a} de {n}", lang, a=summary.critical_cases, n=summary.cases),
             summary.critical_cases <= protocol.max_critical_cases,
         ),
         Check(
-            "casos parcialmente corretos",
-            f"no máximo {protocol.max_unstable_cases}",
-            f"{summary.unstable_cases} de {summary.cases}",
+            t("casos parcialmente corretos", lang),
+            t("no máximo {n}", lang, n=protocol.max_unstable_cases),
+            t("{a} de {n}", lang, a=summary.unstable_cases, n=summary.cases),
             summary.unstable_cases <= protocol.max_unstable_cases,
         ),
         Check(
-            "taxa de amostras corretas",
-            f"pelo menos {protocol.min_sample_accuracy:.0%}",
+            t("taxa de amostras corretas", lang),
+            t("pelo menos {p}", lang, p=f"{protocol.min_sample_accuracy:.0%}"),
             f"{summary.sample_accuracy:.0%}",
             summary.sample_accuracy >= protocol.min_sample_accuracy,
         ),
@@ -190,29 +192,35 @@ def warnings(
     cases_sha256: str | None,
     samples_by_model: dict[str, int],
     temperatures_by_model: dict[str, tuple[float, ...]],
+    lang: str = "pt",
 ) -> list[str]:
     """Every reason the protocol might not be the criterion it claims to be."""
     found: list[str] = []
     if first_answer is not None and protocol.written_on > first_answer.date():
-        found.append(
-            f"o protocolo diz ter sido escrito a {protocol.written_on.isoformat()}, depois da "
-            f"primeira resposta ({first_answer.date().isoformat()}): não conta como critério "
-            "definido antes do ensaio"
-        )
+        found.append(t(
+            "o protocolo diz ter sido escrito a {escrito}, depois da primeira resposta "
+            "({primeira}): não conta como critério definido antes do ensaio",
+            lang, escrito=protocol.written_on.isoformat(), primeira=first_answer.date().isoformat(),
+        ))
     if cases_sha256 is not None and cases_sha256 != protocol.cases_sha256:
-        found.append(
+        found.append(t(
             "o banco de casos corrido não é o banco para que o protocolo foi escrito "
-            "(SHA-256 diferente)"
-        )
+            "(SHA-256 diferente)", lang,
+        ))
     for model, samples in sorted(samples_by_model.items()):
         if samples != protocol.samples:
-            found.append(f"{model} correu com {samples} amostras por caso; o protocolo previa {protocol.samples}")
+            found.append(t(
+                "{modelo} correu com {n} amostras por caso; o protocolo previa {previsto}",
+                lang, modelo=model, n=samples, previsto=protocol.samples,
+            ))
     for model, temps in sorted(temperatures_by_model.items()):
         if temps != (protocol.temperature,):
-            shown = ", ".join(f"{t:g}" for t in temps)
-            found.append(f"{model} correu à temperatura {shown}; o protocolo previa {protocol.temperature:g}")
+            shown = ", ".join(f"{v:g}" for v in temps)
+            found.append(t(
+                "{modelo} correu à temperatura {valor}; o protocolo previa {previsto}",
+                lang, modelo=model, valor=shown, previsto=f"{protocol.temperature:g}",
+            ))
     return found
-
 
 __all__ = [
     "Protocol",

@@ -171,7 +171,9 @@ python -m aferidor relatorio --formato html
 São 405 pedidos (27 × 5 × 3). Num portátil, a duração depende do hardware e do
 modelo; recomenda-se registar o tempo total no README do ensaio.
 `relatorios/relatorio.html` é um ficheiro único, com a grelha de estados por
-caso e um ponto por amostra.
+caso e um ponto por amostra. Com `--linguas pt,en,es,fr,de`, o relatório é
+gerado também nas outras línguas, cada uma num ficheiro ao lado
+(`relatorio.en.html`...), com um menu 🌐 entre elas.
 
 **APIs comerciais.** Para medir os modelos que o utilizador final usa,
 substituir `--fornecedor local` por `openai`, `anthropic` ou `gemini`. O custo
