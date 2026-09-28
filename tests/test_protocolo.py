@@ -60,6 +60,41 @@ class TestReading(unittest.TestCase):
                 read_protocol(write_protocol(folder, taxa_de_amostras_corretas_min=95))
 
 
+class TestCaseRule(unittest.TestCase):
+    def test_the_template_names_the_strictest_rule(self):
+        self.assertEqual(template("x", REAL_CASES)["regra_do_caso"], "todas")
+
+    def test_a_protocol_without_a_rule_reads_as_the_strictest(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = write_protocol(folder)
+            data = json.loads(path.read_text(encoding="utf-8"))
+            del data["regra_do_caso"]
+            path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertEqual(read_protocol(path).case_rule, "todas")
+
+    def test_an_unknown_rule_is_refused_by_name(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = write_protocol(folder)
+            data = json.loads(path.read_text(encoding="utf-8"))
+            data["regra_do_caso"] = "quase_todas"
+            path.write_text(json.dumps(data), encoding="utf-8")
+            with self.assertRaises(ValueError) as raised:
+                read_protocol(path)
+        self.assertIn("quase_todas", str(raised.exception))
+
+    def test_the_report_counts_right_cases_by_the_protocol_rule(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = write_protocol(folder)
+            data = json.loads(path.read_text(encoding="utf-8"))
+            data["regra_do_caso"] = "nenhuma_critica"
+            path.write_text(json.dumps(data), encoding="utf-8")
+            protocol = read_protocol(path)
+        case = a_case()
+        answers = [Answer("C1", "falso", "Amoxicilina 1 g", datetime(2026, 9, 2))]
+        text = report.build([case], answers, [grade(case, answers[0])], protocol=protocol)
+        self.assertIn("nenhuma amostra teve falha crítica", text)
+
+
 class TestEvaluate(unittest.TestCase):
     def protocol(self, **limits):
         with tempfile.TemporaryDirectory() as folder:

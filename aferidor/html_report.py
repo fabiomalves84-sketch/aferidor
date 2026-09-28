@@ -24,6 +24,8 @@ import re
 from datetime import date
 
 from .grading import (
+    CASE_RULES,
+    DEFAULT_CASE_RULE,
     Consistency,
     ConsistencyState,
     ConsistencySummary,
@@ -35,6 +37,7 @@ from .grading import (
     expected_samples,
     missing_samples,
     pairs_by_case,
+    right_cases_by_model,
     states_by_model,
     tally_by_model,
     worst_examples,
@@ -248,11 +251,20 @@ GLOSSARY: dict[str, str] = {
     "parâmetros": "Medida do tamanho de um modelo de linguagem. Mais parâmetros costuma querer dizer mais capacidade.",
     "tokens_max": "Limite de tamanho da resposta que o modelo podia dar.",
     "Acordo Ortográfico": "O Acordo Ortográfico de 1990, em vigor em Portugal: escreve-se infeção e não infecção.",
+    "amostra": "Uma das respostas do modelo à mesma pergunta. Cada caso é perguntado várias vezes, porque o modelo não responde sempre igual.",
+    "acertou sempre": "Todas as amostras deste caso passaram em todos os critérios.",
+    "às vezes acertou": "Algumas amostras passaram e outras não: a resposta certa dependeu da tentativa que o médico calhasse a ver.",
+    "nunca acertou": "Nenhuma amostra passou. Não quer dizer falha crítica: pode ter falhado sempre só por uma resposta incompleta.",
+    "falha crítica": "Erro de dose, interação ou contraindicação omitida, encaminhamento urgente omitido, ou facto inventado.",
+    "casos certos": "Veredicto sim ou não por caso, pela regra escrita no relatório. Por omissão, um caso está certo só quando acertou em todas as amostras.",
 }
+# The report's own vocabulary: marked where the report uses it, never in case texts.
+_REPORT_TERMS = ("amostra", "acertou sempre", "às vezes acertou", "nunca acertou", "falha crítica", "casos certos")
 # Clinical and source abbreviations marked automatically in case texts.
 _CASE_TERMS = tuple(
     k for k in GLOSSARY
     if k not in ("IC 95%", "SHA-256", "Ollama", "parâmetros", "tokens_max", "Acordo Ortográfico")
+    + _REPORT_TERMS
 )
 
 
@@ -406,8 +418,9 @@ def _intro(cases: list[Case], models: list[str], answers: list[Answer]) -> str:
   <ol class="como-ler" aria-label="Como ler este relatório">
     <li><strong>O número grande</strong> é o de casos em que o modelo cometeu, pelo menos
     uma vez, um erro de risco crítico. Um médico só vê uma resposta, por isso basta uma.</li>
-    <li><strong>A barra</strong> mostra a consistência: em quantos casos o modelo acertou
-    sempre, falhou sempre, ou mudou de resposta entre tentativas.</li>
+    <li><strong>A barra</strong> mostra a consistência: em quantos casos o modelo
+    {_term("acertou sempre")}, {_term("às vezes acertou")} ou {_term("nunca acertou")}.
+    A secção <a href="#como-se-conta">Como se conta</a> explica cada um com um exemplo.</li>
     <li><strong>Em baixo</strong>, cada caso com falha mostra a pergunta, a referência, o que
     o modelo respondeu e o critério que falhou, para qualquer veredito poder ser contestado.</li>
   </ol>
@@ -456,7 +469,7 @@ def _state_bar(model: str, counts: dict[ConsistencyState, int], total: int) -> s
         css, icon = _STATE_STYLE[state]
         legend.append(
             f'<li><span class="swatch {css}" aria-hidden="true"></span>'
-            f"{icon} {_esc(state.label)} <strong>{n}</strong></li>"
+            f"{icon} {_term(state.label)} <strong>{n}</strong></li>"
         )
         if n:
             segments.append(
@@ -471,6 +484,72 @@ def _state_bar(model: str, counts: dict[ConsistencyState, int], total: int) -> s
     )
 
 
+def _units(cases: int, samples: int, total: int) -> str:
+    """Why the answer count is not the case count: cases times attempts."""
+    if samples > 1 and cases * samples == total:
+        return f"{cases} casos × {samples} tentativas; conta respostas, não casos"
+    return "conta respostas, não casos"
+
+
+def _dots(pairs: list[tuple[Answer, Verdict]], expected: int) -> str:
+    """One dot per sample, in sample order: passed, failed, or never answered.
+
+    The shape carries the result, not only the colour: a filled dot passed, a
+    cross failed, an empty ring was never answered.
+    """
+    by_sample = {answer.sample: verdict.passed for answer, verdict in pairs}
+    marks, words = [], []
+    for n in range(1, max(expected, max(by_sample, default=0)) + 1):
+        if n not in by_sample:
+            marks.append('<span class="pt falta">○</span>')
+            words.append(f"{n} sem resposta")
+        elif by_sample[n]:
+            marks.append('<span class="pt certa">●</span>')
+            words.append(f"{n} certa")
+        else:
+            marks.append('<span class="pt errada">✕</span>')
+            words.append(f"{n} errada")
+    label = "Amostras: " + ", ".join(words)
+    return f'<span class="pontos" role="img" aria-label="{label}" title="{label}">{"".join(marks)}</span>'
+
+
+def _how_counted(samples: int, rule: str) -> str:
+    """The report's vocabulary, each state shown with an example row of dots."""
+    n = max(samples, 1)
+
+    def row(pattern: str) -> str:
+        return "".join(
+            f'<span class="pt {"certa" if c == "●" else "errada"}">{c}</span>' for c in pattern
+        )
+    half = max(1, n // 2)
+    patterns = [
+        ("ok", "✓", "acertou sempre", "●" * n, "todas as amostras passaram"),
+        ("instavel", "◐", "às vezes acertou", ("●" * (n - half) + "✕" * half) if n > 1 else "●",
+         "umas passaram, outras não"),
+        ("erro", "✕", "nunca acertou", "✕" * n, "nenhuma amostra passou"),
+    ]
+    items = "".join(
+        f'<li><span class="pontos" aria-hidden="true">{row(pattern)}</span>'
+        f'<span class="swatch {css}" aria-hidden="true"></span>{icon} {_term(name)}: {_esc(meaning)}</li>'
+        # With one sample a case cannot be partly right, so that state is left out.
+        for css, icon, name, pattern, meaning in (patterns if n > 1 else patterns[::2])
+    )
+    return f"""
+<div class="como-se-conta" id="como-se-conta">
+  <h3>Como se conta</h3>
+  <p>Cada caso foi perguntado {_esc(_plural(n, "vez", "vezes"))} a cada modelo; cada resposta é uma
+  {_term("amostra")}. Na grelha, cada ponto é uma amostra, pela ordem em que foi pedida:
+  <span class="pt certa">●</span> passou, <span class="pt errada">✕</span> falhou,
+  <span class="pt falta">○</span> ficou sem resposta.</p>
+  <ul>{items}</ul>
+  <p><strong>{_term("casos certos", "Casos certos")}</strong> é o veredicto sim ou não por caso. A regra deste
+  relatório: um caso está certo quando {_esc(CASE_RULES[rule])}.</p>
+  <p><strong>Nunca acertou não é o mesmo que {_term("falha crítica")}.</strong> Um caso pode falhar
+  sempre só por uma resposta incompleta, e um caso que às vezes acertou pode ter tido um erro de
+  dose numa das amostras. Por isso o número grande de cada cartão conta as falhas críticas à parte.</p>
+</div>"""
+
+
 def _model_card(
     model: str,
     summary: ConsistencySummary,
@@ -478,6 +557,9 @@ def _model_card(
     states: dict[ConsistencyState, int],
     language: LanguageSummary,
     verdict: bool | None,
+    right: tuple[int, int],
+    rule: str,
+    samples: int,
 ) -> str:
     badge = ""
     if verdict is not None:
@@ -492,8 +574,8 @@ def _model_card(
   <p class="numero-principal"><span class="destaque">{summary.critical_cases}</span><span class="legenda">de {summary.cases} casos com falha crítica em alguma amostra ({_gloss(_esc(interval_text(summary.critical_cases, summary.cases)), ("IC 95%",))})</span></p>
   {_state_bar(model, states, summary.cases)}
   <dl class="metricas">
-    <div><dt>Casos instáveis</dt><dd>{summary.unstable_cases} de {summary.cases}</dd></div>
-    <div><dt>Respostas certas</dt><dd>{tally.passed} de {tally.total} ({_gloss(_esc(interval_text(tally.passed, tally.total)), ("IC 95%",))})</dd></div>
+    <div><dt>{_term("casos certos", "Casos certos")}</dt><dd>{right[0]} de {right[1]} casos ({_gloss(_esc(interval_text(*right)), ("IC 95%",))})</dd><dd class="unidade">regra: {_esc(CASE_RULES[rule])}</dd></div>
+    <div><dt>Respostas certas</dt><dd>{tally.passed} de {tally.total} respostas ({_gloss(_esc(interval_text(tally.passed, tally.total)), ("IC 95%",))})</dd><dd class="unidade">{_esc(_units(summary.cases, samples, tally.total))}</dd></div>
   </dl>
   <p class="lingua-linha"><strong>Português europeu:</strong> {language.brazilian} de {language.answers} respostas com formas do Brasil, {language.pre_agreement} com grafia anterior ao Acordo.</p>
 </article>"""
@@ -671,11 +753,11 @@ def _areas(cases, models, consistency) -> str:
 # ---------------------------------------------------------------- grid
 
 
-def _cell(entry: Consistency | None) -> tuple[str, str]:
+def _cell(entry: Consistency | None, dots: str) -> tuple[str, str]:
     if entry is None:
         return "sem-resposta", '<span class="ic" aria-hidden="true">○</span> sem resposta'
     css, icon = _STATE_STYLE[entry.state]
-    label = f'<span class="ic" aria-hidden="true">{icon}</span> {_esc(entry.state.label)}'
+    label = f'<span class="ic" aria-hidden="true">{icon}</span> {_esc(entry.state.label)}{dots}'
     if entry.state is ConsistencyState.ESTAVEL_CERTO:
         return css, label
     failure = _esc(_FAILURE_LABEL[entry.worst_failure]) if entry.worst_failure else ""
@@ -687,7 +769,11 @@ def _cell(entry: Consistency | None) -> tuple[str, str]:
 
 
 def _grid(
-    cases: list[Case], models: list[str], consistency: dict[tuple[str, str], Consistency]
+    cases: list[Case],
+    models: list[str],
+    consistency: dict[tuple[str, str], Consistency],
+    pairs: dict[tuple[str, str], list[tuple[Answer, Verdict]]],
+    expected: dict[str, int],
 ) -> str:
     out = ['<div class="grade-wrap"><table class="grade">']
     out.append(
@@ -706,7 +792,10 @@ def _grid(
                 f'<span class="caso-pergunta">{_esc(case.question)}</span></th>'
             )
             for model in models:
-                css_class, text = _cell(consistency.get((case.case_id, model)))
+                key = (case.case_id, model)
+                css_class, text = _cell(
+                    consistency.get(key), _dots(pairs.get(key, []), expected.get(model, 0))
+                )
                 out.append(f'<td class="cel {css_class}">{text}</td>')
             out.append("</tr>")
     out.append("</tbody></table></div>")
@@ -715,7 +804,7 @@ def _grid(
 
 def _grid_legend() -> str:
     items = [
-        f'<li><span class="swatch {css}" aria-hidden="true"></span>{icon} {_esc(state.label)}</li>'
+        f'<li><span class="swatch {css}" aria-hidden="true"></span>{icon} {_term(state.label)}</li>'
         for state, (css, icon) in _STATE_STYLE.items()
     ]
     items.append('<li><span class="swatch sem-resposta" aria-hidden="true"></span>○ sem resposta</li>')
@@ -906,6 +995,18 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .metricas div { background: var(--surface-2); border-radius: 8px; padding: 0.5rem 0.7rem; }
 .metricas dt { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
 .metricas dd { margin: 0.1rem 0 0; font-weight: 600; font-size: 0.95rem; }
+.metricas dd.unidade { font-weight: 400; font-size: 0.78rem; color: var(--muted); }
+.pontos { display: inline-flex; gap: 2px; margin-left: 0.4rem; font-size: 0.72rem; letter-spacing: 0; vertical-align: 0.05rem; }
+.pt.certa { color: var(--success-text); }
+.pt { display: inline-block; width: 0.85em; text-align: center; }
+.pt.errada { color: var(--critical); font-weight: 800; font-size: 1.2em; line-height: 1; }
+.pt.falta { color: var(--muted); }
+.como-se-conta { background: var(--surface-2); border-radius: 10px; padding: 0.9rem 1.1rem; margin: 1.25rem 0 0.5rem; }
+.como-se-conta h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+.como-se-conta p { margin: 0.4rem 0; }
+.como-se-conta ul { list-style: none; padding: 0; margin: 0.5rem 0; }
+.como-se-conta li { margin: 0.25rem 0; }
+.como-se-conta li .pontos { display: inline-flex; min-width: 5.5rem; margin: 0 0.6rem 0 0; }
 .lingua-linha { font-size: 0.86rem; color: var(--ink-2); margin: 0; }
 .protocolo .cartao { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
 .protocolo ul { padding-left: 1.2rem; margin-bottom: 0; }
@@ -1128,6 +1229,9 @@ def build(
         states = states_by_model(consistency)
         pairs = pairs_by_case(cases, answers, verdicts)
         languages = language_by_model(answers)
+        expected = expected_samples(answers)
+        rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
+        right = right_cases_by_model(consistency, rule)
 
         protocol_html, approved = ("", {})
         if protocol is not None:
@@ -1147,23 +1251,26 @@ def build(
             out.append(
                 _model_card(
                     model, summaries[model], per_model[model], states[model],
-                    languages[model], approved.get(model),
+                    languages[model], approved.get(model), right[model], rule,
+                    expected.get(model, 0),
                 )
             )
-        out.append("</div></section>")
+        out.append("</div>")
+        out.append(_how_counted(max(expected.values(), default=0), rule))
+        out.append("</section>")
         out.append(protocol_html)
         out.append(_worst(cases, consistency, pairs))
         out.append(_areas(cases, models, consistency))
 
         out.append('<section id="grelha"><h2>Caso a caso</h2>')
         out.append(
-            '<p class="seccao-intro">Cada linha é um caso; cada coluna, um modelo. Estável '
-            "certo: acertou em todas as tentativas. Estável errado: falhou em todas. Instável: "
-            "a resposta certa dependeu da tentativa. Nas falhas aparece o tipo de falha mais "
-            "grave.</p>"
+            '<p class="seccao-intro">Cada linha é um caso; cada coluna, um modelo. Os pontos '
+            "são as amostras, pela ordem em que foram pedidas (● passou, ✕ falhou, ○ sem "
+            "resposta). Nas falhas aparece o tipo de falha mais grave. "
+            '<a href="#como-se-conta">Como se conta</a>.</p>'
         )
         out.append(_grid_legend())
-        out.append(_grid(cases, models, consistency))
+        out.append(_grid(cases, models, consistency, pairs, expected))
         out.append("</section>")
 
         out.append('<section id="falhas"><h2>Falhas por tipo</h2>')

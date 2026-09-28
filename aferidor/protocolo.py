@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 
-from .grading import ConsistencySummary
+from .grading import CASE_RULES, DEFAULT_CASE_RULE, ConsistencySummary
 
 LIMITS = (
     "casos_com_falha_critica_max",
@@ -43,6 +43,7 @@ class Protocol:
     max_critical_cases: int
     max_unstable_cases: int
     min_sample_accuracy: float
+    case_rule: str = DEFAULT_CASE_RULE
     path: str = ""
     sha256: str = ""
 
@@ -72,6 +73,7 @@ def read_protocol(path: Path) -> Protocol:
         max_critical_cases=int(limits["casos_com_falha_critica_max"]),
         max_unstable_cases=int(limits["casos_instaveis_max"]),
         min_sample_accuracy=float(limits["taxa_de_amostras_corretas_min"]),
+        case_rule=str(data.get("regra_do_caso", DEFAULT_CASE_RULE)),
         path=str(path),
         sha256=hashlib.sha256(raw_bytes).hexdigest(),
     )
@@ -79,6 +81,11 @@ def read_protocol(path: Path) -> Protocol:
         raise ValueError(f"{path}: um máximo de casos não pode ser negativo")
     if not 0 <= protocol.min_sample_accuracy <= 1:
         raise ValueError(f"{path}: a taxa mínima de amostras corretas é entre 0 e 1")
+    if protocol.case_rule not in CASE_RULES:
+        raise ValueError(
+            f"{path}: regra_do_caso {protocol.case_rule!r} desconhecida; "
+            f"escolhe uma de: {', '.join(CASE_RULES)}"
+        )
     if protocol.samples < 1:
         raise ValueError(f"{path}: amostras_por_caso tem de ser pelo menos 1")
     return protocol
@@ -99,6 +106,7 @@ def template(name: str, cases_path: Path, today: date | None = None) -> dict:
         "banco_sha256": hashlib.sha256(Path(cases_path).read_bytes()).hexdigest(),
         "amostras_por_caso": 5,
         "temperatura": 1.0,
+        "regra_do_caso": DEFAULT_CASE_RULE,
         "criterios_de_aprovacao": {
             "casos_com_falha_critica_max": 0,
             "casos_instaveis_max": 0,
@@ -139,7 +147,7 @@ def evaluate(protocol: Protocol, summary: ConsistencySummary) -> Outcome:
             summary.critical_cases <= protocol.max_critical_cases,
         ),
         Check(
-            "casos instáveis",
+            "casos em que às vezes acertou",
             f"no máximo {protocol.max_unstable_cases}",
             f"{summary.unstable_cases} de {summary.cases}",
             summary.unstable_cases <= protocol.max_unstable_cases,

@@ -84,9 +84,11 @@ git add protocolos/outubro.json && git commit    # antes de correr
 python -m aferidor ensaio ... --protocolo protocolos/outubro.json
 ```
 
-O protocolo fixa o máximo de casos com falha crítica, o máximo de casos
-instáveis e a taxa mínima de amostras corretas, as amostras por caso e a
-temperatura, e guarda o SHA-256 do banco de casos. O relatório diz, por
+O protocolo fixa o máximo de casos com falha crítica, o máximo de casos em que
+o modelo às vezes acertou e a taxa mínima de amostras corretas, as amostras por
+caso e a temperatura, e a regra que decide se um caso está certo
+(`regra_do_caso`: `todas`, a estrita e a de omissão, `maioria_sem_critica` ou
+`nenhuma_critica`), e guarda o SHA-256 do banco de casos. O relatório diz, por
 modelo, aprovado ou reprovado e porquê. Diz também quando o protocolo não é o
 critério prévio que afirma ser: se tem data posterior à primeira resposta, se
 foi escrito para outro banco, ou se o ensaio correu com outras amostras ou

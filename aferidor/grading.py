@@ -235,9 +235,9 @@ class ConsistencyState(Enum):
 
 
 _CONSISTENCY_LABELS: dict[ConsistencyState, str] = {
-    ConsistencyState.ESTAVEL_CERTO: "estável certo",
-    ConsistencyState.ESTAVEL_ERRADO: "estável errado",
-    ConsistencyState.INSTAVEL: "instável",
+    ConsistencyState.ESTAVEL_CERTO: "acertou sempre",
+    ConsistencyState.ESTAVEL_ERRADO: "nunca acertou",
+    ConsistencyState.INSTAVEL: "às vezes acertou",
 }
 
 
@@ -346,6 +346,41 @@ def consistency_by_model(
             sample_accuracy=(total_passed / total_samples) if total_samples else 0.0,
         )
     return result
+
+
+# The boolean rule that turns a case's samples into one verdict: right or
+# wrong. Declared in the protocol, before the run; without a protocol the
+# strictest applies, because a clinician sees one answer and does not choose
+# which sample it is.
+CASE_RULES: dict[str, str] = {
+    "todas": "acertou em todas as amostras",
+    "maioria_sem_critica": "acertou na maioria das amostras e nenhuma teve falha crítica",
+    "nenhuma_critica": "nenhuma amostra teve falha crítica",
+}
+DEFAULT_CASE_RULE = "todas"
+
+
+def case_is_right(entry: "Consistency", rule: str = DEFAULT_CASE_RULE) -> bool:
+    """One case, one model, one yes or no, by the named rule."""
+    critical = entry.worst_failure is not None and entry.worst_failure.risk == Risk.CRITICO
+    if rule == "todas":
+        return entry.passed == entry.samples
+    if rule == "maioria_sem_critica":
+        return entry.passed * 2 > entry.samples and not critical
+    if rule == "nenhuma_critica":
+        return not critical
+    raise ValueError(f"regra do caso desconhecida {rule!r}; esperava uma de {', '.join(CASE_RULES)}")
+
+
+def right_cases_by_model(
+    consistency: dict[tuple[str, str], "Consistency"], rule: str = DEFAULT_CASE_RULE
+) -> dict[str, tuple[int, int]]:
+    """(cases right, cases answered) per model, by the named rule."""
+    result: dict[str, tuple[int, int]] = {}
+    for (_, model), entry in consistency.items():
+        right, total = result.get(model, (0, 0))
+        result[model] = (right + int(case_is_right(entry, rule)), total + 1)
+    return dict(sorted(result.items()))
 
 
 def states_by_model(
@@ -715,6 +750,10 @@ __all__ = [
     "ConsistencySummary",
     "consistency_by_model",
     "states_by_model",
+    "CASE_RULES",
+    "DEFAULT_CASE_RULE",
+    "case_is_right",
+    "right_cases_by_model",
     "critical_by_category",
     "CriticalComparison",
     "compare_critical",

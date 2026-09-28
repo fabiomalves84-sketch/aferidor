@@ -153,8 +153,10 @@ python -m aferidor ensaio --fornecedor anthropic --modelo <nome>
 ```
 
 A tabela mostra, por modelo, os casos com falha crítica em alguma amostra, os
-casos instáveis e a taxa de amostras corretas, por esta ordem, e cada número com
-o seu intervalo de confiança. Ler as duas primeiras colunas antes da terceira.
+casos certos pela regra do relatório, os casos em que às vezes acertou e as
+amostras certas, por esta ordem, e cada número com o seu intervalo de
+confiança. As três primeiras colunas contam casos; a última conta respostas.
+Ler as primeiras antes da última.
 
 ## 9. O limite de tokens, e o modelo que raciocina antes de responder
 
@@ -224,9 +226,9 @@ modelo como o `qwen3:8b` gasta parte do orçamento a pensar antes da primeira
 palavra da resposta.
 
 O último comando escreve `relatorios/relatorio.html`, um ficheiro só que abre
-com duplo clique: a grelha de casos por modelo, com o estado de cada um,
-estável certo, estável errado ou instável, é mais fácil de ler ali do que na
-tabela em Markdown.
+com duplo clique: a grelha de casos por modelo, com o estado de cada um
+(acertou sempre, às vezes acertou, nunca acertou) e um ponto por amostra, é
+mais fácil de ler ali do que na tabela em Markdown.
 
 **Opção: as APIs pagas.** Se preferires medir os modelos que o utilizador
 final vai mesmo usar, e não uma versão aberta equivalente, troca

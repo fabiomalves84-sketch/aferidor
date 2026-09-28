@@ -6,7 +6,9 @@ import unittest
 from datetime import datetime
 
 from aferidor.grading import (
+    Consistency,
     ConsistencyState,
+    case_is_right,
     consistency_by_case,
     consistency_by_model,
     expected_samples,
@@ -14,6 +16,7 @@ from aferidor.grading import (
     grade_all,
     missing_samples,
     negative_controls,
+    right_cases_by_model,
     self_check,
     tally,
     tally_by_model,
@@ -323,6 +326,47 @@ class TestConsistency(unittest.TestCase):
         self.assertEqual(summary.critical_cases, 2)
         self.assertEqual(summary.unstable_cases, 1)
         self.assertAlmostEqual(summary.sample_accuracy, 1 / 4)
+
+
+def an_entry(passed: int, worst: FailureType | None, samples: int = 5, case_id: str = "C1") -> Consistency:
+    if passed == samples:
+        state = ConsistencyState.ESTAVEL_CERTO
+    elif passed == 0:
+        state = ConsistencyState.ESTAVEL_ERRADO
+    else:
+        state = ConsistencyState.INSTAVEL
+    return Consistency(case_id, "falso", samples, passed, worst, state)
+
+
+class TestCaseRule(unittest.TestCase):
+    """One yes or no per case; the rule decides how many samples that takes."""
+
+    def test_the_default_rule_wants_every_sample_right(self):
+        self.assertTrue(case_is_right(an_entry(5, None)))
+        self.assertFalse(case_is_right(an_entry(4, FailureType.RESPOSTA_INCOMPLETA)))
+
+    def test_a_majority_is_not_enough_if_one_sample_was_critical(self):
+        rule = "maioria_sem_critica"
+        self.assertTrue(case_is_right(an_entry(3, FailureType.RESPOSTA_INCOMPLETA), rule))
+        self.assertFalse(case_is_right(an_entry(4, FailureType.DOSE_INCORRETA), rule))
+        self.assertFalse(case_is_right(an_entry(2, FailureType.RESPOSTA_INCOMPLETA), rule))
+
+    def test_the_loosest_rule_only_asks_for_no_critical_failure(self):
+        rule = "nenhuma_critica"
+        self.assertTrue(case_is_right(an_entry(0, FailureType.RESPOSTA_INCOMPLETA), rule))
+        self.assertFalse(case_is_right(an_entry(4, FailureType.DOSE_INCORRETA), rule))
+
+    def test_an_unknown_rule_is_refused(self):
+        with self.assertRaises(ValueError):
+            case_is_right(an_entry(5, None), "quase_todas")
+
+    def test_right_cases_are_counted_per_model(self):
+        consistency = {
+            ("C1", "falso"): an_entry(5, None, case_id="C1"),
+            ("C2", "falso"): an_entry(3, FailureType.RESPOSTA_INCOMPLETA, case_id="C2"),
+        }
+        self.assertEqual(right_cases_by_model(consistency), {"falso": (1, 2)})
+        self.assertEqual(right_cases_by_model(consistency, "maioria_sem_critica"), {"falso": (2, 2)})
 
 
 class TestSelfCheck(unittest.TestCase):

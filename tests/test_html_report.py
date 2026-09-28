@@ -85,18 +85,18 @@ class TestGrid(unittest.TestCase):
 
     def test_the_state_is_written_out_not_just_shown_in_colour(self):
         text = build([a_case()], [an_answer("500 mg")])
-        self.assertIn("estável errado", text)
+        self.assertIn("nunca acertou", text)
 
     def test_a_stable_pass_says_so(self):
         text = build([a_case()], [an_answer("1 g")])
-        self.assertIn("estável certo", text)
+        self.assertIn("acertou sempre", text)
 
     def test_a_mixed_result_across_samples_is_unstable(self):
         text = build(
             [a_case()],
             [an_answer("1 g", sample=1), an_answer("500 mg", sample=2)],
         )
-        self.assertIn("instável", text)
+        self.assertIn("às vezes acertou", text)
 
     def test_a_case_never_asked_to_a_model_says_so(self):
         cases = [a_case("C1"), a_case("C2")]
@@ -110,6 +110,42 @@ class TestGrid(unittest.TestCase):
             missing=["C2"], reasons={"C2": "resposta truncada no limite de tokens"},
         )
         self.assertIn("C2 (resposta truncada no limite de tokens)", text)
+
+
+class TestHowItIsCounted(unittest.TestCase):
+    """The report's own words for a case's samples, and the one verdict per case."""
+
+    def test_each_sample_is_a_dot_in_the_order_it_was_asked(self):
+        text = build(
+            [a_case()],
+            [an_answer("1 g", sample=1), an_answer("500 mg", sample=2), an_answer("1 g", sample=3)],
+        )
+        self.assertIn('aria-label="Amostras: 1 certa, 2 errada, 3 certa"', text)
+
+    def test_a_sample_never_answered_is_a_dot_of_its_own(self):
+        answers = [an_answer("1 g", sample=1), an_answer("1 g", sample=3)]
+        text = build([a_case()], answers)
+        self.assertIn("2 sem resposta", text)
+
+    def test_the_page_explains_the_states_and_that_never_right_is_not_critical(self):
+        text = build([a_case()], [an_answer("1 g", sample=1), an_answer("500 mg", sample=2)])
+        self.assertIn('id="como-se-conta"', text)
+        self.assertIn("Nunca acertou não é o mesmo que", text)
+        for state in ("acertou sempre", "às vezes acertou", "nunca acertou"):
+            with self.subTest(state=state):
+                self.assertIn(f'data-termo="{state}"', text)
+
+    def test_the_card_counts_right_cases_by_the_rule_and_names_the_rule(self):
+        text = build([a_case()], [an_answer("1 g", sample=1), an_answer("500 mg", sample=2)])
+        self.assertIn("0 de 1 casos", text)
+        self.assertIn("regra: acertou em todas as amostras", text)
+
+    def test_the_card_says_answers_are_cases_times_attempts(self):
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [an_answer("1 g", case_id=c, sample=s) for c in ("C1", "C2") for s in (1, 2, 3)]
+        text = build(cases, answers)
+        self.assertIn("6 de 6 respostas", text)
+        self.assertIn("2 casos × 3 tentativas", text)
 
 
 class TestMissingSamples(unittest.TestCase):
@@ -191,7 +227,7 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_a_state_is_never_shown_by_colour_alone(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        self.assertIn("✕ estável errado", text)
+        self.assertRegex(text, r'✕ <abbr class="termo"[^>]*>nunca acertou</abbr>')
 
     def test_failure_charts_share_one_scale_across_models(self):
         """Two charts on their own scales make a smaller count look as long as a bigger one."""

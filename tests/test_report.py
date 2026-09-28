@@ -244,8 +244,8 @@ class TestComparison(unittest.TestCase):
         text = report.build(cases, answers, verdicts, today=date(2026, 9, 14))
         self.assertIn("## Comparação", text)
         self.assertIn(
-            "| Modelo | Casos com falha crítica em alguma amostra | Casos instáveis | "
-            "Taxa de amostras corretas |",
+            "| Modelo | Casos com falha crítica em alguma amostra | Casos certos | "
+            "Casos em que às vezes acertou | Amostras certas |",
             text,
         )
 

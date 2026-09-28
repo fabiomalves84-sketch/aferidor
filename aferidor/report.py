@@ -26,6 +26,9 @@ from .grading import (
     expected_samples,
     match_answers,
     missing_samples,
+    CASE_RULES,
+    DEFAULT_CASE_RULE,
+    right_cases_by_model,
     run_conditions,
     tally_by_model,
     wilson_interval,
@@ -131,6 +134,25 @@ def interval_text(successes: int, total: int) -> str:
     """A 95% Wilson interval, written the way the report writes percentages."""
     low, high = wilson_interval(successes, total)
     return f"IC 95% {_percent(low)} a {_percent(high)}"
+
+
+def how_counted(samples: int, rule: str) -> str:
+    """How a case's samples become its state and its verdict, in plain words.
+
+    Shared by both reports: the states and the right-or-wrong rule are the
+    report's own vocabulary, and a reader who does not know them reads the
+    numbers wrong.
+    """
+    n = samples or 1
+    return (
+        f"Cada caso foi perguntado {n} {'vez' if n == 1 else 'vezes'} a cada modelo; cada "
+        "resposta é uma amostra. Um caso **acertou sempre** quando todas as amostras passaram, "
+        f"**nunca acertou** quando nenhuma passou, e **às vezes acertou** no meio. Para um "
+        f"veredicto sim ou não por caso, a regra deste relatório é: o caso está certo quando "
+        f"{CASE_RULES[rule]}. Nunca acertou não é o mesmo que falha crítica: um caso pode falhar "
+        "sempre só por uma resposta incompleta, e um caso que às vezes acertou pode ter tido um "
+        "erro de dose numa das amostras."
+    )
 
 
 def _risk_line(critical_cases: int, total_cases: int) -> str:
@@ -313,30 +335,39 @@ def build(
             out.append(f"| `{outcome.model}` | {result} | " + " | ".join(cells) + " |")
         out.append("")
 
+    rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
+    right = right_cases_by_model(consistency, rule)
+    out.append("## Como se conta")
+    out.append("")
+    out.append(how_counted(max(expected_samples(answers).values(), default=0), rule))
+    out.append("")
+
     if len(per_model) > 1:
         out.append("## Comparação")
         out.append("")
         out.append(
-            "| Modelo | Casos com falha crítica em alguma amostra | Casos instáveis | "
-            "Taxa de amostras corretas |"
+            "| Modelo | Casos com falha crítica em alguma amostra | Casos certos | "
+            "Casos em que às vezes acertou | Amostras certas |"
         )
-        out.append("|---|---|---|---|")
+        out.append("|---|---|---|---|---|")
         for model in per_model:
             summary = consistency_per_model[model]
             counts = per_model[model]
+            ok, total = right[model]
             out.append(
                 f"| `{model}` | {summary.critical_cases} de {summary.cases} "
                 f"({interval_text(summary.critical_cases, summary.cases)}) | "
+                f"{ok} de {total} ({interval_text(ok, total)}) | "
                 f"{summary.unstable_cases} de {summary.cases} | "
-                f"{_percent(summary.sample_accuracy)} ({interval_text(counts.passed, counts.total)}) |"
+                f"{counts.passed} de {counts.total} ({interval_text(counts.passed, counts.total)}) |"
             )
         out.append("")
         out.append(
-            "As duas primeiras colunas pesam mais do que a terceira: uma taxa de amostras "
-            "corretas alta ainda pode esconder casos que falham sempre, ou casos instáveis "
-            "cuja resposta certa depende de que amostra o médico calhou a ver. Os intervalos "
-            "são de Wilson a 95%. O da taxa de amostras trata cada amostra como independente, "
-            "e não o são (há várias por caso), por isso é mais estreito do que devia."
+            "As três primeiras colunas contam casos; a última conta amostras (casos × "
+            "tentativas). Uma taxa de amostras certas alta ainda pode esconder casos que "
+            "nunca acertam, ou casos em que a resposta certa depende da amostra que o médico "
+            "calhou a ver. Os intervalos são de Wilson a 95%; o das amostras trata cada amostra "
+            "como independente, e não o são, por isso é mais estreito do que devia."
         )
         out.append("")
 
@@ -347,6 +378,12 @@ def build(
         out.append("")
         out.append(_risk_line(summary.critical_cases, summary.cases))
         out.append("")
+        ok, total = right[model]
+        out.append(
+            f"**Casos certos: {ok} de {total}** ({interval_text(ok, total)}), pela regra: "
+            f"{CASE_RULES[rule]}."
+        )
+        out.append("")
         out.append(
             f"{counts.passed} de {counts.total} amostras passaram em todos os critérios "
             f"({_percent(counts.accuracy)}, {interval_text(counts.passed, counts.total)})."
@@ -354,8 +391,8 @@ def build(
         if summary.unstable_cases:
             out.append("")
             out.append(
-                f"{summary.unstable_cases} de {summary.cases} casos deram respostas "
-                "diferentes em amostras diferentes do mesmo modelo: instáveis."
+                f"Em {summary.unstable_cases} de {summary.cases} casos o modelo às vezes "
+                "acertou: deu respostas diferentes em amostras diferentes."
             )
         out.append("")
         out.append("### Falhas por tipo")
@@ -394,6 +431,7 @@ __all__ = [
     "conditions_rows",
     "protocol_findings",
     "interval_text",
+    "how_counted",
     "format_missing",
     "format_missing_samples",
     "HEADER_NOTE",

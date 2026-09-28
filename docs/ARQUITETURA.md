@@ -71,11 +71,15 @@ a mesma regra.
 
 **Uma amostra sozinha não conta nada.** Um caso pode ser pedido mais do que
 uma vez ao mesmo modelo; `grading.consistency_by_case` agrupa as amostras de
-um caso e de um modelo e decide um de três estados, estável certo, estável
-errado ou instável, a partir de quantas passaram. O número principal do
-relatório deixou de ser a média de amostras corretas e passou a ser casos com
-falha crítica em pelo menos uma amostra: um médico só vê uma resposta, não a
-média de cinco.
+um caso e de um modelo e decide um de três estados, acertou sempre, às vezes
+acertou ou nunca acertou, a partir de quantas passaram. Os nomes são ditos em
+palavras correntes de propósito: "estável errado" lia-se como uma virtude. Para
+quem precisa de um sim ou não por caso, `grading.case_is_right` aplica uma de
+três regras com nome (`CASE_RULES`); a mais estrita, todas as amostras certas,
+é a regra por omissão, e um protocolo pode escolher outra antes de correr, no
+campo `regra_do_caso`. O número principal do relatório deixou de ser a média
+de amostras corretas e passou a ser casos com falha crítica em pelo menos uma
+amostra: um médico só vê uma resposta, não a média de cinco.
 
 **O relatório HTML não calcula nada, só apresenta o que `grading` produziu.**
 `html_report.py` lê a mesma tally e a mesma estrutura de consistência que
