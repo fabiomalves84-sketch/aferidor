@@ -88,9 +88,12 @@ class TestConditions(unittest.TestCase):
             [a_case()], answers, verdicts, today=date(2026, 9, 14),
             cases_source=("casos/casos.json", "ab" * 32),
         )
+        import re
+
+        visible = re.sub(r"<[^>]+>", "", page)
         for label, value in rows:
             with self.subTest(label=label):
-                self.assertIn(value, page)
+                self.assertIn(value, visible)
 
 
 class TestAlternativeShown(unittest.TestCase):

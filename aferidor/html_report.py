@@ -152,7 +152,10 @@ def model_label(model_id: str) -> tuple[str, str]:
 
 def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo") -> str:
     name, description = model_label(model_id)
-    sub = f'<span class="modelo-desc">{_esc(description)}</span>' if description else ""
+    sub = (
+        f'<span class="modelo-desc">{_gloss(_esc(description), ("Ollama", "parâmetros"))}</span>'
+        if description else ""
+    )
     return (
         f'<div class="{css}"><{tag} class="modelo-nome">{_esc(name)}</{tag}>{sub}'
         f'<code class="modelo-id">{_esc(model_id)}</code></div>'
@@ -204,6 +207,100 @@ def _pct(value: float) -> str:
     return f"{value * 100:.0f}%"
 
 
+# Terms a reader may not know, with a one-line definition. The report marks
+# them where they appear (a dotted underline; the definition shows on hover,
+# on keyboard focus and on tap), and lists the ones used at the end. Model
+# answers are never marked: they are evidence and stay exactly as they came.
+GLOSSARY: dict[str, str] = {
+    "DGS": "Direção-Geral da Saúde. Publica as normas de orientação clínica em Portugal.",
+    "Infarmed": "Autoridade Nacional do Medicamento e Produtos de Saúde.",
+    "RCM": "Resumo das Características do Medicamento: o documento oficial de cada medicamento, com doses, contraindicações e interações.",
+    "APMGF": "Associação Portuguesa de Medicina Geral e Familiar, autora do Guia de Bolso de Antibioterapia em Ambulatório.",
+    "EMA": "Agência Europeia de Medicamentos.",
+    "FDA": "Agência do medicamento dos Estados Unidos.",
+    "ESC": "Sociedade Europeia de Cardiologia, autora de diretrizes clínicas.",
+    "ADA": "Associação Americana de Diabetes, autora dos Standards of Care.",
+    "NICE": "Instituto britânico que publica diretrizes clínicas.",
+    "SNS": "Serviço Nacional de Saúde.",
+    "PNV": "Programa Nacional de Vacinação.",
+    "DPOC": "Doença pulmonar obstrutiva crónica.",
+    "TFG": "Taxa de filtração glomerular: mede a função dos rins.",
+    "AVC": "Acidente vascular cerebral.",
+    "HbA1c": "Hemoglobina glicada: reflete a média da glicemia nos últimos dois a três meses.",
+    "INR": "Medida da coagulação do sangue, usada para ajustar a dose de varfarina.",
+    "IECA": "Inibidor da enzima de conversão da angiotensina: uma classe de anti-hipertensores.",
+    "ECA": "Enzima de conversão da angiotensina.",
+    "ARA II": "Antagonista dos recetores da angiotensina II: uma classe de anti-hipertensores.",
+    "DOAC": "Anticoagulante oral direto (apixabano, rivaroxabano, edoxabano, dabigatrano).",
+    "TSN": "Terapêutica de substituição de nicotina: adesivos, pastilhas, gomas ou spray.",
+    "SGLT2": "Inibidores do SGLT2: uma classe de antidiabéticos orais (por exemplo, dapagliflozina).",
+    "CYP3A4": "Enzima do fígado que elimina muitos medicamentos; bloqueá-la faz subir os níveis de outros.",
+    "MAPA": "Monitorização ambulatória da pressão arterial, durante 24 horas.",
+    "AMPA": "Automedição da pressão arterial, no domicílio.",
+    "TA": "Tensão arterial.",
+    "IM": "Via intramuscular.",
+    "IV": "Via intravenosa.",
+    "SCORE2": "Instrumento europeu que estima o risco cardiovascular a 10 anos.",
+    "SCORE": "Versão anterior do SCORE2, usada pela norma da DGS de 2013.",
+    "IC 95%": "Intervalo de confiança a 95%: a faixa onde o valor real provavelmente está. Com poucos casos, é larga.",
+    "SHA-256": "Impressão digital de um ficheiro: muda se o ficheiro mudar uma única vírgula. Serve para provar que nada foi alterado.",
+    "Ollama": "Programa que corre modelos de linguagem abertos no próprio computador, sem enviar nada para fora.",
+    "parâmetros": "Medida do tamanho de um modelo de linguagem. Mais parâmetros costuma querer dizer mais capacidade.",
+    "tokens_max": "Limite de tamanho da resposta que o modelo podia dar.",
+    "Acordo Ortográfico": "O Acordo Ortográfico de 1990, em vigor em Portugal: escreve-se infeção e não infecção.",
+}
+# Clinical and source abbreviations marked automatically in case texts.
+_CASE_TERMS = tuple(
+    k for k in GLOSSARY
+    if k not in ("IC 95%", "SHA-256", "Ollama", "parâmetros", "tokens_max", "Acordo Ortográfico")
+)
+
+
+def _slug(term: str) -> str:
+    return "g-" + re.sub(r"[^a-z0-9]+", "-", term.lower()).strip("-")
+
+
+def _term(term: str, shown: str | None = None) -> str:
+    """One glossary term, marked for hover, focus and tap."""
+    return (
+        f'<abbr class="termo" tabindex="0" data-termo="{_esc(term)}" '
+        f'data-def="{_esc(GLOSSARY[term])}" aria-describedby="{_slug(term)}">'
+        f"{_esc(shown or term)}</abbr>"
+    )
+
+
+def _gloss(escaped: str, terms: tuple[str, ...] = _CASE_TERMS) -> str:
+    """Mark glossary terms in text that is already escaped.
+
+    One pass with every term in the alternation, longest first, so "ARA II"
+    wins over a shorter term and nothing inserted is scanned again. Terms
+    match whole words and case exactly: "MAPA" is the blood pressure
+    monitoring, "mapa" is just a map.
+    """
+    ordered = sorted(terms, key=len, reverse=True)
+    pattern = re.compile(
+        r"(?<![\w-])(" + "|".join(re.escape(_esc(t)) for t in ordered) + r")(?![\w-])"
+    )
+    by_escaped = {_esc(t): t for t in ordered}
+    return pattern.sub(lambda m: _term(by_escaped[m.group(1)]), escaped)
+
+
+def _glossary_section(page: str) -> str:
+    """The glossary, listing only the terms the page actually marks."""
+    used = sorted(set(re.findall(r'data-termo="([^"]+)"', page)), key=lambda s: s.casefold())
+    if not used:
+        return ""
+    items = "".join(
+        f'<div><dt id="{_slug(_html.unescape(term))}">{term}</dt>'
+        f"<dd>{_esc(GLOSSARY[_html.unescape(term)])}</dd></div>"
+        for term in used
+    )
+    return (
+        '<details class="glossario" id="glossario"><summary>Glossário: '
+        f"{len(used)} siglas e termos usados neste relatório</summary><dl>{items}</dl></details>"
+    )
+
+
 def _grouped_cases(cases: list[Case]) -> list[tuple[str, list[Case]]]:
     """Cases in their original order, bucketed by category on first sight."""
     order: list[str] = []
@@ -251,8 +348,8 @@ def _intro(cases: list[Case], models: list[str], answers: list[Answer]) -> str:
     <p class="lead">O <strong>Aferidor</strong> mede com que frequência um modelo de
     linguagem responde certo a perguntas clínicas em português europeu, e que tipo de
     erro comete quando erra.</p>
-    <p>Cada pergunta tem uma resposta de referência com fonte pública (normas da DGS,
-    Infarmed, diretrizes europeias) e critérios de aceitação escritos antes do ensaio.
+    <p>Cada pergunta tem uma resposta de referência com fonte pública (normas da {_term("DGS")},
+    {_term("Infarmed")}, diretrizes europeias) e critérios de aceitação escritos antes do ensaio.
     A mesma pergunta é feita várias vezes a cada modelo, porque um modelo não responde
     sempre igual: cada uma dessas respostas é uma <em>amostra</em>. Cada amostra é
     corrigida de forma automática e determinista, e cada falha é classificada pelo risco
@@ -346,11 +443,11 @@ def _model_card(
     return f"""
 <article class="cartao-modelo">
   <header>{_model_heading(model)}{badge}</header>
-  <p class="numero-principal"><span class="destaque">{summary.critical_cases}</span><span class="legenda">de {summary.cases} casos com falha crítica em alguma amostra ({_esc(interval_text(summary.critical_cases, summary.cases))})</span></p>
+  <p class="numero-principal"><span class="destaque">{summary.critical_cases}</span><span class="legenda">de {summary.cases} casos com falha crítica em alguma amostra ({_gloss(_esc(interval_text(summary.critical_cases, summary.cases)), ("IC 95%",))})</span></p>
   {_state_bar(model, states, summary.cases)}
   <dl class="metricas">
     <div><dt>Casos instáveis</dt><dd>{summary.unstable_cases} de {summary.cases}</dd></div>
-    <div><dt>Respostas certas</dt><dd>{tally.passed} de {tally.total} ({_esc(interval_text(tally.passed, tally.total))})</dd></div>
+    <div><dt>Respostas certas</dt><dd>{tally.passed} de {tally.total} ({_gloss(_esc(interval_text(tally.passed, tally.total)), ("IC 95%",))})</dd></div>
   </dl>
   <p class="lingua-linha"><strong>Português europeu:</strong> {language.brazilian} de {language.answers} respostas com formas do Brasil, {language.pre_agreement} com grafia anterior ao Acordo.</p>
 </article>"""
@@ -484,12 +581,12 @@ def _worst(cases, consistency, pairs) -> str:
             '<article class="erro-cartao">'
             f'<p class="erro-topo"><span class="caso-id">{_esc(case.case_id)}</span>'
             f'<span class="erro-modelo">{_esc(_model_short(answer.model))}</span></p>'
-            f'<p class="erro-pergunta">{_esc(case.question)}</p>'
+            f'<p class="erro-pergunta">{_gloss(_esc(case.question))}</p>'
             f'<div class="erro-par"><div><p class="erro-rotulo">O modelo respondeu</p>'
             f"<blockquote>{_esc(short)}</blockquote></div>"
             f'<div><p class="erro-rotulo">A referência diz</p>'
-            f'<p class="erro-ref">{_esc(case.reference)}</p>'
-            f'<p class="fonte">{_esc(case.source.name)}, {_esc(case.source.reference)}</p></div></div>'
+            f'<p class="erro-ref">{_gloss(_esc(case.reference))}</p>'
+            f'<p class="fonte">{_gloss(_esc(case.source.name))}, {_esc(case.source.reference)}</p></div></div>'
             f'<p class="erro-chips">{chips}</p>'
             f'<p><a href="#caso-{_esc(case.case_id)}">Ver o caso completo</a></p></article>'
         )
@@ -644,11 +741,11 @@ def _detail(
             f'<span class="minis" aria-hidden="true">{"".join(minis)}</span></summary>'
         )
         out.append('<div class="detalhe-corpo">')
-        out.append(f"<p><strong>Pergunta.</strong> {_esc(case.question)}</p>")
+        out.append(f"<p><strong>Pergunta.</strong> {_gloss(_esc(case.question))}</p>")
         out.append(
             f'<div class="referencia"><p><strong>Resposta de referência.</strong> '
-            f"{_esc(case.reference)}</p>"
-            f'<p class="fonte"><strong>Fonte.</strong> {_esc(case.source.name)}, '
+            f"{_gloss(_esc(case.reference))}</p>"
+            f'<p class="fonte"><strong>Fonte.</strong> {_gloss(_esc(case.source.name))}, '
             f"{_esc(case.source.reference)}</p></div>"
         )
         for model in failing_models:
@@ -859,6 +956,20 @@ blockquote { margin: 0 0 0.5rem; padding: 0.6rem 0.8rem; background: var(--surfa
 .condicoes dl { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin: 0; }
 .condicoes dt { font-weight: 600; font-size: 0.9rem; word-break: break-word; }
 .condicoes dd { margin: 0.1rem 0 0.8rem; color: var(--ink-2); font-size: 0.9rem; }
+abbr.termo { text-decoration: none; border-bottom: 1px dotted var(--muted); cursor: help; position: relative; }
+abbr.termo:focus { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+abbr.termo:hover::after, abbr.termo:focus::after {
+  content: attr(data-def); position: absolute; left: 0; top: calc(100% + 6px); z-index: 20;
+  width: max-content; max-width: min(20rem, 80vw); padding: 0.5rem 0.65rem; border-radius: 6px;
+  background: var(--ink); color: var(--page); font-size: 0.8rem; line-height: 1.4; font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  text-transform: none; letter-spacing: normal; white-space: normal; text-align: left;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18); pointer-events: none; }
+details.glossario { margin-top: 2.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; scroll-margin-top: 3.5rem; }
+details.glossario summary { cursor: pointer; padding: 0.9rem 1.25rem; font-weight: 650; }
+details.glossario dl { margin: 0; padding: 0 1.25rem 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.4rem 1.5rem; }
+details.glossario dt { font-weight: 650; font-size: 0.9rem; }
+details.glossario dd { margin: 0 0 0.5rem; color: var(--ink-2); font-size: 0.86rem; }
 footer.rodape { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--grid); color: var(--ink-2); font-size: 0.88rem; scroll-margin-top: 3.5rem; }
 footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 @media (max-width: 46rem) {
@@ -891,7 +1002,7 @@ def _protocol_section(
     parts.append(
         f"<p>Protocolo <strong>{_esc(protocol.name)}</strong>, escrito a "
         f"{_esc(protocol.written_on.isoformat())} (<code>{_esc(protocol.path)}</code>, "
-        f"SHA-256 {_esc(protocol.sha256[:12])}).</p>"
+        f"{_term('SHA-256')} {_esc(protocol.sha256[:12])}).</p>"
     )
     for warning in found_warnings:
         parts.append(_aviso("Aviso.", _esc(warning) + "."))
@@ -952,7 +1063,7 @@ def build(
             ("falhas", "Falhas por tipo"),
             ("casos-com-falha", "Casos com falha"),
         ]
-    sections += [("condicoes", "Condições do ensaio"), ("metodo", "Método")]
+    sections += [("condicoes", "Condições do ensaio"), ("glossario", "Glossário"), ("metodo", "Método")]
     out.append(
         '<nav class="indice" aria-label="Secções"><ul>'
         + "".join(f'<li><a href="#{anchor}">{_esc(label)}</a></li>' for anchor, label in sections)
@@ -1023,7 +1134,8 @@ def build(
         out.append(
             '<section class="lingua"><h2>Português europeu</h2><ul>'
             + "".join(
-                f"<li><strong>{_esc(_model_short(m))}</strong> <code>{_esc(m)}</code>: {_esc(language_line(languages[m]))}</li>"
+                f"<li><strong>{_esc(_model_short(m))}</strong> <code>{_esc(m)}</code>: "
+                f"{_gloss(_esc(language_line(languages[m])), ('Acordo Ortográfico',))}</li>"
                 for m in models
             )
             + '</ul><p class="seccao-intro">Indicador à parte, por uma lista curta de formas '
@@ -1038,12 +1150,16 @@ def build(
         out.append("<dl>")
         for label, value in rows:
             shown = label if label == "Banco de casos" else f"{_model_short(label)} ({label})"
-            out.append(f"<dt>{_esc(shown)}</dt><dd>{_esc(value)}</dd>")
+            out.append(
+                f"<dt>{_esc(shown)}</dt>"
+                f"<dd>{_gloss(_esc(value), ('SHA-256', 'tokens_max'))}</dd>"
+            )
         out.append("</dl>")
     else:
         out.append("<p>Sem respostas registadas.</p>")
     out.append("</section>")
 
+    out.append(_glossary_section("".join(out)))
     out.append(
         '<footer class="rodape" id="metodo"><h2>Método</h2>'
         f"<p>{_esc(HEADER_NOTE)}</p>"

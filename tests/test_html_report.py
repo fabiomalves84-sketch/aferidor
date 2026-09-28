@@ -265,6 +265,45 @@ class TestWhatJumpsOut(unittest.TestCase):
         self.assertNotIn("modelos abertos e pequenos", text)
 
 
+class TestGlossary(unittest.TestCase):
+    """Abbreviations explained on hover, and a glossary of the ones used."""
+
+    def page(self, answer_text="Amoxicilina 500 mg na DPOC"):
+        case = Case(
+            case_id="C1", category="dose",
+            question="Exacerbação de DPOC: que dose? Ver no mapa da consulta.",
+            reference="Amoxicilina 1000 mg de 8/8h", source=Source(name="DGS", reference="Norma"),
+            criteria=(Criterion(kind="contem", terms=("1000 mg",), failure=FailureType.DOSE_INCORRETA),),
+        )
+        return build([case], [an_answer(answer_text)])
+
+    def test_an_abbreviation_in_a_question_is_marked_with_its_definition(self):
+        text = self.page()
+        self.assertIn('data-termo="DPOC"', text)
+        self.assertIn("Doença pulmonar obstrutiva crónica", text)
+
+    def test_the_model_answer_is_never_marked(self):
+        text = self.page()
+        self.assertIn("<blockquote>Amoxicilina 500 mg na DPOC</blockquote>", text)
+
+    def test_a_lowercase_word_is_not_taken_for_an_abbreviation(self):
+        self.assertNotIn('data-termo="MAPA"', self.page())
+
+    def test_the_glossary_lists_only_the_terms_the_page_uses(self):
+        text = self.page()
+        glossary = text.split('id="glossario"', 1)[1].split("</details>", 1)[0]
+        self.assertIn(">DPOC</dt>", glossary)
+        self.assertNotIn(">HbA1c</dt>", glossary)
+
+    def test_every_marked_term_points_to_its_glossary_entry(self):
+        import re
+
+        text = self.page()
+        for target in re.findall(r'aria-describedby="([^"]+)"', text):
+            with self.subTest(target=target):
+                self.assertIn(f'id="{target}"', text)
+
+
 class TestEmpty(unittest.TestCase):
     def test_no_verdicts_says_so_instead_of_reporting_zero_percent(self):
         text = html_report.build([a_case()], [], [], today=date(2026, 9, 14))
