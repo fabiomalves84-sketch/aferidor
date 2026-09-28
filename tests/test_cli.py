@@ -423,5 +423,36 @@ class TestExecutar(unittest.TestCase):
             self.assertNotIn("descartadas", out)
 
 
+
+class TestProtocolBeforeThePaidRun(unittest.TestCase):
+    """A protocol problem must stop the run before the first question is paid for."""
+
+    def test_a_missing_protocol_stops_before_asking_anything(self):
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            code, _, err = run(
+                "ensaio", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+                "--saida", str(f / "r.jsonl"), "--vereditos", str(f / "v.json"),
+                "--relatorio", str(f / "rel.md"), "--protocolo", str(f / "nao-existe.json"),
+            )
+            self.assertEqual(code, 2)
+            self.assertFalse((f / "r.jsonl").exists(), "nothing may be asked")
+
+    def test_a_protocol_with_limite_is_refused(self):
+        from aferidor.protocolo import template
+
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            (f / "p.json").write_text(json.dumps(template("x", REAL_CASES)), encoding="utf-8")
+            code, _, err = run(
+                "ensaio", "--fornecedor", "falso", "--casos", str(REAL_CASES), "--limite", "2",
+                "--saida", str(f / "r.jsonl"), "--vereditos", str(f / "v.json"),
+                "--relatorio", str(f / "rel.md"), "--protocolo", str(f / "p.json"),
+            )
+            self.assertEqual(code, 2)
+            self.assertIn("não é compatível com --limite", err)
+            self.assertFalse((f / "r.jsonl").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

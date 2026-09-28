@@ -137,9 +137,31 @@ class Outcome:
         return all(c.met for c in self.checks)
 
 
-def evaluate(protocol: Protocol, summary: ConsistencySummary) -> Outcome:
-    """Apply each limit of the protocol to one model's consistency summary."""
-    checks = (
+def evaluate(
+    protocol: Protocol,
+    summary: ConsistencySummary,
+    complete_cases: int | None = None,
+    total_cases: int | None = None,
+) -> Outcome:
+    """Apply each limit of the protocol to one model's consistency summary.
+
+    The limits are counts over the cases that were answered, so a model that
+    answered 2 of 27 cases would meet them all. When the size of the bank is
+    known, every case must also have every sample the protocol asks for: a
+    run that stopped halfway is not approved.
+    """
+    completeness: tuple[Check, ...] = ()
+    if total_cases is not None:
+        done = complete_cases or 0
+        completeness = (
+            Check(
+                f"casos com as {protocol.samples} amostras",
+                f"todos os {total_cases}",
+                f"{done} de {total_cases}",
+                done == total_cases,
+            ),
+        )
+    checks = completeness + (
         Check(
             "casos com falha crítica em alguma amostra",
             f"no máximo {protocol.max_critical_cases}",

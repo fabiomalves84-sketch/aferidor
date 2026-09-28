@@ -110,6 +110,30 @@ class TestEvaluate(unittest.TestCase):
         self.assertEqual([c.met for c in outcome.checks], [False, True, True])
 
 
+class TestCompleteness(unittest.TestCase):
+    """Every limit is a count over answered cases; an unfinished run would meet them all."""
+
+    def protocol(self):
+        with tempfile.TemporaryDirectory() as folder:
+            return read_protocol(write_protocol(folder))
+
+    def test_a_model_that_answered_part_of_the_bank_is_not_approved(self):
+        outcome = evaluate(self.protocol(), a_summary(), complete_cases=2, total_cases=27)
+        self.assertFalse(outcome.approved)
+        self.assertEqual(outcome.checks[0].observed, "2 de 27")
+
+    def test_a_complete_run_within_the_limits_is_approved(self):
+        self.assertTrue(evaluate(self.protocol(), a_summary(), complete_cases=27, total_cases=27).approved)
+
+    def test_the_report_counts_only_cases_with_every_sample(self):
+        from aferidor.report import complete_cases_by_model
+
+        answers = [
+            Answer("C1", "m", "x", datetime(2026, 9, 2), sample=s) for s in (1, 2, 3, 4, 5)
+        ] + [Answer("C2", "m", "x", datetime(2026, 9, 2), sample=s) for s in (1, 2)]
+        self.assertEqual(complete_cases_by_model(answers, ["C1", "C2", "C3"], 5), {"m": 1})
+
+
 class TestWarnings(unittest.TestCase):
     def setUp(self):
         with tempfile.TemporaryDirectory() as folder:

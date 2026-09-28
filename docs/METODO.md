@@ -63,8 +63,11 @@ ou divide o valor de `valor_numerico`, acrescenta a prescrição proibida por
 `nao_prescreve`) e exige que o veredicto registe a falha. Nenhum conteúdo
 clínico é inventado; apenas se altera o que já existe. Estes controlos não
 detetam um termo contido acidentalmente noutra palavra de uma resposta real;
-isso só se observa com respostas reais. A verificação corre também na bateria
-de testes.
+isso só se observa com respostas reais. Para os critérios negativos há dois
+controlos adicionais: uma recusa seguida do termo proibido, porque um marcador
+de recusa não pode ocultar uma prescrição, e, em `nao_prescreve`, a afirmação
+de que o fármaco não está contraindicado. A verificação corre também na
+bateria de testes.
 
 ## Estados e veredicto por caso
 
@@ -94,7 +97,10 @@ amostras por caso, a temperatura e a regra do caso (`regra_do_caso`), e
 regista o SHA-256 do banco. O relatório indica, por modelo, aprovado ou
 reprovado e o motivo. Assinala também quando o protocolo não constitui um
 critério prévio: data posterior à primeira resposta, banco diferente, ou
-amostras e temperatura diferentes. A data no ficheiro é declarativa; a prova é
+amostras e temperatura diferentes. Um modelo só é aprovado se tiver respondido
+a todos os casos do banco em todas as amostras; por isso, `--protocolo` não
+aceita `--limite`, e o protocolo é lido antes do primeiro pedido. A data no
+ficheiro é declarativa; a prova é
 o commit do protocolo antes do ensaio. O comando recusa reescrever um
 protocolo existente.
 
@@ -162,7 +168,8 @@ próxima do nome do fármaco e na mesma frase. Falha nos dois sentidos. Dá como
 excluído um fármaco quando a expressão de exclusão pertence a outro ("Não usar
 amoxicilina, dar cefuroxima"); dá como prescrito um fármaco quando a exclusão
 usa uma forma ausente da lista ("não são alternativa") ou está noutra frase
-("Não usar amoxicilina. Nem a cefuroxima."). É preferível ao comportamento
+("Não usar amoxicilina. Nem a cefuroxima."). A negação de uma exclusão ("não
+está contraindicada", "sem contraindicação") conta como prescrição. É preferível ao comportamento
 anterior, que tratava qualquer menção como prescrição e reprovava respostas
 corretas que incluíam um aviso. Não constitui compreensão de texto.
 

@@ -112,13 +112,30 @@ def conditions_rows(
     return rows
 
 
+def complete_cases_by_model(answers: list[Answer], case_ids: list[str], samples: int) -> dict[str, int]:
+    """How many of these cases each model answered in every sample from 1 to `samples`."""
+    got: dict[str, set[tuple[str, int]]] = {}
+    for answer in answers:
+        got.setdefault(answer.model, set()).add((answer.case_id, answer.sample))
+    wanted = range(1, samples + 1)
+    return {
+        model: sum(1 for c in case_ids if all((c, s) in pairs for s in wanted))
+        for model, pairs in got.items()
+    }
+
+
 def protocol_findings(
     protocol: Protocol,
     answers: list[Answer],
     summaries: dict,
     cases_source: tuple[str, str] | None,
+    case_ids: list[str] | None = None,
 ) -> tuple[list[str], list[Outcome]]:
-    """The protocol's warnings and its verdict per model, shared by both reports."""
+    """The protocol's warnings and its verdict per model, shared by both reports.
+
+    With `case_ids`, a model is only approved when it answered every case of
+    the bank in every sample the protocol asks for.
+    """
     found = run_conditions(answers)
     found_warnings = protocol_warnings(
         protocol,
@@ -127,7 +144,13 @@ def protocol_findings(
         expected_samples(answers),
         {model: c.temperatures for model, c in found.items()},
     )
-    return found_warnings, [evaluate(protocol, summaries[m]) for m in sorted(summaries)]
+    if case_ids is None:
+        return found_warnings, [evaluate(protocol, summaries[m]) for m in sorted(summaries)]
+    complete = complete_cases_by_model(answers, case_ids, protocol.samples)
+    return found_warnings, [
+        evaluate(protocol, summaries[m], complete.get(m, 0), len(case_ids))
+        for m in sorted(summaries)
+    ]
 
 
 def interval_text(successes: int, total: int) -> str:
@@ -312,7 +335,8 @@ def build(
 
     if protocol is not None:
         found_warnings, outcomes = protocol_findings(
-            protocol, answers, consistency_per_model, cases_source
+            protocol, answers, consistency_per_model, cases_source,
+            [case.case_id for case in cases],
         )
         out.append("## Critério de aprovação")
         out.append("")

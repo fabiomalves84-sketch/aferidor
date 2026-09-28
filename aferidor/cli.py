@@ -303,6 +303,24 @@ def comando_verificar(args: argparse.Namespace) -> int:
     return 1 if broken or uncaught else 0
 
 
+def _protocol_problem(args: argparse.Namespace) -> str | None:
+    """Why this protocol cannot judge this run, printed; None when it can.
+
+    A protocol judges the whole bank. With --limite only part of it is asked,
+    and every limit would be met on a handful of cases.
+    """
+    problem = None
+    try:
+        protocolo.read_protocol(args.protocolo)
+    except (OSError, ValueError) as error:
+        problem = str(error)
+    if problem is None and getattr(args, "limite", 0) > 0:
+        problem = "um protocolo avalia o banco inteiro; não é compatível com --limite"
+    if problem is not None:
+        print(f"erro: {problem}", file=sys.stderr)
+    return problem
+
+
 def comando_relatorio(
     args: argparse.Namespace, reasons: dict[str, str] | None = None
 ) -> int:
@@ -327,11 +345,9 @@ def comando_relatorio(
 
     protocol = None
     if getattr(args, "protocolo", None) is not None:
-        try:
-            protocol = protocolo.read_protocol(args.protocolo)
-        except (OSError, ValueError) as error:
-            print(f"erro: {error}", file=sys.stderr)
+        if _protocol_problem(args) is not None:
             return 2
+        protocol = protocolo.read_protocol(args.protocolo)
     builder = html_report.build if formato == "html" else report.build
     text = builder(
         cases,
@@ -453,6 +469,11 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     falha. Perguntar a um modelo custa dinheiro; descobrir depois que um caso
     estava partido custa o dinheiro outra vez.
     """
+    # The protocol is read before anything is asked: a wrong path or a broken
+    # file found only at the report would already have paid for the run.
+    if getattr(args, "protocolo", None) is not None:
+        if _protocol_problem(args) is not None:
+            return 2
     cases = read_cases(args.casos)
     broken = self_check(cases)
     _, uncaught = uncaught_controls(cases)

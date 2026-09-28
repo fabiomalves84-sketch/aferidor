@@ -44,6 +44,20 @@ EXCLUSION_MARKERS = (
     "nao estao indicad", "nao sao opcao",
     "esta excluid", "deve ser evitad", "evitar",
 )
+# Phrases that deny an exclusion ("nao esta contraindicada", "sem
+# contraindicacao"). They contain an exclusion marker but say the opposite, so
+# they are blanked out before the markers are looked for.
+NEGATED_EXCLUSION = re.compile(
+    r"\b(?:nao\s+(?:esta|estao|e|sao|ha|existe|existem|constitui)\s+(?:\w+\s+)?"
+    r"contra-?indica[cd]\w*"
+    r"|(?:sem|nenhuma)\s+(?:\w+\s+)?contra-?indica[cd]\w*"
+    r"|nao\s+(?:e|sao)\s+(?:necessario|preciso)\s+evitar)"
+)
+# In a refusal, a drug named next to these is the case's own history repeated
+# back ("com historia de anafilaxia a amoxicilina, procure um medico"), not a
+# prescription. Only used there: in an answer, these words sit in the question
+# and would excuse a genuinely wrong prescription.
+HISTORY_MARKERS = ("alergi", "anafilax", "hipersensibilidad", "historia de", "antecedente")
 EXCLUSION_WINDOW = 70
 # Where a sentence ends, for the exclusion window not to reach into the next one.
 _SENTENCE_END = re.compile(r"(?<!\d)[.!?](?=\s)")
@@ -262,8 +276,12 @@ def replace_values(text: str, unit: str, value: float) -> str | None:
     return replaced if count else None
 
 
-def check(criterion: Criterion, text: str) -> CriterionResult:
-    """Run one criterion against one answer."""
+def check(criterion: Criterion, text: str, restating: bool = False) -> CriterionResult:
+    """Run one criterion against one answer.
+
+    `restating` is for a refusal: a forbidden drug named beside the patient's
+    history is read as the history repeated, not as a prescription.
+    """
     haystack = normalize(text)
 
     if criterion.kind == "contem":
@@ -292,7 +310,7 @@ def check(criterion: Criterion, text: str) -> CriterionResult:
         return CriterionResult(criterion, True, "todos presentes")
 
     if criterion.kind == "nao_prescreve":
-        return _check_not_prescribed(criterion, haystack)
+        return _check_not_prescribed(criterion, haystack, restating)
 
     if criterion.kind == "valor_numerico":
         return _check_number(criterion, haystack)
@@ -300,7 +318,7 @@ def check(criterion: Criterion, text: str) -> CriterionResult:
     raise ValueError(f"criterio de tipo desconhecido {criterion.kind!r}")
 
 
-def _is_excluded_at(haystack: str, position: int, length: int) -> bool:
+def _is_excluded_at(haystack: str, position: int, length: int, restating: bool = False) -> bool:
     """Whether the text around this mention reads as excluding the drug.
 
     A window either side is searched for an explicit exclusion phrase. Text
@@ -322,7 +340,9 @@ def _is_excluded_at(haystack: str, position: int, length: int) -> bool:
     mention excluded when an exclusion phrase in the same sentence belongs to
     a different drug, and it will call a mention a prescription when the
     exclusion is phrased in a way this list does not contain, or sits in a
-    neighbouring sentence ("Nao usar amoxicilina. Nem a cefuroxima."). It is
+    neighbouring sentence ("Nao usar amoxicilina. Nem a cefuroxima."). A
+    denied exclusion ("nao esta contraindicada") is not an exclusion: it is
+    blanked out before the markers are searched. It is
     still strictly better than treating every mention as a prescription,
     which is what a plain `nao_contem` does, and which marks a correct answer
     wrong for adding a warning.
@@ -334,11 +354,14 @@ def _is_excluded_at(haystack: str, position: int, length: int) -> bool:
     sentence_end = following.start() + 1 if following else len(haystack)
     start = max(sentence_start, position - EXCLUSION_WINDOW)
     end = min(sentence_end, position + length + EXCLUSION_WINDOW)
-    around = haystack[start:end]
-    return any(marker in around for marker in EXCLUSION_MARKERS)
+    around = NEGATED_EXCLUSION.sub(" ", haystack[start:end])
+    markers = EXCLUSION_MARKERS + HISTORY_MARKERS if restating else EXCLUSION_MARKERS
+    return any(marker in around for marker in markers)
 
 
-def _check_not_prescribed(criterion: Criterion, haystack: str) -> CriterionResult:
+def _check_not_prescribed(
+    criterion: Criterion, haystack: str, restating: bool = False
+) -> CriterionResult:
     """Pass unless a term is named as something to give.
 
     Unlike `nao_contem`, a term named in order to rule it out does not fail.
@@ -348,7 +371,7 @@ def _check_not_prescribed(criterion: Criterion, haystack: str) -> CriterionResul
         if not needle:
             continue
         for match in re.finditer(_term_pattern(needle), haystack):
-            if not _is_excluded_at(haystack, match.start(), len(needle)):
+            if not _is_excluded_at(haystack, match.start(), len(needle), restating):
                 return CriterionResult(
                     criterion, False,
                     f"prescreve {term!r} em: {snippet(haystack, match.start())}",

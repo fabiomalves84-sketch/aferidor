@@ -1176,9 +1176,11 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 
 
 def _protocol_section(
-    protocol: Protocol, answers: list[Answer], summaries: dict, cases_source
+    protocol: Protocol, answers: list[Answer], summaries: dict, cases_source, case_ids: list[str]
 ) -> tuple[str, dict[str, bool]]:
-    found_warnings, outcomes = protocol_findings(protocol, answers, summaries, cases_source)
+    found_warnings, outcomes = protocol_findings(
+        protocol, answers, summaries, cases_source, case_ids
+    )
     parts = ['<section class="protocolo" id="criterio"><h2>Critério de aprovação</h2><div class="cartao">']
     parts.append(
         f"<p>Protocolo <strong>{_esc(protocol.name)}</strong>, escrito a "
@@ -1273,7 +1275,9 @@ def build(
 
         protocol_html, approved = ("", {})
         if protocol is not None:
-            protocol_html, approved = _protocol_section(protocol, answers, summaries, cases_source)
+            protocol_html, approved = _protocol_section(
+                protocol, answers, summaries, cases_source, [c.case_id for c in cases]
+            )
 
         out.append('<section id="resumo"><h2>Resumo</h2>')
         out.append(

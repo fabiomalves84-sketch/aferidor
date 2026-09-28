@@ -172,6 +172,17 @@ class TestNaoPrescreve(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertTrue(check(self.crit(), text).passed)
 
+    def test_denying_a_contraindication_is_not_excluding_the_drug(self):
+        """"Não está contraindicada" contains the marker but says the opposite."""
+        for text in (
+            "Sim. A amoxicilina não está contraindicada.",
+            "Pode usar amoxicilina, sem contraindicação neste doente.",
+            "A amoxicilina não é uma contraindicação absoluta; iniciar 500 mg.",
+            "Não há contraindicação para a amoxicilina.",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(check(self.crit(), text).passed)
+
     def test_the_wording_of_a_product_information_leaflet_counts_as_excluding(self):
         """An SmPC says "o uso de apixabano nao e recomendado", not "nao recomendado".
         Reading the verb as a gap turned a correct answer into a critical failure."""
