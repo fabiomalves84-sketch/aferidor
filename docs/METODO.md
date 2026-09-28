@@ -210,6 +210,13 @@ Ficou guardada e explicada, e a terceira, em
 com o corretor corrigido, sem repetir nenhuma pergunta e sem tocar nos
 originais.
 
+O quarto, em `ensaios/2026-09-27-locais-12-14b/`, é o primeiro feito com o
+instrumento completo: protocolo de aprovação commitado antes da primeira
+pergunta, condições gravadas em cada resposta, instrução com acentos e os casos
+de infeção com as fontes da DGS. Dois modelos abertos maiores (Gemma 3 12B e
+Phi-4 14B), 27 casos, 5 amostras. 270 de 270 respostas completas; os dois
+modelos ficam reprovados pelo protocolo.
+
 Depois de 27/09 vários casos mudaram de fonte e de pergunta (os de infeção
 passaram para as normas da DGS). As respostas desses ensaios foram dadas às
 perguntas de então, e os números que os READMEs dos ensaios registam são os do
