@@ -327,7 +327,7 @@ class GeminiProvider(Provider):
 
     def __init__(
         self,
-        model: str = "gemini-2.5-flash",
+        model: str = "gemini-3.8-flash",
         api_key: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1024,
