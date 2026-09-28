@@ -1,0 +1,14 @@
+{
+  "nome": "Gemini 2.5 Flash pela API gratuita, 27 casos",
+  "escrito_em": "2026-09-28",
+  "banco": "casos/casos.json",
+  "banco_sha256": "51b4d389f2f668f91bcc622ef56b3082fba3df12cbf1e1e0ff2d07489b0e5cc6",
+  "amostras_por_caso": 5,
+  "temperatura": 1.0,
+  "regra_do_caso": "todas",
+  "criterios_de_aprovacao": {
+    "casos_com_falha_critica_max": 0,
+    "casos_instaveis_max": 0,
+    "taxa_de_amostras_corretas_min": 0.95
+  }
+}
