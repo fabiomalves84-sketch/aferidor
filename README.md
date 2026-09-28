@@ -14,7 +14,7 @@ Precisa de Python 3.10 ou superior e de nada mais: só a biblioteca padrão.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 408 testes
+python3 -m unittest discover -s tests          # 413 testes
 python3 -m aferidor verificar                  # os casos e o corretor estão coerentes?
 python3 -m aferidor ensaio --fornecedor falso  # ensaio a seco, sem chave nem custo
 ```
@@ -91,7 +91,7 @@ mesma exatidão e não têm nada a ver um com o outro.
   (`casos/casos.json`), e consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar` dá 27/27 e 30/30 casos coerentes, e 206/206 e 83/83 respostas
-  erradas construídas apanhadas. 408 testes, em Python 3.10 a 3.14 na CI.
+  erradas construídas apanhadas. 413 testes, em Python 3.10 a 3.14 na CI.
 - Fontes: 34 de 57 confirmadas por uma pessoa, com duas qualidades de
   evidência; das restantes, 16 lidas no original e 7 à espera de leitura
   humana. Tudo em `casos/VERIFICACAO.md`.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import unittest
 from pathlib import Path
 from datetime import date, datetime
@@ -378,6 +379,59 @@ class TestEmpty(unittest.TestCase):
         body = text.split("<body>", 1)[1]
         self.assertIn("Não há vereditos", body)
         self.assertNotIn("0%", body)
+
+
+def tokens(block: str) -> dict[str, str]:
+    return dict(re.findall(r"--([a-z0-9-]+):\s*(#[0-9a-f]{6})", block))
+
+
+def contrast(fg: str, bg: str) -> float:
+    """WCAG 2.1 contrast ratio between two #rrggbb colours."""
+    def luminance(colour: str) -> float:
+        channels = [int(colour[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        linear = [c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4 for c in channels]
+        return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+    high, low = sorted((luminance(fg), luminance(bg)), reverse=True)
+    return (high + 0.05) / (low + 0.05)
+
+
+class TestTheme(unittest.TestCase):
+    """A light and dark switch in the header, in CSS alone, with measured contrast."""
+
+    def setUp(self):
+        self.text = build([a_case()], [an_answer("1 g")])
+
+    def test_the_header_has_a_labelled_switch_with_both_themes(self):
+        header = self.text[self.text.index('<header class="topo">'):self.text.index("</header>")]
+        self.assertIn('role="radiogroup" aria-label="Tema"', header)
+        for theme in ("tema-claro", "tema-escuro"):
+            with self.subTest(theme=theme):
+                self.assertIn(f'<input type="radio" name="tema" id="{theme}">', header)
+                self.assertIn(f'<label for="{theme}">', header)
+
+    def test_nothing_is_picked_so_the_page_starts_on_the_system_theme(self):
+        self.assertNotIn("checked>", self.text)
+        self.assertNotIn('checked="', self.text)
+
+    def test_the_choice_overrides_the_system_and_print_is_always_light(self):
+        self.assertIn(":root:not(:has(#tema-claro:checked))", self.text)
+        self.assertIn(":root:has(#tema-escuro:checked) { color-scheme: dark;", self.text)
+        self.assertRegex(self.text, r"@media print \{\s*:root, :root:has\(#tema-escuro:checked\) \{ color-scheme: light;")
+
+    def test_both_themes_define_the_same_tokens(self):
+        self.assertEqual(
+            set(re.findall(r"--([a-z0-9-]+):", html_report._LIGHT_TOKENS)),
+            set(re.findall(r"--([a-z0-9-]+):", html_report._DARK_TOKENS)),
+        )
+
+    def test_every_text_colour_reads_on_the_page_and_on_cards_in_both_themes(self):
+        """4.5:1 is the WCAG AA floor for body text; computed, not judged by eye."""
+        for name, block in (("claro", html_report._LIGHT_TOKENS), ("escuro", html_report._DARK_TOKENS)):
+            colours = tokens(block)
+            for text in ("ink", "ink-2", "muted", "accent", "success-text", "critical-text"):
+                for ground in ("page", "surface", "surface-2"):
+                    with self.subTest(theme=name, text=text, ground=ground):
+                        self.assertGreaterEqual(contrast(colours[text], colours[ground]), 4.5)
 
 
 if __name__ == "__main__":

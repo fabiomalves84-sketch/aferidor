@@ -14,7 +14,9 @@ opens by saying what the bench is and how to read the page, before any
 number. It is one self contained file with no script and nothing loaded
 from the network, so it opens the same way from an email attachment, a
 shared drive or a laptop without internet. Colour always travels with an
-icon and a written label: a state is never shown by colour alone.
+icon and a written label: a state is never shown by colour alone. The page
+follows the system's light or dark setting, and a switch in the header
+changes it; the switch is CSS alone, so the no-script promise holds.
 """
 
 from __future__ import annotations
@@ -906,9 +908,9 @@ def _detail(
 
 # ---------------------------------------------------------------- style
 
-_STYLE = """
-:root {
-  color-scheme: light dark;
+# Colour tokens, written once per theme and placed three times in the CSS:
+# the system preference, the header switch, and print (always light).
+_LIGHT_TOKENS = """
   --page: #f9f9f7; --surface: #ffffff; --surface-2: #f3f2ee;
   --ink: #0b0b0b; --ink-2: #52514e; --muted: #6f6d68;
   --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
@@ -916,19 +918,31 @@ _STYLE = """
   --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b; --neutral: #a9a79f;
   --good-bg: rgba(12,163,12,0.12); --warning-bg: rgba(250,178,25,0.18);
   --critical-bg: rgba(208,59,59,0.12); --neutral-bg: rgba(137,135,129,0.14);
-  --success-text: #006300;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321;
-    --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a4a298;
-    --grid: #2c2c2a; --border: rgba(255,255,255,0.10);
-    --accent: #7eaaf0; --neutral: #6c6a64;
-    --good-bg: rgba(12,163,12,0.20); --warning-bg: rgba(250,178,25,0.16);
-    --critical-bg: rgba(208,59,59,0.24); --neutral-bg: rgba(137,135,129,0.18);
-    --success-text: #0ca30c;
-  }
-}
+  --success-text: #006300; --critical-text: #b42a2a;
+  --tooltip-shadow: rgba(0,0,0,0.18);
+"""
+_DARK_TOKENS = """
+  --page: #121211; --surface: #1c1c1a; --surface-2: #272724;
+  --ink: #f2f1ec; --ink-2: #cbc9bf; --muted: #a5a399;
+  --grid: #34332f; --border: rgba(242,241,236,0.12);
+  --accent: #8db4f5;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b; --neutral: #6c6a64;
+  --good-bg: rgba(12,163,12,0.20); --warning-bg: rgba(250,178,25,0.16);
+  --critical-bg: rgba(208,59,59,0.24); --neutral-bg: rgba(137,135,129,0.18);
+  --success-text: #5fd35f; --critical-text: #ff8f86;
+  --tooltip-shadow: rgba(0,0,0,0.55);
+"""
+# Only CSS decides the theme: no radio is checked, so the page follows the
+# system until the reader picks one; `:has()` lets the choice reach :root.
+_THEME_CSS = (
+    ":root { color-scheme: light;" + _LIGHT_TOKENS + "}\n"
+    "@media (prefers-color-scheme: dark) {\n"
+    "  :root:not(:has(#tema-claro:checked)) { color-scheme: dark;" + _DARK_TOKENS + "}\n}\n"
+    ":root:has(#tema-escuro:checked) { color-scheme: dark;" + _DARK_TOKENS + "}\n"
+    "@media print {\n"
+    "  :root, :root:has(#tema-escuro:checked) { color-scheme: light;" + _LIGHT_TOKENS + "}\n}\n"
+)
+_STYLE = _THEME_CSS + """
 * { box-sizing: border-box; }
 html { background: var(--page); scroll-behavior: smooth; }
 body {
@@ -944,7 +958,24 @@ p { margin: 0 0 0.75rem; }
 code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em;
   background: var(--surface-2); padding: 0.1rem 0.3rem; border-radius: 4px; }
 section { margin-top: 2.5rem; scroll-margin-top: 3.5rem; }
-.topo { padding: 2rem 0 1rem; }
+.topo { padding: 2rem 0 1rem; position: relative; }
+.tema { position: absolute; top: 1.6rem; right: 0; display: inline-flex; padding: 3px; gap: 2px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; }
+.tema input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.tema label { cursor: pointer; padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 0.85rem;
+  color: var(--ink-2); user-select: none; }
+.tema label:hover { color: var(--ink); }
+.tema input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* The highlighted half is the theme in force: the one picked, or the system's. */
+.tema label[for="tema-claro"], :root:has(#tema-claro:checked) .tema label[for="tema-claro"],
+:root:has(#tema-escuro:checked) .tema label[for="tema-escuro"] {
+  background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px var(--border); }
+:root:has(#tema-escuro:checked) .tema label[for="tema-claro"] { background: none; color: var(--ink-2); box-shadow: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(#tema-claro:checked)) .tema label[for="tema-escuro"] {
+    background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px var(--border); }
+  :root:not(:has(#tema-claro:checked)) .tema label[for="tema-claro"] { background: none; color: var(--ink-2); box-shadow: none; }
+}
 .marca { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .topo h1 { font-size: 2rem; margin: 0.25rem 0 0.4rem; }
 .subtitulo { color: var(--ink-2); margin: 0; }
@@ -999,7 +1030,7 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .pontos { display: inline-flex; gap: 2px; margin-left: 0.4rem; font-size: 0.72rem; letter-spacing: 0; vertical-align: 0.05rem; }
 .pt.certa { color: var(--success-text); }
 .pt { display: inline-block; width: 0.85em; text-align: center; }
-.pt.errada { color: var(--critical); font-weight: 800; font-size: 1.2em; line-height: 1; }
+.pt.errada { color: var(--critical-text); font-weight: 800; font-size: 1.2em; line-height: 1; }
 .pt.falta { color: var(--muted); }
 .como-se-conta { background: var(--surface-2); border-radius: 10px; padding: 0.9rem 1.1rem; margin: 1.25rem 0 0.5rem; }
 .como-se-conta h3 { margin: 0 0 0.4rem; font-size: 1rem; }
@@ -1073,7 +1104,7 @@ td.cel.sem-resposta { background: var(--neutral-bg); color: var(--ink-2); }
 .cel-falha { font-size: 0.8rem; color: var(--ink-2); }
 .ic { font-weight: 700; }
 td.cel.ok .ic { color: var(--success-text); }
-td.cel.erro .ic { color: var(--critical); }
+td.cel.erro .ic { color: var(--critical-text); }
 .detalhe details { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin: 0.5rem 0; }
 .detalhe summary { cursor: pointer; padding: 0.75rem 1rem; display: grid; grid-template-columns: 9rem 1fr auto; gap: 0.75rem; align-items: center; }
 .detalhe summary:hover { background: var(--surface-2); border-radius: 10px; }
@@ -1111,7 +1142,7 @@ abbr.termo:hover::after, abbr.termo:focus::after {
   background: var(--ink); color: var(--page); font-size: 0.8rem; line-height: 1.4; font-weight: 400;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   text-transform: none; letter-spacing: normal; white-space: normal; text-align: left;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.18); pointer-events: none; }
+  box-shadow: 0 4px 14px var(--tooltip-shadow); pointer-events: none; }
 abbr.termo.lado:hover::after, abbr.termo.lado:focus::after { left: calc(100% + 8px); top: -0.3rem; }
 details.glossario { margin-top: 2.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; scroll-margin-top: 3.5rem; }
 details.glossario summary { cursor: pointer; padding: 0.9rem 1.25rem; font-weight: 650; }
@@ -1127,6 +1158,7 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
   .barras-falhas li { grid-template-columns: 8.5rem 1fr 2rem; }
   .destaque { font-size: 2.6rem; }
   .topo h1 { font-size: 1.6rem; }
+  .tema { position: static; margin-top: 0.75rem; }
   .metricas { grid-template-columns: 1fr; }
   .erros { grid-template-columns: 1fr; }
   .erro-par { grid-template-columns: 1fr; }
@@ -1134,6 +1166,7 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 }
 @media print {
   nav.indice { position: static; }
+  .tema { display: none; }
   details { break-inside: avoid; }
 }
 """
@@ -1193,6 +1226,11 @@ def build(
     ]
     out.append(
         '<header class="topo"><div class="marca">Aferidor · banco de ensaio clínico</div>'
+        '<div class="tema" role="radiogroup" aria-label="Tema">'
+        '<input type="radio" name="tema" id="tema-claro"><label for="tema-claro">'
+        '<span aria-hidden="true">☀</span> Claro</label>'
+        '<input type="radio" name="tema" id="tema-escuro"><label for="tema-escuro">'
+        '<span aria-hidden="true">☾</span> Escuro</label></div>'
         "<h1>Relatório do Aferidor</h1>"
         '<p class="subtitulo">Respostas clínicas de modelos de linguagem, medidas contra '
         "casos de referência com fonte pública.</p>"
