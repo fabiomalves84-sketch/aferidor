@@ -66,7 +66,7 @@ julgamento clínico.
   português europeu independente das falhas clínicas.
 - Adaptadores para OpenAI, Anthropic, Google Gemini e modelos locais através
   do Ollama.
-- 447 testes automáticos, sem dependências externas.
+- 455 testes automáticos, sem dependências externas.
 
 Limitações conhecidas:
 
@@ -99,7 +99,7 @@ evidência:
 | Rastreabilidade à fonte | documento e página em cada caso |
 | Verificação dos dados de origem | `casos/VERIFICACAO.md` e comando `verificar` |
 | Classificação de falhas por risco | `aferidor/risk.py` |
-| Registo íntegro dos resultados | `data/respostas.jsonl`, escrito à medida que as respostas chegam |
+| Registo íntegro dos resultados | `data/respostas.jsonl`, escrito à medida que as respostas chegam; em cada ensaio registado, `MANIFESTO.sha256` com o SHA-256 de cada ficheiro (`aferidor manifesto --verificar`) |
 | Relatório para revisão humana | `relatorios/relatorio.md` e `.html`, com condições do ensaio e intervalos de confiança |
 | Validação do método de medida | `aferidor revisao` e `concordancia`: corretor contra clínico, às cegas |
 
@@ -116,7 +116,7 @@ não nos casos.
 ## Demonstração
 
 ```
-python -m unittest discover -s tests   # 447 testes
+python -m unittest discover -s tests   # 455 testes
 python -m aferidor verificar           # 27/27 casos, 307/307 controlos negativos
 python -m aferidor verificar --casos casos/consulta.json   # 30/30, 138/138
 python -m aferidor executar --fornecedor falso

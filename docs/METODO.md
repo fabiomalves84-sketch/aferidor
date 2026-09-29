@@ -194,7 +194,11 @@ Dispositivos Médicos) está em `docs/APRESENTACAO.md`.
 
 `ensaios/` contém as execuções realizadas, com respostas em bruto, veredictos e
 relatório. Cada pasta tem um README com o procedimento, as limitações e os
-resultados.
+resultados, e um `MANIFESTO.sha256` com o SHA-256 de cada ficheiro, que se
+verifica com `shasum -a 256 -c MANIFESTO.sha256` ou `aferidor manifesto
+--verificar`. Os manifestos dos ensaios até 28/09 foram escritos a 29/09,
+sobre os ficheiros tal como estavam commitados; o histórico do git prova que
+não mudaram entre o ensaio e essa data.
 
 | Ensaio | Descrição |
 |---|---|

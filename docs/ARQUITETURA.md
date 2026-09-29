@@ -32,6 +32,7 @@ flowchart LR
 | `lingua.py` | Indicador de português europeu, independente da correção clínica |
 | `protocolo.py` | Critério de aprovação prévio e verificação da sua anterioridade |
 | `revisao.py` | Comparação do corretor com o juízo de uma pessoa, em folha cega |
+| `manifesto.py` | SHA-256 de cada ficheiro de um ensaio registado, no formato do `shasum` |
 | `cli.py` | Comandos de terminal |
 
 ## Fronteiras

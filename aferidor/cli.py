@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import html_report, protocolo, report, revisao
+from . import html_report, manifesto, protocolo, report, revisao
 from .grading import grade_all, met_by_the_question, self_check, tally_by_model, uncaught_controls
 from .providers import (
     AnthropicProvider,
@@ -158,6 +158,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "concordancia", help="comparar os juízos de uma pessoa com os veredictos do corretor"
     )
     conc.add_argument("--revisao", type=Path, default=Path("relatorios/revisao.csv"))
+
+    manifesto = sub.add_parser(
+        "manifesto", help="escrever ou verificar o SHA-256 de cada ficheiro de um ensaio registado"
+    )
+    manifesto.add_argument("pasta", type=Path, help="pasta do ensaio, por exemplo ensaios/2026-09-28-gemini-flash")
+    manifesto.add_argument("--verificar", action="store_true", help="comparar a pasta com o manifesto existente")
 
     relatorio = sub.add_parser("relatorio", help="escrever o relatório")
     relatorio.add_argument("--casos", type=Path, default=DEFAULT_CASES)
@@ -317,6 +323,27 @@ def comando_verificar(args: argparse.Namespace) -> int:
         for case, criterion in echoes:
             print(f"  {case.case_id}: {criterion.kind} {list(criterion.terms)}", file=sys.stderr)
     return 1 if broken or uncaught else 0
+
+
+def comando_manifesto(args: argparse.Namespace) -> int:
+    folder = args.pasta
+    if not folder.is_dir():
+        print(f"erro: {folder} não é uma pasta", file=sys.stderr)
+        return 2
+    if not args.verificar:
+        target = manifesto.write_manifest(folder)
+        count = len(target.read_text(encoding="utf-8").splitlines())
+        print(f"manifesto em {target} ({count} ficheiros); verificável com: shasum -a 256 -c {manifesto.MANIFEST}")
+        return 0
+    if not (folder / manifesto.MANIFEST).exists():
+        print(f"erro: {folder} não tem {manifesto.MANIFEST}", file=sys.stderr)
+        return 2
+    result = manifesto.check_manifest(folder)
+    for label, names in (("alterado", result.changed), ("em falta", result.missing), ("fora do manifesto", result.unlisted)):
+        for name in names:
+            print(f"  {label}: {name}", file=sys.stderr)
+    print(f"{folder}: {'íntegra' if result.intact else 'difere do manifesto'}")
+    return 0 if result.intact else 1
 
 
 def _protocol_problem(args: argparse.Namespace) -> str | None:
@@ -565,6 +592,7 @@ _COMMANDS = {
     "protocolo": lambda a: comando_protocolo(a),
     "revisao": lambda a: comando_revisao(a),
     "concordancia": lambda a: comando_concordancia(a),
+    "manifesto": lambda a: comando_manifesto(a),
 }
 
 
