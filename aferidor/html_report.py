@@ -54,6 +54,7 @@ from .report import (
     conditions_rows,
     format_missing,
     format_missing_samples,
+    in_bank,
     interval_text,
     protocol_findings,
 )
@@ -149,6 +150,8 @@ def model_label(model_id: str) -> tuple[str, str]:
         family, maker = _FAMILIES[match.group(1)]
         words: list[str] = []
         for token in match.group(2).replace("-", " ").split():
+            if re.fullmatch(r"20\d{6}", token):
+                continue  # a release date ("claude-sonnet-4-5-20250929") is not part of the name
             if token.isdigit() and words and words[-1].replace(".", "").isdigit():
                 words[-1] += "." + token
             else:
@@ -167,7 +170,8 @@ def model_label(model_id: str) -> tuple[str, str]:
 
 
 def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo", show_id: bool = True) -> str:
-    name, description = model_label(model_id)
+    _, description = model_label(model_id)
+    name = _model_short(model_id)
     sub = (
         f'<span class="modelo-desc">{_gloss(_esc(description), ("Ollama", "parâmetros"))}</span>'
         if description else ""
@@ -179,8 +183,28 @@ def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo", show_id:
     )
 
 
+# Short names of the models on the page being built, made unique by `build`.
+_SHORT: contextvars.ContextVar[dict[str, str]] = contextvars.ContextVar("nomes", default={})
+
+
 def _model_short(model_id: str) -> str:
-    return model_label(model_id)[0]
+    return _SHORT.get().get(model_id) or model_label(model_id)[0]
+
+
+def unique_names(models: list[str]) -> dict[str, str]:
+    """A readable name per model, with the tag added where two would read the same.
+
+    "local:llama3.1:8b" and "local:llama3.1:70b" both read "Llama 3.1"; side by
+    side they become "Llama 3.1 (8b)" and "Llama 3.1 (70b)".
+    """
+    names = {m: model_label(m)[0] for m in models}
+    taken: dict[str, int] = {}
+    for name in names.values():
+        taken[name] = taken.get(name, 0) + 1
+    return {
+        m: f"{name} ({m.rsplit(':', 1)[-1] if m.count(':') > 1 else m})" if taken[name] > 1 else name
+        for m, name in names.items()
+    }
 
 
 _EVIDENCE = (
@@ -1349,12 +1373,14 @@ def build(
     if lingua not in HTML_LANG:
         raise ValueError(f"língua desconhecida {lingua!r}; esperava uma de {', '.join(HTML_LANG)}")
     token = _LANG.set(lingua)
+    names = _SHORT.set(unique_names(list(tally_by_model(verdicts))))
     try:
         return _build(
             cases, answers, verdicts, missing, reasons, sources_verified, today,
             cases_source, protocol, alternates,
         )
     finally:
+        _SHORT.reset(names)
         _LANG.reset(token)
 
 
@@ -1389,11 +1415,14 @@ def _build(
 
     sections = []
     if models:
+        consistency = consistency_by_case(cases, answers, verdicts)
+        pairs = pairs_by_case(cases, answers, verdicts)
         sections.append(("resumo", "Resumo"))
         if protocol is not None:
             sections.append(("criterio", "Critério de aprovação"))
+        if worst_examples(cases, consistency, pairs):
+            sections.append(("erros", "Erros mais graves"))
         sections += [
-            ("erros", "Erros mais graves"),
             ("areas", "Por área clínica"),
             ("grelha", "Resultados por caso"),
             ("casos-com-falha", "Casos com falha"),
@@ -1412,13 +1441,11 @@ def _build(
     out.extend(_notices(cases, answers, missing, reasons, sources_verified))
 
     if not models:
-        out.append(f'<section id="resumo"><p>{_t("Não há vereditos para relatar.")}</p></section>')
+        out.append(f'<section id="resumo"><p>{_t("Não há veredictos para relatar.")}</p></section>')
     else:
-        consistency = consistency_by_case(cases, answers, verdicts)
         summaries = consistency_by_model(consistency)
         states = states_by_model(consistency)
-        pairs = pairs_by_case(cases, answers, verdicts)
-        languages = language_by_model(answers)
+        languages = language_by_model(in_bank(cases, answers))
         expected = expected_samples(answers)
         right = right_cases_by_model(consistency, rule)
 
@@ -1486,7 +1513,7 @@ def _build(
         )
         out.extend(more)
 
-    rows = conditions_rows(answers, cases_source, _LANG.get())
+    rows = conditions_rows(in_bank(cases, answers), cases_source, _LANG.get())
     out.append(
         f'<details class="recolhe tecnico" id="detalhes"><summary>{_t("Detalhes técnicos: condições do ensaio, glossário e método")}</summary>'
     )

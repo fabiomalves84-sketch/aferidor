@@ -42,7 +42,7 @@ _ROWS: tuple[tuple[str, str, str, str, str], ...] = (
     ("Casos com falha", "Cases with failures", "Casos con fallos", "Cas en échec", "Fälle mit Fehlern"),
     ("Mais indicadores", "More indicators", "Más indicadores", "Autres indicateurs", "Weitere Indikatoren"),
     ("Detalhes técnicos", "Technical details", "Detalles técnicos", "Détails techniques", "Technische Details"),
-    ("Não há vereditos para relatar.", "There are no verdicts to report.", "No hay veredictos que informar.", "Aucun verdict à rapporter.", "Keine Urteile zu berichten."),
+    ("Não há veredictos para relatar.", "There are no verdicts to report.", "No hay veredictos que informar.", "Aucun verdict à rapporter.", "Keine Urteile zu berichten."),
     ("Este documento mede um sistema, não um doente. Não aconselha, não trata e não substitui julgamento clínico.",
      "This document measures a system, not a patient. It does not advise, does not treat and does not replace clinical judgement.",
      "Este documento mide un sistema, no a un paciente. No aconseja, no trata y no sustituye el juicio clínico.",

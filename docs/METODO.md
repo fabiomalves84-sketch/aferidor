@@ -121,8 +121,11 @@ pergunta, a referência e a resposta, mas não o veredicto nem o modelo, que
 ficam num ficheiro-chave separado. O avaliador escreve "certa" ou "errada" em
 cada linha. O segundo comando apresenta, por esta ordem, as aprovações
 indevidas (respostas julgadas erradas que o corretor aprovou), as reprovações
-indevidas, a concordância e o kappa de Cohen, com intervalos de confiança a
-95%. Respostas a uma formulação diferente da pergunta são excluídas da
+indevidas, a concordância e o kappa de Cohen; as três primeiras com
+intervalo de confiança a 95%. A amostra é estratificada (metade aprovada e
+metade reprovada pelo corretor), pelo que a concordância e o kappa descrevem a
+amostra e não a execução; as taxas de aprovações e reprovações indevidas,
+condicionais ao juízo do avaliador, são as que se aplicam à execução. Respostas a uma formulação diferente da pergunta são excluídas da
 amostra; respostas antigas, sem registo do texto enviado, são incluídas com
 aviso.
 
@@ -178,14 +181,15 @@ dois níveis de evidência, identificados em `casos/VERIFICACAO.md`: dez casos
 de infeção confirmados nos PDF das normas da DGS, um a um; 24 declarados
 confirmados em grupo nos documentos da DGS e do Infarmed, sem registo de
 página por caso. Os 23 restantes citam outras fontes (APMGF, ESC, ADA, NICE,
-EMA) e estão por confirmar.
+EMA) e aguardam confirmação por uma pessoa: 16 foram lidos no documento
+original por ferramenta e 7 ainda não.
 
 O enquadramento normativo (ISO/IEC 42001, ISO 13485, Regulamento de
 Dispositivos Médicos) está em `docs/APRESENTACAO.md`.
 
 ## Ensaios registados
 
-`ensaios/` contém as execuções realizadas, com respostas em bruto, vereditos e
+`ensaios/` contém as execuções realizadas, com respostas em bruto, veredictos e
 relatório. Cada pasta tem um README com o procedimento, as limitações e os
 resultados.
 

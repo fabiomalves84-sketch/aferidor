@@ -10,8 +10,8 @@ flowchart LR
     C --> D[grading + checks<br/>corrige por critérios e por consistência]
     A --> D
     D --> E[vereditos.json<br/>certo, errado, que falha]
-    E --> F[report<br/>documento em Markdown]
-    E --> G[html_report<br/>documento em HTML]
+    D --> F[report<br/>documento em Markdown]
+    D --> G[html_report<br/>documento em HTML]
     B -.fala com.-> P[providers<br/>OpenAI, Anthropic, Gemini, local via Ollama, falso]
 ```
 
@@ -20,7 +20,7 @@ flowchart LR
 | Ficheiro | Responsabilidade |
 |---|---|
 | `risk.py` | A taxonomia de falhas e o risco clínico de cada uma |
-| `models.py` | Caso, fonte, critério, resposta (com amostra e condições de obtenção), veredito |
+| `models.py` | Caso, fonte, critério, resposta (com amostra e condições de obtenção), veredicto |
 | `storage.py` | Leitura e escrita destes objetos em JSON legível |
 | `providers.py` | Comunicação com um modelo, através de uma interface estreita |
 | `runner.py` | Execução dos casos, com repetições, novas tentativas e retoma |
@@ -62,7 +62,7 @@ alguma diferir, recusa e indica as opções (`--recomecar` ou outro `--saida`).
 Um ficheiro com duas medições diferentes produziria um resultado que não
 descreve nenhuma delas.
 
-**Nenhuma contagem mistura modelos.** `tally` recusa vereditos de modelos
+**Nenhuma contagem mistura modelos.** `tally` recusa veredictos de modelos
 diferentes na mesma contagem; `consistency_by_model` segue a mesma regra.
 
 **O caso, e não a amostra, é a unidade de resultado.** `grading.consistency_by_case`
@@ -105,7 +105,8 @@ execuções separadas no tempo diferem apenas no modelo.
   SHA-256 do texto enviado e versão do Aferidor com o SHA-256 do código. Sem
   este registo, uma alteração de uma palavra no prompt seria indistinguível
   no mesmo ficheiro
-- `data/vereditos.json`: resultado da correção
+- `data/vereditos.json`: resultado da correção (os relatórios não o leem: voltam a
+  corrigir as respostas com os critérios atuais)
 - `relatorios/relatorio.md`: relatório em Markdown
 - `relatorios/relatorio.html`: relatório em HTML (`--formato html`)
 

@@ -82,6 +82,17 @@ def format_missing_samples(
     return ", ".join(parts)
 
 
+def in_bank(cases: list[Case], answers: list[Answer]) -> list[Answer]:
+    """Only the answers to cases of the bank being reported.
+
+    A file can hold answers to another bank, or to cases left out by
+    --limite; they are named as unknown elsewhere, and must not count in the
+    conditions or in the language indicator of this bank.
+    """
+    ids = {case.case_id for case in cases}
+    return [answer for answer in answers if answer.case_id in ids]
+
+
 def conditions_rows(
     answers: list[Answer], cases_source: tuple[str, str] | None = None, lang: str = "pt"
 ) -> list[tuple[str, str]]:
@@ -191,8 +202,8 @@ def how_counted(samples: int, rule: str) -> str:
 def _risk_line(critical_cases: int, total_cases: int) -> str:
     """The headline number: cases, not samples, with how far it can be trusted.
 
-    Um caso conta como falha crítica se qualquer amostra a produziu. Um médico
-    só vê uma resposta e não escolhe qual das amostras lhe calha.
+    A case counts as a critical failure if any sample produced one. A doctor
+    sees one answer and does not choose which of the samples it is.
 
     The interval is part of the number, not a footnote. With 27 cases, zero
     critical failures is still compatible with a true rate above one in ten,
@@ -303,7 +314,7 @@ def build(
     out.append("")
     out.append(HEADER_NOTE)
     out.append("")
-    rows = conditions_rows(answers, cases_source)
+    rows = conditions_rows(in_bank(cases, answers), cases_source)
     if rows:
         out.append("## Condições do ensaio")
         out.append("")
@@ -339,7 +350,7 @@ def build(
         out.append("")
 
     if not per_model:
-        out.append("Não há vereditos para relatar.")
+        out.append("Não há veredictos para relatar.")
         out.append("")
         return "\n".join(out)
 
@@ -405,7 +416,7 @@ def build(
         )
         out.append("")
 
-    languages = language_by_model(answers)
+    languages = language_by_model(in_bank(cases, answers))
     for model, counts in per_model.items():
         summary = consistency_per_model[model]
         out.append(f"## {model}")

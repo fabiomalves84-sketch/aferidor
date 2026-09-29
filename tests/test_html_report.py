@@ -244,6 +244,11 @@ class TestReadableByAnOutsider(unittest.TestCase):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
         self.assertRegex(text, r'✕ <abbr class="termo"[^>]*>nunca correto</abbr>')
 
+    def test_the_index_only_links_sections_that_exist(self):
+        text = build([a_case()], [an_answer("1 g")])
+        self.assertNotIn('href="#erros"', text)
+        self.assertNotIn('id="erros"', text)
+
     def test_failure_charts_share_one_scale_across_models(self):
         """Two charts on their own scales make a smaller count look as long as a bigger one."""
         answers = [an_answer("Amoxicilina 500 mg", model="a"), an_answer("nada", model="b")]
@@ -266,6 +271,19 @@ class TestModelNames(unittest.TestCase):
         self.assertEqual(model_label("anthropic:claude-sonnet-4-5")[0], "Claude Sonnet 4.5")
         self.assertEqual(model_label("openai:gpt-4o")[0], "GPT-4o")
         self.assertEqual(model_label("gemini:gemini-3.5-flash-lite"), ("Gemini 3.5 Flash Lite", "Google · acedido por API"))
+
+    def test_two_models_with_the_same_name_are_told_apart(self):
+        from aferidor.html_report import unique_names
+
+        names = unique_names(["local:llama3.1:8b", "local:llama3.1:70b", "local:qwen3:8b"])
+        self.assertEqual(names["local:llama3.1:8b"], "Llama 3.1 (8b)")
+        self.assertEqual(names["local:llama3.1:70b"], "Llama 3.1 (70b)")
+        self.assertEqual(names["local:qwen3:8b"], "Qwen 3")
+
+    def test_a_release_date_is_not_part_of_the_name(self):
+        from aferidor.html_report import model_label
+
+        self.assertEqual(model_label("anthropic:claude-sonnet-4-5-20250929")[0], "Claude Sonnet 4.5")
 
     def test_an_unknown_model_is_shown_by_its_identifier_not_guessed(self):
         from aferidor.html_report import model_label
@@ -392,7 +410,7 @@ class TestEmpty(unittest.TestCase):
     def test_no_verdicts_says_so_instead_of_reporting_zero_percent(self):
         text = html_report.build([a_case()], [], [], today=date(2026, 9, 14))
         body = text.split("<body>", 1)[1]
-        self.assertIn("Não há vereditos", body)
+        self.assertIn("Não há veredictos", body)
         self.assertNotIn("0%", body)
 
 

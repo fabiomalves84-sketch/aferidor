@@ -233,6 +233,14 @@ class TestMissingSamples(unittest.TestCase):
         self.assertNotIn("Amostras em falta", text)
 
 
+class TestOnlyTheBankCounts(unittest.TestCase):
+    def test_answers_to_other_cases_are_left_out_of_conditions_and_language(self):
+        answers = [an_answer("1 g", case_id="C1"), an_answer("infecção, você", case_id="OUTRO-1")]
+        text = report.build([a_case("C1")], answers, [grade(a_case("C1"), answers[0])], today=date(2026, 9, 14))
+        self.assertIn("1 respostas, recolhidas", text)
+        self.assertIn("0 de 1 respostas com formas do português do Brasil", text)
+
+
 class TestComparison(unittest.TestCase):
     def test_two_models_get_a_comparison_table(self):
         cases = [a_case("C1")]
@@ -256,7 +264,7 @@ class TestComparison(unittest.TestCase):
 class TestEmpty(unittest.TestCase):
     def test_no_verdicts_says_so_instead_of_reporting_zero_percent(self):
         text = report.build([a_case()], [], [], today=date(2026, 9, 14))
-        self.assertIn("Não há vereditos", text)
+        self.assertIn("Não há veredictos", text)
         self.assertNotIn("0%", text)
 
 

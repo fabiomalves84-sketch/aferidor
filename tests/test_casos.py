@@ -46,15 +46,21 @@ class TestShippedCases(unittest.TestCase):
         missing = sorted(f.value for f in FailureType if f not in measured)
         self.assertEqual(missing, [], f"tipos de falha sem nenhum caso: {missing}")
 
-    def test_every_critical_failure_is_measured_by_more_than_one_criterion(self):
+    # Critical failure types measured by a single case, known and waiting for a
+    # second one. A second case is a clinical decision, not a code change; when
+    # it is added, the type comes off this list and the test holds it there.
+    ONE_CASE_ONLY = {"encaminhamento_omitido"}
+
+    def test_every_critical_failure_is_measured_by_more_than_one_case(self):
+        """One case per critical type makes that type's count hinge on a single question."""
         from collections import Counter
 
         both = self.cases + read_cases(BANK)
-        counts = Counter(cr.failure for c in both for cr in c.all_criteria)
-        thin = sorted(
-            f.value for f in FailureType if f.risk.name == "CRITICO" and counts[f] < 1
-        )
-        self.assertEqual(thin, [])
+        counts = Counter(f for c in both for f in {cr.failure for cr in c.all_criteria})
+        thin = {
+            f.value for f in FailureType if f.risk.name == "CRITICO" and counts[f] < 2
+        }
+        self.assertEqual(thin, self.ONE_CASE_ONLY)
 
     def test_every_criterion_catches_its_negative_control(self):
         from aferidor.grading import uncaught_controls
