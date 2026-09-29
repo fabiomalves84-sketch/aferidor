@@ -63,7 +63,7 @@ demonstra.
 ## Como correr
 
 ```
-python3 -m unittest discover -s tests   # 463 testes
+python3 -m unittest discover -s tests   # 465 testes
 python3 -m aferidor verificar           # 27/27 casos, 307/307 controlos negativos
 python3 -m aferidor verificar --casos casos/consulta.json   # 30/30, 138/138
 python3 -m aferidor ensaio --fornecedor falso
