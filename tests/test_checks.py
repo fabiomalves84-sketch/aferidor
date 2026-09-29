@@ -172,6 +172,32 @@ class TestNaoPrescreve(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertTrue(check(self.crit(), text).passed)
 
+    def test_the_exclusion_can_follow_a_long_subject_to_the_end_of_the_sentence(self):
+        """"Os DOAC (apixabano, dabigatrano, edoxabano ou rivaroxabano) estao contraindicados"."""
+        text = ("Os DOAC (anticoagulantes orais diretos, como apixabano, dabigatrano, edoxabano "
+                "ou rivaroxabano) estão contraindicados na prótese valvular mecânica.")
+        self.assertTrue(check(criterion("nao_prescreve", "doac", failure=FailureType.CONTRAINDICACAO_OMITIDA), text).passed)
+
+    def test_a_later_mention_of_an_excluded_drug_explains_the_exclusion(self):
+        for text in (
+            "Não dar amoxicilina. A amoxicilina está associada a anafilaxia neste doente.",
+            "A amoxicilina não é adequada. A cefuroxima é mais segura que a amoxicilina.",
+            "Nunca deve administrar amoxicilina. Ver o risco da amoxicilina no RCM.",
+            "Deve desaconselhar-se a amoxicilina; a **amoxicilina** tem risco neste doente.",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(check(self.crit(), text).passed)
+
+    def test_a_later_mention_with_a_dose_or_advice_to_give_is_a_prescription(self):
+        for text in (
+            "A amoxicilina está contraindicada. Mesmo assim, inicie amoxicilina 500 mg.",
+            "Não usar amoxicilina por agora. A amoxicilina é a primeira linha.",
+            "A amoxicilina está contraindicada. Na verdade a amoxicilina não está contraindicada.",
+            "A amoxicilina está contraindicada. **Recomendo amoxicilina.**",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(check(self.crit(), text).passed)
+
     def test_denying_a_contraindication_is_not_excluding_the_drug(self):
         """"Não está contraindicada" contains the marker but says the opposite."""
         for text in (

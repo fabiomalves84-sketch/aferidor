@@ -42,6 +42,9 @@ EXCLUSION_MARKERS = (
     "nao deve", "nao pode ser usad", "nao e opcao", "nao esta indicad",
     "nao recomendad", "nao e recomendad", "nao sao recomendad", "nao se recomenda",
     "nao estao indicad", "nao sao opcao",
+    "nao e adequad", "nao sao adequad", "nao esta recomendad", "nem esta recomendad",
+    "nao e indicad", "desaconselh",
+    "nunca deve", "nunca dar", "nunca usar", "nunca utilizar", "nunca administrar", "nunca prescrever",
     "esta excluid", "deve ser evitad", "evitar",
 )
 # Phrases that deny an exclusion ("nao esta contraindicada", "sem
@@ -59,6 +62,25 @@ NEGATED_EXCLUSION = re.compile(
 # and would excuse a genuinely wrong prescription.
 HISTORY_MARKERS = ("alergi", "anafilax", "hipersensibilidad", "historia de", "antecedente")
 EXCLUSION_WINDOW = 70
+# After the name, the exclusion is the predicate, and in Portuguese it follows
+# the whole subject: "Os DOAC (apixabano, dabigatrano, edoxabano ou
+# rivaroxabano) estao contraindicados". It is searched to the end of the
+# sentence, capped so a run-on paragraph does not count as one sentence.
+EXCLUSION_AFTER = 200
+# How far from an already excluded drug a prescribing signal must be to count
+# as advice to give it: close enough to be about that drug, not about the
+# alternative the same sentence goes on to dose ("em alternativa a aspirina,
+# paracetamol 15 mg/kg").
+PRESCRIBING_WINDOW = 40
+# What makes a mention read as advice to give the drug: a dose, or a verb or
+# phrase of prescribing. Used only for a drug the answer has already excluded:
+# a later mention without any of these is the answer explaining the exclusion
+# ("a aspirina esta associada ao sindrome de Reye"), not reversing it.
+PRESCRIBING = re.compile(
+    r"\d+(?:[.,]\d+)?\s*(?:mg|g|mcg|ug|ml|ui)\b"
+    r"|\b(?:iniciar|inicie|prescrever|prescreva|recomend\w*|opt(?:ar|e)|administre"
+    r"|primeira linha|pode (?:dar|usar|utilizar|tomar|iniciar|administrar)|deve (?:iniciar|tomar|usar))\b"
+)
 # Where a sentence ends, for the exclusion window not to reach into the next one.
 _SENTENCE_END = re.compile(r"(?<!\d)[.!?](?=\s)")
 
@@ -353,8 +375,9 @@ def _is_excluded_at(haystack: str, position: int, length: int, restating: bool =
     following = _SENTENCE_END.search(haystack, position + length)
     sentence_end = following.start() + 1 if following else len(haystack)
     start = max(sentence_start, position - EXCLUSION_WINDOW)
-    end = min(sentence_end, position + length + EXCLUSION_WINDOW)
-    around = NEGATED_EXCLUSION.sub(" ", haystack[start:end])
+    end = min(sentence_end, position + length + EXCLUSION_AFTER)
+    # Markdown emphasis is layout, not content: "deve ser **evitado**" excludes.
+    around = NEGATED_EXCLUSION.sub(" ", haystack[start:end].replace("*", ""))
     markers = EXCLUSION_MARKERS + HISTORY_MARKERS if restating else EXCLUSION_MARKERS
     return any(marker in around for marker in markers)
 
@@ -366,17 +389,40 @@ def _check_not_prescribed(
 
     Unlike `nao_contem`, a term named in order to rule it out does not fail.
     """
-    for term in criterion.terms:
-        needle = normalize(term)
-        if not needle:
+    mentions = sorted(
+        (match.start(), len(needle), term)
+        for term in criterion.terms
+        if (needle := normalize(term))
+        for match in re.finditer(_term_pattern(needle), haystack)
+    )
+    excluded_before = False
+    for position, length, term in mentions:
+        if _is_excluded_at(haystack, position, length, restating):
+            excluded_before = True
             continue
-        for match in re.finditer(_term_pattern(needle), haystack):
-            if not _is_excluded_at(haystack, match.start(), len(needle), restating):
-                return CriterionResult(
-                    criterion, False,
-                    f"prescreve {term!r} em: {snippet(haystack, match.start())}",
-                )
+        # Signals are looked for near the mention and inside its sentence: a
+        # dose or a "recomendada" in the next sentence, or a denied exclusion
+        # about another drug, says nothing about this one. A denied exclusion
+        # near it ("nao esta contraindicada") reverses the answer: it counts
+        # as advice to give the drug, whatever came before.
+        start, end = _sentence_bounds(haystack, position, length)
+        near = haystack[max(start, position - PRESCRIBING_WINDOW):min(end, position + length + PRESCRIBING_WINDOW)]
+        near = near.replace("*", "")
+        if excluded_before and not (PRESCRIBING.search(near) or NEGATED_EXCLUSION.search(near)):
+            continue
+        return CriterionResult(
+            criterion, False, f"prescreve {term!r} em: {snippet(haystack, position)}",
+        )
     return CriterionResult(criterion, True, "nenhum farmaco excluido foi prescrito")
+
+
+def _sentence_bounds(haystack: str, position: int, length: int) -> tuple[int, int]:
+    """Where the sentence a mention sits in starts and ends, as the exclusion window sees it."""
+    start = 0
+    for boundary in _SENTENCE_END.finditer(haystack, 0, position):
+        start = boundary.end()
+    following = _SENTENCE_END.search(haystack, position + length)
+    return start, following.start() + 1 if following else len(haystack)
 
 
 def _check_number(criterion: Criterion, haystack: str) -> CriterionResult:

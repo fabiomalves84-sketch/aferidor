@@ -175,7 +175,14 @@ excluído um fármaco quando a expressão de exclusão pertence a outro ("Não u
 amoxicilina, dar cefuroxima"); dá como prescrito um fármaco quando a exclusão
 usa uma forma ausente da lista ("não são alternativa") ou está noutra frase
 ("Não usar amoxicilina. Nem a cefuroxima."). A negação de uma exclusão ("não
-está contraindicada", "sem contraindicação") conta como prescrição. É preferível ao comportamento
+está contraindicada", "sem contraindicação") conta como prescrição. A
+expressão de exclusão pode vir depois do nome até ao fim da frase, porque em
+português o predicado segue o sujeito inteiro ("Os DOAC (…) estão
+contraindicados"). Uma menção posterior a um fármaco que a resposta já excluiu
+só conta como prescrição se tiver perto, na mesma frase, uma dose, um verbo
+de prescrever ou a negação da exclusão; sem isso, é a resposta a explicar a
+exclusão. Continua a errar no sentido conservador em construções como "ao
+contrário da bupropiona, [a vareniclina] não está contraindicada". É preferível ao comportamento
 anterior, que tratava qualquer menção como prescrição e reprovava respostas
 corretas que incluíam um aviso. Não constitui compreensão de texto.
 
