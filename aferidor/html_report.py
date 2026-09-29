@@ -473,6 +473,7 @@ def _intro(cases: list[Case], models: list[str], answers: list[Answer], how_coun
 <section class="intro" aria-labelledby="sobre">
   <h2 id="sobre" class="vh">{_t("Sobre este relatório")}</h2>
   <p class="lead">{_t("O <strong>Aferidor</strong> avalia a exatidão de modelos de linguagem em perguntas clínicas em português europeu e classifica os erros pelo risco clínico.")}</p>
+  <p class="triagem">{_t("Os veredictos são a triagem automática do corretor; a validação por um especialista faz-se à parte, numa folha cega ({comando}).", comando="<code>aferidor revisao</code>")}</p>
   <ul class="factos">{fact_items}</ul>
   <details class="recolhe ler">
     <summary>{_t("Como interpretar este relatório")}</summary>
@@ -1101,6 +1102,7 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .intro { margin-top: 1.5rem;
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
 .lead { font-size: 1.12rem; }
+.triagem { color: var(--ink-2); font-size: 0.9rem; margin-top: -0.25rem; }
 .factos { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .factos li { background: var(--surface-2); border-radius: 999px; padding: 0.2rem 0.75rem; font-size: 0.88rem; color: var(--ink-2); }
 .como-ler { margin: 0; padding-left: 1.3rem; color: var(--ink-2); font-size: 0.95rem; }

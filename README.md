@@ -15,7 +15,7 @@ Requer Python 3.10 ou superior. Não tem dependências externas.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 446 testes
+python3 -m unittest discover -s tests          # 447 testes
 python3 -m aferidor verificar                  # coerência dos casos e do corretor
 python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
@@ -89,15 +89,16 @@ documentos públicos ou são sintéticos.
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar`: 27/27 e 30/30 casos coerentes; 307/307 e 138/138 controlos
-  negativos detetados. 446 testes, em Python 3.10 a 3.14 na integração
+  negativos detetados. 447 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 34 de 57 confirmadas por uma pessoa; das restantes, 16 lidas no
   documento original e 7 por confirmar. Detalhe em `casos/VERIFICACAO.md`.
 
 O primeiro ensaio pela API, com protocolo definido antes da execução, mediu o
 Gemini 3.5 Flash Lite (`ensaios/2026-09-28-gemini-flash/`). Em falta: a revisão
-de uma amostra de respostas por um clínico e a confirmação das fontes
-restantes.
+de uma amostra de respostas por um clínico, que ainda não tem revisor (a folha
+cega gera-se com `aferidor revisao` e fica pronta para quando houver), e a
+confirmação das fontes restantes.
 
 ## Documentação
 

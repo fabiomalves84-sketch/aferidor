@@ -43,6 +43,10 @@ HEADER_NOTE = (
     "Este documento mede um sistema, não um doente. Não aconselha, não trata e "
     "não substitui julgamento clínico."
 )
+TRIAGE_NOTE = (
+    "Os veredictos são a triagem automática do corretor; a validação por um "
+    "especialista faz-se à parte, numa folha cega (`aferidor revisao`)."
+)
 
 
 def _percent(value: float) -> str:
@@ -314,6 +318,8 @@ def build(
     out.append("")
     out.append(HEADER_NOTE)
     out.append("")
+    out.append(TRIAGE_NOTE)
+    out.append("")
     rows = conditions_rows(in_bank(cases, answers), cases_source)
     if rows:
         out.append("## Condições do ensaio")
@@ -480,4 +486,5 @@ __all__ = [
     "format_missing",
     "format_missing_samples",
     "HEADER_NOTE",
+    "TRIAGE_NOTE",
 ]

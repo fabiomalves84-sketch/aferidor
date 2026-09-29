@@ -105,6 +105,7 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .intro { margin-top: 1.5rem;
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
 .lead { font-size: 1.12rem; }
+.triagem { color: var(--ink-2); font-size: 0.9rem; margin-top: -0.25rem; }
 .factos { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .factos li { background: var(--surface-2); border-radius: 999px; padding: 0.2rem 0.75rem; font-size: 0.88rem; color: var(--ink-2); }
 .como-ler { margin: 0; padding-left: 1.3rem; color: var(--ink-2); font-size: 0.95rem; }
@@ -301,6 +302,7 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 <section class="intro" aria-labelledby="sobre">
   <h2 id="sobre" class="vh">About this report</h2>
   <p class="lead"><strong>Aferidor</strong> assesses the accuracy of language models on clinical questions in European Portuguese and classifies errors by clinical risk.</p>
+  <p class="triagem">The verdicts are the grader's automatic triage; validation by a specialist is done separately, on a blind sheet (<code>aferidor revisao</code>).</p>
   <ul class="factos"><li>27 clinical cases</li><li>3 models</li><li>5 samples per case</li></ul>
   <details class="recolhe ler">
     <summary>How to read this report</summary>

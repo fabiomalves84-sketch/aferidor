@@ -66,13 +66,14 @@ julgamento clínico.
   português europeu independente das falhas clínicas.
 - Adaptadores para OpenAI, Anthropic, Google Gemini e modelos locais através
   do Ollama.
-- 446 testes automáticos, sem dependências externas.
+- 447 testes automáticos, sem dependências externas.
 
 Limitações conhecidas:
 
 - **A validação pelo especialista ainda não foi feita nos ensaios
-  registados.** O circuito está pronto; falta um clínico julgar a folha. Até
-  lá, os resultados correspondem à triagem do corretor.
+  registados.** O circuito está pronto e a folha cega gera-se com um comando;
+  falta um clínico disponível para a julgar. Até lá, os resultados
+  correspondem à triagem do corretor, e os relatórios dizem-no no topo.
 - **Fontes parcialmente confirmadas.** 10 casos confirmados nos PDF da DGS, um
   a um; 24 declarados confirmados em grupo; dos 23 restantes, 16 lidos no
   documento original por ferramenta e 7 (ESC e ADA) por confirmar. Detalhe em
@@ -115,7 +116,7 @@ não nos casos.
 ## Demonstração
 
 ```
-python -m unittest discover -s tests   # 446 testes
+python -m unittest discover -s tests   # 447 testes
 python -m aferidor verificar           # 27/27 casos, 307/307 controlos negativos
 python -m aferidor verificar --casos casos/consulta.json   # 30/30, 138/138
 python -m aferidor executar --fornecedor falso

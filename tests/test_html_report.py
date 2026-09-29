@@ -244,6 +244,11 @@ class TestReadableByAnOutsider(unittest.TestCase):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
         self.assertRegex(text, r'✕ <abbr class="termo"[^>]*>nunca correto</abbr>')
 
+    def test_the_first_screen_says_the_verdicts_are_triage_for_a_specialist(self):
+        text = build([a_case()], [an_answer("1 g")])
+        intro = text[text.index('class="intro"'):text.index("<details")]
+        self.assertIn("triagem automática do corretor", intro)
+
     def test_the_index_only_links_sections_that_exist(self):
         text = build([a_case()], [an_answer("1 g")])
         self.assertNotIn('href="#erros"', text)
