@@ -8,6 +8,24 @@ https://fabiomalves84-sketch.github.io/aferidor/exemplo/ (Gemini 3.5 Flash Lite
 pela API e dois modelos locais, 27 casos, 5 amostras por caso, ensaios de 27 e
 28/09/2026; em português, inglês, espanhol, francês e alemão).
 
+[![Resumo do relatório de exemplo](docs/imagens/resumo.png)](https://fabiomalves84-sketch.github.io/aferidor/exemplo/)
+
+## Resultados
+
+Banco principal, 27 casos × 5 amostras, temperatura 1,0, protocolo commitado
+antes de cada ensaio.
+
+| Modelo | Casos com falha crítica (IC 95%) | Casos sempre corretos | Protocolo |
+|---|---|---|---|
+| Gemini 3.5 Flash Lite (Google, API) | 11 de 27 (25% a 59%) | 10 de 27 | reprovado |
+| Gemma 3 12B (Google, local) | 17 de 27 (44% a 78%) | 2 de 27 | reprovado |
+| Phi-4 14B (Microsoft, local) | 22 de 27 (63% a 92%) | 2 de 27 | reprovado |
+
+Os protocolos exigem zero casos com falha crítica. Entre os dois melhores, o
+teste de McNemar exato sobre os casos discordantes dá p = 0,146: com 27 casos,
+a diferença ainda pode ser acaso. Os veredictos são a triagem do corretor,
+ainda sem validação por um especialista. Detalhe em `ensaios/`.
+
 ## Instalação e primeira execução
 
 Requer Python 3.10 ou superior. Não tem dependências externas.
