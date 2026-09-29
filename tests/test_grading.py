@@ -15,6 +15,7 @@ from aferidor.grading import (
     grade,
     grade_all,
     missing_samples,
+    mcnemar_exact,
     met_by_the_question,
     negative_controls,
     right_cases_by_model,
@@ -397,6 +398,19 @@ class TestCaseRule(unittest.TestCase):
         }
         self.assertEqual(right_cases_by_model(consistency), {"falso": (1, 2)})
         self.assertEqual(right_cases_by_model(consistency, "maioria_sem_critica"), {"falso": (2, 2)})
+
+
+class TestMcNemar(unittest.TestCase):
+    """The paired test on the cases where exactly one of two models failed."""
+
+    def test_no_discordant_case_means_no_evidence_of_a_difference(self):
+        self.assertEqual(mcnemar_exact(0, 0), 1.0)
+        self.assertEqual(mcnemar_exact(5, 5), 1.0)
+
+    def test_values_match_the_exact_binomial(self):
+        self.assertAlmostEqual(mcnemar_exact(0, 6), 2 / 64)
+        self.assertAlmostEqual(mcnemar_exact(1, 9), 2 * 11 / 1024)
+        self.assertAlmostEqual(mcnemar_exact(9, 1), mcnemar_exact(1, 9))
 
 
 class TestMetByTheQuestion(unittest.TestCase):

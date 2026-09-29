@@ -27,6 +27,7 @@ from .grading import (
     match_answers,
     missing_samples,
     CASE_RULES,
+    compare_critical,
     DEFAULT_CASE_RULE,
     right_cases_by_model,
     run_conditions,
@@ -421,6 +422,21 @@ def build(
             "verifica, pelo que é mais estreito do que deveria."
         )
         out.append("")
+        paired = compare_critical(consistency_per_model, consistency)
+        if paired.p_value is not None:
+            first, second = paired.rows[0][0], paired.rows[1][0]
+            verdict = (
+                "a diferença é estatisticamente significativa" if paired.p_value < 0.05
+                else "a diferença pode dever-se ao acaso"
+            )
+            shown = "p < 0,001" if paired.p_value < 0.001 else f"p = {paired.p_value:.3f}".replace(".", ",")
+            out.append(
+                f"`{first}` teve menos casos com falha crítica do que `{second}`. Nos casos em "
+                f"que só um dos dois teve falha crítica ({paired.only_first} contra "
+                f"{paired.only_second}), {verdict} (teste de McNemar exato, {shown}). O teste "
+                "é emparelhado, porque os modelos responderam aos mesmos casos."
+            )
+            out.append("")
 
     languages = language_by_model(in_bank(cases, answers))
     for model, counts in per_model.items():

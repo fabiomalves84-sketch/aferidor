@@ -660,9 +660,20 @@ def _context_note(models: list[str]) -> str:
     return f'<p class="contexto"><strong>{_t("Contexto.")}</strong> {sentence}</p>'
 
 
-def _comparison(summaries: dict[str, ConsistencySummary]) -> str:
-    """Which model had the fewest critical cases, and whether that could be chance."""
-    result = compare_critical(summaries)
+def _p_value(p: float) -> str:
+    """A p-value as a reader expects it, in the page's decimal notation."""
+    shown = "< 0.001" if p < 0.001 else f"= {p:.3f}"
+    return "p " + decimal(shown, _LANG.get())
+
+
+def _comparison(summaries: dict[str, ConsistencySummary], consistency=None) -> str:
+    """Which model had the fewest critical cases, and whether that could be chance.
+
+    With the cases known, the two best models are compared on the cases both
+    answered, with the exact McNemar test: they answered the same questions,
+    so the comparison is paired, which two separate intervals cannot see.
+    """
+    result = compare_critical(summaries, consistency)
     if len(result.rows) < 2:
         return ""
     best, second = result.rows[0], result.rows[1]
@@ -676,15 +687,27 @@ def _comparison(summaries: dict[str, ConsistencySummary]) -> str:
             melhor=f"<strong>{_esc(_model_short(best[0]))}</strong>", a=best[1], n=best[2],
             b=second[1], m=second[2], outro=_esc(_model_short(second[0])),
         )
-        sentence = _t(
-            "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
-            "{outro}), mas os intervalos de confiança sobrepõem-se: com {n} casos, a diferença "
-            "pode dever-se ao acaso."
-            if result.overlap else
-            "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
-            "{outro}), e os intervalos de confiança não se sobrepõem.",
-            **values,
-        )
+        if result.p_value is not None:
+            sentence = _t(
+                "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
+                "{outro}). Nos casos em que só um dos dois teve falha crítica ({x} contra {y}), a "
+                "diferença é estatisticamente significativa (teste de McNemar exato, {p})."
+                if result.p_value < 0.05 else
+                "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
+                "{outro}). Nos casos em que só um dos dois teve falha crítica ({x} contra {y}), a "
+                "diferença pode dever-se ao acaso (teste de McNemar exato, {p}).",
+                x=result.only_first, y=result.only_second, p=_p_value(result.p_value), **values,
+            )
+        else:
+            sentence = _t(
+                "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
+                "{outro}), mas os intervalos de confiança sobrepõem-se: com {n} casos, a diferença "
+                "pode dever-se ao acaso."
+                if result.overlap else
+                "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
+                "{outro}), e os intervalos de confiança não se sobrepõem.",
+                **values,
+            )
     rows = []
     for model, critical, cases_n, low, high in result.rows:
         share = critical / cases_n
@@ -1459,7 +1482,7 @@ def _build(
 
         out.append(f'<section id="resumo"><h2>{_t("Resumo")}</h2>')
         out.append(_context_note(models))
-        out.append(_comparison(summaries))
+        out.append(_comparison(summaries, consistency))
         out.append('<div class="cartoes">')
         for model in models:
             out.append(

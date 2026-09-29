@@ -257,6 +257,16 @@ class TestComparison(unittest.TestCase):
             text,
         )
 
+    def test_two_models_are_compared_with_a_paired_test(self):
+        cases = [a_case("C1")]
+        answers = [
+            an_answer("1 g", case_id="C1", model="um"),
+            an_answer("500 mg", case_id="C1", model="dois"),
+        ]
+        verdicts = [grade(cases[0], a) for a in answers]
+        text = report.build(cases, answers, verdicts, today=date(2026, 9, 14))
+        self.assertIn("teste de McNemar exato, p = 1,000", text)
+
     def test_one_model_gets_no_comparison_table(self):
         self.assertNotIn("## Comparação", build([a_case()], [an_answer("1 g")]))
 

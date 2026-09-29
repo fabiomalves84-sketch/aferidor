@@ -7,6 +7,8 @@ tally here is kept split by failure type and by the risk that type carries.
 
 from __future__ import annotations
 
+import math
+
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -463,9 +465,37 @@ class CriticalComparison:
 
     rows: tuple[tuple[str, int, int, float, float], ...]
     overlap: bool
+    # The paired comparison of the first two models, when their cases are known:
+    # cases where only the first failed critically, only the second, and the
+    # exact McNemar p-value on those discordant cases.
+    only_first: int | None = None
+    only_second: int | None = None
+    p_value: float | None = None
 
 
-def compare_critical(summaries: dict[str, "ConsistencySummary"]) -> CriticalComparison:
+def mcnemar_exact(only_first: int, only_second: int) -> float:
+    """Two-sided exact McNemar test: a binomial test on the discordant pairs.
+
+    Two models answered the same cases, so their results are paired; the
+    overlap of two separate intervals ignores that and is too cautious. Only
+    the cases where exactly one of them failed carry information about which
+    is better; under no difference, each is equally likely to be either one.
+    """
+    n = only_first + only_second
+    if n == 0:
+        return 1.0
+    tail = sum(math.comb(n, i) for i in range(min(only_first, only_second) + 1)) / 2 ** n
+    return min(1.0, 2 * tail)
+
+
+def _critical(entry: "Consistency") -> bool:
+    return entry.worst_failure is not None and entry.worst_failure.risk == Risk.CRITICO
+
+
+def compare_critical(
+    summaries: dict[str, "ConsistencySummary"],
+    consistency: dict[tuple[str, str], "Consistency"] | None = None,
+) -> CriticalComparison:
     rows = []
     for model, summary in summaries.items():
         if not summary.cases:
@@ -474,7 +504,25 @@ def compare_critical(summaries: dict[str, "ConsistencySummary"]) -> CriticalComp
         rows.append((model, summary.critical_cases, summary.cases, low, high))
     rows.sort(key=lambda r: (r[1] / r[2], r[0]))
     overlap = len(rows) > 1 and rows[0][4] >= rows[1][3]
-    return CriticalComparison(rows=tuple(rows), overlap=overlap)
+    if consistency is None or len(rows) < 2:
+        return CriticalComparison(rows=tuple(rows), overlap=overlap)
+    first, second = rows[0][0], rows[1][0]
+    both = {
+        case_id for (case_id, model) in consistency
+        if model == first and (case_id, second) in consistency
+    }
+    only_first = sum(
+        1 for c in both
+        if _critical(consistency[(c, first)]) and not _critical(consistency[(c, second)])
+    )
+    only_second = sum(
+        1 for c in both
+        if _critical(consistency[(c, second)]) and not _critical(consistency[(c, first)])
+    )
+    return CriticalComparison(
+        rows=tuple(rows), overlap=overlap, only_first=only_first, only_second=only_second,
+        p_value=mcnemar_exact(only_first, only_second),
+    )
 
 
 def worst_examples(
@@ -815,6 +863,7 @@ __all__ = [
     "critical_by_category",
     "CriticalComparison",
     "compare_critical",
+    "mcnemar_exact",
     "worst_examples",
     "expected_samples",
     "missing_samples",
