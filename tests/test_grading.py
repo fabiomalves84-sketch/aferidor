@@ -15,6 +15,7 @@ from aferidor.grading import (
     grade,
     grade_all,
     missing_samples,
+    met_by_the_question,
     negative_controls,
     right_cases_by_model,
     self_check,
@@ -396,6 +397,21 @@ class TestCaseRule(unittest.TestCase):
         }
         self.assertEqual(right_cases_by_model(consistency), {"falso": (1, 2)})
         self.assertEqual(right_cases_by_model(consistency, "maioria_sem_critica"), {"falso": (2, 2)})
+
+
+class TestMetByTheQuestion(unittest.TestCase):
+    def test_a_required_term_the_question_already_contains_is_reported(self):
+        case = Case(
+            case_id="C1", category="gravidez", question="Mulher sem contraceção, a tomar valproato?",
+            reference="Não iniciar; referenciar e assegurar contraceção eficaz.",
+            source=Source(name="Guia", reference="p. 1"),
+            criteria=(
+                Criterion(kind="contem", terms=("contracecao",), failure=FailureType.RESPOSTA_INCOMPLETA),
+                Criterion(kind="contem", terms=("referenciar",), failure=FailureType.ENCAMINHAMENTO_OMITIDO),
+            ),
+        )
+        found = met_by_the_question([case])
+        self.assertEqual([c.terms for _, c in found], [("contracecao",)])
 
 
 class TestSelfCheck(unittest.TestCase):

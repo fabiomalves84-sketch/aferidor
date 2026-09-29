@@ -729,6 +729,23 @@ def negative_controls(case: Case) -> list[NegativeControl]:
     return controls
 
 
+def met_by_the_question(cases: list[Case]) -> list[tuple[Case, Criterion]]:
+    """Positive criteria that the question alone, repeated back, already meets.
+
+    Such a criterion cannot tell an answer from an echo of the question: a
+    required term that the question contains ("sem contraceção", a "|" asked
+    for in the format) passes whatever the answer says about it. Reported as
+    a warning, not an error: fixing it means rewriting a criterion, which is
+    a clinical decision with its reason in the commit.
+    """
+    found: list[tuple[Case, Criterion]] = []
+    for case in cases:
+        for criterion in case.all_criteria:
+            if criterion.kind in _POSITIVE_KINDS and check(criterion, case.question).passed:
+                found.append((case, criterion))
+    return found
+
+
 def uncaught_controls(
     cases: list[Case],
 ) -> tuple[int, list[tuple[NegativeControl, Verdict | None]]]:
@@ -807,4 +824,5 @@ __all__ = [
     "NegativeControl",
     "negative_controls",
     "uncaught_controls",
+    "met_by_the_question",
 ]

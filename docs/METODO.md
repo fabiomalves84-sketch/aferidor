@@ -63,7 +63,10 @@ ou divide o valor de `valor_numerico`, acrescenta a prescrição proibida por
 `nao_prescreve`) e exige que o veredicto registe a falha. Nenhum conteúdo
 clínico é inventado; apenas se altera o que já existe. Estes controlos não
 detetam um termo contido acidentalmente noutra palavra de uma resposta real;
-isso só se observa com respostas reais. Para os critérios negativos há dois
+isso só se observa com respostas reais. O comando avisa também, sem falhar,
+quando um critério positivo se cumpre só com o texto da pergunta, porque não
+distingue uma resposta de uma repetição da pergunta; corrigi-lo é reescrever
+o critério, com a razão no commit. Para os critérios negativos há dois
 controlos adicionais: uma recusa seguida do termo proibido, porque um marcador
 de recusa não pode ocultar uma prescrição, e, em `nao_prescreve`, a afirmação
 de que o fármaco não está contraindicado. A verificação corre também na

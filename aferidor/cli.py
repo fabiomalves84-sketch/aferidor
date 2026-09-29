@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 from . import html_report, protocolo, report, revisao
-from .grading import grade_all, self_check, tally_by_model, uncaught_controls
+from .grading import grade_all, met_by_the_question, self_check, tally_by_model, uncaught_controls
 from .providers import (
     AnthropicProvider,
     FakeProvider,
@@ -306,6 +306,16 @@ def comando_verificar(args: argparse.Namespace) -> int:
         if verdict is not None:
             found = ", ".join(f.value for f in verdict.failures) or "nenhuma falha"
             print(f"  o veredicto deu: {found}", file=sys.stderr)
+
+    echoes = met_by_the_question(cases)
+    if echoes:
+        print(
+            f"aviso: {len(echoes)} critérios cumprem-se só com o texto da pergunta "
+            "(não distinguem uma resposta de uma repetição da pergunta):",
+            file=sys.stderr,
+        )
+        for case, criterion in echoes:
+            print(f"  {case.case_id}: {criterion.kind} {list(criterion.terms)}", file=sys.stderr)
     return 1 if broken or uncaught else 0
 
 
