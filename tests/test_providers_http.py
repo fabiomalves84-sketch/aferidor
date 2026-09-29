@@ -305,6 +305,17 @@ class TestGeminiReplies(unittest.TestCase):
             provider.ask("p")
         self.assertEqual(waits, [5.0])
 
+    def test_the_reasoning_before_the_answer_is_not_kept(self):
+        payload = {"choices": [{"message": {"content": "<thought>A bupropiona... talvez.</thought>Não. Está contraindicada."}}]}
+        with mock.patch("aferidor.providers.urllib.request.urlopen", replying(payload)):
+            self.assertEqual(self.gemini().ask("p").text, "Não. Está contraindicada.")
+
+    def test_reasoning_that_never_closes_leaves_an_empty_answer(self):
+        from aferidor.providers import without_thoughts
+
+        self.assertEqual(without_thoughts("<thought>a pensar sem fim"), "")
+        self.assertEqual(without_thoughts("Resposta sem raciocínio."), "Resposta sem raciocínio.")
+
     def test_without_a_key_it_says_which_variable_to_set(self):
         with mock.patch.dict("os.environ", {}, clear=True):
             with self.assertRaises(ProviderError) as caught:

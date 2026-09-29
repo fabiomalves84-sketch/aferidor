@@ -13,6 +13,7 @@ from __future__ import annotations
 import http.client
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
@@ -334,7 +335,7 @@ class GeminiProvider(Provider):
         api_key: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1024,
-        timeout: float = 120.0,
+        timeout: float = 300.0,
         min_interval_s: float | None = None,
         clock: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
@@ -363,7 +364,7 @@ class GeminiProvider(Provider):
 
     def ask(self, prompt: str) -> Reply:
         self._pace()
-        return _chat_completion(
+        reply = _chat_completion(
             f"{self.BASE}/chat/completions",
             {"authorization": f"Bearer {self.api_key}"},
             self.model,
@@ -373,6 +374,7 @@ class GeminiProvider(Provider):
             self.timeout,
             "do Gemini",
         )
+        return Reply(text=without_thoughts(reply.text), finish_reason=reply.finish_reason)
 
     def available_models(self) -> list[str]:
         data = _request_json(
@@ -381,6 +383,22 @@ class GeminiProvider(Provider):
         return sorted(
             str(m.get("id", "")).removeprefix("models/") for m in data.get("data", []) if m.get("id")
         )
+
+
+_THOUGHT = re.compile(r"<thought>.*?(?:</thought>|\Z)", re.S)
+
+
+def without_thoughts(text: str) -> str:
+    """The answer without the reasoning some models write before it.
+
+    The Gemma models served by the Gemini API put their reasoning in the
+    content, inside <thought>...</thought>, and the answer after it. The
+    reasoning is not what a doctor would read, and a grader that read it
+    would score what the model considered instead of what it said. A block
+    that never closes leaves nothing, which the runner treats as a truncated
+    answer rather than as an answer.
+    """
+    return _THOUGHT.sub("", text).strip()
 
 
 def _unreachable(base_url: str, error: ProviderError) -> bool:
