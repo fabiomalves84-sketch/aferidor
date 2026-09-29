@@ -454,5 +454,23 @@ class TestProtocolBeforeThePaidRun(unittest.TestCase):
             self.assertFalse((f / "r.jsonl").exists())
 
 
+
+class TestBrokenFiles(unittest.TestCase):
+    """A missing or malformed file ends in a message and exit code 2, never a traceback."""
+
+    def test_a_truncated_answers_file_is_named_not_crashed_on(self):
+        with tempfile.TemporaryDirectory() as folder:
+            broken = Path(folder) / "r.jsonl"
+            broken.write_text('{"caso": "A"\n', encoding="utf-8")
+            code, _, err = run("classificar", "--casos", str(REAL_CASES), "--respostas", str(broken),
+                               "--saida", str(Path(folder) / "v.json"))
+        self.assertEqual(code, 2)
+        self.assertIn("ficheiro JSON inválido", err)
+
+    def test_a_missing_case_file_is_named_not_crashed_on(self):
+        code, _, err = run("verificar", "--casos", "/nao/existe/casos.json")
+        self.assertEqual(code, 2)
+        self.assertIn("erro:", err)
+
 if __name__ == "__main__":
     unittest.main()

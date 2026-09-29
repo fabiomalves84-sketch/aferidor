@@ -152,7 +152,7 @@ def _request_json(
         ) from None
     except urllib.error.URLError as error:
         raise ProviderError(f"{url} inacessível: {error.reason}", retryable=True) from None
-    except (ConnectionResetError, http.client.RemoteDisconnected) as error:
+    except (ConnectionResetError, http.client.RemoteDisconnected, http.client.IncompleteRead) as error:
         raise ProviderError(f"{url} desligou a meio da leitura: {error}", retryable=True) from None
     except TimeoutError:
         raise ProviderError(f"{url} excedeu {timeout}s", retryable=True) from None
@@ -168,7 +168,7 @@ def _key_from_env(variable: str, given: str | None) -> str:
     key = given or os.environ.get(variable, "")
     if not key.strip():
         raise ProviderError(
-            f"falta a chave de API: define {variable} no ambiente ou passa-a ao construtor"
+            f"falta a chave de API: definir {variable} no ambiente ou passá-la ao construtor"
         )
     return key.strip()
 

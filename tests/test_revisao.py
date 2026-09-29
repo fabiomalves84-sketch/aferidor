@@ -105,6 +105,24 @@ class TestSheet(unittest.TestCase):
         self.assertNotIn("corretor", text)
         self.assertIn("juizo", text.splitlines()[0])
 
+    def test_an_answer_that_looks_like_a_formula_is_written_as_text(self):
+        """A spreadsheet evaluates "=..." and reads "- item" as a formula; the reviewer must see text."""
+        cases = [a_case("C1")]
+        answers = [
+            Answer("C1", "modelo-x", "=HYPERLINK(\"http://x\")", datetime(2026, 9, 1), sample=1),
+            Answer("C1", "modelo-x", "- Amoxicilina 1000 mg", datetime(2026, 9, 1), sample=2),
+        ]
+        verdicts, _ = grade_all(cases, answers)
+        items = sample_for_review(cases, answers, verdicts, n=2, seed=1)
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "respostas.jsonl"
+            write_answers(answers, source)
+            sheet = Path(folder) / "revisao.csv"
+            write_review(items, sheet, key_path_for(sheet), source)
+            with sheet.open(encoding="utf-8-sig", newline="") as handle:
+                cells = [row["resposta_do_modelo"] for row in csv.DictReader(handle, delimiter=";")]
+        self.assertTrue(all(c.startswith("'") for c in cells), cells)
+
     def test_the_key_records_the_verdict_and_the_answers_file_hash(self):
         with tempfile.TemporaryDirectory() as folder:
             sheet, items = self.write(folder)

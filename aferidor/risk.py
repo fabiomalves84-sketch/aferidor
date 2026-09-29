@@ -68,4 +68,4 @@ def failure_from_label(label: str) -> FailureType:
         return FailureType(label)
     except ValueError:
         known = ", ".join(sorted(f.value for f in FailureType))
-        raise ValueError(f"unknown failure type {label!r}; expected one of: {known}") from None
+        raise ValueError(f"tipo de falha desconhecido {label!r}; esperava um de: {known}") from None

@@ -66,7 +66,7 @@ class RunConfig:
 
     def __post_init__(self) -> None:
         if self.attempts < 1:
-            raise ValueError("a run needs at least one attempt per case")
+            raise ValueError("uma execução precisa de pelo menos uma tentativa por caso")
 
 
 @dataclass
@@ -111,9 +111,10 @@ def _check_same_conditions(
 ) -> None:
     """Refuse to resume onto answers of this model obtained differently.
 
-    A field an older answer never recorded is not compared: there is nothing
-    to compare it with, and refusing every old file would be a refusal
-    nobody could act on.
+    A field an older answer never recorded is not compared, with one
+    exception: the hash of the text sent. It was recorded from the same day
+    the instruction changed, so an answer without it is known to have been
+    given to the old instruction, and resuming onto it would mix the two.
     """
     if path is None or not Path(path).exists():
         return
@@ -128,7 +129,9 @@ def _check_same_conditions(
         if answer.max_tokens is not None and answer.max_tokens != max_tokens:
             differences.append(f"{where}: tokens_max {answer.max_tokens}, agora {max_tokens}")
         wanted = prompts.get(answer.case_id)
-        if answer.prompt_sha256 and wanted and answer.prompt_sha256 != wanted:
+        if not answer.prompt_sha256:
+            differences.append(f"{where}: sem registo do texto enviado (instrução anterior a 27/09)")
+        elif wanted and answer.prompt_sha256 != wanted:
             differences.append(f"{where}: o texto enviado ao modelo mudou")
     if differences:
         shown = "; ".join(differences[:5])

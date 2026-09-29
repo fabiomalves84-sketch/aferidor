@@ -315,7 +315,7 @@ def check(criterion: Criterion, text: str, restating: bool = False) -> Criterion
     if criterion.kind == "valor_numerico":
         return _check_number(criterion, haystack)
 
-    raise ValueError(f"criterio de tipo desconhecido {criterion.kind!r}")
+    raise ValueError(f"critério de tipo desconhecido {criterion.kind!r}")
 
 
 def _is_excluded_at(haystack: str, position: int, length: int, restating: bool = False) -> bool:

@@ -85,7 +85,7 @@ def read_protocol(path: Path) -> Protocol:
     if protocol.case_rule not in CASE_RULES:
         raise ValueError(
             f"{path}: regra_do_caso {protocol.case_rule!r} desconhecida; "
-            f"escolhe uma de: {', '.join(CASE_RULES)}"
+            f"usar uma de: {', '.join(CASE_RULES)}"
         )
     if protocol.samples < 1:
         raise ValueError(f"{path}: amostras_por_caso tem de ser pelo menos 1")

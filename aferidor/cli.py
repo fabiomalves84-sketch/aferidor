@@ -155,7 +155,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
 
     conc = sub.add_parser(
-        "concordancia", help="comparar os juízos de uma pessoa com os vereditos do corretor"
+        "concordancia", help="comparar os juízos de uma pessoa com os veredictos do corretor"
     )
     conc.add_argument("--revisao", type=Path, default=Path("relatorios/revisao.csv"))
 
@@ -274,7 +274,7 @@ def comando_classificar(args: argparse.Namespace) -> int:
 
     if missing:
         print(f"\ncasos sem resposta válida: {', '.join(sorted(set(missing)))}", file=sys.stderr)
-    print(f"\nvereditos em {args.saida}")
+    print(f"\nveredictos em {args.saida}")
     return 0
 
 
@@ -305,7 +305,7 @@ def comando_verificar(args: argparse.Namespace) -> int:
         )
         if verdict is not None:
             found = ", ".join(f.value for f in verdict.failures) or "nenhuma falha"
-            print(f"  o veredito deu: {found}", file=sys.stderr)
+            print(f"  o veredicto deu: {found}", file=sys.stderr)
     return 1 if broken or uncaught else 0
 
 
@@ -418,7 +418,7 @@ def comando_revisao(args: argparse.Namespace) -> int:
     if (args.saida.exists() or key.exists()) and not args.substituir:
         print(
             f"erro: {args.saida} já existe e pode ter juízos de uma pessoa; "
-            "escolhe outro --saida, ou usa --substituir se quiseres mesmo apagá-la",
+            "escolher outro --saida, ou usar --substituir para a apagar",
             file=sys.stderr,
         )
         return 2
@@ -483,12 +483,11 @@ def comando_modelos(args: argparse.Namespace) -> int:
 
 
 def comando_ensaio(args: argparse.Namespace) -> int:
-    """Os tres passos de uma vez, parando ao primeiro que falhe.
+    """The three steps in one go, stopping at the first that fails.
 
-    A verificacao dos casos corre primeiro e de proposito, nos dois sentidos: a
-    resposta certa passa, e uma resposta errada construida para cada criterio
-    falha. Perguntar a um modelo custa dinheiro; descobrir depois que um caso
-    estava partido custa o dinheiro outra vez.
+    The cases are checked first, on purpose, in both directions: the right
+    answer passes, and a wrong answer built for each criterion fails. Asking
+    a model costs money; finding a broken case afterwards costs it again.
     """
     # The protocol is read before anything is asked: a wrong path or a broken
     # file found only at the report would already have paid for the run.
@@ -546,27 +545,32 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     return 0
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(list(sys.argv[1:] if argv is None else argv))
-    if args.comando == "executar":
-        return comando_executar(args)
-    if args.comando == "verificar":
-        return comando_verificar(args)
-    if args.comando == "classificar":
-        return comando_classificar(args)
-    if args.comando == "relatorio":
-        return comando_relatorio(args)
-    if args.comando == "ensaio":
-        return comando_ensaio(args)
-    if args.comando == "modelos":
-        return comando_modelos(args)
-    if args.comando == "protocolo":
-        return comando_protocolo(args)
-    if args.comando == "revisao":
-        return comando_revisao(args)
-    if args.comando == "concordancia":
-        return comando_concordancia(args)
-    return 2
+_COMMANDS = {
+    "executar": lambda a: comando_executar(a),
+    "verificar": lambda a: comando_verificar(a),
+    "classificar": lambda a: comando_classificar(a),
+    "relatorio": lambda a: comando_relatorio(a),
+    "ensaio": lambda a: comando_ensaio(a),
+    "modelos": lambda a: comando_modelos(a),
+    "protocolo": lambda a: comando_protocolo(a),
+    "revisao": lambda a: comando_revisao(a),
+    "concordancia": lambda a: comando_concordancia(a),
+}
 
+
+def main(argv: list[str] | None = None) -> int:
+    """Run one command; a missing or malformed file ends in a message, not a traceback."""
+    args = parse_args(list(sys.argv[1:] if argv is None else argv))
+    command = _COMMANDS.get(args.comando)
+    if command is None:
+        return 2
+    try:
+        return command(args)
+    except json.JSONDecodeError as error:
+        print(f"erro: ficheiro JSON inválido, linha {error.lineno}, coluna {error.colno}", file=sys.stderr)
+        return 2
+    except (OSError, ValueError) as error:
+        print(f"erro: {error}", file=sys.stderr)
+        return 2
 
 __all__ = ["main", "build_provider", "parse_args"]

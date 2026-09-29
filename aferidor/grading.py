@@ -222,7 +222,7 @@ def tally(verdicts: list[Verdict]) -> Tally:
     models = {v.model for v in verdicts}
     if len(models) > 1:
         raise ValueError(
-            "vereditos de modelos diferentes na mesma contagem: " + ", ".join(sorted(models))
+            "veredictos de modelos diferentes na mesma contagem: " + ", ".join(sorted(models))
         )
 
     counts = Tally(model=verdicts[0].model, total=len(verdicts))
@@ -299,7 +299,7 @@ def match_answers(
     matched = [a for a in answers if a.case_id in known_ids]
     if len(matched) != len(verdicts):
         raise ValueError(
-            "answers e verdicts fora de sincronia; volta a correr grade_all(cases, answers)"
+            "answers e verdicts fora de sincronia; correr de novo grade_all(cases, answers)"
         )
     return list(zip(matched, verdicts))
 

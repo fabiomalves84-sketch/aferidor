@@ -24,9 +24,9 @@ class Source:
 
     def __post_init__(self) -> None:
         if not self.name.strip():
-            raise ValueError("a source needs a name")
+            raise ValueError("uma fonte precisa de nome")
         if not self.reference.strip():
-            raise ValueError(f"source {self.name!r} needs a reference (document, page or section)")
+            raise ValueError(f"a fonte {self.name!r} precisa de uma referência (documento, página ou secção)")
 
 
 @dataclass(frozen=True)
@@ -46,7 +46,7 @@ class Criterion:
 
     def __post_init__(self) -> None:
         if self.kind not in self.KINDS:
-            raise ValueError(f"unknown criterion kind {self.kind!r}; expected one of {self.KINDS}")
+            raise ValueError(f"tipo de critério desconhecido {self.kind!r}; esperava um de {self.KINDS}")
         if not self.terms:
             raise ValueError(f"criterion {self.kind!r} needs at least one term")
 
@@ -68,7 +68,7 @@ class Alternative:
 
     def __post_init__(self) -> None:
         if not self.description.strip():
-            raise ValueError("an alternative needs a description")
+            raise ValueError("uma alternativa precisa de descrição")
         if not self.reference.strip():
             raise ValueError(f"alternative {self.description!r} needs a reference answer")
         if not self.criteria:
@@ -95,7 +95,7 @@ class Case:
 
     def __post_init__(self) -> None:
         if not self.case_id.strip():
-            raise ValueError("a case needs an id")
+            raise ValueError("um caso precisa de identificador")
         if not self.question.strip():
             raise ValueError(f"case {self.case_id} needs a question")
         if not self.reference.strip():
@@ -156,9 +156,9 @@ class Answer:
 
     def __post_init__(self) -> None:
         if self.latency_ms < 0:
-            raise ValueError("latency cannot be negative")
+            raise ValueError("a latência não pode ser negativa")
         if self.sample < 1:
-            raise ValueError("sample numbers start at 1")
+            raise ValueError("os números de amostra começam em 1")
 
 
 @dataclass(frozen=True)

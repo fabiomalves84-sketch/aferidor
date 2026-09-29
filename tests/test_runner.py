@@ -233,9 +233,10 @@ class TestRepetitions(unittest.TestCase):
     def test_an_old_answer_without_a_sample_field_is_read_as_sample_one(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "respostas.jsonl"
+            digest = prompt_digest(build_prompt(a_case("A")))
             path.write_text(
                 '{"caso": "A", "modelo": "falso", "texto": "x", '
-                '"perguntada_em": "2026-09-14T10:00:00"}\n',
+                f'"perguntada_em": "2026-09-14T10:00:00", "prompt_sha256": "{digest}"}}\n',
                 encoding="utf-8",
             )
             provider = FakeProvider(default="y")
@@ -342,13 +343,28 @@ class TestResumeUnderSameConditions(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "respostas.jsonl"
+            digest = prompt_digest(build_prompt(a_case("A")))
             write_answers(
-                [Answer("A", "falso", "texto", datetime(2026, 9, 16), temperature=0.0)], path
+                [Answer("A", "falso", "texto", datetime(2026, 9, 16), temperature=0.0,
+                        prompt_sha256=digest)], path
             )
             provider = FakeProvider()
             provider.max_tokens = 8192
             result = run([a_case("A"), a_case("B")], provider, path=path)
         self.assertEqual([a.case_id for a in result.answers], ["B"])
+
+    def test_an_answer_without_the_hash_of_the_text_sent_is_not_resumed_onto(self):
+        """Such answers predate 27/09, when the instruction changed: they were given to another text."""
+        from datetime import datetime
+
+        from aferidor.models import Answer
+
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            write_answers([Answer("A", "falso", "texto", datetime(2026, 9, 16), temperature=0.0)], path)
+            with self.assertRaises(ConditionsMismatch) as raised:
+                run([a_case("A"), a_case("B")], FakeProvider(), path=path)
+        self.assertIn("sem registo do texto enviado", str(raised.exception))
 
 
 class TestConfig(unittest.TestCase):

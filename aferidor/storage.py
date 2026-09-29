@@ -17,7 +17,7 @@ from .risk import failure_from_label
 
 def _require(data: dict, key: str, where: str) -> object:
     if key not in data:
-        raise ValueError(f"{where}: missing field {key!r}")
+        raise ValueError(f"{where}: falta o campo {key!r}")
     return data[key]
 
 
@@ -45,7 +45,7 @@ def criterion_from_dict(data: dict, where: str) -> Criterion:
     if isinstance(terms, str):
         terms = [terms]
     if not isinstance(terms, list):
-        raise ValueError(f"{where}: 'termos' must be a string or a list")
+        raise ValueError(f"{where}: 'termos' tem de ser um texto ou uma lista")
     return Criterion(
         kind=str(_require(data, "tipo", where)),
         terms=tuple(str(t) for t in terms),
@@ -70,10 +70,10 @@ def case_from_dict(data: dict, where: str) -> Case:
     at = f"{where}, caso {case_id}"
     criteria = _require(data, "criterios", at)
     if not isinstance(criteria, list):
-        raise ValueError(f"{at}: 'criterios' must be a list")
+        raise ValueError(f"{at}: 'criterios' tem de ser uma lista")
     alternatives = data.get("alternativas", [])
     if not isinstance(alternatives, list):
-        raise ValueError(f"{at}: 'alternativas' must be a list")
+        raise ValueError(f"{at}: 'alternativas' tem de ser uma lista")
     return Case(
         case_id=case_id,
         category=str(_require(data, "categoria", at)),
@@ -91,7 +91,7 @@ def alternative_from_dict(data: dict, where: str) -> Alternative:
     at = f"{where}, alternativa {description!r}"
     criteria = _require(data, "criterios", at)
     if not isinstance(criteria, list):
-        raise ValueError(f"{at}: 'criterios' must be a list")
+        raise ValueError(f"{at}: 'criterios' tem de ser uma lista")
     return Alternative(
         description=description,
         reference=str(_require(data, "referencia", at)),
@@ -190,15 +190,15 @@ def read_cases(path: Path) -> list[Case]:
     if isinstance(raw, dict) and "casos" in raw:
         raw = [_bank_case_to_legacy(dict(item), str(path)) for item in raw["casos"]]
     if not isinstance(raw, list):
-        raise ValueError(f"{path}: expected a list of cases at the top level")
+        raise ValueError(f"{path}: esperava uma lista de casos no nível de topo")
     if not raw:
-        raise ValueError(f"{path}: no cases found")
+        raise ValueError(f"{path}: nenhum caso encontrado")
 
     cases = [case_from_dict(dict(item), str(path)) for item in raw]
     seen: set[str] = set()
     for case in cases:
         if case.case_id in seen:
-            raise ValueError(f"{path}: duplicate case id {case.case_id!r}")
+            raise ValueError(f"{path}: identificador de caso repetido {case.case_id!r}")
         seen.add(case.case_id)
     return cases
 

@@ -59,7 +59,7 @@ class TestCaseValidation(unittest.TestCase):
             path = self._write(folder, [case_to_dict(a_case()), case_to_dict(a_case())])
             with self.assertRaises(ValueError) as caught:
                 read_cases(path)
-        self.assertIn("duplicate", str(caught.exception))
+        self.assertIn("repetido", str(caught.exception))
 
     def test_an_empty_file_is_refused(self):
         with tempfile.TemporaryDirectory() as folder:

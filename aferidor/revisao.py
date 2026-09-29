@@ -103,6 +103,17 @@ def asked_the_same_question(case: Case, answer: Answer) -> bool | None:
     return answer.prompt_sha256 == prompt_digest(build_prompt(case))
 
 
+# A cell that starts with one of these is read as a formula by Excel and
+# LibreOffice. Model answers often start with "- " or "=" (lists, equations),
+# and one could start with "=HYPERLINK(...)"; the reviewer must see text.
+_FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _as_text(value: str) -> str:
+    """A cell value a spreadsheet will show as text, never evaluate."""
+    return "'" + value if value.startswith(_FORMULA_START) else value
+
+
 def write_review(items: list[ReviewItem], sheet: Path, key: Path, source: Path) -> None:
     """Write the blind sheet for the reviewer and, separately, the key.
 
@@ -117,8 +128,8 @@ def write_review(items: list[ReviewItem], sheet: Path, key: Path, source: Path) 
         writer.writerow(SHEET_COLUMNS)
         for item in items:
             writer.writerow([
-                item.review_id, item.case.case_id, item.case.question, item.case.reference,
-                item.answer.text, "", "",
+                item.review_id, item.case.case_id, _as_text(item.case.question),
+                _as_text(item.case.reference), _as_text(item.answer.text), "", "",
             ])
     payload = {
         "respostas": str(source),
@@ -226,7 +237,7 @@ def read_review(sheet: Path, key: Path) -> Agreement:
             if raw not in JUDGEMENTS:
                 allowed = ", ".join(sorted(set(JUDGEMENTS)))
                 raise ValueError(
-                    f"{sheet}, {review_id}: juízo {raw!r} desconhecido; escreve um de: {allowed}"
+                    f"{sheet}, {review_id}: juízo {raw!r} desconhecido; usar um de: {allowed}"
                 )
             human = JUDGEMENTS[raw]
             machine = grader[review_id]["corretor"] == "certa"
@@ -246,7 +257,7 @@ def format_agreement(result: Agreement) -> str:
     if not result.judged:
         return (
             f"Nenhuma resposta julgada ainda ({len(result.unjudged)} por julgar). "
-            "Escreve 'certa' ou 'errada' na coluna 'juizo' e volta a correr."
+            "Escrever 'certa' ou 'errada' na coluna 'juizo' e voltar a correr."
         )
     lines: list[str] = []
     if result.human_wrong:
@@ -263,11 +274,21 @@ def format_agreement(result: Agreement) -> str:
             f"Falhas falsas: {result.false_fail} de {result.human_right} respostas que a "
             f"revisão deu como certas ({result.false_fail_rate:.0%}, IC 95% {low:.0%} a {high:.0%})."
         )
-    lines.append(f"Concordância: {result.agreement:.0%} em {result.judged} respostas julgadas.")
+    low, high = wilson_interval(round(result.agreement * result.judged), result.judged)
+    lines.append(
+        f"Concordância: {result.agreement:.0%} em {result.judged} respostas julgadas "
+        f"(IC 95% {low:.0%} a {high:.0%})."
+    )
     kappa = result.kappa
     lines.append(
         f"Kappa de Cohen: {kappa:.2f}." if kappa is not None
         else "Kappa de Cohen: indefinido (os dois disseram o mesmo de todas)."
+    )
+    lines.append(
+        "A amostra é estratificada (metade aprovada e metade reprovada pelo corretor): "
+        "a concordância e o kappa descrevem esta amostra, não a execução completa; as "
+        "taxas de passagens e falhas falsas, por serem condicionais ao juízo da revisão, "
+        "são as que se podem levar para a execução."
     )
     if result.unjudged:
         lines.append(
