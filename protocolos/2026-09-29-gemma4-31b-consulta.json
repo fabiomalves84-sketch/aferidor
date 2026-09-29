@@ -1,0 +1,14 @@
+{
+  "nome": "Gemma 4 31B pela API gratuita, banco de consulta, 30 casos",
+  "escrito_em": "2026-09-29",
+  "banco": "casos/consulta.json",
+  "banco_sha256": "a2c33a43984c5f1b070e4845c4be4438d3f4e02a465fbe129be6f32a2e5269e6",
+  "amostras_por_caso": 5,
+  "temperatura": 1.0,
+  "regra_do_caso": "todas",
+  "criterios_de_aprovacao": {
+    "casos_com_falha_critica_max": 0,
+    "casos_instaveis_max": 0,
+    "taxa_de_amostras_corretas_min": 0.95
+  }
+}
