@@ -21,6 +21,11 @@ antes de cada ensaio.
 | Gemma 3 12B (Google, local) | 17 de 27 (44% a 78%) | 2 de 27 | reprovado |
 | Phi-4 14B (Microsoft, local) | 22 de 27 (63% a 92%) | 2 de 27 | reprovado |
 
+No banco de consulta (30 casos de adulto, criança e cessação tabágica), o
+Gemini 3.5 Flash Lite teve 6 de 30 casos com falha crítica (IC 95% 10% a 37%)
+e 18 de 30 sempre corretos, também reprovado
+(`ensaios/2026-09-29-gemini-consulta/`).
+
 Os protocolos exigem zero casos com falha crítica. Entre os dois melhores, o
 teste de McNemar exato sobre os casos discordantes dá p = 0,146: com 27 casos,
 a diferença ainda pode ser acaso. Os veredictos são a triagem do corretor,
