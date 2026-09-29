@@ -17,6 +17,7 @@ from aferidor.grading import (
     missing_samples,
     mcnemar_exact,
     met_by_the_question,
+    verdict_changes,
     negative_controls,
     right_cases_by_model,
     self_check,
@@ -398,6 +399,34 @@ class TestCaseRule(unittest.TestCase):
         }
         self.assertEqual(right_cases_by_model(consistency), {"falso": (1, 2)})
         self.assertEqual(right_cases_by_model(consistency, "maioria_sem_critica"), {"falso": (2, 2)})
+
+
+class TestVerdictChanges(unittest.TestCase):
+    """What a change to the grader did to answers already graded."""
+
+    def setUp(self):
+        from aferidor.storage import verdict_to_dict
+
+        self.cases = [a_case("C1")]
+        self.answers = [
+            an_answer("Amoxicilina 1000 mg", case_id="C1", sample=1),
+            an_answer("Amoxicilina 500 mg", case_id="C1", sample=2),
+        ]
+        self.verdicts, _ = grade_all(self.cases, self.answers)
+        self.saved = [verdict_to_dict(v) for v in self.verdicts]
+
+    def test_the_same_grading_changes_nothing(self):
+        self.assertEqual(verdict_changes(self.saved, self.cases, self.answers, self.verdicts), [])
+
+    def test_a_verdict_that_flipped_is_named_with_its_sample(self):
+        self.saved[1]["passou"], self.saved[1]["falhas"] = True, []
+        [change] = verdict_changes(self.saved, self.cases, self.answers, self.verdicts)
+        self.assertEqual((change.sample, change.passed_before, change.passed_now), (2, True, False))
+
+    def test_a_verdicts_file_of_other_answers_is_refused(self):
+        self.saved[0]["caso"] = "C9"
+        with self.assertRaises(ValueError):
+            verdict_changes(self.saved, self.cases, self.answers, self.verdicts)
 
 
 class TestMcNemar(unittest.TestCase):

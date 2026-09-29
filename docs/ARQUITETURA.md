@@ -25,7 +25,7 @@ flowchart LR
 | `providers.py` | Comunicação com um modelo, através de uma interface estreita |
 | `runner.py` | Execução dos casos, com repetições, novas tentativas e retoma |
 | `checks.py` | Avaliação de uma resposta contra um critério |
-| `grading.py` | Vereditos, contagens por risco, consistência entre amostras e controlos negativos |
+| `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |
 | `report.py` | Relatório em Markdown |
 | `html_report.py` | O mesmo relatório em HTML, num único ficheiro |
 | `traducao.py` | A interface do relatório HTML em inglês, espanhol, francês e alemão; os casos e as respostas ficam em português |

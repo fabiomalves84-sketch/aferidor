@@ -794,6 +794,52 @@ def met_by_the_question(cases: list[Case]) -> list[tuple[Case, Criterion]]:
     return found
 
 
+@dataclass(frozen=True)
+class VerdictChange:
+    """One answer whose verdict differs between a saved grading and the current one."""
+
+    case_id: str
+    model: str
+    sample: int
+    passed_before: bool
+    passed_now: bool
+    failures_before: tuple[str, ...]
+    failures_now: tuple[str, ...]
+
+
+def verdict_changes(
+    saved: list[dict], cases: list[Case], answers: list[Answer], verdicts: list[Verdict]
+) -> list[VerdictChange]:
+    """What a change to the grader or the criteria did to answers already graded.
+
+    `saved` is a verdicts file written earlier (vereditos.json), in the order
+    the answers were graded; `verdicts` is the grading now, of the same
+    answers. They are paired in that order and checked case by case and model
+    by model, so a file that does not belong to these answers is refused
+    rather than compared.
+    """
+    pairs = match_answers(cases, answers, verdicts)
+    if len(saved) != len(pairs):
+        raise ValueError(
+            f"o ficheiro de veredictos tem {len(saved)} entradas e as respostas dão {len(pairs)}"
+        )
+    changes: list[VerdictChange] = []
+    for old, (answer, now) in zip(saved, pairs):
+        if (old.get("caso"), old.get("modelo")) != (answer.case_id, answer.model):
+            raise ValueError(
+                f"veredicto {old.get('caso')} ({old.get('modelo')}) não corresponde à resposta "
+                f"{answer.case_id} ({answer.model}): os ficheiros não são do mesmo ensaio"
+            )
+        before = tuple(old.get("falhas", []))
+        after = tuple(f.value for f in now.failures)
+        if bool(old.get("passou")) != now.passed or before != after:
+            changes.append(VerdictChange(
+                answer.case_id, answer.model, answer.sample,
+                bool(old.get("passou")), now.passed, before, after,
+            ))
+    return changes
+
+
 def uncaught_controls(
     cases: list[Case],
 ) -> tuple[int, list[tuple[NegativeControl, Verdict | None]]]:
@@ -874,4 +920,6 @@ __all__ = [
     "negative_controls",
     "uncaught_controls",
     "met_by_the_question",
+    "VerdictChange",
+    "verdict_changes",
 ]

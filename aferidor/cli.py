@@ -14,7 +14,14 @@ import sys
 from pathlib import Path
 
 from . import html_report, manifesto, protocolo, report, revisao
-from .grading import grade_all, met_by_the_question, self_check, tally_by_model, uncaught_controls
+from .grading import (
+    grade_all,
+    met_by_the_question,
+    self_check,
+    tally_by_model,
+    uncaught_controls,
+    verdict_changes,
+)
 from .providers import (
     AnthropicProvider,
     FakeProvider,
@@ -158,6 +165,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "concordancia", help="comparar os juízos de uma pessoa com os veredictos do corretor"
     )
     conc.add_argument("--revisao", type=Path, default=Path("relatorios/revisao.csv"))
+
+    comparar = sub.add_parser(
+        "comparar-vereditos",
+        help="mostrar que veredictos de um ensaio mudam com os critérios e o corretor atuais",
+    )
+    comparar.add_argument("--casos", type=Path, default=DEFAULT_CASES)
+    comparar.add_argument("--respostas", type=Path, required=True)
+    comparar.add_argument("--vereditos", type=Path, required=True, help="vereditos.json gravado antes")
 
     manifesto = sub.add_parser(
         "manifesto", help="escrever ou verificar o SHA-256 de cada ficheiro de um ensaio registado"
@@ -323,6 +338,27 @@ def comando_verificar(args: argparse.Namespace) -> int:
         for case, criterion in echoes:
             print(f"  {case.case_id}: {criterion.kind} {list(criterion.terms)}", file=sys.stderr)
     return 1 if broken or uncaught else 0
+
+
+def comando_comparar(args: argparse.Namespace) -> int:
+    """Measure what a change to the grader did, answer by answer, before committing it."""
+    cases = read_cases(args.casos)
+    answers = read_answers(args.respostas)
+    verdicts, _ = grade_all(cases, answers)
+    saved = json.loads(args.vereditos.read_text(encoding="utf-8"))
+    changes = verdict_changes(saved, cases, answers, verdicts)
+    worse = [c for c in changes if c.passed_before and not c.passed_now]
+    better = [c for c in changes if not c.passed_before and c.passed_now]
+    other = [c for c in changes if c.passed_before == c.passed_now]
+    print(
+        f"{len(changes)} de {len(saved)} veredictos mudam: {len(better)} passam a passar, "
+        f"{len(worse)} passam a falhar, {len(other)} mudam só o tipo de falha"
+    )
+    for c in changes:
+        before = "passava" if c.passed_before else ", ".join(c.failures_before)
+        now = "passa" if c.passed_now else ", ".join(c.failures_now)
+        print(f"  {c.case_id} {c.model} amostra {c.sample}: {before} -> {now}")
+    return 0
 
 
 def comando_manifesto(args: argparse.Namespace) -> int:
@@ -593,6 +629,7 @@ _COMMANDS = {
     "revisao": lambda a: comando_revisao(a),
     "concordancia": lambda a: comando_concordancia(a),
     "manifesto": lambda a: comando_manifesto(a),
+    "comparar-vereditos": lambda a: comando_comparar(a),
 }
 
 

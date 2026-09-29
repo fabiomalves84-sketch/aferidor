@@ -150,8 +150,11 @@ def model_label(model_id: str) -> tuple[str, str]:
         family, maker = _FAMILIES[match.group(1)]
         words: list[str] = []
         for token in match.group(2).replace("-", " ").split():
-            if re.fullmatch(r"20\d{6}", token):
-                continue  # a release date ("claude-sonnet-4-5-20250929") is not part of the name
+            if re.fullmatch(r"20\d{6}", token) or token == "it":
+                continue  # a release date or the "instruction tuned" suffix is not part of the name
+            if re.fullmatch(r"\d+(?:\.\d+)?b", token) and not tag:
+                tag = token  # "gemma-4-31b-it": the size is in the name, not after a colon
+                continue
             if token.isdigit() and words and words[-1].replace(".", "").isdigit():
                 words[-1] += "." + token
             else:

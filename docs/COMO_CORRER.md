@@ -97,7 +97,15 @@ python -m aferidor classificar
 ```
 
 O comando volta a corrigir as respostas já guardadas com os critérios atuais,
-sem novos pedidos.
+sem novos pedidos. Para ver exatamente que veredictos uma alteração muda,
+resposta a resposta, antes de a commitar:
+
+```
+python -m aferidor comparar-vereditos --casos <casos.json> --respostas <respostas.jsonl> --vereditos <vereditos.json>
+```
+
+O resumo (quantos passam a passar, quantos passam a falhar) entra na mensagem
+de commit, junto com a razão.
 
 **Regra:** alargar um critério que penaliza outra forma de dizer a mesma coisa
 é afinação; alargá-lo para o modelo passar não é aceitável. Cada alteração a
