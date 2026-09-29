@@ -88,7 +88,7 @@ documentos públicos ou são sintéticos.
 - Dois bancos, 57 casos: antibioterapia, interações, gravidez e ajuste de dose
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
-- `verificar`: 27/27 e 30/30 casos coerentes; 307/307 e 137/137 controlos
+- `verificar`: 27/27 e 30/30 casos coerentes; 307/307 e 138/138 controlos
   negativos detetados. 446 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 34 de 57 confirmadas por uma pessoa; das restantes, 16 lidas no

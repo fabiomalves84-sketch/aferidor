@@ -769,7 +769,13 @@
       {
         "tipo": "contem",
         "termos": [
-          "sinvastatina"
+          "cyp3a4",
+          "cyp 3a4",
+          "concentracoes plasmaticas",
+          "concentracao plasmatica",
+          "concentracoes da estatina",
+          "niveis da estatina",
+          "niveis de sinvastatina"
         ],
         "falha": "resposta_incompleta"
       },
@@ -845,7 +851,10 @@
       {
         "tipo": "contem",
         "termos": [
-          "|"
+          "mg |",
+          "mg|",
+          " g |",
+          " g|"
         ],
         "falha": "formato_invalido",
         "descricao": "o formato foi pedido de forma explícita"
@@ -1402,11 +1411,15 @@
       {
         "tipo": "contem",
         "termos": [
-          "contracecao",
-          "contracetiv",
-          "contraceptiv",
-          "anticoncecion",
-          "anticonceptiv"
+          "contracecao eficaz",
+          "contracecao altamente eficaz",
+          "contracecao efetiva",
+          "contracetivo eficaz",
+          "contraceptivo eficaz",
+          "metodo contracetivo",
+          "metodo contraceptivo",
+          "metodos contracetivos",
+          "metodos contraceptivos"
         ],
         "falha": "contraindicacao_omitida"
       },

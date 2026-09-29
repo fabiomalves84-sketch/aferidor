@@ -187,7 +187,7 @@
         {
           "tipo": "contem",
           "termos": [
-            "fragil"
+            "fragilidade"
           ],
           "falha": "ajuste_omitido",
           "descricao": "tem de considerar a fragilidade"
@@ -196,7 +196,7 @@
           "tipo": "contem",
           "termos": [
             "ortostat",
-            "quedas"
+            "hipotensao postural"
           ],
           "falha": "ajuste_omitido",
           "descricao": "tem de considerar ortostatismo ou quedas"
@@ -1194,7 +1194,6 @@
           "tipo": "contem",
           "termos": [
             "convuls",
-            "epilep",
             "limiar"
           ],
           "falha": "resposta_incompleta"
@@ -1266,10 +1265,21 @@
         {
           "tipo": "contem",
           "termos": [
-            "segur",
-            "adequad",
-            "pode usar",
-            "pode utilizar"
+            "sim",
+            "e uma opcao",
+            "opcao adequada"
+          ],
+          "falha": "resposta_incompleta"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "enfarte",
+            "arritmia",
+            "morte",
+            "mortalidade",
+            "eventos cardiovasculares",
+            "eventos cardiacos"
           ],
           "falha": "resposta_incompleta"
         }

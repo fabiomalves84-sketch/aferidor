@@ -55,7 +55,7 @@ julgamento clínico.
   duas fontes reconhecidas divergem de forma defensável, o caso aceita ambas.
 - **Corretor verificado nos dois sentidos.** A resposta de referência de cada
   caso tem de passar e uma resposta errada construída para cada critério tem
-  de falhar: 307 e 137 controlos negativos, todos detetados.
+  de falhar: 307 e 138 controlos negativos, todos detetados.
 - **Rastreabilidade.** Cada resposta regista o SHA-256 do texto enviado, a
   temperatura, o limite de tokens e a versão do código. Uma retoma recusa
   condições diferentes. O relatório indica o banco, as condições e as datas.
@@ -117,7 +117,7 @@ não nos casos.
 ```
 python -m unittest discover -s tests   # 446 testes
 python -m aferidor verificar           # 27/27 casos, 307/307 controlos negativos
-python -m aferidor verificar --casos casos/consulta.json   # 30/30, 137/137
+python -m aferidor verificar --casos casos/consulta.json   # 30/30, 138/138
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```
