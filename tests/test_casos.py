@@ -49,7 +49,8 @@ class TestShippedCases(unittest.TestCase):
     # Critical failure types measured by a single case, known and waiting for a
     # second one. A second case is a clinical decision, not a code change; when
     # it is added, the type comes off this list and the test holds it there.
-    ONE_CASE_ONLY = {"encaminhamento_omitido"}
+    # encaminhamento_omitido came off on 30/09/2026, with ADU-AVC-01.
+    ONE_CASE_ONLY: set[str] = set()
 
     def test_every_critical_failure_is_measured_by_more_than_one_case(self):
         """One case per critical type makes that type's count hinge on a single question."""

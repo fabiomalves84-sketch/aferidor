@@ -190,8 +190,8 @@ corretas que incluíam um aviso. Não constitui compreensão de texto.
 dois níveis de evidência, identificados em `casos/VERIFICACAO.md`: dez casos
 de infeção confirmados nos PDF das normas da DGS, um a um; 24 declarados
 confirmados em grupo nos documentos da DGS e do Infarmed, sem registo de
-página por caso. Os 23 restantes citam outras fontes (APMGF, ESC, ADA, NICE,
-EMA) e aguardam confirmação por uma pessoa: 16 foram lidos no documento
+página por caso. Os 24 restantes citam outras fontes (APMGF, ESC, ADA, NICE,
+EMA, SNS) e aguardam confirmação por uma pessoa: 17 foram lidos no documento
 original por ferramenta e 7 ainda não.
 
 O enquadramento normativo (ISO/IEC 42001, ISO 13485, Regulamento de

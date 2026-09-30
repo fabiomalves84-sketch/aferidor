@@ -326,7 +326,7 @@ _CODE_PARTS = {
     "OMA": "Otite média aguda", "IECA": "Inibidor da enzima de conversão da angiotensina",
     "VPA": "Valproato", "APX": "Apixabano", "MTX": "Metotrexato",
     "HTA": "Hipertensão arterial", "DM": "Diabetes", "CV": "Risco cardiovascular",
-    "FA": "Fibrilhação auricular",
+    "FA": "Fibrilhação auricular", "AVC": "Acidente vascular cerebral",
 }
 _CODE_ENTRY = "Código do caso"
 GLOSSARY[_CODE_ENTRY] = (

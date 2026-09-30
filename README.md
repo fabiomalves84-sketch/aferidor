@@ -16,7 +16,7 @@ espanhol, francês e alemão).
 5 amostras por caso, temperatura 1,0, protocolo commitado antes de cada
 ensaio. Todas as respostas corrigidas com os bancos e o corretor atuais.
 
-| Modelo | Banco principal (27 casos): casos com falha crítica (IC 95%) | Banco de consulta (30 casos): casos com falha crítica (IC 95%) | Protocolo |
+| Modelo | Banco principal (27 casos): casos com falha crítica (IC 95%) | Banco de consulta (30 casos à data dos ensaios): casos com falha crítica (IC 95%) | Protocolo |
 |---|---|---|---|
 | Gemma 4 31B (Google, aberto, API) | 10 (22% a 56%) | 4 (5% a 30%) | reprovado |
 | Gemini 3.5 Flash Lite (Google, comercial, API) | 11 (25% a 59%) | 6 (10% a 37%) | reprovado |
@@ -106,13 +106,13 @@ documentos públicos ou são sintéticos.
 
 **O instrumento está completo; a validação clínica está por fazer.**
 
-- Dois bancos, 57 casos: antibioterapia, interações, gravidez e ajuste de dose
+- Dois bancos, 58 casos: antibioterapia, interações, gravidez e ajuste de dose
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
-- `verificar`: 27/27 e 30/30 casos coerentes; 307/307 e 138/138 controlos
+- `verificar`: 27/27 e 31/31 casos coerentes; 319/319 e 140/140 controlos
   negativos detetados. 466 testes, em Python 3.10 a 3.14 na integração
   contínua.
-- Fontes: 34 de 57 confirmadas por uma pessoa; das restantes, 16 lidas no
+- Fontes: 34 de 58 confirmadas por uma pessoa; das restantes, 17 lidas no
   documento original e 7 por confirmar. Detalhe em `casos/VERIFICACAO.md`.
 
 O primeiro ensaio pela API, com protocolo definido antes da execução, mediu o

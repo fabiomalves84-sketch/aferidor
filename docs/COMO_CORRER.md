@@ -46,7 +46,7 @@ modelos mudam com frequência.
 ## 4. Banco de casos
 
 `casos/casos.json` (27 casos: antibioterapia, interações, gravidez e ajuste de
-dose) é o banco por omissão. `casos/consulta.json` (30 casos de consulta de
+dose) é o banco por omissão. `casos/consulta.json` (31 casos de consulta de
 adulto, criança e cessação tabágica) seleciona-se com `--casos`:
 
 ```

@@ -385,6 +385,7 @@ _ROWS: tuple[tuple[str, str, str, str, str], ...] = (
     ("Metotrexato", "Methotrexate", "Metotrexato", "Méthotrexate", "Methotrexat"),
     ("Hipertensão arterial", "Hypertension", "Hipertensión arterial", "Hypertension artérielle", "Arterielle Hypertonie"),
     ("Risco cardiovascular", "Cardiovascular risk", "Riesgo cardiovascular", "Risque cardiovasculaire", "Kardiovaskuläres Risiko"),
+    ("Acidente vascular cerebral", "Stroke", "Accidente cerebrovascular", "Accident vasculaire cérébral", "Schlaganfall"),
     ("Fibrilhação auricular", "Atrial fibrillation", "Fibrilación auricular", "Fibrillation auriculaire", "Vorhofflimmern"),
 
     # ---- glossary terms shown in the page's language

@@ -2,7 +2,7 @@
 
 ## Descrição
 
-Trinta perguntas clínicas em português europeu, do tipo colocado por um médico de família a um assistente: consulta de adulto (12), consulta de criança (10) e cessação tabágica (8). Cada caso inclui uma resposta de referência, os elementos obrigatórios de uma resposta correta, os erros que a tornam perigosa, um nível de risco e a fonte, com versão, secção e data de verificação.
+Trinta e uma perguntas clínicas em português europeu, do tipo colocado por um médico de família a um assistente: consulta de adulto (13, incluindo um caso de encaminhamento urgente, ADU-AVC-01, acrescentado a 30/09/2026), consulta de criança (10) e cessação tabágica (8). Cada caso inclui uma resposta de referência, os elementos obrigatórios de uma resposta correta, os erros que a tornam perigosa, um nível de risco e a fonte, com versão, secção e data de verificação.
 
 O ficheiro é `casos/consulta.json`. Os critérios de correção estão definidos em cada caso.
 
@@ -16,12 +16,12 @@ Os casos privilegiam os erros de maior custo clínico, e não os mais fáceis de
 
 ## Fontes
 
-27 casos têm fonte primária (RCM, norma da DGS, diretriz da ESC, ADA ou NICE, comunicado da EMA, ensaio original) e 3 têm fonte secundária (PED-04, PED-06 e PED-10). Todos têm data de verificação.
+28 casos têm fonte primária (RCM, norma da DGS, diretriz da ESC, ADA ou NICE, comunicado da EMA, ensaio original, portal do SNS) e 3 têm fonte secundária (PED-04, PED-06 e PED-10). Todos têm data de verificação.
 
 ## Limitações
 
 - **Sem revisão clínica independente.** Os casos foram construídos a partir de fontes públicas por um não clínico. Nesta revisão foram corrigidos dois casos já marcados como revistos: uma imprecisão sobre o trimestre da gravidez (ADU-HTA-02) e uma omissão sobre o ibuprofeno na varicela (PED-04). A 27/09/2026, parte das fontes (DGS e Infarmed) foi declarada confirmada, com uma médica presente, sem registo caso a caso; as fontes da ESC, ADA, NICE e EMA estão por confirmar. Ver `casos/VERIFICACAO.md`.
-- **Sem ensaio contra um modelo real.** Os critérios foram testados contra as respostas de referência (30/30) e contra respostas erradas construídas, mas não contra a redação de um modelo real. São esperadas reprovações indevidas no primeiro ensaio.
+- **Ensaios reais recentes.** O banco correu pela primeira vez a 29 e 30/09/2026 (Gemini 3.5 Flash Lite e Gemma 4 31B, ver `ensaios/`), com os 30 casos da altura. Esses ensaios mostraram reprovações indevidas do corretor, corrigidas com a razão escrita; o caso ADU-AVC-01 ainda não foi corrido contra nenhum modelo.
 - **Correção textual.** Os critérios procuram palavras e números e não avaliam raciocínio. A opção é deliberada (um corretor baseado noutro modelo introduziria um segundo sistema em avaliação), mas exige critérios bem redigidos.
-- **Trinta casos identificam padrões, não taxas.** Permitem mostrar onde um modelo falha, mas não quantificar a frequência com precisão.
+- **Trinta e um casos identificam padrões, não taxas.** Permitem mostrar onde um modelo falha, mas não quantificar a frequência com precisão.
 - **Fontes com data.** A norma da otite é de 2014, o programa-tipo de cessação tabágica de 2007, e o PNV foi alterado em outubro de 2025.

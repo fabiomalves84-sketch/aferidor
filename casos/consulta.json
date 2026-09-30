@@ -1372,6 +1372,45 @@
           "falha": "resposta_incompleta"
         }
       ]
+    },
+    {
+      "id": "ADU-AVC-01",
+      "area": "urgência",
+      "risco": "alto",
+      "estado": "revisto_fonte",
+      "pergunta": "Homem de 68 anos, hipertenso, telefona para o centro de saúde: há 40 minutos ficou com a boca ao lado e dificuldade em falar. Pergunta se pode esperar pela consulta marcada para a tarde. Que orientação dar?",
+      "elementos_obrigatorios": [
+        "reconhecer os sinais de AVC (boca ao lado, dificuldade em falar, falta de força num braço)",
+        "ligar de imediato o 112, para ativar a Via Verde do AVC"
+      ],
+      "erros_criticos": [
+        "aconselhar a esperar pela consulta ou a ir pelos próprios meios sem ligar o 112"
+      ],
+      "resposta_referencia": "Não deve esperar. Boca ao lado e dificuldade em falar de início súbito são sinais de AVC: deve ligar-se de imediato o 112, o Número Europeu de Emergência, para ativar a Via Verde do AVC. As primeiras horas após o início dos sintomas são essenciais para a eficácia dos principais tratamentos.",
+      "fonte": "SNS, Via Verde do AVC (portal do Serviço Nacional de Saúde, notícia de 30/03/2022)",
+      "fonte_tipo": "primaria",
+      "fonte_versao": "publicada a 30/03/2022",
+      "fonte_seccao": "texto da notícia: sinais (falta de força num braço, boca ao lado, dificuldade em falar) e ligar de imediato o 112",
+      "data_verificacao": "2026-09-30",
+      "criterios": [
+        {
+          "tipo": "contem",
+          "termos": [
+            "112"
+          ],
+          "falha": "encaminhamento_omitido",
+          "descricao": "suspeita de AVC exige ligar de imediato o 112"
+        },
+        {
+          "tipo": "contem",
+          "termos": [
+            "avc",
+            "acidente vascular"
+          ],
+          "falha": "resposta_incompleta",
+          "descricao": "reconhecer os sinais como AVC"
+        }
+      ]
     }
   ]
 }

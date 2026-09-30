@@ -1,7 +1,15 @@
-# Proposta: critérios de intervalo entre tomas (por decidir)
+# Critérios de intervalo entre tomas: proposta e decisão
 
-**Estado: proposta, não aplicada.** Nenhum caso foi alterado. A decisão é do
-Fábio, caso a caso; cada critério aceite entra num commit com a razão.
+**Estado: aplicada a 30/09/2026 (commit `5037d3b`), por decisão do Fábio**, só
+com o intervalo de 6/6h para a nitrofurantoína, como a DGS. As formas aceites
+foram alargadas depois de ler as respostas reais (ver o commit).
+
+**Correção:** a secção "Efeito medido" abaixo, escrita a 29/09, dizia que só 2
+respostas mudariam. Estava errado: o script da simulação procurava os modelos
+locais por um nome errado e contava zero para eles. Medido com
+`comparar-vereditos` no banco final, 13 das 540 respostas do banco principal
+passaram a falhar, todas afastadas do intervalo da referência; o commit
+`5037d3b` descreve-as.
 
 ## O problema
 

@@ -47,15 +47,15 @@ julgamento clínico.
 
 ## Estado atual
 
-- **Dois bancos, 57 casos**, cada um com fonte pública identificada: 27 de
-  antibioterapia, interações, gravidez e ajuste de dose; 30 de consulta de
+- **Dois bancos, 58 casos**, cada um com fonte pública identificada: 27 de
+  antibioterapia, interações, gravidez e ajuste de dose; 31 de consulta de
   adulto, criança e cessação tabágica. Vários casos formam pares que testam
   uma distinção clínica (pneumonia com e sem comorbilidades; hipersensibilidade
   tipo I e não tipo I). Os casos de infeção seguem as normas da DGS; quando
   duas fontes reconhecidas divergem de forma defensável, o caso aceita ambas.
 - **Corretor verificado nos dois sentidos.** A resposta de referência de cada
   caso tem de passar e uma resposta errada construída para cada critério tem
-  de falhar: 307 e 138 controlos negativos, todos detetados.
+  de falhar: 319 e 140 controlos negativos, todos detetados.
 - **Rastreabilidade.** Cada resposta regista o SHA-256 do texto enviado, a
   temperatura, o limite de tokens e a versão do código. Uma retoma recusa
   condições diferentes. O relatório indica o banco, as condições e as datas.
@@ -75,7 +75,7 @@ Limitações conhecidas:
   falta um clínico disponível para a julgar. Até lá, os resultados
   correspondem à triagem do corretor, e os relatórios dizem-no no topo.
 - **Fontes parcialmente confirmadas.** 10 casos confirmados nos PDF da DGS, um
-  a um; 24 declarados confirmados em grupo; dos 23 restantes, 16 lidos no
+  a um; 24 declarados confirmados em grupo; dos 24 restantes, 17 lidos no
   documento original por ferramenta e 7 (ESC e ADA) por confirmar. Detalhe em
   `casos/VERIFICACAO.md`.
 - **Um único modelo comercial medido.** O ensaio de 28/09 mediu o Gemini 3.5
@@ -118,8 +118,8 @@ não nos casos.
 
 ```
 python -m unittest discover -s tests   # 466 testes
-python -m aferidor verificar           # 27/27 casos, 307/307 controlos negativos
-python -m aferidor verificar --casos casos/consulta.json   # 30/30, 138/138
+python -m aferidor verificar           # 27/27 casos, 319/319 controlos negativos
+python -m aferidor verificar --casos casos/consulta.json   # 31/31, 140/140
 python -m aferidor executar --fornecedor falso
 python -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```
