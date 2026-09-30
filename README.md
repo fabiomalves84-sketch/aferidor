@@ -18,14 +18,14 @@ ensaio. Todas as respostas corrigidas com os bancos e o corretor atuais.
 
 | Modelo | Banco principal (27 casos): casos com falha crítica (IC 95%) | Banco de consulta (30 casos à data dos ensaios): casos com falha crítica (IC 95%) | Protocolo |
 |---|---|---|---|
-| Gemma 4 31B (Google, aberto, API) | 10 (22% a 56%) | 4 (5% a 30%) | reprovado |
+| Gemma 4 31B (Google, aberto, API) | 9 (19% a 52%) | 4 (5% a 30%) | reprovado |
 | Gemini 3.5 Flash Lite (Google, comercial, API) | 11 (25% a 59%) | 6 (10% a 37%) | reprovado |
-| Gemma 3 12B (Google, aberto, local) | 17 (44% a 78%) | — | reprovado |
+| Gemma 3 12B (Google, aberto, local) | 16 (41% a 75%) | — | reprovado |
 | Phi-4 14B (Microsoft, aberto, local) | 22 (63% a 92%) | — | reprovado |
 
 Os protocolos exigem zero casos com falha crítica. Entre os dois melhores, o
 teste de McNemar exato sobre os casos discordantes não mostra diferença (p =
-1,000 no banco principal, 0,500 no de consulta); entre o Gemma 4 31B e o
+0,625 no banco principal, 0,500 no de consulta); entre o Gemma 4 31B e o
 Gemma 3 12B, 2 contra 9 casos, p = 0,065. Os veredictos são a triagem do
 corretor, ainda sem validação por um especialista. Detalhe em `ensaios/`.
 
