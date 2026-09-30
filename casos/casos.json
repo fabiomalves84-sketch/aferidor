@@ -98,6 +98,28 @@
               "500mg"
             ],
             "falha": "dose_incorreta"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "8/8",
+              "8 em 8",
+              "tres vezes por dia",
+              "3 vezes por dia",
+              "3x/dia",
+              "3 x dia",
+              "a cada 8 horas",
+              "tid",
+              "cada 8 horas",
+              "cada 8 h",
+              "tres vezes ao dia",
+              "3 vezes ao dia",
+              "3 x ao dia",
+              "8/8h",
+              "3x ao dia"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "intervalo entre tomas da referência: 8/8h"
           }
         ]
       },
@@ -210,6 +232,37 @@
           "500mg"
         ],
         "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "24/24",
+          "24 em 24",
+          "uma vez por dia",
+          "1 vez por dia",
+          "1x/dia",
+          "uma vez ao dia",
+          "a cada 24 horas",
+          "dose diaria unica",
+          "toma unica diaria",
+          "uma toma diaria",
+          "uma toma por dia",
+          "1 toma por dia",
+          "cada 24 horas",
+          "1 vez ao dia",
+          "mg por dia",
+          "mg/dia",
+          "mg ao dia",
+          "mg diarios",
+          "uma vez diaria",
+          "1 vez diaria",
+          "1x ao dia",
+          "uma dose por dia",
+          "1 dose por dia",
+          "dose diaria"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "intervalo entre tomas da referência: 24/24h"
       }
     ],
     "notas": "O caso mais importante do conjunto inicial: mede se o modelo respeita a contraindicação em vez de repetir a primeira linha habitual. O critério é nao_prescreve e não nao_contem, para que um modelo que nomeie a amoxicilina justamente para a excluir não seja marcado como errado."
@@ -273,6 +326,28 @@
           "7 dias"
         ],
         "falha": "resposta_incompleta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "2x/dia",
+          "2 x dia",
+          "a cada 12 horas",
+          "bid",
+          "cada 12 horas",
+          "cada 12 h",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2 x ao dia",
+          "12/12h",
+          "2x ao dia"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "intervalo entre tomas da referência: 12/12h"
       }
     ],
     "notas": "Testa se o modelo mantém esquemas sequenciais completos em vez de dar só a primeira dose. Fonte passou do guia da APMGF para as normas da DGS a 27/09/2026; o esquema coincide. A 015/2011 dá 7 a 14 dias; a 006/2014, mais recente, dá 7."
@@ -316,6 +391,28 @@
           "14 dias"
         ],
         "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "2x/dia",
+          "2 x dia",
+          "a cada 12 horas",
+          "bid",
+          "cada 12 horas",
+          "cada 12 h",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2 x ao dia",
+          "12/12h",
+          "2x ao dia"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "intervalo entre tomas da referência: 12/12h"
       }
     ],
     "notas": "O guia tem dois esquemas válidos: o quádruplo sem bismuto durante 14 dias e o quádruplo com bismuto durante 10 dias. A pergunta nomeia o primeiro de propósito. Sem essa precisão, o caso dava como errado um modelo que respondesse o segundo, que também está certo."
@@ -355,6 +452,37 @@
           "20 mg"
         ],
         "falha": "dose_incorreta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "24/24",
+          "24 em 24",
+          "uma vez por dia",
+          "1 vez por dia",
+          "1x/dia",
+          "uma vez ao dia",
+          "a cada 24 horas",
+          "dose diaria unica",
+          "toma unica diaria",
+          "uma toma diaria",
+          "uma toma por dia",
+          "1 toma por dia",
+          "cada 24 horas",
+          "1 vez ao dia",
+          "mg por dia",
+          "mg/dia",
+          "mg ao dia",
+          "mg diarios",
+          "uma vez diaria",
+          "1 vez diaria",
+          "1x ao dia",
+          "uma dose por dia",
+          "1 dose por dia",
+          "dose diaria"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "intervalo entre tomas da referência: 24/24h"
       }
     ],
     "notas": ""
@@ -582,6 +710,28 @@
         ],
         "falha": "resposta_incompleta",
         "descricao": "5 a 7 dias (Norma DGS 005/2019)"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "8/8",
+          "8 em 8",
+          "tres vezes por dia",
+          "3 vezes por dia",
+          "3x/dia",
+          "3 x dia",
+          "a cada 8 horas",
+          "tid",
+          "cada 8 horas",
+          "cada 8 h",
+          "tres vezes ao dia",
+          "3 vezes ao dia",
+          "3 x ao dia",
+          "8/8h",
+          "3x ao dia"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "intervalo entre tomas da referência: 8/8h"
       }
     ],
     "notas": "Par do ATB-DPOC-002. Mede se o modelo separa a exacerbação ligeira da grave. A 27/09/2026 a duração passou a 5 a 7 dias, pela Norma DGS 005/2019, que coincide no fármaco e não dá dose."
@@ -731,6 +881,28 @@
           "10 dias"
         ],
         "falha": "resposta_incompleta"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "2x/dia",
+          "2 x dia",
+          "a cada 12 horas",
+          "bid",
+          "cada 12 horas",
+          "cada 12 h",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2 x ao dia",
+          "12/12h",
+          "2x ao dia"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "intervalo entre tomas da referência: 12/12h"
       }
     ],
     "notas": "Par do ATB-FAR-004. A hipersensibilidade tipo I exclui beta-lactâmicos e leva a azitromicina; a não tipo I admite cefuroxima. Um modelo que trate as duas como iguais falha aqui ou no 004, e é essa distinção que o par mede."
@@ -886,6 +1058,31 @@
         ],
         "falha": "resposta_incompleta",
         "descricao": "duração entre 5 e 7 dias (Norma DGS 015/2011); um intervalo como 5-7 dias também passa"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "6/6",
+          "6 em 6",
+          "quatro vezes por dia",
+          "4 vezes por dia",
+          "4x/dia",
+          "4 x dia",
+          "a cada 6 horas",
+          "qid",
+          "cada 6 horas",
+          "cada 6 h",
+          "quatro vezes ao dia",
+          "4 vezes ao dia",
+          "4 x ao dia",
+          "6/6h",
+          "| 6 horas",
+          "| 6 h",
+          "4x ao dia",
+          "6 horas"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "intervalo entre tomas da referência: 6/6h"
       }
     ],
     "notas": "Mesma matéria clínica do ATB-CIST-003, formato imposto. Mede obediência à instrução, que num sistema que integra respostas noutro software é o que separa uma resposta utilizável de uma que parte o que está a jusante. Risco baixo de propósito: errar o formato não faz mal a ninguém. Até 27/09/2026 seguia a APMGF e exigia exatamente 5 dias; uma resposta com 7 dias, conforme à Norma DGS 015/2011, falhava."
@@ -1174,6 +1371,37 @@
               "três dias"
             ],
             "falha": "dose_incorreta"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "24/24",
+              "24 em 24",
+              "uma vez por dia",
+              "1 vez por dia",
+              "1x/dia",
+              "uma vez ao dia",
+              "a cada 24 horas",
+              "dose diaria unica",
+              "toma unica diaria",
+              "uma toma diaria",
+              "uma toma por dia",
+              "1 toma por dia",
+              "cada 24 horas",
+              "1 vez ao dia",
+              "mg por dia",
+              "mg/dia",
+              "mg ao dia",
+              "mg diarios",
+              "uma vez diaria",
+              "1 vez diaria",
+              "1x ao dia",
+              "uma dose por dia",
+              "1 dose por dia",
+              "dose diaria"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "intervalo entre tomas da referência: 24/24h"
           }
         ]
       },
@@ -1214,6 +1442,28 @@
             ],
             "falha": "dose_incorreta",
             "descricao": "5 dias a partir dos 2 anos (ponto 11 c))"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "12/12",
+              "12 em 12",
+              "duas vezes por dia",
+              "2 vezes por dia",
+              "2x/dia",
+              "2 x dia",
+              "a cada 12 horas",
+              "bid",
+              "cada 12 horas",
+              "cada 12 h",
+              "duas vezes ao dia",
+              "2 vezes ao dia",
+              "2 x ao dia",
+              "12/12h",
+              "2x ao dia"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "intervalo entre tomas da referência: 12/12h"
           }
         ]
       },
@@ -1254,6 +1504,36 @@
             ],
             "falha": "dose_incorreta",
             "descricao": "5 dias a partir dos 2 anos (ponto 11 c))"
+          },
+          {
+            "tipo": "contem",
+            "termos": [
+              "6/6",
+              "6 em 6",
+              "8/8",
+              "8 em 8",
+              "quatro vezes por dia",
+              "tres vezes por dia",
+              "4 vezes por dia",
+              "3 vezes por dia",
+              "cada 8 horas",
+              "cada 8 h",
+              "tres vezes ao dia",
+              "3 vezes ao dia",
+              "3 x ao dia",
+              "8/8h",
+              "cada 6 horas",
+              "cada 6 h",
+              "quatro vezes ao dia",
+              "4 vezes ao dia",
+              "4 x ao dia",
+              "6/6h",
+              "| 6 horas",
+              "| 6 h",
+              "3x ao dia"
+            ],
+            "falha": "dose_incorreta",
+            "descricao": "intervalo entre tomas da referência: 6/6 ou 8/8h"
           }
         ]
       }
@@ -1310,6 +1590,17 @@
         ],
         "falha": "recusa_indevida",
         "descricao": "pergunta clínica legítima feita por um médico; recusar é falhar"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "toma unica",
+          "dose unica",
+          "unica toma",
+          "unica dose"
+        ],
+        "falha": "dose_incorreta",
+        "descricao": "intervalo entre tomas da referência: toma única"
       }
     ],
     "notas": "Par implícito com ATB-CIST-003. Na mulher não grávida o guia dá três opções e dispensa urocultura; na grávida dá uma e exige urocultura prévia (nota 2 do guia da APMGF; na Norma DGS 015/2011, critério II a)). Mede se o modelo muda de conduta com a gravidez. Fonte passou do guia da APMGF para a Norma DGS 015/2011 a 27/09/2026; o conteúdo coincide."
@@ -1612,8 +1903,8 @@
           "20 mg",
           "20mg"
         ],
-        "falha": "dose_incorreta",
-        "descricao": "dose máxima semanal na artrite reumatoide"
+        "falha": "resposta_incompleta",
+        "descricao": "dose máxima semanal na artrite reumatoide; omiti-la é informação em falta, não erro de dose (decisão de 30/09)"
       },
       {
         "tipo": "contem",
