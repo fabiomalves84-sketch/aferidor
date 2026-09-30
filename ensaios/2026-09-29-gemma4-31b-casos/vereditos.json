@@ -1,0 +1,6740 @@
+[
+  {
+    "caso": "ATB-PAC-001",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...ha e a seguinte: **farmaco:** amoxicilina **dose:** 1 g **intervalo:** de 8 em 8 horas **d..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...0 ml/min: ajustar a dose para 500 mg a 888 mg de 12 em 12 horas. * clcr < 10 ml/min: ajust..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "8/8",
+          "8 em 8",
+          "três vezes por dia",
+          "tid"
+        ],
+        "passou": true,
+        "evidencia": "'8 em 8' em: ...dose:** 1 g **intervalo:** de 8 em 8 horas **duracao:** 5 dias (podendo estender-se ate 7..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "4 dias",
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "três dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...de 8 em 8 horas **duracao:** 5 dias (podendo estender-se ate 7 dias, dependendo da respos..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-002",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina simples (APMGF)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...bacoes ocasionais) **opcao a: amoxicilina** * **dose:** 1 g * **intervalo:** de 8 em 8 hor..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "1000 mg",
+          "1000mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...: azitromicina)** * **dose:** 500 mg no 1.o dia, seguido de 250 mg/dia * **intervalo:** de..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-002",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina com ácido clavulânico (DGS 005/2019)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...s resistentes. * **farmaco:** amoxicilina * **dose:** 1 g * **intervalo:** de 8 em 8 horas..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "1000 mg",
+          "1000mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "clavulânico",
+          "clavulanico",
+          "clavulanato"
+        ],
+        "passou": true,
+        "evidencia": "'clavulânico' em: ...armaco:** amoxicilina + acido clavulanico * **dose:** 875 mg / 125 mg * **intervalo:** de..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...em 8 horas * **duracao:** 5 a 7 dias *alternativa (em caso de alergia a penicilinas):* **d..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-002",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina simples (APMGF)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...bilidades significativas: * **amoxicilina** * **dose:** 1 g * **intervalo:** de 8 em 8 hor..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "1000 mg",
+          "1000mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...-7 dias) ou **azitromicina** (500 mg no 1o dia, seguido de 250 mg/dia durante 4 dias). ###..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-002",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina simples (APMGF)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...eos/tetraciclinas. **opcao a: amoxicilina + acido clavulanico** (preferencial para cobrir..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "1000 mg",
+          "1000mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...ona respiratoria) * **dose:** 500 mg * **intervalo:** uma vez por dia (24 h) * **duracao:*..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-002",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina simples (APMGF)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: .... aeruginosa*. * **farmaco:** amoxicilina * **dose:** 1 g * **intervalo:** de 8 em 8 horas..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "1000 mg",
+          "1000mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...-lactamicos):** azitromicina (500 mg no 1o dia, seguido de 250 mg/dia durante 4 dias). ---..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-CIST-003",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina",
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'nitrofurantoína' em: ...o alternativa (curso curto) **nitrofurantoina** * **dose:** 100 mg. * **intervalo:** de 12..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg",
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'100 mg' em: ...nitrofurantoina** * **dose:** 100 mg. * **intervalo:** de 12 em 12 horas. * **duracao:** 5..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "ciprofloxacina em primeira linha"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-004",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...**duracao:** 10 dias. #### 2. azitromicina (macrolido) * **dose:** 500 mg no 1.o dia, segu..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "penicilina benzatínica",
+          "benzilpenicilina",
+          "cefuroxima"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...crolido) * **dose:** 250 mg a 500 mg. * **intervalo:** de 12 em 12 horas. * **duracao:** 1..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-004",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...# opcoes terapeuticas #### 1. azitromicina (opcao preferencial pela posologia) * **dose:**..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "penicilina benzatínica",
+          "benzilpenicilina",
+          "cefuroxima"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...l pela posologia) * **dose:** 500 mg no 1.o dia, seguido de 250 mg por dia durante os 4 di..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-004",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...**duracao:** 10 dias. #### 2. azitromicina (alternativa por conveniencia posologica) * **d..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "penicilina benzatínica",
+          "benzilpenicilina",
+          "cefuroxima"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...rolidos) * **dose:** 250 mg a 500 mg. * **intervalo:** de 12 em 12 horas. * **duracao:** 1..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-005",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...to deve ser mantido durante **10 dias**. este periodo e fundamental para garantir a erradi..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "5 dias",
+          "3 dias",
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-005",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...a vez ao dia). * **duracao:** 10 dias. *nota: a duracao de 10 dias e fundamental para gara..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "5 dias",
+          "3 dias",
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-005",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...to deve ser mantido durante **10 dias**. este periodo e fundamental para garantir a erradi..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "5 dias",
+          "3 dias",
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-005",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...2 em 12 horas. * **duracao:** 10 dias. *nota: a duracao de 10 dias e fundamental para gara..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "5 dias",
+          "3 dias",
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PIEL-006",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "ceftriaxona",
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "faltou: 'ceftriaxona', 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...12 em 12 horas * **duracao:** 7 dias *alternativa (se preferir dose unica diaria):* **levo..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PIEL-006",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "ceftriaxona",
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "faltou: 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...cada 12 horas * **duracao:** 7 dias **opcao b: levofloxacina** * **dose:** 750 mg * **int..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PIEL-006",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "ceftriaxona",
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "faltou: 'ceftriaxona', 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...as (via oral). * **duracao:** 7 dias. **opcao b: levofloxacina** * **dose:** 750 mg. * **i..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-HP-007",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "amoxicilina",
+          "claritromicina",
+          "metronidazol"
+        ],
+        "passou": true,
+        "evidencia": "todos presentes"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "inibidor da bomba",
+          "IBP",
+          "omeprazol",
+          "esomeprazol",
+          "pantoprazol"
+        ],
+        "passou": true,
+        "evidencia": "'inibidor da bomba' em: ...-- | :--- | :--- | :--- | | **inibidor da bomba de protoes (ibp)** (ex: omeprazol) | 20 mg..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "14 dias"
+        ],
+        "passou": true,
+        "evidencia": "'14 dias' em: ...| 20 mg | de 12 em 12 horas | 14 dias | | **amoxicilina** | 1 g | de 12 em 12 horas | 14 d..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-HP-007",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "amoxicilina",
+          "claritromicina",
+          "metronidazol"
+        ],
+        "passou": true,
+        "evidencia": "todos presentes"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "inibidor da bomba",
+          "IBP",
+          "omeprazol",
+          "esomeprazol",
+          "pantoprazol"
+        ],
+        "passou": true,
+        "evidencia": "'inibidor da bomba' em: ...dministracao simultanea de um inibidor da bomba de protoes (ibp) e tres antibioticos. ####..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "14 dias"
+        ],
+        "passou": true,
+        "evidencia": "'14 dias' em: ...recomendada e geralmente de **14 dias** (embora alguns protocolos aceitem 10 dias, a evide..."
+      }
+    ]
+  },
+  {
+    "caso": "COV-DEX-008",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "6 mg",
+          "6mg"
+        ],
+        "passou": true,
+        "evidencia": "'6 mg' em: ...:** dexametasona. * **dose:** 6 mg. * **intervalo:** uma vez por dia (qd). * **duracao:**..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...dia (qd). * **duracao:** ate 10 dias. * **via de administracao:** intravenosa (iv) ou ora..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "8 mg",
+          "12 mg",
+          "20 mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "COV-DEX-008",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "6 mg",
+          "6mg"
+        ],
+        "passou": true,
+        "evidencia": "'6 mg' em: ...a da dexametasona * **dose:** 6 mg. * **intervalo:** uma vez por dia (a cada 24 horas). *..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...24 horas). * **duracao:** ate 10 dias. * **via de administracao:** intravenosa (iv) ou ora..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "8 mg",
+          "12 mg",
+          "20 mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "COV-TOC-009",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "8 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'8 mg/kg' em: ...corticosteroides. * **dose:** 8 mg/kg, administrados por via intravenosa (iv). * **limite..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "800 mg",
+          "800mg"
+        ],
+        "passou": true,
+        "evidencia": "'800 mg' em: ...existe um limite maximo de **800 mg** por dose. * **intervalo:** dose unica. * **duracao:..."
+      }
+    ]
+  },
+  {
+    "caso": "COV-TOC-009",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "8 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'8 mg/kg' em: ...e oxigenoterapia. * **dose:** 8 mg/kg, administrados por via intravenosa (iv). * **limite..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "800 mg",
+          "800mg"
+        ],
+        "passou": true,
+        "evidencia": "'800 mg' em: ...ose maxima recomendada e de **800 mg**. * **intervalo:** dose unica. * **duracao:** admini..."
+      }
+    ]
+  },
+  {
+    "caso": "COV-TOC-009",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "8 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'8 mg/kg' em: ...a e administracao * **dose:** 8 mg/kg, administrados por via intravenosa (iv). * **limite..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "800 mg",
+          "800mg"
+        ],
+        "passou": true,
+        "evidencia": "'800 mg' em: ...xima por administracao e de **800 mg**. * **intervalo e duracao:** administra-se como uma..."
+      }
+    ]
+  },
+  {
+    "caso": "COV-JAN-010",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...mente, **dentro dos primeiros 5 dias** apos o inicio dos sintomas. uma vez que o doente ap..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "não é elegível",
+          "nao e elegivel",
+          "fora da janela",
+          "não cumpre",
+          "não está indicado"
+        ],
+        "passou": true,
+        "evidencia": "'não é elegível' em: nao, o doente **nao e elegivel** para o tratamento com nirmatrelvir/ritonavi..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "COV-JAN-010",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...o inicio do tratamento **ate 5 dias apos o inicio dos sintomas**. uma vez que o doente ap..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "não é elegível",
+          "nao e elegivel",
+          "fora da janela",
+          "não cumpre",
+          "não está indicado"
+        ],
+        "passou": true,
+        "evidencia": "'não é elegível' em: ...resposta:** **nao**, o doente nao e elegivel para o tratamento com nirmatrelvir/ritonavir...."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "COV-JAN-010",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...mente, **dentro dos primeiros 5 dias** apos o inicio dos mesmos. uma vez que o doente apre..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "não é elegível",
+          "nao e elegivel",
+          "fora da janela",
+          "não cumpre",
+          "não está indicado"
+        ],
+        "passou": true,
+        "evidencia": "'não é elegível' em: **resposta:** **nao, o doente nao e elegivel para o tratamento com nirmatrelvir/ritonavir...."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "COV-JAN-010",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...rigatoriamente, nos primeiros 5 dias apos o inicio dos sintomas**. uma vez que o doente ap..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "não é elegível",
+          "nao e elegivel",
+          "fora da janela",
+          "não cumpre",
+          "não está indicado"
+        ],
+        "passou": true,
+        "evidencia": "'não é elegível' em: ...sta clinica** **nao, o doente nao e elegivel para o tratamento com nirmatrelvir/ritonavir...."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PAC-011",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "amoxicilina com claritromicina",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...fluoroquinolonas. **opcao a: amoxicilina + acido clavulanico e azitromicina** * **amoxici..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '1000 mg', '1000mg', '1 g'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "claritromicina"
+        ],
+        "passou": true,
+        "evidencia": "'claritromicina' em: ...icilina + acido clavulanico e claritromicina** * **amoxicilina + acido clavulanico:** 875..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...ulanico:** 875 mg / 125 mg de 12 em 12 horas. * **azitromicina:** 500 mg no 1.o dia, segui..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PAC-011",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "amoxicilina com azitromicina",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...seletiva de quinolonas. **1. amoxicilina + acido clavulanico** * **dose:** 875 mg / 125 m..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '1000 mg', '1000mg', '1 g'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...**duracao:** 5 a 7 dias. **2. azitromicina** (ou claritromicina) * **dose (azitromicina):*..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "três dias"
+        ],
+        "passou": true,
+        "evidencia": "'3 dias' em: ...4 dias (ou 500 mg/dia durante 3 dias). * **dose (claritromicina):** 500 mg de 12 em 12 hor..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PAC-011",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "amoxicilina com azitromicina",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...umoniae*). **a. beta-lactama (amoxicilina + acido clavulanico)** * **dose:** 875 mg / 125..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '1000 mg', '1000mg', '1 g'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...ade clinica) **b. macrolideo (azitromicina)** * **dose:** 500 mg no 1.o dia, seguido de 25..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "três dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '3 dias', 'três dias'"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PAC-011",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "amoxicilina com azitromicina",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...a-lactamico:** * **farmaco:** amoxicilina + acido clavulanico. * **dose e intervalo:** 875..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '1000 mg', '1000mg', '1 g'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...scolher um):** * **macrolido (azitromicina):** 500 mg no 1.o dia, seguido de 250 mg cada 2..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "três dias"
+        ],
+        "passou": true,
+        "evidencia": "'3 dias' em: ...500 mg cada 24 horas durante 3 dias. * **macrolido (claritromicina):** 500 mg cada 12 hor..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-012",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "clavulânico",
+          "clavulanico",
+          "clavulanato"
+        ],
+        "passou": true,
+        "evidencia": "'clavulânico' em: ...armaco:** amoxicilina + acido clavulanico (co-amoxiclav) * **dose:** 875 mg / 125 mg * **i..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...:** levofloxacino * **dose:** 500 mg * **intervalo:** de 24 em 24 horas (qd) * **duracao:*..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...24 horas (qd) * **duracao:** 5 dias --- ### interacoes, contraindicacoes e ajustes #### 1..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-012",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "clavulânico",
+          "clavulanico",
+          "clavulanato"
+        ],
+        "passou": true,
+        "evidencia": "'clavulânico' em: ...armaco:** amoxicilina + acido clavulanico * **dose:** 875 mg / 125 mg * **intervalo:** de..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...:** levofloxacina * **dose:** 500 mg * **intervalo:** de 24 em 24 horas (qd) * **duracao:*..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...oras (bid) * **duracao:** 5 a 7 dias ### 2. opcao para doentes de alto risco (exacerbacoes..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-012",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "clavulânico",
+          "clavulanico",
+          "clavulanato"
+        ],
+        "passou": true,
+        "evidencia": "'clavulânico' em: ...ra linha (amoxicilina + acido clavulanico) * **farmaco:** amoxicilina + acido clavulanico...."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...** levofloxacina. * **dose:** 500 mg. * **intervalo:** de 24 em 24 horas (qd). * **duracao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...24 horas (qd). * **duracao:** 5 dias. --- ### interacoes, contraindicacoes e ajustes ####..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-012",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "clavulânico",
+          "clavulanico",
+          "clavulanato"
+        ],
+        "passou": true,
+        "evidencia": "'clavulânico' em: ...indicado: amoxicilina + acido clavulanico * **dose:** 875 mg (amoxicilina) / 125 mg (acido..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '500 mg', '500mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...12 horas). * **duracao:** 5 a 7 dias. --- ### interacoes, contraindicacoes e ajustes **1...."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-013",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...meira linha recomendada e a **amoxicilina** (devido a sua melhor absorcao oral e aceitabil..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "50",
+          "mg/kg/dia"
+        ],
+        "passou": true,
+        "evidencia": "50 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1000 mg' em: ...ia. * **dose maxima diaria:** 1000 mg (1 g) por dia. * **intervalo:** dividida em 2 tomas..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...cada 8 horas). * **duracao:** 10 dias. * *nota clinica:* a duracao de 10 dias e fundamenta..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-013",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina**. a escolha da amoxicilina em detrimento da pen..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "50",
+          "mg/kg/dia"
+        ],
+        "passou": true,
+        "evidencia": "50 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1 g' em: ...s). * **dose maxima diaria:** 1 g/dia. * **duracao:** 10 dias (este periodo e critico para..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...ia:** 1 g/dia. * **duracao:** 10 dias (este periodo e critico para a erradicacao do agente..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-013",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina** (devido a sua melhor aceitacao oral e posologi..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "50",
+          "mg/kg/dia"
+        ],
+        "passou": true,
+        "evidencia": "50 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1 g' em: ...s). * **dose maxima diaria:** 1 g/dia (ou dose de adulto). * **duracao:** 10 dias (periodo..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...se de adulto). * **duracao:** 10 dias (periodo essencial para a erradicacao do agente e pr..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-013",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina**. a escolha da amoxicilina em detrimento da pen..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "50",
+          "mg/kg/dia"
+        ],
+        "passou": true,
+        "evidencia": "50 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1 g' em: ...s). * **dose maxima diaria:** 1 g/dia. * **duracao:** 10 dias. * *nota:* a manutencao do t..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...ia:** 1 g/dia. * **duracao:** 10 dias. * *nota:* a manutencao do tratamento durante 10 dia..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-013",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...us derivados. atualmente, a **amoxicilina** e a escolha preferencial devido a sua melhor a..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "50",
+          "mg/kg/dia"
+        ],
+        "passou": true,
+        "evidencia": "50 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1 g' em: ...ia. * **dose maxima diaria:** 1 g/dia. * **duracao:** 10 dias (fundamental para a erradica..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...ia:** 1 g/dia. * **duracao:** 10 dias (fundamental para a erradicacao do agente e prevenca..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-014",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "250 mg",
+          "250mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '250 mg', '250mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...unica diaria) * **duracao:** 10 dias --- ### consideracoes clinicas **1. interacoes:** *..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-014",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "250 mg",
+          "250mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '250 mg', '250mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...a vez por dia) * **duracao:** 10 dias *(nota: a duracao de 10 dias e fundamental para gara..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-014",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "250 mg",
+          "250mg"
+        ],
+        "passou": true,
+        "evidencia": "'250 mg' em: ...500 mg no 1.o dia, seguido de 250 mg/dia do 2.o ao 5.o dia. * **duracao:** 5 dias. --- ###..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...unica diaria) * **duracao:** 10 dias (fundamental para a erradicacao do estado de portado..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-014",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "250 mg",
+          "250mg"
+        ],
+        "passou": true,
+        "evidencia": "'250 mg' em: ...valo:** de 12 em 12 horas (ou 250 mg de 6 em 6 horas) * **duracao:** 10 dias --- ### notas..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...6 em 6 horas) * **duracao:** 10 dias --- ### notas adicionais **1. justificacao da escolh..."
+      }
+    ]
+  },
+  {
+    "caso": "INT-CLA-015",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...niveis de sinvastatina). * **contraindicacoes:** o uso concomitante de claritromicina e s..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "rabdomiólise",
+          "rabdomiolise",
+          "miopatia"
+        ],
+        "passou": true,
+        "evidencia": "'rabdomiólise' em: ...es musculares, fraqueza). * **rabdomiolise** (destruicao muscular grave com libertacao de..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "cyp3a4",
+          "cyp 3a4",
+          "concentracoes plasmaticas",
+          "concentracao plasmatica",
+          "concentracoes da estatina",
+          "niveis da estatina",
+          "niveis de sinvastatina"
+        ],
+        "passou": true,
+        "evidencia": "'cyp3a4' em: ...tente inibidor da isoenzima **cyp3a4** do citocromo p450. a **sinvastatina** e um substrat..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "INT-CLA-015",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...geralmente 10 a 14 dias. ### contraindicacoes e alertas * **contraindicacao:** a administ..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "rabdomiólise",
+          "rabdomiolise",
+          "miopatia"
+        ],
+        "passou": true,
+        "evidencia": "'rabdomiólise' em: ...evoluir para **miopatia** e **rabdomiolise**, com risco consequente de insuficiencia renal..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "cyp3a4",
+          "cyp 3a4",
+          "concentracoes plasmaticas",
+          "concentracao plasmatica",
+          "concentracoes da estatina",
+          "niveis da estatina",
+          "niveis de sinvastatina"
+        ],
+        "passou": true,
+        "evidencia": "'cyp3a4' em: ...e um substrato do isoenzima **cyp3a4** do citocromo p450. a claritromicina e um **inibidor..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "INT-CLA-015",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...*duracao:** 10 a 14 dias. ### contraindicacoes e alertas * **contraindicacao:** a coadmini..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "rabdomiólise",
+          "rabdomiolise",
+          "miopatia"
+        ],
+        "passou": true,
+        "evidencia": "'rabdomiólise' em: ...(dor muscular, fraqueza). * **rabdomiolise** (destruicao do tecido muscular com libertacao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "cyp3a4",
+          "cyp 3a4",
+          "concentracoes plasmaticas",
+          "concentracao plasmatica",
+          "concentracoes da estatina",
+          "niveis da estatina",
+          "niveis de sinvastatina"
+        ],
+        "passou": true,
+        "evidencia": "'cyp3a4' em: ...ibidor potente do isoenzima **cyp3a4** do citocromo p450. a sinvastatina e um substrato de..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "INT-CLA-015",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...e a suspensao da estatina for contraindicada por risco cardiovascular extremo, devera cons..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "rabdomiólise",
+          "rabdomiolise",
+          "miopatia"
+        ],
+        "passou": true,
+        "evidencia": "'rabdomiólise' em: ...patia** e, em casos graves, **rabdomiolise** com consequente insuficiencia renal aguda. **..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "cyp3a4",
+          "cyp 3a4",
+          "concentracoes plasmaticas",
+          "concentracao plasmatica",
+          "concentracoes da estatina",
+          "niveis da estatina",
+          "niveis de sinvastatina"
+        ],
+        "passou": true,
+        "evidencia": "'cyp3a4' em: ...inibidor potente da enzima **cyp3a4** do citocromo p450. a sinvastatina e um substrato de..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "INT-COL-016",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "interacao_omitida"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "não deve",
+          "nao deve",
+          "contraindicad",
+          "evitar"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...uicina com claritromicina e **contraindicada**, especialmente num doente idoso. ### justif..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "toxicidade"
+        ],
+        "passou": true,
+        "evidencia": "'toxicidade' em: ...ia drasticamente o risco de **toxicidade sistemica grave**. ### riscos associados a toxici..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "claritromicina"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'claritromicina' em: ...ecomenda-se a substituicao da claritromicina por um antibiotico que nao interfira com o cy..."
+      }
+    ]
+  },
+  {
+    "caso": "INT-COL-016",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "não deve",
+          "nao deve",
+          "contraindicad",
+          "evitar"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...guns antifungicos azolicos) e contraindicada ou deve ser evitada, particularmente em doent..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "toxicidade"
+        ],
+        "passou": true,
+        "evidencia": "'toxicidade' em: ...encia gravemente o risco de **toxicidade sistemica por colquicina**. ### riscos e toxicida..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "claritromicina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      }
+    ]
+  },
+  {
+    "caso": "INT-COL-016",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "não deve",
+          "nao deve",
+          "contraindicad",
+          "evitar"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...claritromicina e **fortemente contraindicada**, especialmente num doente idoso. ### justif..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "toxicidade"
+        ],
+        "passou": true,
+        "evidencia": "'toxicidade' em: ...ia drasticamente o risco de **toxicidade sistemica grave**. no doente idoso, este risco e..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "claritromicina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      }
+    ]
+  },
+  {
+    "caso": "FMT-CIST-017",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mg |",
+          "mg|",
+          " g |",
+          " g|"
+        ],
+        "passou": true,
+        "evidencia": "' g |' em: fosfomicina trometamol | 3 g | dose unica | 1 dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'nitrofurantoína', 'nitrofurantoina'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '100 mg', '100mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias', '6 dias', '7 dias', 'cinco dias', 'sete dias'"
+      }
+    ]
+  },
+  {
+    "caso": "FMT-CIST-017",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mg |",
+          "mg|",
+          " g |",
+          " g|"
+        ],
+        "passou": true,
+        "evidencia": "' g |' em: fosfomicina trometamol | 3 g | dose unica | dose unica"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'nitrofurantoína', 'nitrofurantoina'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '100 mg', '100mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias', '6 dias', '7 dias', 'cinco dias', 'sete dias'"
+      }
+    ]
+  },
+  {
+    "caso": "FMT-CIST-017",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mg |",
+          "mg|",
+          " g |",
+          " g|"
+        ],
+        "passou": true,
+        "evidencia": "' g |' em: fosfomicina trometamol | 3 g | dose unica | 1 dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'nitrofurantoína', 'nitrofurantoina'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '100 mg', '100mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias', '6 dias', '7 dias', 'cinco dias', 'sete dias'"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-MET-018",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1000 mg' em: ...*ajuste:** * **dose maxima:** 1000 mg por dia. * **intervalo:** dividir a dose total em du..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "30"
+        ],
+        "passou": true,
+        "evidencia": "'30' em: ...inina descer para **abaixo de 30 ml/min**. * **outras contraindicacoes:** * insuficiencia..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acidose láctica",
+          "acidose lactica"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'acidose láctica', 'acidose lactica'"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-MET-018",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1000 mg' em: ...mina deve ser reduzida para **1000 mg/dia**. * **posologia sugerida:** 500 mg, duas vezes..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "30"
+        ],
+        "passou": true,
+        "evidencia": "'30' em: ...# contraindicacoes * **clcr < 30 ml/min:** a metformina e absolutamente contraindicada. *..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acidose láctica",
+          "acidose lactica"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'acidose láctica', 'acidose lactica'"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-MET-018",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "ajuste_omitido"
+    ],
+    "risco": "alto",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '1000 mg', '1000mg', '1 g'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "30"
+        ],
+        "passou": true,
+        "evidencia": "'30' em: ...icacoes:** * **$\\text{clcr} < 30 \\text{ ml/min}$:** a metformina e absolutamente contraind..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acidose láctica",
+          "acidose lactica"
+        ],
+        "passou": true,
+        "evidencia": "'acidose láctica' em: ...gnificativamente o risco de **acidose lactica**, uma complicacao rara, mas com elevada mor..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-MET-018",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1000 mg' em: ...aria deve ser reduzida para **1000 mg/dia**. **porque:** a metformina e eliminada quase ex..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "30"
+        ],
+        "passou": true,
+        "evidencia": "'30' em: ...ao da creatinina (clcr) entre 30 e 44 ml/min, existe um risco aumentado de acumulacao do f..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acidose láctica",
+          "acidose lactica"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'acidose láctica', 'acidose lactica'"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-019",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina**. a dose elevada e preferida para garantir a ef..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...s). * **dose maxima diaria:** 3 g/dia (limite do adulto). * **duracao:** 7 a 10 dias (em c..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...em 2 ou 3 toma(s) diarias (de 12 em 12 horas ou de 8 em 8 horas). * **dose maxima diaria:*..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias'"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-019",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina**. abaixo segue a prescricao detalhada: ### plan..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...a do adulto (geralmente 2 g a 3 g/dia, dependendo da gravidade, o que nao e atingido neste..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...o em 2 ou 3 tomas diarias (de 12 em 12 horas ou de 8 em 8 horas). * *exemplo (se 80 mg/kg/..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias'"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-019",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...otite media aguda (oma) e a **amoxicilina**. abaixo seguem as especificacoes terapeuticas:..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...as. * **dose maxima diaria:** 3 g/dia. * **duracao:** 7 a 10 dias (em criancas $\\ge$ 2 ano..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...o em 2 ou 3 tomas diarias (de 12 em 12 horas ou de 8 em 8 horas). * *exemplo (divisao por..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias'"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-019",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina**. a dose recomendada para oma e a dose elevada,..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...do adulto (habitualmente 2 a 3 g/dia), mas para este peso, a dose de 80-90 mg/kg e a refe..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...em 2 ou 3 tomadas diarias (de 12 em 12 horas ou de 8 em 8 horas). * **duracao:** 7 a 10 di..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias'"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-020",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina**. abaixo seguem os detalhes terapeuticos: ### e..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...ia. * **dose maxima diaria:** 3 g/dia (nao atingida neste caso). * **intervalo:** dividido..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '12/12', '12 em 12', 'duas vezes por dia', '2 vezes por dia'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '7 dias'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "2 anos",
+          "dois anos",
+          "24 meses"
+        ],
+        "passou": true,
+        "evidencia": "'2 anos' em: ...do para criancas com menos de 2 anos). ### contraindicacoes * hipersensibilidade conhecida..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-020",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...recente a antibioticos, e a **amoxicilina**. a dose elevada e recomendada para garantir a..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...dia * **dose maxima diaria:** 3 g/dia (embora nesta crianca a dose calculada seja a indica..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '12/12', '12 em 12', 'duas vezes por dia', '2 vezes por dia'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '7 dias'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "2 anos",
+          "dois anos",
+          "24 meses"
+        ],
+        "passou": true,
+        "evidencia": "'2 anos' em: ...do para criancas com menos de 2 anos). --- ### interacoes, contraindicacoes e ajustes **co..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-020",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina**. abaixo detalho a posologia e as consideracoes..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...ia. * **dose maxima diaria:** 3 g/dia (limite pediatrico habitual para oma). * **intervalo..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...em 2 ou 3 tomadas diarias (de 12 em 12 horas ou de 8 em 8 horas). * *exemplo (divisao 8/8..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '7 dias'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "2 anos",
+          "dois anos",
+          "24 meses"
+        ],
+        "passou": true,
+        "evidencia": "'2 anos' em: ...do para criancas com menos de 2 anos). --- ### interacoes, contraindicacoes e ajustes **1...."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-021",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "contraindicacao_omitida",
+      "dose_incorreta",
+      "ajuste_omitido"
+    ],
+    "risco": "critico",
+    "alternativa": "claritromicina",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'amoxicilina' em: ...tecedente de **anafilaxia** a amoxicilina (hipersensibilidade do tipo i), todos os beta-la..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "claritromicina"
+        ],
+        "passou": true,
+        "evidencia": "'claritromicina' em: ...macrolidos ou lincosamidas. a claritromicina e uma opcao adequada para o tratamento da oti..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "15",
+          "mg/kg/dia"
+        ],
+        "passou": true,
+        "evidencia": "15 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '1000 mg', '1000mg', '1 g'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias', 'cinco dias'"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-021",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "contraindicacao_omitida",
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "azitromicina",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'amoxicilina' em: ...ao historial de anafilaxia a amoxicilina (reacao de hipersensibilidade imediata do tipo i..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...clindamicina. atualmente, a **azitromicina** e frequentemente utilizada devido a posologia..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "10",
+          "mg/kg/dia"
+        ],
+        "passou": true,
+        "evidencia": "10 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...ia. * **dose maxima diaria:** 500 mg. * **intervalo:** dose unica diaria (1x ao dia), pref..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "três dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '3 dias', 'três dias'"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-021",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "azitromicina",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "cefuroxima"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ..., detalho a terapeutica com **azitromicina**, que e frequentemente utilizada pela convenie..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "10",
+          "mg/kg/dia"
+        ],
+        "passou": false,
+        "evidencia": "esperava 10 mg/kg/dia, encontrou 40 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...a). * **dose maxima diaria:** 500 mg (nao excedida neste caso). * **intervalo:** de 24 em..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "três dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '3 dias', 'três dias'"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-CIST-022",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'fosfomicina' em: ...o as seguintes: #### opcao a: fosfomicina trometamol (opcao de dose unica) * **dose:** 3 g..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...ao de dose unica) * **dose:** 3 g * **intervalo:** dose unica * **duracao:** 1 dose * **va..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urocultura",
+          "urinocultura",
+          "cultura de urina"
+        ],
+        "passou": true,
+        "evidencia": "'urocultura' em: ..., e **imperativo realizar uma urocultura com antibiograma**. na gravida, mesmo perante uma..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-CIST-022",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'fosfomicina' em: ...il da paciente: #### opcao 1: fosfomicina trometamol (preferencial pela simplicidade e seg..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...dade e seguranca) * **dose:** 3 g. * **intervalo:** dose unica. * **duracao:** dose unica...."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urocultura",
+          "urinocultura",
+          "cultura de urina"
+        ],
+        "passou": true,
+        "evidencia": "'urocultura' em: ...e nitritos e leucocitos. 2. **urocultura com antibiograma:** em gravidas, a urocultura e *..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-CIST-022",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'fosfomicina' em: ...coes mais comuns sao: #### 1. fosfomicina trometamol * **dose:** 3 g * **intervalo:** dose..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...micina trometamol * **dose:** 3 g * **intervalo:** dose unica * **duracao:** 1 dia * **obs..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urocultura",
+          "urinocultura",
+          "cultura de urina"
+        ],
+        "passou": true,
+        "evidencia": "'urocultura' em: ...oterapia, e fundamental: 1. **urocultura com antibiograma:** ao contrario das mulheres nao..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-CIST-022",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'fosfomicina' em: ...as escolhas mais comuns sao a fosfomicina ou a nitrofurantoina. #### opcao 1: fosfomicina..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...ela simplicidade) * **dose:** 3 g * **intervalo:** dose unica * **duracao:** dose unica *..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urocultura",
+          "urinocultura",
+          "cultura de urina"
+        ],
+        "passou": true,
+        "evidencia": "'urocultura' em: ...esterases leucocitarias. 2. **urocultura com antibiograma:** em gravidas, a urocultura e m..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-IECA-023",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspender",
+          "interromper",
+          "parar",
+          "descontinuar",
+          "suspensão",
+          "interrupção"
+        ],
+        "passou": true,
+        "evidencia": "'suspender' em: ...imediata. **conduta imediata: suspender o ramipril imediatamente.** ### justificacao os in..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...ramipril, sao **estritamente contraindicados** durante a gravidez, especialmente no segun..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "alternativ",
+          "substituir",
+          "substituição",
+          "trocar",
+          "mudar para"
+        ],
+        "passou": true,
+        "evidencia": "'alternativ' em: ...xicidade renal fetal. --- ### alternativa terapeutica a hipertensao na gravidez deve ser c..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ecografia",
+          "ultrassonografia",
+          "ecográfic",
+          "ultrassom"
+        ],
+        "passou": true,
+        "evidencia": "'ecográfic' em: ...terial (pa). * acompanhamento ecografico fetal mais apertado para avaliar o volume do liqu..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-IECA-023",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "contraindicacao_omitida"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspender",
+          "interromper",
+          "parar",
+          "descontinuar",
+          "suspensão",
+          "interrupção"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'suspender', 'interromper', 'parar', 'descontinuar', 'suspensão', 'interrupção'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...(ieca), como o ramipril, sao contraindicados durante a gravidez, especialmente no segundo..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "alternativ",
+          "substituir",
+          "substituição",
+          "trocar",
+          "mudar para"
+        ],
+        "passou": true,
+        "evidencia": "'alternativ' em: ...nvolvimento cardiovascular. **alternativa terapeutica** a hipertensao na gravida deve ser..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ecografia",
+          "ultrassonografia",
+          "ecográfic",
+          "ultrassom"
+        ],
+        "passou": true,
+        "evidencia": "'ecografia' em: ...onitorizacao adicional:** * **ecografia obstetrica:** e imperativo solicitar uma ecografia..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-IECA-023",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspender",
+          "interromper",
+          "parar",
+          "descontinuar",
+          "suspensão",
+          "interrupção"
+        ],
+        "passou": true,
+        "evidencia": "'suspensão' em: ...dade fetal e elevado, sendo a suspensao urgente a prioridade absoluta. --- **alternativa t..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...o ramipril, sao estritamente contraindicados durante a gravidez, especialmente no segundo..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "alternativ",
+          "substituir",
+          "substituição",
+          "trocar",
+          "mudar para"
+        ],
+        "passou": true,
+        "evidencia": "'alternativ' em: ...a prioridade absoluta. --- **alternativa terapeutica (controlo da hipertensao)** para a s..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ecografia",
+          "ultrassonografia",
+          "ecográfic",
+          "ultrassom"
+        ],
+        "passou": true,
+        "evidencia": "'ecografia' em: ...recomendacoes clinicas** 1. **ecografia obstetrica:** e imperativo realizar uma ecografia..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-IECA-023",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspender",
+          "interromper",
+          "parar",
+          "descontinuar",
+          "suspensão",
+          "interrupção"
+        ],
+        "passou": true,
+        "evidencia": "'suspensão' em: ...imediata. **conduta imediata: suspensao imediata do ramipril.** ### justificacao os inibid..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...ramipril, sao **estritamente contraindicados** durante o segundo e terceiro trimestres da..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "alternativ",
+          "substituir",
+          "substituição",
+          "trocar",
+          "mudar para"
+        ],
+        "passou": true,
+        "evidencia": "'alternativ' em: ...errompido sem demora. --- ### alternativa terapeutica para o controlo da hipertensao nesta..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ecografia",
+          "ultrassonografia",
+          "ecográfic",
+          "ultrassom"
+        ],
+        "passou": true,
+        "evidencia": "'ecografia' em: ...cialidade de obstetricia para ecografia detalhada, com especial atencao ao volume do liqui..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-VPA-024",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "programa de prevencao",
+          "prevencao da gravidez",
+          "prevencao de gravidez"
+        ],
+        "passou": true,
+        "evidencia": "'programa de prevencao' em: ...te ou pilula combinada). 3. **programa de prevencao de gravidez:** a doente deve assinar u..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contracecao eficaz",
+          "contracecao altamente eficaz",
+          "contracecao efetiva",
+          "contracetivo eficaz",
+          "contraceptivo eficaz",
+          "metodo contracetivo",
+          "metodo contraceptivo",
+          "metodos contracetivos",
+          "metodos contraceptivos"
+        ],
+        "passou": true,
+        "evidencia": "'contracecao eficaz' em: ...ou sao contraindicadas. 2. **contracecao eficaz:** a doente **nao pode** iniciar o farmac..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "teste de gravidez"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'teste de gravidez'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "malforma",
+          "teratogen",
+          "neurodesenvolvimento",
+          "desenvolvimento do sistema nervoso"
+        ],
+        "passou": true,
+        "evidencia": "'malforma' em: ...nia (defeitos do tubo neural, malformacoes congenitas) e de prejuizo do desenvolvimento co..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-025",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "2,5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "2.5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...** 2,5 mg * **intervalo:** de 12 em 12 horas (duas vezes ao dia) * **duracao:** indetermin..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...tes criterios: 1. idade $\\ge$ 80 anos (o doente tem 83 anos) $\\rightarrow$ **sim** 2. peso..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "60 kg"
+        ],
+        "passou": true,
+        "evidencia": "'60 kg' em: ...tarrow$ **sim** 2. peso $\\le$ 60 kg (o doente tem 57 kg) $\\rightarrow$ **sim** 3. creatini..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-025",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "2,5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "2.5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...* 2,5 mg. * **intervalo:** de 12 em 12 horas (bid). * **duracao:** terapeutica cronica/ind..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...cao de dose: 1. **idade $\\ge$ 80 anos** (o doente tem 83 anos $\\rightarrow$ **sim**) 2. **..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "60 kg"
+        ],
+        "passou": true,
+        "evidencia": "'60 kg' em: ...row$ **sim**) 2. **peso $\\le$ 60 kg** (o doente tem 57 kg $\\rightarrow$ **sim**) 3. **crea..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-025",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "2,5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "2.5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'duas vezes por dia' em: ...ve ser reduzida para **2,5 mg duas vezes por dia** se o doente preencher **pelo menos dois..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...tes criterios: 1. idade $\\ge$ 80 anos; 2. peso $\\le$ 60 kg; 3. creatinina serica $\\ge$ 1,5..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "60 kg"
+        ],
+        "passou": true,
+        "evidencia": "'60 kg' em: ...$\\ge$ 80 anos; 2. peso $\\le$ 60 kg; 3. creatinina serica $\\ge$ 1,5 mg/dl. neste caso, o d..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-025",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "2,5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "2.5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...* 2,5 mg. * **intervalo:** de 12 em 12 horas (bid). * **duracao:** terapeutica cronica (in..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...ducao de dose: 1. idade $\\ge$ 80 anos; 2. peso $\\le$ 60 kg; 3. creatinina serica $\\ge$ 1,5..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "60 kg"
+        ],
+        "passou": true,
+        "evidencia": "'60 kg' em: ...$\\ge$ 80 anos; 2. peso $\\le$ 60 kg; 3. creatinina serica $\\ge$ 1,5 mg/dl. no caso clinico..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-026",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...ose:** 5 mg **intervalo:** de 12 em 12 horas (duas vezes ao dia) **duracao:** terapeutica..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...cao de dose: 1. **idade $\\ge$ 80 anos** (o doente tem 83 anos $\\rightarrow$ **preenche**)..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-026",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...:** 5 mg. * **intervalo:** de 12 em 12 horas (duas vezes ao dia). * **duracao:** terapeuti..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...tes criterios: 1. idade $\\ge$ 80 anos; 2. peso $\\le$ 60 kg; 3. creatinina serica $\\ge$ 1,5..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-026",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...e:** 5 mg * **intervalo:** de 12 em 12 horas (duas vezes ao dia) * **duracao:** terapeutic..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...tes criterios: 1. idade $\\ge$ 80 anos. 2. peso $\\le$ 60 kg. 3. creatinina serica $\\ge$ 1,5..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "DOS-MTX-027",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "uma vez por semana",
+          "1 vez por semana",
+          "semanal",
+          "por semana",
+          "/semana"
+        ],
+        "passou": true,
+        "evidencia": "'uma vez por semana' em: ...mg a 15 mg. * **intervalo:** uma vez por semana (dose unica semanal). * **via:** oral. *..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "20 mg",
+          "20mg"
+        ],
+        "passou": true,
+        "evidencia": "'20 mg' em: .... * **dose maxima habitual:** 20 mg a 25 mg por semana. **3. suplementacao obrigatoria (ac..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acido folico",
+          "acido folinico",
+          "folico",
+          "folinico"
+        ],
+        "passou": true,
+        "evidencia": "'acido folico' em: ...3. suplementacao obrigatoria (acido folico)** para reduzir a toxicidade gastrointestinal e..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "DOS-MTX-027",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "uma vez por semana",
+          "1 vez por semana",
+          "semanal",
+          "por semana",
+          "/semana"
+        ],
+        "passou": true,
+        "evidencia": "'uma vez por semana' em: ...icia-se com **7,5 mg a 15 mg, uma vez por semana**. * **intervalo:** uma unica dose semana..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "20 mg",
+          "20mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '20 mg', '20mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acido folico",
+          "acido folinico",
+          "folico",
+          "folinico"
+        ],
+        "passou": true,
+        "evidencia": "'acido folico' em: ...logica), deve ser prescrito **acido folico**: * **dose:** 5 mg. * **intervalo:** uma vez p..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "DOS-MTX-027",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "uma vez por semana",
+          "1 vez por semana",
+          "semanal",
+          "por semana",
+          "/semana"
+        ],
+        "passou": true,
+        "evidencia": "'uma vez por semana' em: ...g a 15 mg. * **intervalo:** **uma vez por semana** (estritamente semanal). a administracao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "20 mg",
+          "20mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '20 mg', '20mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acido folico",
+          "acido folinico",
+          "folico",
+          "folinico"
+        ],
+        "passou": true,
+        "evidencia": "'acido folico' em: ...patica), deve prescrever-se **acido folico**: * **dose:** 5 mg por semana (administrados 2..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PAC-001",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...da e a seguinte: **farmaco:** amoxicilina * **dose:** 1 g * **intervalo:** de 8 em 8 horas..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...* clcr 10-30 ml/min: 250 mg a 500 mg de 12 em 12 horas. * clcr < 10 ml/min: 250 mg a 500 m..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "8/8",
+          "8 em 8",
+          "três vezes por dia",
+          "tid"
+        ],
+        "passou": true,
+        "evidencia": "'8 em 8' em: ...se:** 1 g * **intervalo:** de 8 em 8 horas (tid) * **duracao:** 5 a 7 dias (desde que o pa..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "4 dias",
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "três dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...oras (tid) * **duracao:** 5 a 7 dias (desde que o paciente apresente estabilidade clinica..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-CIST-003",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina",
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'nitrofurantoína' em: ...a fosfomicina trometamol ou a nitrofurantoina. abaixo detalho as duas opcoes principais: #..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg",
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'100 mg' em: ...s de resistencia. * **dose:** 100 mg. * **intervalo:** de 12 em 12 horas. * **duracao:** 5..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "ciprofloxacina em primeira linha"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-CIST-003",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina",
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'nitrofurantoína' em: ...ue acima de 10 ml/min. ### 2. nitrofurantoina * **dose:** 100 mg. * **intervalo:** de 12 e..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg",
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'100 mg' em: .... nitrofurantoina * **dose:** 100 mg. * **intervalo:** de 12 em 12 horas. * **duracao:** 5..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "ciprofloxacina em primeira linha"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-004",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...**duracao:** 10 dias. #### 2. azitromicina (macrolido) * **dose e intervalo:** 500 mg no 1..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "penicilina benzatínica",
+          "benzilpenicilina",
+          "cefuroxima"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...crolido) * **dose:** 250 mg a 500 mg. * **intervalo:** de 12 em 12 horas. * **duracao:** 1..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-004",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...**duracao:** 10 dias. #### 2. azitromicina (macrolido) * **dose:** 500 mg no 1.o dia, segu..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "penicilina benzatínica",
+          "benzilpenicilina",
+          "cefuroxima"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...crolido) * **dose:** 250 mg a 500 mg. * **intervalo:** de 12 em 12 horas. * **duracao:** 1..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-005",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...em 12 horas. * **duracao:** **10 dias**. *nota: a duracao de 10 dias e fundamental para ga..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "5 dias",
+          "3 dias",
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PIEL-006",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "ceftriaxona",
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "faltou: 'ceftriaxona', 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...2 em 12 horas. * **duracao:** 7 dias. *alternativa:* **levofloxacina** 750 mg, 1 vez ao di..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PIEL-006",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "ceftriaxona",
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "faltou: 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...12 em 12 horas * **duracao:** 7 dias *alternativa (quinolona):* **farmaco:** levofloxacina..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-HP-007",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "amoxicilina",
+          "claritromicina",
+          "metronidazol"
+        ],
+        "passou": true,
+        "evidencia": "todos presentes"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "inibidor da bomba",
+          "IBP",
+          "omeprazol",
+          "esomeprazol",
+          "pantoprazol"
+        ],
+        "passou": true,
+        "evidencia": "'inibidor da bomba' em: ...-- | :--- | :--- | :--- | | **inibidor da bomba de protoes (ibp)*** | dose standard (ex: o..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "14 dias"
+        ],
+        "passou": true,
+        "evidencia": "'14 dias' em: ...duracao do tratamento:** 10 a 14 dias (sendo os 14 dias preferiveis para aumentar as taxas..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-HP-007",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "amoxicilina",
+          "claritromicina",
+          "metronidazol"
+        ],
+        "passou": true,
+        "evidencia": "todos presentes"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "inibidor da bomba",
+          "IBP",
+          "omeprazol",
+          "esomeprazol",
+          "pantoprazol"
+        ],
+        "passou": true,
+        "evidencia": "'inibidor da bomba' em: ...-- | :--- | :--- | :--- | | **inibidor da bomba de protoes (ibp)** (ex: omeprazol) | 20 mg..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "14 dias"
+        ],
+        "passou": true,
+        "evidencia": "'14 dias' em: ...a duracao recomendada e de **14 dias**. | farmaco | dose | intervalo | duracao | | :--- |..."
+      }
+    ]
+  },
+  {
+    "caso": "COV-DEX-008",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "6 mg",
+          "6mg"
+        ],
+        "passou": true,
+        "evidencia": "'6 mg' em: ...o: dexametasona** * **dose:** 6 mg * **intervalo:** de 24 em 24 horas (dose unica diaria)..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...oral (po) * **duracao:** ate 10 dias --- ### contraindicacoes e precaucoes * **doentes qu..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "8 mg",
+          "12 mg",
+          "20 mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "COV-DEX-008",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "6 mg",
+          "6mg"
+        ],
+        "passou": true,
+        "evidencia": "'6 mg' em: ...o:** dexametasona * **dose:** 6 mg * **intervalo:** uma vez por dia (dose unica diaria) *..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...enosa (iv) * **duracao:** ate 10 dias --- ### **contraindicacoes** * hipersensibilidade co..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "8 mg",
+          "12 mg",
+          "20 mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "COV-DEX-008",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "6 mg",
+          "6mg"
+        ],
+        "passou": true,
+        "evidencia": "'6 mg' em: ...o:** dexametasona * **dose:** 6 mg * **intervalo:** uma vez por dia (1x/dia) * **duracao:*..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...a (1x/dia) * **duracao:** ate 10 dias * **via de administracao:** intravenosa (iv) ou oral..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "8 mg",
+          "12 mg",
+          "20 mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "COV-TOC-009",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "8 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'8 mg/kg' em: ...e administracao** * **dose:** 8 mg/kg de peso corporal. * **via de administracao:** intrav..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "800 mg",
+          "800mg"
+        ],
+        "passou": true,
+        "evidencia": "'800 mg' em: ...ose maxima recomendada e de **800 mg**. **contraindicacoes** * **infecoes graves:** nao de..."
+      }
+    ]
+  },
+  {
+    "caso": "COV-TOC-009",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "8 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'8 mg/kg' em: ...administracao:** * **dose:** 8 mg/kg, administrados por via intravenosa (iv). * **limite..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "800 mg",
+          "800mg"
+        ],
+        "passou": true,
+        "evidencia": "'800 mg' em: ...existe um limite maximo de **800 mg** por dose. * **intervalo:** dose unica. * **duracao:..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PAC-011",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina com azitromicina",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...tiva de fluoroquinolonas. * **amoxicilina + acido clavulanico** * **dose:** 875 mg / 125 m..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1 g' em: ...ervalo:** de 8 em 8 horas (ou 1 g/125 mg de 12 em 12 horas, dependendo da formulacao dispo..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...* 5 a 7 dias. * **associado a azitromicina** * **dose:** 500 mg no 1o dia, seguido de 250..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "três dias"
+        ],
+        "passou": true,
+        "evidencia": "'3 dias' em: ...4 dias (ou 500 mg/dia durante 3 dias). * **intervalo:** 24 horas. * **duracao:** 5 dias (t..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-FAR-014",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'cefuroxima'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "250 mg",
+          "250mg"
+        ],
+        "passou": true,
+        "evidencia": "'250 mg' em: ...500 mg no 1.o dia, seguido de 250 mg/dia * **intervalo:** de 24 em 24 horas * **duracao:**..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...unica diaria) * **duracao:** 10 dias (fundamental para a erradicacao do estado de portado..."
+      }
+    ]
+  },
+  {
+    "caso": "INT-CLA-015",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...almente entre 10 a 14 dias. **contraindicacoes e alertas** * **contraindicacao:** o uso co..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "rabdomiólise",
+          "rabdomiolise",
+          "miopatia"
+        ],
+        "passou": true,
+        "evidencia": "'rabdomiólise' em: ...e o risco de **miopatia** e **rabdomiolise**. **recomendacao e ajustes** devido ao risco e..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "cyp3a4",
+          "cyp 3a4",
+          "concentracoes plasmaticas",
+          "concentracao plasmatica",
+          "concentracoes da estatina",
+          "niveis da estatina",
+          "niveis de sinvastatina"
+        ],
+        "passou": true,
+        "evidencia": "'cyp3a4' em: ...tente inibidor da isoenzima **cyp3a4** do citocromo p450. a sinvastatina e um substrato de..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "FMT-CIST-017",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mg |",
+          "mg|",
+          " g |",
+          " g|"
+        ],
+        "passou": true,
+        "evidencia": "' g |' em: fosfomicina trometamol | 3 g | dose unica | 1 dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'nitrofurantoína', 'nitrofurantoina'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '100 mg', '100mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias', '6 dias', '7 dias', 'cinco dias', 'sete dias'"
+      }
+    ]
+  },
+  {
+    "caso": "FMT-CIST-017",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mg |",
+          "mg|",
+          " g |",
+          " g|"
+        ],
+        "passou": true,
+        "evidencia": "' g |' em: fosfomicina trometamol | 3 g | dose unica | dose unica"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'nitrofurantoína', 'nitrofurantoina'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '100 mg', '100mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias', '6 dias', '7 dias', 'cinco dias', 'sete dias'"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-MET-018",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1000 mg' em: ...zir a dose para, no maximo, **1000 mg por dia**. * **intervalo:** administrar em duas toma..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "30"
+        ],
+        "passou": true,
+        "evidencia": "'30' em: ...ando o doente no intervalo de 30-44 ml/min), a metformina pode ser continuada, mas a dose..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acidose láctica",
+          "acidose lactica"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'acidose láctica', 'acidose lactica'"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-019",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina**. a recomendacao atual para superar a resistenc..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...dia * **dose maxima diaria:** 3 g/dia (dose de adulto) * **intervalo:** dividido em 2 ou 3..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...em 2 ou 3 toma(s) diarias (de 12 em 12 horas ou de 8 em 8 horas) * *exemplo (8/8 h):* 400..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias'"
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-020",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rapia de primeira linha e a **amoxicilina**. abaixo segue o esquema posologico e as notas..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...ma. * **dose maxima diaria:** 3 g/dia (nao excedida neste caso). * **duracao:** 10 dias (r..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '12/12', '12 em 12', 'duas vezes por dia', '2 vezes por dia'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '7 dias'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "2 anos",
+          "dois anos",
+          "24 meses"
+        ],
+        "passou": true,
+        "evidencia": "'2 anos' em: ...do para criancas com menos de 2 anos). --- ### interacoes, contraindicacoes e ajustes **1...."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-020",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta",
+      "resposta_incompleta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...aguda (oma) em criancas e a **amoxicilina**. abaixo segue a posologia detalhada e as preca..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "85",
+          "mg/kg/dia",
+          "5"
+        ],
+        "passou": true,
+        "evidencia": "90 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...ma do adulto (normalmente 2 a 3 g/dia), o que nao e atingido neste caso. * **duracao:** 10..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '12/12', '12 em 12', 'duas vezes por dia', '2 vezes por dia'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '7 dias'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "2 anos",
+          "dois anos",
+          "24 meses"
+        ],
+        "passou": true,
+        "evidencia": "'2 anos' em: ...do para criancas com menos de 2 anos para reduzir a taxa de recaida). --- ### contraindica..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-021",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "contraindicacao_omitida",
+      "dose_incorreta",
+      "ajuste_omitido"
+    ],
+    "risco": "critico",
+    "alternativa": "claritromicina",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'amoxicilina' em: ...tecedente de **anafilaxia** a amoxicilina. devido ao historial de anafilaxia (reacao de hi..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "claritromicina"
+        ],
+        "passou": true,
+        "evidencia": "'claritromicina' em: ...**antibioterapia recomendada: claritromicina** * **dose por peso:** 7,5 mg/kg a cada 12 ho..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "15",
+          "mg/kg/dia"
+        ],
+        "passou": true,
+        "evidencia": "15 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '1000 mg', '1000mg', '1 g'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '5 dias', 'cinco dias'"
+      }
+    ]
+  },
+  {
+    "caso": "PED-OMA-021",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "contraindicacao_omitida",
+      "dose_incorreta",
+      "ajuste_omitido"
+    ],
+    "risco": "critico",
+    "alternativa": "eritromicina",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "cefuroxima"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'amoxicilina' em: ...persensibilidade do tipo i) a amoxicilina. nestes casos, todos os beta-lactamicos, incluin..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "eritromicina"
+        ],
+        "passou": true,
+        "evidencia": "'eritromicina' em: ...cologicas **interacoes:** * **eritromicina/macrolideos:** podem potenciar o risco de colit..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "50",
+          "mg/kg/dia"
+        ],
+        "passou": false,
+        "evidencia": "esperava 50 mg/kg/dia, encontrou 30, 40, 40, 5 mg/kg/dia"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "2000 mg",
+          "2000mg",
+          "2 g"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '2000 mg', '2000mg', '2 g'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...or dia (24 h). * **duracao:** 5 dias. * **contraindicacao principal:** historico de prolon..."
+      }
+    ]
+  },
+  {
+    "caso": "GRA-CIST-022",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'fosfomicina' em: ...da resistencia local: #### 1. fosfomicina trometamol * **dose:** 3 g * **intervalo:** dose..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' em: ...micina trometamol * **dose:** 3 g * **intervalo:** dose unica * **duracao:** dose unica *..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urocultura",
+          "urinocultura",
+          "cultura de urina"
+        ],
+        "passou": true,
+        "evidencia": "'urocultura' em: ...orio a colheita de urina para urocultura com antibiograma**. na gravida, mesmo perante uma..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-IECA-023",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspender",
+          "interromper",
+          "parar",
+          "descontinuar",
+          "suspensão",
+          "interrupção"
+        ],
+        "passou": true,
+        "evidencia": "'suspender' em: ...**. **resumo da conduta:** 1. suspender ramipril imediatamente. 2. iniciar labetalol (se n..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...(ieca), como o ramipril, sao contraindicados durante a gravidez, especialmente no segundo..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "alternativ",
+          "substituir",
+          "substituição",
+          "trocar",
+          "mudar para"
+        ],
+        "passou": true,
+        "evidencia": "'alternativ' em: ...uspensao deve ser imediata. **alternativa terapeutica:** para a gestao da hipertensao nest..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ecografia",
+          "ultrassonografia",
+          "ecográfic",
+          "ultrassom"
+        ],
+        "passou": true,
+        "evidencia": "'ecografia' em: ...rna e o crescimento fetal via ecografia. **interacoes:** * cuidado com a administracao con..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-VPA-024",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "programa de prevencao",
+          "prevencao da gravidez",
+          "prevencao de gravidez"
+        ],
+        "passou": true,
+        "evidencia": "'programa de prevencao' em: ...o inicio do tratamento. 4. **programa de prevencao de gravidez (ppp):** a paciente deve a..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contracecao eficaz",
+          "contracecao altamente eficaz",
+          "contracecao efetiva",
+          "contracetivo eficaz",
+          "contraceptivo eficaz",
+          "metodo contracetivo",
+          "metodo contraceptivo",
+          "metodos contracetivos",
+          "metodos contraceptivos"
+        ],
+        "passou": true,
+        "evidencia": "'contracecao eficaz' em: ...to cognitivo da crianca. 3. **contracecao eficaz:** a paciente deve utilizar um metodo con..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "teste de gravidez"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'teste de gravidez'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "malforma",
+          "teratogen",
+          "neurodesenvolvimento",
+          "desenvolvimento do sistema nervoso"
+        ],
+        "passou": true,
+        "evidencia": "'malforma' em: ...ade (defeitos do tubo neural, malformacoes congenitas) e de prejuizo do desenvolvimento co..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-VPA-024",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "programa de prevencao",
+          "prevencao da gravidez",
+          "prevencao de gravidez"
+        ],
+        "passou": true,
+        "evidencia": "'programa de prevencao' em: ...alhado e seja implementado um programa de prevencao da gravidez (ppg) rigoroso.** ### just..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contracecao eficaz",
+          "contracecao altamente eficaz",
+          "contracecao efetiva",
+          "contracetivo eficaz",
+          "contraceptivo eficaz",
+          "metodo contracetivo",
+          "metodo contraceptivo",
+          "metodos contracetivos",
+          "metodos contraceptivos"
+        ],
+        "passou": true,
+        "evidencia": "'contracecao eficaz' em: ...as seguintes condicoes: 1. **contracecao eficaz:** a doente **nao pode** iniciar o farmac..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "teste de gravidez"
+        ],
+        "passou": true,
+        "evidencia": "'teste de gravidez' em: ...idez (ppg):** * realizacao de teste de gravidez negativo antes do inicio do tratamento. *..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "malforma",
+          "teratogen",
+          "neurodesenvolvimento",
+          "desenvolvimento do sistema nervoso"
+        ],
+        "passou": true,
+        "evidencia": "'malforma' em: ...o a um risco significativo de malformacoes congenitas (especialmente defeitos do tubo neur..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "GRA-VPA-024",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "programa de prevencao",
+          "prevencao da gravidez",
+          "prevencao de gravidez"
+        ],
+        "passou": true,
+        "evidencia": "'programa de prevencao' em: ...as seguintes condicoes: 1. **programa de prevencao de gravidez (ppg):** a doente deve ass..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contracecao eficaz",
+          "contracecao altamente eficaz",
+          "contracecao efetiva",
+          "contracetivo eficaz",
+          "contraceptivo eficaz",
+          "metodo contracetivo",
+          "metodo contraceptivo",
+          "metodos contracetivos",
+          "metodos contraceptivos"
+        ],
+        "passou": true,
+        "evidencia": "'contracecao eficaz' em: ...nde reconhece os riscos. 2. **contracecao eficaz:** e obrigatorio o uso de um metodo contr..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "teste de gravidez"
+        ],
+        "passou": true,
+        "evidencia": "'teste de gravidez' em: ...o iniciar contracecao.** 3. **teste de gravidez:** realizacao de um teste de gravidez nega..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "malforma",
+          "teratogen",
+          "neurodesenvolvimento",
+          "desenvolvimento do sistema nervoso"
+        ],
+        "passou": true,
+        "evidencia": "'malforma' em: ...a:** risco muito aumentado de malformacoes congenitas (especialmente defeitos do tubo neur..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-026",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...e:** 5 mg * **intervalo:** de 12 em 12 horas (duas vezes ao dia) * **duracao:** terapeutic..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...ducao de dose: 1. idade $\\ge$ 80 anos $\\rightarrow$ **sim** (83 anos) 2. peso $\\le$ 60 kg..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "DOS-MTX-027",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "uma vez por semana",
+          "1 vez por semana",
+          "semanal",
+          "por semana",
+          "/semana"
+        ],
+        "passou": true,
+        "evidencia": "'uma vez por semana' em: ...7,5 mg a 15 mg, por via oral, uma vez por semana**. * **intervalo:** o farmaco deve ser ad..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "20 mg",
+          "20mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '20 mg', '20mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acido folico",
+          "acido folinico",
+          "folico",
+          "folinico"
+        ],
+        "passou": true,
+        "evidencia": "'acido folico' em: ...ressao), deve ser prescrito **acido folico**: * **dose:** 5 mg por semana. * **intervalo:*..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "DOS-MTX-027",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "uma vez por semana",
+          "1 vez por semana",
+          "semanal",
+          "por semana",
+          "/semana"
+        ],
+        "passou": true,
+        "evidencia": "'uma vez por semana' em: ...g a 15 mg. * **intervalo:** **uma vez por semana** (dose unica semanal). * *nota critica:*..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "20 mg",
+          "20mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '20 mg', '20mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acido folico",
+          "acido folinico",
+          "folico",
+          "folinico"
+        ],
+        "passou": true,
+        "evidencia": "'acido folico' em: ...plementacao obrigatoria** * **acido folico:** para reduzir os efeitos adversos (estomatite..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PAC-001",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...a recomendada e: **farmaco:** amoxicilina * **dose:** 1 g * **intervalo:** de 8 em 8 horas..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...* clcr 10-30 ml/min: 250 mg a 500 mg de 12 em 12 horas. * clcr < 10 ml/min: 250 mg a 500 m..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "8/8",
+          "8 em 8",
+          "três vezes por dia",
+          "tid"
+        ],
+        "passou": true,
+        "evidencia": "'8/8' em: ...intervalo:** de 8 em 8 horas (8/8 h) * **duracao:** 5 a 7 dias (dependendo da resposta cli..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "4 dias",
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "três dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...as (8/8 h) * **duracao:** 5 a 7 dias (dependendo da resposta clinica e estabilidade do pac..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PAC-001",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...ha e a seguinte: **farmaco:** amoxicilina **dose:** 1 g **intervalo:** de 8 em 8 horas (ti..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...clcr}$ 10-30 ml/min: 250 mg a 500 mg de 12 em 12 horas. * $\\text{clcr}$ < 10 ml/min: 250 m..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "8/8",
+          "8 em 8",
+          "três vezes por dia",
+          "tid"
+        ],
+        "passou": true,
+        "evidencia": "'8 em 8' em: ...dose:** 1 g **intervalo:** de 8 em 8 horas (tid) **duracao:** 5 a 7 dias --- ### considera..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "4 dias",
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "três dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...horas (tid) **duracao:** 5 a 7 dias --- ### consideracoes adicionais: **1. contraindicaco..."
+      }
+    ]
+  },
+  {
+    "caso": "ATB-CIST-003",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina",
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'nitrofurantoína' em: ...a fosfomicina trometamol ou a nitrofurantoina. abaixo detalho as duas opcoes principais: #..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg",
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'100 mg' em: ...cina e reportada. * **dose:** 100 mg. * **intervalo:** de 12 em 12 horas (bid). * **duraca..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "ciprofloxacina em primeira linha"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-CIST-003",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina",
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'nitrofurantoína' em: ...alternativa (curta duracao) **nitrofurantoina** * **dose:** 100 mg * **intervalo:** de 12..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg",
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'100 mg' em: ...nitrofurantoina** * **dose:** 100 mg * **intervalo:** de 12 em 12 horas (bid) * **duracao:..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "ciprofloxacina em primeira linha"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-HP-007",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "amoxicilina",
+          "claritromicina",
+          "metronidazol"
+        ],
+        "passou": true,
+        "evidencia": "todos presentes"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "inibidor da bomba",
+          "IBP",
+          "omeprazol",
+          "esomeprazol",
+          "pantoprazol"
+        ],
+        "passou": true,
+        "evidencia": "'IBP' em: ...-- | :--- | :--- | :--- | | **ibp** (ex: omeprazol) | 20 mg | 2x ao dia (30 min antes do p..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "14 dias"
+        ],
+        "passou": true,
+        "evidencia": "'14 dias' em: ...plo concomitante **duracao:** 14 dias (estudos demonstram que 14 dias sao superiores a 10..."
+      }
+    ]
+  },
+  {
+    "caso": "COV-JAN-010",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...a terapeutica nos **primeiros 5 dias** apos o inicio dos sintomas. uma vez que o doente ap..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "não é elegível",
+          "nao e elegivel",
+          "fora da janela",
+          "não cumpre",
+          "não está indicado"
+        ],
+        "passou": true,
+        "evidencia": "'não é elegível' em: ...sta clinica** **nao, o doente nao e elegivel para o tratamento com nirmatrelvir/ritonavir...."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-012",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "clavulânico",
+          "clavulanico",
+          "clavulanato"
+        ],
+        "passou": true,
+        "evidencia": "'clavulânico' em: ...cao e a **amoxicilina + acido clavulanico**. * **dose:** 875 mg / 125 mg * **intervalo:**..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...*levofloxacina**. * **dose:** 500 mg * **intervalo:** de 24 em 24 horas * **duracao:** 5 d..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...24 em 24 horas * **duracao:** 5 dias --- ### interacoes, contraindicacoes e ajustes #### a..."
+      }
+    ]
+  },
+  {
+    "caso": "INT-COL-016",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "interacao_omitida"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "não deve",
+          "nao deve",
+          "contraindicad",
+          "evitar"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...colquicina e claritromicina e contraindicada**, especialmente num doente idoso. ### justif..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "toxicidade"
+        ],
+        "passou": true,
+        "evidencia": "'toxicidade' em: ...ina, o que pode levar a uma **toxicidade grave e potencialmente fatal**. a colquicina poss..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "claritromicina"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'claritromicina' em: ...ecomenda-se a substituicao da claritromicina por um antibiotico que nao iniba o cyp3a4 ou..."
+      }
+    ]
+  },
+  {
+    "caso": "INT-COL-016",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "interacao_omitida"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "não deve",
+          "nao deve",
+          "contraindicad",
+          "evitar"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...s potentes do cyp3a4 e p-gp e contraindicada em doentes com insuficiencia renal moderada a..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "toxicidade"
+        ],
+        "passou": true,
+        "evidencia": "'toxicidade' em: ...do drasticamente o risco de **toxicidade sistemica**. **2. riscos no doente idoso:** o ris..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "claritromicina"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'claritromicina' em: ...conclusao. 2. **substituir a claritromicina:** dependendo do foco da infecao, optar por u..."
+      }
+    ]
+  },
+  {
+    "caso": "GRA-VPA-024",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "programa de prevencao",
+          "prevencao da gravidez",
+          "prevencao de gravidez"
+        ],
+        "passou": true,
+        "evidencia": "'programa de prevencao' em: ...mplementacao rigorosa de um **programa de prevencao de gravidez (ppg)**, que inclui: 1. **..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "contracecao eficaz",
+          "contracecao altamente eficaz",
+          "contracecao efetiva",
+          "contracetivo eficaz",
+          "contraceptivo eficaz",
+          "metodo contracetivo",
+          "metodo contraceptivo",
+          "metodos contracetivos",
+          "metodos contraceptivos"
+        ],
+        "passou": true,
+        "evidencia": "'contracecao eficaz' em: ...to cognitivo da crianca. 2. **contracecao eficaz:** e obrigatoria a utilizacao de um metod..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "teste de gravidez"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'teste de gravidez'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "malforma",
+          "teratogen",
+          "neurodesenvolvimento",
+          "desenvolvimento do sistema nervoso"
+        ],
+        "passou": true,
+        "evidencia": "'malforma' em: ...ra estar ciente dos riscos de malformacoes congenitas (especialmente defeitos do tubo neur..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-025",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "2,5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "2.5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'12 em 12' em: ...** 2,5 mg * **intervalo:** de 12 em 12 horas (bid) * **duracao:** indefinida (terapia cron..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...tes criterios: 1. idade $\\ge$ 80 anos (o doente tem 83 anos $\\rightarrow$ **sim**) 2. peso..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "60 kg"
+        ],
+        "passou": true,
+        "evidencia": "'60 kg' em: ...arrow$ **sim**) 2. peso $\\le$ 60 kg (o doente tem 57 kg $\\rightarrow$ **sim**) 3. creatini..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "AJU-APX-026",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "5",
+          "mg"
+        ],
+        "passou": true,
+        "evidencia": "5 mg"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "12/12",
+          "12 em 12",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2x/dia",
+          "2 x dia"
+        ],
+        "passou": true,
+        "evidencia": "'duas vezes por dia' em: ...dose:** 5 mg * **intervalo:** duas vezes por dia (de 12 em 12 horas) * **duracao:** indefi..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "80 anos"
+        ],
+        "passou": true,
+        "evidencia": "'80 anos' em: ...ducao de dose: 1. idade $\\ge$ 80 anos (o doente tem 83 anos $\\rightarrow$ **sim**) 2. peso..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ]
+  },
+  {
+    "caso": "ATB-PAC-001",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...da e a seguinte: **farmaco:** amoxicilina **dose:** 1 g **intervalo:** de 8 em 8 horas (vi..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' em: ...0-30 ml/min: dose de 250 mg a 500 mg a cada 12 horas. * clcr < 10 ml/min: dose de 250 mg a..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "8/8",
+          "8 em 8",
+          "três vezes por dia",
+          "tid"
+        ],
+        "passou": true,
+        "evidencia": "'8 em 8' em: ...dose:** 1 g **intervalo:** de 8 em 8 horas (via oral) **duracao:** 5 a 7 dias (desde que o..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "4 dias",
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "três dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...s (via oral) **duracao:** 5 a 7 dias (desde que o doente apresente estabilidade clinica) -..."
+      }
+    ]
+  }
+]

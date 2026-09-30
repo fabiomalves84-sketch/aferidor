@@ -215,6 +215,8 @@ não mudaram entre o ensaio e essa data.
 | `2026-09-27-locais-12-14b/` | Primeiro ensaio com o instrumento completo: protocolo commitado antes da primeira pergunta, condições registadas em cada resposta, casos de infeção com fontes da DGS. Gemma 3 12B e Phi-4 14B, 27 casos, 5 amostras; 270 de 270 respostas; ambos reprovados pelo protocolo. |
 | `2026-09-28-gemini-flash/` | Primeiro ensaio com um modelo comercial: Gemini 3.5 Flash Lite pela API gratuita, com protocolo commitado antes da primeira resposta. 27 casos, 5 amostras; 135 de 135 respostas; 11 de 27 casos com falha crítica; reprovado pelo protocolo. |
 | `2026-09-29-gemini-consulta/` | Primeiro ensaio do banco de consulta: Gemini 3.5 Flash Lite, 30 casos, 5 amostras, protocolo prévio. 150 de 150 respostas; 6 de 30 casos com falha crítica; reprovado pelo protocolo. As respostas levaram a afinar o `nao_prescreve` (commit `3fc49ba`), antes de registar os resultados. |
+| `2026-09-29-gemma4-31b-casos/` | Gemma 4 31B (modelo aberto, pela API gratuita) no banco principal, protocolo prévio. 135 de 135 respostas; 10 de 27 casos com falha crítica; reprovado. |
+| `2026-09-29-gemma4-31b-consulta/` | Gemma 4 31B no banco de consulta, protocolo prévio. 150 de 150 respostas; 4 de 30 casos com falha crítica; reprovado. Levou a afinar o `nao_prescreve` (commit `0cbfda6`). |
 
 Depois de 27/09, vários casos mudaram de fonte e de formulação. Os resultados
 registados em cada ensaio correspondem ao instrumento da altura e não são

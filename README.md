@@ -4,32 +4,30 @@ Banco de ensaio para respostas clínicas de modelos de linguagem em português
 europeu. Avalia; não aconselha.
 
 **Relatório de exemplo:**
-https://fabiomalves84-sketch.github.io/aferidor/exemplo/ (Gemini 3.5 Flash Lite
-pela API e dois modelos locais, 27 casos, 5 amostras por caso, ensaios de 27 e
-28/09/2026; em português, inglês, espanhol, francês e alemão).
+https://fabiomalves84-sketch.github.io/aferidor/exemplo/ (quatro modelos no
+banco principal: Gemma 4 31B e Gemini 3.5 Flash Lite pela API, Gemma 3 12B e
+Phi-4 14B locais; 27 casos, 5 amostras por caso; em português, inglês,
+espanhol, francês e alemão).
 
 [![Resumo do relatório de exemplo](docs/imagens/resumo.png)](https://fabiomalves84-sketch.github.io/aferidor/exemplo/)
 
 ## Resultados
 
-Banco principal, 27 casos × 5 amostras, temperatura 1,0, protocolo commitado
-antes de cada ensaio.
+5 amostras por caso, temperatura 1,0, protocolo commitado antes de cada
+ensaio. Todas as respostas corrigidas com os bancos e o corretor atuais.
 
-| Modelo | Casos com falha crítica (IC 95%) | Casos sempre corretos | Protocolo |
+| Modelo | Banco principal (27 casos): casos com falha crítica (IC 95%) | Banco de consulta (30 casos): casos com falha crítica (IC 95%) | Protocolo |
 |---|---|---|---|
-| Gemini 3.5 Flash Lite (Google, API) | 11 de 27 (25% a 59%) | 10 de 27 | reprovado |
-| Gemma 3 12B (Google, local) | 17 de 27 (44% a 78%) | 2 de 27 | reprovado |
-| Phi-4 14B (Microsoft, local) | 22 de 27 (63% a 92%) | 2 de 27 | reprovado |
-
-No banco de consulta (30 casos de adulto, criança e cessação tabágica), o
-Gemini 3.5 Flash Lite teve 6 de 30 casos com falha crítica (IC 95% 10% a 37%)
-e 18 de 30 sempre corretos, também reprovado
-(`ensaios/2026-09-29-gemini-consulta/`).
+| Gemma 4 31B (Google, aberto, API) | 10 (22% a 56%) | 4 (5% a 30%) | reprovado |
+| Gemini 3.5 Flash Lite (Google, comercial, API) | 11 (25% a 59%) | 6 (10% a 37%) | reprovado |
+| Gemma 3 12B (Google, aberto, local) | 17 (44% a 78%) | — | reprovado |
+| Phi-4 14B (Microsoft, aberto, local) | 22 (63% a 92%) | — | reprovado |
 
 Os protocolos exigem zero casos com falha crítica. Entre os dois melhores, o
-teste de McNemar exato sobre os casos discordantes dá p = 0,146: com 27 casos,
-a diferença ainda pode ser acaso. Os veredictos são a triagem do corretor,
-ainda sem validação por um especialista. Detalhe em `ensaios/`.
+teste de McNemar exato sobre os casos discordantes não mostra diferença (p =
+1,000 no banco principal, 0,500 no de consulta); entre o Gemma 4 31B e o
+Gemma 3 12B, 2 contra 9 casos, p = 0,065. Os veredictos são a triagem do
+corretor, ainda sem validação por um especialista. Detalhe em `ensaios/`.
 
 ## Instalação e primeira execução
 

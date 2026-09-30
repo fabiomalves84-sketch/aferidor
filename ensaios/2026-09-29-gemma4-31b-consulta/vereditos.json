@@ -1,0 +1,4519 @@
+[
+  {
+    "caso": "ADU-HTA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mapa",
+          "ampa",
+          "ambulatorio",
+          "domicilio",
+          "medicoes repetidas",
+          "repetir",
+          "confirmar",
+          "confirmacao"
+        ],
+        "passou": true,
+        "evidencia": "'mapa' em: ...ulatoria da pressao arterial (mapa):** e o \"gold standard\", permitindo avaliar a pressao a..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mapa",
+          "ampa",
+          "ambulatorio",
+          "domicilio",
+          "medicoes repetidas",
+          "repetir",
+          "confirmar",
+          "confirmacao"
+        ],
+        "passou": true,
+        "evidencia": "'mapa' em: ...ulatoria da pressao arterial (mapa - 24 h):** e o metodo padrao-ouro para excluir a hipert..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mapa",
+          "ampa",
+          "ambulatorio",
+          "domicilio",
+          "medicoes repetidas",
+          "repetir",
+          "confirmar",
+          "confirmacao"
+        ],
+        "passou": true,
+        "evidencia": "'mapa' em: ...ranca, deve solicitar-se: * **mapa (monitorizacao ambulatoria da pressao arterial):** aval..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspender",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...lisinopril, sao estritamente contraindicados durante a gravidez. a exposicao ao segundo e..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ara ii",
+          "losartan",
+          "valsartan",
+          "candesartan",
+          "irbesartan",
+          "telmisartan",
+          "olmesartan"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspender",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...**justificacao:** os ieca sao contraindicados durante a gravidez. embora o risco seja mais..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ara ii",
+          "losartan",
+          "valsartan",
+          "candesartan",
+          "irbesartan",
+          "telmisartan",
+          "olmesartan"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspender",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...**justificacao** os ieca sao contraindicados durante a gravidez. embora o risco seja mais..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ara ii",
+          "losartan",
+          "valsartan",
+          "candesartan",
+          "irbesartan",
+          "telmisartan",
+          "olmesartan"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspender",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...ca). os ieca sao estritamente contraindicados durante a gravidez. a exposicao a estes farm..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ara ii",
+          "losartan",
+          "valsartan",
+          "candesartan",
+          "irbesartan",
+          "telmisartan",
+          "olmesartan"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspender",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...se de farmacos e estritamente contraindicada durante a gravidez. a exposicao aos ieca, esp..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ara ii",
+          "losartan",
+          "valsartan",
+          "candesartan",
+          "irbesartan",
+          "telmisartan",
+          "olmesartan"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "combinação inicial (ESC 2024)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "combinacao",
+          "associacao",
+          "dois farmacos",
+          "terapeutica dupla"
+        ],
+        "passou": true,
+        "evidencia": "'combinacao' em: ...icio da terapeutica com uma **combinacao de dois farmacos em dose baixa**, preferencialmen..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "combinação inicial (ESC 2024)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "combinacao",
+          "associacao",
+          "dois farmacos",
+          "terapeutica dupla"
+        ],
+        "passou": true,
+        "evidencia": "'combinacao' em: ...ferencialmente atraves de uma combinacao de dose fixa (single pill combination), para melh..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "combinação inicial (ESC 2024)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "combinacao",
+          "associacao",
+          "dois farmacos",
+          "terapeutica dupla"
+        ],
+        "passou": true,
+        "evidencia": "'combinacao' em: ...a farmacologica recomendada a combinacao de primeira linha sugerida e um **inibidor da enz..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "combinação inicial (ESC 2024)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "combinacao",
+          "associacao",
+          "dois farmacos",
+          "terapeutica dupla"
+        ],
+        "passou": true,
+        "evidencia": "'combinacao' em: ...icio da terapeutica com uma **combinacao dual**, preferencialmente num unico comprimido (*..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "combinação inicial (ESC 2024)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "combinacao",
+          "associacao",
+          "dois farmacos",
+          "terapeutica dupla"
+        ],
+        "passou": true,
+        "evidencia": "'combinacao' em: ...icio da terapeutica com uma **combinacao dual de farmacos**, preferencialmente numa unica..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fragilidade"
+        ],
+        "passou": true,
+        "evidencia": "'fragilidade' em: ...e de 84 anos, com sindrome de fragilidade e historico de quedas recentes, o objetivo do co..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ortostat",
+          "hipotensao postural"
+        ],
+        "passou": true,
+        "evidencia": "'ortostat' em: ...das. 1. **risco de hipotensao ortostatica:** a intensificacao da terapeutica num paciente..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "individualiz",
+          "desprescri",
+          "nao automaticamente",
+          "decisao partilhada"
+        ],
+        "passou": true,
+        "evidencia": "'individualiz' em: ...controlo pressorico deve ser individualizado, priorizando a qualidade de vida e a prevenc..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fragilidade"
+        ],
+        "passou": true,
+        "evidencia": "'fragilidade' em: ...numa paciente de 84 anos, com fragilidade e historial de quedas recentes, deve basear-se n..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ortostat",
+          "hipotensao postural"
+        ],
+        "passou": true,
+        "evidencia": "'ortostat' em: ...vamente o risco de hipotensao ortostatica, sincopes e, consequentemente, novas quedas, que..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "individualiz",
+          "desprescri",
+          "nao automaticamente",
+          "decisao partilhada"
+        ],
+        "passou": true,
+        "evidencia": "'individualiz' em: ...sh), os alvos de pa devem ser individualizados. em pacientes idosos frageis, a prioridade..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fragilidade"
+        ],
+        "passou": true,
+        "evidencia": "'fragilidade' em: ...e basear-se mais no perfil de fragilidade e na tolerancia do que em valores numericos rigi..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ortostat",
+          "hipotensao postural"
+        ],
+        "passou": true,
+        "evidencia": "'ortostat' em: ...tes), o risco de **hipotensao ortostatica**, sincope e novas quedas - que podem resultar e..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "individualiz",
+          "desprescri",
+          "nao automaticamente",
+          "decisao partilhada"
+        ],
+        "passou": true,
+        "evidencia": "'desprescri' em: ...a conduta deve focar-se na **desprescricao** ou otimizacao: 1. **medicao da pa ortostatic..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fragilidade"
+        ],
+        "passou": true,
+        "evidencia": "'fragilidade' em: ...cia ao esforco e aumentando a fragilidade. * **bloqueadores dos canais de calcio/ieca/ara..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ortostat",
+          "hipotensao postural"
+        ],
+        "passou": true,
+        "evidencia": "'ortostat' em: ...sao sintomatica ou hipotensao ortostatica supera largamente o beneficio cardiovascular de..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "individualiz",
+          "desprescri",
+          "nao automaticamente",
+          "decisao partilhada"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'individualiz', 'desprescri', 'nao automaticamente', 'decisao partilhada'"
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspend",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...a/infarmed), a metformina e **contraindicada** em doentes com uma taxa de filtracao glomer..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspend",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...a metformina e **estritamente contraindicada** quando a taxa de filtracao glomerular estim..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspend",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...a e da ada), a metformina e **contraindicada** em doentes com uma taxa de filtracao glomer..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspend",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...o clinica a metformina esta **contraindicada** em doentes com insuficiencia renal grave, d..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sglt2",
+          "sglt-2",
+          "sglt 2",
+          "gliflozina"
+        ],
+        "passou": true,
+        "evidencia": "'sglt2' em: ...lmente sao os **inibidores do sglt2 (isglt2)**. estes farmacos demonstraram nao so control..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sglt2",
+          "sglt-2",
+          "sglt 2",
+          "gliflozina"
+        ],
+        "passou": true,
+        "evidencia": "'sglt2' em: ...lmente sao os **inibidores do sglt2 (isglt2)**. estes farmacos demonstraram nao so a reduc..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sglt2",
+          "sglt-2",
+          "sglt 2",
+          "gliflozina"
+        ],
+        "passou": true,
+        "evidencia": "'sglt2' em: ...lmente sao os **inibidores do sglt2 (sglt2i)**. esta recomendacao baseia-se nas evidencias..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sglt2",
+          "sglt-2",
+          "sglt 2",
+          "gliflozina"
+        ],
+        "passou": true,
+        "evidencia": "'sglt2' em: ...lmente sao os **inibidores do sglt2 (isglt2)**. estes farmacos demonstraram nao so a reduc..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sglt2",
+          "sglt-2",
+          "sglt 2",
+          "gliflozina"
+        ],
+        "passou": true,
+        "evidencia": "'sglt2' em: ...mente e a dos **inibidores do sglt2 (isglt2)**. estes farmacos demonstraram nao so o contr..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "hipoglicemia"
+        ],
+        "passou": true,
+        "evidencia": "'hipoglicemia' em: ...*justificacao:** * **risco de hipoglicemia:** em doentes com demencia, a hipoglicemia pode..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "menos exigente",
+          "menos estrit",
+          "individualiz",
+          "8,0",
+          "8%",
+          "inferior a 8"
+        ],
+        "passou": true,
+        "evidencia": "'individualiz' em: ...clinica complexa que exige a individualizacao do tratamento, privilegiando a seguranca e..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "hipoglicemia"
+        ],
+        "passou": true,
+        "evidencia": "'hipoglicemia' em: ...al nesta populacao e evitar a hipoglicemia, que pode precipitar eventos cardiovasculares,..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "menos exigente",
+          "menos estrit",
+          "individualiz",
+          "8,0",
+          "8%",
+          "inferior a 8"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'menos exigente', 'menos estrit', 'individualiz', '8,0', '8%', 'inferior a 8'"
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "hipoglicemia"
+        ],
+        "passou": true,
+        "evidencia": "'hipoglicemia' em: ...primordial e a **evitacao de hipoglicemias** e a manutencao da qualidade de vida, em detr..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "menos exigente",
+          "menos estrit",
+          "individualiz",
+          "8,0",
+          "8%",
+          "inferior a 8"
+        ],
+        "passou": true,
+        "evidencia": "'8,0' em: ...clinico e: **$\\text{hba1c} < 8,0\\% - 8,5\\%$** em casos de fragilidade extrema ou demencia..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "hipoglicemia"
+        ],
+        "passou": true,
+        "evidencia": "'hipoglicemia' em: ...perfil de doente, o risco de hipoglicemia supera largamente os beneficios de um controlo..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "menos exigente",
+          "menos estrit",
+          "individualiz",
+          "8,0",
+          "8%",
+          "inferior a 8"
+        ],
+        "passou": true,
+        "evidencia": "'8,0' em: ...ituando-se geralmente entre **8,0% e 8,5%**. **justificacao:** neste perfil de doente, o r..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "hipoglicemia"
+        ],
+        "passou": true,
+        "evidencia": "'hipoglicemia' em: ...rfil de paciente e **evitar a hipoglicemia**, que podera exacerbar o declinio cognitivo, a..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "menos exigente",
+          "menos estrit",
+          "individualiz",
+          "8,0",
+          "8%",
+          "inferior a 8"
+        ],
+        "passou": true,
+        "evidencia": "'8,0' em: ...axado: **alvo de hba1c: $\\geq 8,0\\%$ (ou entre $8,0\\%$ e $8,5\\%$)** o objetivo primordial..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "albumin",
+          "uacr"
+        ],
+        "passou": true,
+        "evidencia": "'albumin' em: ...efropatia diabetica * **racio albumina/creatinina urinaria (uacr):** colheita de amostra d..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "retin",
+          "fundo do olho",
+          "oftalmolog"
+        ],
+        "passou": true,
+        "evidencia": "'retin' em: ...orizar a funcao renal. ### 3. retinopatia diabetica * **exame de fundo de olho:** rastreio..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pes",
+          "monofilamento",
+          "pe diabetico"
+        ],
+        "passou": true,
+        "evidencia": "'monofilamento' em: ...clinico do pe:** * **teste do monofilamento (10 g):** para avaliar a sensibilidade proteto..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "albumin",
+          "uacr"
+        ],
+        "passou": true,
+        "evidencia": "'albumin' em: ...abetica:** * **exame:** racio albumina/creatinina urinaria (uacr) em amostra isolada de ur..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "retin",
+          "fundo do olho",
+          "oftalmolog"
+        ],
+        "passou": true,
+        "evidencia": "'retin' em: ...plicacoes microvasculares * **retinopatia diabetica:** * **exame:** exame de fundo de olho..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pes",
+          "monofilamento",
+          "pe diabetico"
+        ],
+        "passou": true,
+        "evidencia": "'monofilamento' em: ...e: teste de sensibilidade com monofilamento de 10 g, teste de vibracao (diapasao 128 hz),..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "albumin",
+          "uacr"
+        ],
+        "passou": true,
+        "evidencia": "'albumin' em: ...efropatia diabetica * **racio albumina/creatinina urinaria (uacr):** colheita de amostra d..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "retin",
+          "fundo do olho",
+          "oftalmolog"
+        ],
+        "passou": true,
+        "evidencia": "'retin' em: ...cao renal. ### 3. rastreio de retinopatia diabetica * **exame de fundo de olho:** realizad..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pes",
+          "monofilamento",
+          "pe diabetico"
+        ],
+        "passou": true,
+        "evidencia": "'monofilamento' em: ...aliacao sensorial:** teste do monofilamento de 10 g (para detetar perda de sensibilidade p..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "albumin",
+          "uacr"
+        ],
+        "passou": true,
+        "evidencia": "'albumin' em: ...fropatia diabetica:** * racio albumina/creatinina urinaria (uacr) em amostra isolada de ur..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "retin",
+          "fundo do olho",
+          "oftalmolog"
+        ],
+        "passou": true,
+        "evidencia": "'retin' em: ...vasculares:** * **rastreio da retinopatia diabetica:** exame do fundo ocular com pupila di..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pes",
+          "monofilamento",
+          "pe diabetico"
+        ],
+        "passou": true,
+        "evidencia": "'monofilamento' em: ...e de sensibilidade protetora (monofilamento de 10 g). * avaliacao de pulsos pediosos e tib..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "albumin",
+          "uacr"
+        ],
+        "passou": true,
+        "evidencia": "'albumin' em: ...opatia diabetica)** * **racio albumina/creatinina urinaria (uacr):** colheita de amostra d..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "retin",
+          "fundo do olho",
+          "oftalmolog"
+        ],
+        "passou": true,
+        "evidencia": "'retin' em: ...**c. avaliacao oftalmologica (retinopatia diabetica)** * **exame de fundo de olho:** fotog..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pes",
+          "monofilamento",
+          "pe diabetico"
+        ],
+        "passou": true,
+        "evidencia": "'monofilamento' em: ...e de sensibilidade protetora (monofilamento de 10 g). * avaliacao de pulsos pediosos e tib..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "SCORE2 (ESC 2021)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "score2",
+          "score 2"
+        ],
+        "passou": true,
+        "evidencia": "'score2' em: ...instrumento recomendado e o **score2** (*systematic coronary risk evaluation 2*). ### just..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "moderado"
+        ],
+        "passou": true,
+        "evidencia": "'moderado' em: ...sco baixo:** < 2,5% * **risco moderado:** 2,5% a < 7,5% * **risco elevado:** 7,5% a < 10%..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "SCORE2 (ESC 2021)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "score2",
+          "score 2"
+        ],
+        "passou": true,
+        "evidencia": "'score2' em: ...instrumento recomendado e o **score2** (*systematic coronary risk evaluation 2*). ### just..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "moderado"
+        ],
+        "passou": true,
+        "evidencia": "'moderado' em: ...icado como um pais de **risco moderado**. deve, portanto, utilizar a tabela ou a calculado..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspend",
+          "suspens",
+          "interromp",
+          "descontinu",
+          "parar"
+        ],
+        "passou": true,
+        "evidencia": "'suspens' em: ...nica e a seguinte: **conduta: suspensao imediata da atorvastatina.** as estatinas sao cont..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspend",
+          "suspens",
+          "interromp",
+          "descontinu",
+          "parar"
+        ],
+        "passou": true,
+        "evidencia": "'suspens' em: ...medico assistente: **conduta: suspensao imediata da atorvastatina.** ### justificacao clin..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspend",
+          "suspens",
+          "interromp",
+          "descontinu",
+          "parar"
+        ],
+        "passou": true,
+        "evidencia": "'suspend' em: ...o (atorvastatina) * **acao:** suspender a dose atual imediatamente. * **intervalo:** n/a (..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspend",
+          "suspens",
+          "interromp",
+          "descontinu",
+          "parar"
+        ],
+        "passou": true,
+        "evidencia": "'suspens' em: ...dada e a seguinte: **conduta: suspensao imediata da atorvastatina.** ### justificacao e ge..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "suspend",
+          "suspens",
+          "interromp",
+          "descontinu",
+          "parar"
+        ],
+        "passou": true,
+        "evidencia": "'suspens' em: ...** a atorvastatina deve ser **suspensa imediatamente**. **justificacao:** as estatinas sao..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inr"
+        ],
+        "passou": true,
+        "evidencia": "'inr' em: ...nticoagulante, aumentando o **inr (international normalized ratio)** e, consequentemente,..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "interac",
+          "aument",
+          "potenci"
+        ],
+        "passou": true,
+        "evidencia": "'interac' em: ...hemorragias. **mecanismos de interacao:** 1. **alteracao da flora intestinal:** reducao d..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inr"
+        ],
+        "passou": true,
+        "evidencia": "'inr' em: ...io normalizado internacional (inr)**. a introducao de um antibiotico num doente anticoagul..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "interac",
+          "aument",
+          "potenci"
+        ],
+        "passou": true,
+        "evidencia": "'interac' em: ...ulante. #### 1. mecanismos de interacao a interacao ocorre geralmente por dois mecanismos:..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inr"
+        ],
+        "passou": true,
+        "evidencia": "'inr' em: ...io normalizado internacional (inr)**, aumentando o risco de hemorragia ou, mais raramente,..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "interac",
+          "aument",
+          "potenci"
+        ],
+        "passou": true,
+        "evidencia": "'interac' em: ...licamente sensivel a inumeras interacoes medicamentosas. ### consideracoes gerais a introd..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inr"
+        ],
+        "passou": true,
+        "evidencia": "'inr' em: ...io normalizado internacional (inr)**, devido ao risco elevado de potencializacao do efeito..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "interac",
+          "aument",
+          "potenci"
+        ],
+        "passou": true,
+        "evidencia": "'interac' em: ...graves. ### 1. mecanismos de interacao a interacao entre antibioticos e varfarina ocorre..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "doac",
+          "apixabano",
+          "rivaroxabano",
+          "edoxabano",
+          "dabigatrano"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varfarina",
+          "vitamina k",
+          "avk",
+          "acenocumarol"
+        ],
+        "passou": true,
+        "evidencia": "'varfarina' em: ...a vitamina k (avk)**, sendo a varfarina o farmaco de referencia. --- ### terapeutica recom..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "doac",
+          "apixabano",
+          "rivaroxabano",
+          "edoxabano",
+          "dabigatrano"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varfarina",
+          "vitamina k",
+          "avk",
+          "acenocumarol"
+        ],
+        "passou": true,
+        "evidencia": "'varfarina' em: ...com avk (ex: acenocoumarol ou varfarina). **1. dose, intervalo e duracao:** * **dose:** a..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "doac",
+          "apixabano",
+          "rivaroxabano",
+          "edoxabano",
+          "dabigatrano"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varfarina",
+          "vitamina k",
+          "avk",
+          "acenocumarol"
+        ],
+        "passou": true,
+        "evidencia": "'varfarina' em: ...a vitamina k (avk)**, sendo a varfarina o farmaco de referencia. --- **plano terapeutico (..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "doac",
+          "apixabano",
+          "rivaroxabano",
+          "edoxabano",
+          "dabigatrano"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varfarina",
+          "vitamina k",
+          "avk",
+          "acenocumarol"
+        ],
+        "passou": true,
+        "evidencia": "'varfarina' em: ...da vitamina k (avk)**, como a varfarina ou o acenocoumarol. * **dose:** individualizada. a..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "urgen",
+          "imediat",
+          "hospital",
+          "observad"
+        ],
+        "passou": true,
+        "evidencia": "'urgen' em: esta e uma situacao de urgencia pediatrica. **orientacao aos pais** deve orientar o..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "urgen",
+          "imediat",
+          "hospital",
+          "observad"
+        ],
+        "passou": true,
+        "evidencia": "'urgen' em: ...ediatamente para o servico de urgencia pediatrica**. nesta faixa etaria, a capacidade de l..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "urgen",
+          "imediat",
+          "hospital",
+          "observad"
+        ],
+        "passou": true,
+        "evidencia": "'urgen' em: ...cao de deslocacao imediata as urgencias pediatricas**. **justificacao:** em lactentes com..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "urgen",
+          "imediat",
+          "hospital",
+          "observad"
+        ],
+        "passou": true,
+        "evidencia": "'urgen' em: esta e uma situacao de **urgencia pediatrica**. ### orientacao clinica a orientacao f..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "urgen",
+          "imediat",
+          "hospital",
+          "observad"
+        ],
+        "passou": true,
+        "evidencia": "'urgen' em: esta e uma situacao de **urgencia pediatrica**. **orientacao aos pais:** os pais deve..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "240 mg",
+          "320 mg"
+        ],
+        "passou": true,
+        "evidencia": "'240 mg' em: ...por toma (em mg):** 160 mg a 240 mg. * **dose por toma (em ml):** **4 ml a 6 ml**. **inte..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "960",
+          "60 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'960' em: ...*. * **dose maxima (em mg):** 960 mg/dia. * **dose maxima (em ml):** **24 ml/dia**. --- ##..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "240 mg",
+          "320 mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '240 mg', '320 mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "960",
+          "60 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'960' em: ...kg} \\times 60\\text{ mg/kg} = 960\\text{ mg/dia}$. * em volume (40 mg/ml): $\\mathbf{24\\text..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "240 mg",
+          "320 mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '240 mg', '320 mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "960",
+          "60 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'960' em: ...kg} \\times 60\\text{ mg/kg} = 960\\text{ mg}$ por dia. * **volume maximo (xarope 40 mg/ml):..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "240 mg",
+          "320 mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '240 mg', '320 mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "960",
+          "60 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'960' em: ...kg} \\times 60\\text{ mg/kg} = 960\\text{ mg}$ por dia $\\rightarrow$ **24 ml / 24 h**. * **d..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "240 mg",
+          "320 mg"
+        ],
+        "passou": true,
+        "evidencia": "'240 mg' em: ...** * **dose por toma:** 6 ml (240 mg). * **intervalo:** de 6 em 6 horas (ou de 4 em 4 hora..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "960",
+          "60 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'960' em: ...t{ kg} \\times 60 \\text{ mg} = 960 \\text{ mg}$ (equivalente a **24 ml** por dia). * **durac..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a 10 mg/kg",
+          "5-10 mg/kg",
+          "90",
+          "180"
+        ],
+        "passou": true,
+        "evidencia": "'90' em: .../kg por dose. * para 18 kg: **90 mg a 180 mg por dose**. * **intervalo:** administrar a ca..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "540",
+          "30 mg/kg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '540', '30 mg/kg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varicela"
+        ],
+        "passou": true,
+        "evidencia": "'varicela' em: ...temicas graves:** suspeita de varicela (devido ao risco aumentado de infecoes cutaneas gra..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a 10 mg/kg",
+          "5-10 mg/kg",
+          "90",
+          "180"
+        ],
+        "passou": true,
+        "evidencia": "'5 a 10 mg/kg' em: ...ose:** a dose habitual e de **5 a 10 mg/kg** por toma. * calculo para 18 kg: **90 mg a 180..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "540",
+          "30 mg/kg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '540', '30 mg/kg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varicela"
+        ],
+        "passou": true,
+        "evidencia": "'varicela' em: ...ficiencia cardiaca grave. * **varicela:** existe um risco aumentado de complicacoes cutane..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a 10 mg/kg",
+          "5-10 mg/kg",
+          "90",
+          "180"
+        ],
+        "passou": true,
+        "evidencia": "'5 a 10 mg/kg' em: ...uprofeno para criancas e de **5 a 10 mg/kg por dose**. * **calculo para 18 kg:** * **dose..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "540",
+          "30 mg/kg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '540', '30 mg/kg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varicela"
+        ],
+        "passou": true,
+        "evidencia": "'varicela' em: ...eve ser evitado em casos de **varicela**, devido ao risco aumentado de complicacoes cutane..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a 10 mg/kg",
+          "5-10 mg/kg",
+          "90",
+          "180"
+        ],
+        "passou": true,
+        "evidencia": "'5 a 10 mg/kg' em: ...te: ### posologia * **dose:** 5 a 10 mg/kg por dose. * para 18 kg: **90 mg a 180 mg por do..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "540",
+          "30 mg/kg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '540', '30 mg/kg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varicela"
+        ],
+        "passou": true,
+        "evidencia": "'varicela' em: ...ou perfuracao gastrica. 5. **varicela:** existe evidencia de que o uso de aines durante a..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a 10 mg/kg",
+          "5-10 mg/kg",
+          "90",
+          "180"
+        ],
+        "passou": true,
+        "evidencia": "'5 a 10 mg/kg' em: ...te: ### posologia * **dose:** 5 a 10 mg/kg por dose. * para 18 kg: **90 mg a 180 mg por to..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "540",
+          "30 mg/kg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '540', '30 mg/kg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varicela"
+        ],
+        "passou": true,
+        "evidencia": "'varicela' em: ...aguda induzida por aines. * **varicela:** o uso de ibuprofeno durante infecoes por varicel..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "aspirina",
+          "acido acetilsalicilico"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ibuprofeno"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "paracetamol"
+        ],
+        "passou": true,
+        "evidencia": "'paracetamol' em: ...a, o farmaco de eleicao e o **paracetamol**. ### prescricao recomendada: paracetamol * **d..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "reye"
+        ],
+        "passou": true,
+        "evidencia": "'reye' em: ...co aumentado de **sindrome de reye**, uma patologia rara mas grave e potencialmente fatal,..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "contraindicacao_omitida"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "aspirina",
+          "acido acetilsalicilico"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ibuprofeno"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'ibuprofeno' em: ...esteroides (aines), como o **ibuprofeno**, em criancas com varicela. existem evidencias q..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "paracetamol"
+        ],
+        "passou": true,
+        "evidencia": "'paracetamol' em: ...r, o farmaco de eleicao e o **paracetamol**. **posologia (paracetamol):** * **dose:** 10 a..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "reye"
+        ],
+        "passou": true,
+        "evidencia": "'reye' em: ...co aumentado de **sindrome de reye**. esta e uma condicao rara, mas grave e potencialmente..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "aspirina",
+          "acido acetilsalicilico"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ibuprofeno"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "paracetamol"
+        ],
+        "passou": true,
+        "evidencia": "'paracetamol' em: ...r, o farmaco de eleicao e o **paracetamol**. **posologia:** * **dose:** 10 a 15 mg/kg por..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "reye"
+        ],
+        "passou": true,
+        "evidencia": "'reye' em: ...co aumentado de **sindrome de reye**. esta e uma condicao rara, mas potencialmente fatal,..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "aspirina",
+          "acido acetilsalicilico"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ibuprofeno"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "paracetamol"
+        ],
+        "passou": true,
+        "evidencia": "'paracetamol' em: ...r, o farmaco de escolha e o **paracetamol**. * **dose:** 10 a 15 mg/kg por dose. * **inter..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "reye"
+        ],
+        "passou": true,
+        "evidencia": "'reye' em: ...envolvimento da **sindrome de reye**, uma patologia rara mas potencialmente fatal, caracte..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 anos"
+        ],
+        "passou": true,
+        "evidencia": "'12 anos' em: ...eina em criancas com menos de 12 anos (especialmente apos amigdalectomia ou adenoidectomia..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "depressao respiratoria"
+        ],
+        "passou": true,
+        "evidencia": "'depressao respiratoria' em: ...anca, isto pode resultar em **depressao respiratoria grave**, que pode ser fatal. devido a..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 anos"
+        ],
+        "passou": true,
+        "evidencia": "'12 anos' em: ...ente em criancas com menos de 12 anos. ### contraindicacoes e riscos * **contraindicacao a..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "depressao respiratoria"
+        ],
+        "passou": true,
+        "evidencia": "'depressao respiratoria' em: ...nselhada devido ao risco de **depressao respiratoria grave**, que pode ser fatal. a codein..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 anos"
+        ],
+        "passou": true,
+        "evidencia": "'12 anos' em: ...eina em criancas com menos de 12 anos. ### posologia, intervalo e duracao **nao aplicavel...."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "depressao respiratoria"
+        ],
+        "passou": true,
+        "evidencia": "'depressao respiratoria' em: ...ngue. isto pode resultar em **depressao respiratoria grave**, que pode ser fatal, especial..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 anos"
+        ],
+        "passou": true,
+        "evidencia": "'12 anos' em: ...cada em criancas com menos de 12 anos para o tratamento da tosse. 3. **eficacia:** nao exi..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "depressao respiratoria"
+        ],
+        "passou": true,
+        "evidencia": "'depressao respiratoria' em: ...acao clinica:** 1. **risco de depressao respiratoria:** a agencia europeia do medicamento..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "botulismo"
+        ],
+        "passou": true,
+        "evidencia": "'botulismo' em: ...2 meses acarreta o risco de **botulismo infantil**. o mel pode conter esporos da bacteria..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 meses",
+          "1 ano",
+          "um ano"
+        ],
+        "passou": true,
+        "evidencia": "'12 meses' em: ...de mel em bebes com menos de 12 meses acarreta o risco de **botulismo infantil**. o mel p..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "botulismo"
+        ],
+        "passou": true,
+        "evidencia": "'botulismo' em: ...gnificativamente o risco de **botulismo infantil**. o mel pode conter esporos da bacteria..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 meses",
+          "1 ano",
+          "um ano"
+        ],
+        "passou": true,
+        "evidencia": "'1 ano' em: ...icado** em bebes com menos de 1 ano de idade. **justificacao clinica:** a administracao de..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "botulismo"
+        ],
+        "passou": true,
+        "evidencia": "'botulismo' em: ...gnificativamente o risco de **botulismo infantil**. o mel pode conter esporos da bacteria..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 meses",
+          "1 ano",
+          "um ano"
+        ],
+        "passou": true,
+        "evidencia": "'12 meses' em: ...icado** em bebes com menos de 12 meses de idade. ### justificacao clinica a administracao..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "botulismo"
+        ],
+        "passou": true,
+        "evidencia": "'botulismo' em: ...indicada devido ao risco de **botulismo infantil**. o mel pode conter esporos da bacteria..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 meses",
+          "1 ano",
+          "um ano"
+        ],
+        "passou": true,
+        "evidencia": "'12 meses' em: ...e mel a criancas com menos de 12 meses e contraindicada devido ao risco de **botulismo inf..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "observa",
+          "vigil",
+          "expectante",
+          "aguardar",
+          "48"
+        ],
+        "passou": true,
+        "evidencia": "'observa' em: ...estrategia preferencial e a **observacao vigilante** (*watchful waiting*) durante 48 a 72..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "analges",
+          "paracetamol",
+          "ibuprofeno"
+        ],
+        "passou": true,
+        "evidencia": "'analges' em: ...sintomatico com antipireticos/analgesicos (paracetamol ou ibuprofeno) e fundamental durant..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "observa",
+          "vigil",
+          "expectante",
+          "aguardar",
+          "48"
+        ],
+        "passou": true,
+        "evidencia": "'observa' em: ...nilateral - a estrategia de **observacao vigilante** (*watchful waiting*) durante 48 a 72..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "analges",
+          "paracetamol",
+          "ibuprofeno"
+        ],
+        "passou": true,
+        "evidencia": "'paracetamol' em: ...ao da dor e da febre com: * **paracetamol:** 15 mg/kg por dose, a cada 6 horas. * **ibupro..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "observa",
+          "vigil",
+          "expectante",
+          "aguardar",
+          "48"
+        ],
+        "passou": true,
+        "evidencia": "'observa' em: ...estrategia preferencial e a **observacao vigilante** (ou *watchful waiting*) durante um pe..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "analges",
+          "paracetamol",
+          "ibuprofeno"
+        ],
+        "passou": true,
+        "evidencia": "'analges' em: ...umo do plano 1. **imediato:** analgesia/antipirexia $\\rightarrow$ observacao por 48-72 h...."
+      }
+    ]
+  },
+  {
+    "caso": "PED-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "observa",
+          "vigil",
+          "expectante",
+          "aguardar",
+          "48"
+        ],
+        "passou": true,
+        "evidencia": "'observa' em: ...estrategia recomendada e a **observacao vigilante** (*watchful waiting*) durante 48 a 72..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "analges",
+          "paracetamol",
+          "ibuprofeno"
+        ],
+        "passou": true,
+        "evidencia": "'analges' em: .... **tratamento sintomatico:** analgesia e antipireticismo (paracetamol ou ibuprofeno). 2...."
+      }
+    ]
+  },
+  {
+    "caso": "PED-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "observa",
+          "vigil",
+          "expectante",
+          "aguardar",
+          "48"
+        ],
+        "passou": true,
+        "evidencia": "'observa' em: ...ecomendavel a estrategia de **observacao vigilante** (*watchful waiting*) durante 48 a 72..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "analges",
+          "paracetamol",
+          "ibuprofeno"
+        ],
+        "passou": true,
+        "evidencia": "'paracetamol' em: ...erapeutica sintomatica:** * **paracetamol:** 15 mg/kg por dose, a cada 6 horas (max. 60 mg..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...*farmaco de primeira linha:** amoxicilina * **dose:** 50 mg/kg/dia. * **intervalo:** divid..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...8 em 8 horas). * **duracao:** 10 dias. * *nota:* a manutencao do tratamento durante 10 dia..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "50 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'50 mg/kg' em: ...ha:** amoxicilina * **dose:** 50 mg/kg/dia. * **intervalo:** dividida em 2 a 3 tomadas dia..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...ira linha e a penicilina ou a amoxicilina. a amoxicilina e preferida em pediatria devido a..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...8 em 8 horas) * **duracao:** 10 dias (a duracao de 10 dias e critica para a erradicacao d..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "50 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'50 mg/kg' em: ...co:** amoxicilina * **dose:** 50 mg/kg/dia * **intervalo:** dividido em 2 tomas (de 12 em..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...ha o farmaco de escolha e a **amoxicilina** (devido a sua melhor aceitacao oral e posologi..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...total diaria). * **duracao:** 10 dias. * *nota:* a duracao de 10 dias e imperativa para ga..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "50 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'50 mg/kg' em: ...a penicilina v). * **dose:** 50 mg/kg/dia. * **intervalo:** administrado a cada 8 ou 12 h..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...a. na pratica pediatrica, a **amoxicilina** e frequentemente preferida em relacao a penici..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...em 12 horas). * **duracao:** 10 dias (essencial para a erradicacao do agente e prevencao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "50 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'50 mg/kg' em: ...co:** amoxicilina * **dose:** 50 mg/kg/dia. * **intervalo:** dose unica diaria ou dividida..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...ha o farmaco de eleicao e a **amoxicilina**. *(alternativamente, a penicilina v pode ser u..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...8 em 8 horas). * **duracao:** 10 dias. *nota: a duracao de 10 dias e fundamental para gara..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "50 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'50 mg/kg' em: ....* **posologia:** * **dose:** 50 mg/kg/dia. * **intervalo:** dividido em 2 tomadas (de 12..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-09",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "reidratacao oral",
+          "sro",
+          "solucao de reidratacao"
+        ],
+        "passou": true,
+        "evidencia": "'reidratacao oral' em: ...oderada atraves da terapia de reidratacao oral (tro). #### estrategia de administracao: *..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urin",
+          "prostrad",
+          "letarg",
+          "irrit",
+          "sonolen"
+        ],
+        "passou": true,
+        "evidencia": "'urin' em: ...xtremidades frias. * **debito urinario:** oliguria ou anuria (fraldas secas por mais de 6..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "refrigerante",
+          "sumo",
+          "coca-cola"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      }
+    ]
+  },
+  {
+    "caso": "PED-09",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "ajuste_omitido"
+    ],
+    "risco": "alto",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "reidratacao oral",
+          "sro",
+          "solucao de reidratacao"
+        ],
+        "passou": true,
+        "evidencia": "'reidratacao oral' em: ...erciveis que impossibilitam a reidratacao oral. --- ### reidratacao domiciliaria a estrate..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urin",
+          "prostrad",
+          "letarg",
+          "irrit",
+          "sonolen"
+        ],
+        "passou": true,
+        "evidencia": "'urin' em: ...tardio e grave). 4. **debito urinario:** oliguria significativa (ex: ausencia de urina/fr..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "refrigerante",
+          "sumo",
+          "coca-cola"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'sumo' em: ...r precoce, evitando-se apenas sumos excessivamente doces ou bebidas gaseificadas (que pode..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-09",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "ajuste_omitido"
+    ],
+    "risco": "alto",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "reidratacao oral",
+          "sro",
+          "solucao de reidratacao"
+        ],
+        "passou": true,
+        "evidencia": "'reidratacao oral' em: ...os incoerciveis que impedem a reidratacao oral. * **outros:** presenca de sangue nas fezes..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urin",
+          "prostrad",
+          "letarg",
+          "irrit",
+          "sonolen"
+        ],
+        "passou": true,
+        "evidencia": "'urin' em: ...iguria ou anuria (ausencia de urina nas ultimas 6-8 horas). * **tolerancia oral:** vomitos..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "refrigerante",
+          "sumo",
+          "coca-cola"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'sumo' em: ...das com elevada osmolaridade (sumos, refrigerantes). #### a. protocolo de reidratacao oral..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-09",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "reidratacao oral",
+          "sro",
+          "solucao de reidratacao"
+        ],
+        "passou": true,
+        "evidencia": "'reidratacao oral' em: ...os incoerciveis que impecam a reidratacao oral. --- ### 2. reidratacao domiciliaria para c..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urin",
+          "prostrad",
+          "letarg",
+          "irrit",
+          "sonolen"
+        ],
+        "passou": true,
+        "evidencia": "'urin' em: ...pos pincelamento). * **debito urinario:** oliguria ou anuria (fraldas secas por mais de 6-..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "refrigerante",
+          "sumo",
+          "coca-cola"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      }
+    ]
+  },
+  {
+    "caso": "PED-09",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "ajuste_omitido"
+    ],
+    "risco": "alto",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "reidratacao oral",
+          "sro",
+          "solucao de reidratacao"
+        ],
+        "passou": true,
+        "evidencia": "'reidratacao oral' em: ...os persistentes que impecam a reidratacao oral. --- ### 2. reidratacao domiciliaria o obje..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "urin",
+          "prostrad",
+          "letarg",
+          "irrit",
+          "sonolen"
+        ],
+        "passou": true,
+        "evidencia": "'urin' em: ...ados (enoftalmos). * **debito urinario:** oliguria ou anuria (ex: fraldas secas por mais d..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "refrigerante",
+          "sumo",
+          "coca-cola"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'sumo' em: ...molaridade reduzida, evitando sumos ou bebidas desportivas (devido a elevada carga osmotic..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-10",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "atraso",
+          "recurso",
+          "recuperacao"
+        ],
+        "passou": true,
+        "evidencia": "'recuperacao' em: ...ma situacao de **vacinacao de recuperacao (catch-up)**. o objetivo e conferir imunidade ao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pnv",
+          "programa nacional de vacinacao"
+        ],
+        "passou": true,
+        "evidencia": "'pnv' em: ...ograma nacional de vacinacao (pnv) e as normas da direcao-geral da saude (dgs) de portugal..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-10",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "atraso",
+          "recurso",
+          "recuperacao"
+        ],
+        "passou": true,
+        "evidencia": "'recuperacao' em: ...uma situacao de vacinacao de recuperacao (*catch-up vaccination*). o objetivo e completar..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pnv",
+          "programa nacional de vacinacao"
+        ],
+        "passou": true,
+        "evidencia": "'pnv' em: ...ograma nacional de vacinacao (pnv) da direcao-geral da saude (dgs) no menor tempo possivel..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-10",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "atraso",
+          "recurso",
+          "recuperacao"
+        ],
+        "passou": true,
+        "evidencia": "'recuperacao' em: esta e uma situacao de recuperacao de vacinacao (*catch-up*), que deve ser gerida r..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pnv",
+          "programa nacional de vacinacao"
+        ],
+        "passou": true,
+        "evidencia": "'pnv' em: ...ograma nacional de vacinacao (pnv)** da direcao-geral da saude (dgs) em portugal. ### proc..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-10",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "atraso",
+          "recurso",
+          "recuperacao"
+        ],
+        "passou": true,
+        "evidencia": "'atraso' em: ...r imediatamente as vacinas em atraso. de acordo com as normas da dgs para a vacinacao de r..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pnv",
+          "programa nacional de vacinacao"
+        ],
+        "passou": true,
+        "evidencia": "'pnv' em: ...plano nacional de vacinacao (pnv) da direcao-geral da saude (dgs) o mais rapidamente poss..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a",
+          "5a",
+          "aconselh"
+        ],
+        "passou": true,
+        "evidencia": "'5 a' em: ...recomendada e o modelo dos **\"5 as\"**. esta abordagem permite integrar a cessacao tabagica..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "seguimento",
+          "acompanh",
+          "encaminh"
+        ],
+        "passou": true,
+        "evidencia": "'seguimento' em: ...rrange): agendar consultas de seguimento (telefone ou presencial) para prevenir recaidas...."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a",
+          "5a",
+          "aconselh"
+        ],
+        "passou": true,
+        "evidencia": "'5 a' em: ...e validada e o modelo dos **\"5 as\"**. abaixo descrevo a estrutura da intervencao e as opc..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "seguimento",
+          "acompanh",
+          "encaminh"
+        ],
+        "passou": true,
+        "evidencia": "'seguimento' em: ...r):** agendar uma consulta de seguimento ou contacto telefonico para monitorizar o progres..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a",
+          "5a",
+          "aconselh"
+        ],
+        "passou": true,
+        "evidencia": "'5 a' em: ...encao breve e o modelo dos **\"5 as\"**. abaixo, apresento a estrutura da intervencao e as o..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "seguimento",
+          "acompanh",
+          "encaminh"
+        ],
+        "passou": true,
+        "evidencia": "'seguimento' em: ...r):** agendar uma consulta de seguimento (telefone ou presencial) para monitorizar a absti..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a",
+          "5a",
+          "aconselh"
+        ],
+        "passou": true,
+        "evidencia": "'5 a' em: ...recomendada e o modelo dos **\"5 as\"**. aqui esta a estrutura detalhada para a sua pratica..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "seguimento",
+          "acompanh",
+          "encaminh"
+        ],
+        "passou": true,
+        "evidencia": "'seguimento' em: ...nhar):** agendar consultas de seguimento (telefone ou presencial) para monitorizar a absti..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 a",
+          "5a",
+          "aconselh"
+        ],
+        "passou": true,
+        "evidencia": "'5 a' em: ...ica clinica e o modelo dos **\"5 as\"**. dado que o doente vem por outro motivo, a brevidade..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "seguimento",
+          "acompanh",
+          "encaminh"
+        ],
+        "passou": true,
+        "evidencia": "'seguimento' em: ...har):** agendar a consulta de seguimento. * o seguimento precoce (1 semana apos a data de..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fagerstrom"
+        ],
+        "passou": true,
+        "evidencia": "'fagerstrom' em: ...ca da nicotina e o **teste de fagerstrom (ftnd - fagerstrom test for nicotine dependence)*..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fagerstrom"
+        ],
+        "passou": true,
+        "evidencia": "'fagerstrom' em: ...ca da nicotina e o **teste de fagerstrom (ftnd)**. este questionario avalia cinco dimensoe..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fagerstrom"
+        ],
+        "passou": true,
+        "evidencia": "'fagerstrom' em: ...ca da nicotina e o **teste de fagerstrom (ftnd - fagerstrom test for nicotine dependence)*..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fagerstrom"
+        ],
+        "passou": true,
+        "evidencia": "'fagerstrom' em: ...ca da nicotina e o **teste de fagerstrom (ftnd - fagerstrom test for nicotine dependence)*..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fagerstrom"
+        ],
+        "passou": true,
+        "evidencia": "'fagerstrom' em: ...ca da nicotina e o **teste de fagerstrom (ftnd - fagerstrom test for nicotine dependence)*..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "adesivo"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'adesivo'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "goma",
+          "pastilha",
+          "spray",
+          "inalador",
+          "acao rapida"
+        ],
+        "passou": true,
+        "evidencia": "'goma' em: ...apida (resgate): pastilhas ou gomas de nicotina utilizadas para controlar a fissura (*crav..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "adesivo"
+        ],
+        "passou": true,
+        "evidencia": "'adesivo' em: ...rolongada (base) **farmaco:** adesivo transdermico de nicotina. * **dose:** iniciar com **..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "goma",
+          "pastilha",
+          "spray",
+          "inalador",
+          "acao rapida"
+        ],
+        "passou": true,
+        "evidencia": "'goma' em: ...gs\" ou fissuras) **farmaco:** goma ou pastilhas de nicotina (ex: 2 mg ou 4 mg). * **dose:*..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "adesivo"
+        ],
+        "passou": true,
+        "evidencia": "'adesivo' em: ...nte de libertacao prolongada (adesivo transdermico) o objetivo e manter niveis plasmaticos..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "goma",
+          "pastilha",
+          "spray",
+          "inalador",
+          "acao rapida"
+        ],
+        "passou": true,
+        "evidencia": "'pastilha' em: ...ponente de libertacao rapida (pastilhas orais ou spray nasal) o objetivo e tratar a fissur..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "adesivo"
+        ],
+        "passou": true,
+        "evidencia": "'adesivo' em: ...nte de libertacao prolongada (adesivo de nicotina) o objetivo e manter um nivel basal de n..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "goma",
+          "pastilha",
+          "spray",
+          "inalador",
+          "acao rapida"
+        ],
+        "passou": true,
+        "evidencia": "'goma' em: ...bertacao rapida (pastilhas ou gomas de nicotina) utilizadas para controlar a fissura subit..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-03",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "adesivo"
+        ],
+        "passou": true,
+        "evidencia": "'adesivo' em: ...rolongada (base) **farmaco:** adesivo de nicotina (patch) * **dose inicial:** 21 mg/24 h (..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "goma",
+          "pastilha",
+          "spray",
+          "inalador",
+          "acao rapida"
+        ],
+        "passou": true,
+        "evidencia": "'goma' em: ...rapida (rescue) **farmaco:** goma ou pastilha de nicotina (escolher uma das opcoes) * **d..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "bupropiona"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "convuls",
+          "limiar"
+        ],
+        "passou": true,
+        "evidencia": "'convuls' em: ...ndicao que aumente o risco de convulsoes. o farmaco reduz o limiar convulsivo, o que pode..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "bupropiona"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "convuls",
+          "limiar"
+        ],
+        "passou": true,
+        "evidencia": "'convuls' em: ...dentes de epilepsia ou crises convulsivas. o farmaco e conhecido por reduzir o limiar conv..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "bupropiona"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "convuls",
+          "limiar"
+        ],
+        "passou": true,
+        "evidencia": "'convuls' em: ...lepsia ou com antecedentes de convulsoes. o farmaco reduz o limiar convulsivo, aumentando..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "bupropiona"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "convuls",
+          "limiar"
+        ],
+        "passou": true,
+        "evidencia": "'convuls' em: ...lepsia ou com antecedentes de convulsoes. o farmaco reduz o limiar convulsivo, aumentando..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "bupropiona"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "convuls",
+          "limiar"
+        ],
+        "passou": true,
+        "evidencia": "'convuls' em: ...de epilepsia ou historico de convulsoes. o farmaco e conhecido por reduzir o limiar convu..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina",
+          "citisina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: ...na gravida e a **intervencao comportamental**. o objetivo e a cessacao total do tabaco, d..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina",
+          "citisina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: .... primeira linha: intervencao comportamental a primeira abordagem deve ser sempre o aconse..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina",
+          "citisina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: ...na gravida e a **intervencao comportamental**. * **entrevista motivacional:** utilizar a..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina",
+          "citisina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: ...ia abaixo: ### 1. intervencao comportamental (primeira linha) a primeira linha de tratamen..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina",
+          "citisina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: ...a gravidez e a **intervencao comportamental**. a cessacao tabagica e recomendada em qualq..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sim",
+          "e uma opcao",
+          "opcao adequada"
+        ],
+        "passou": true,
+        "evidencia": "'sim' em: caro colega, sim, o uso de adesivos de nicotina (terapia de substituicao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "enfarte",
+          "arritmia",
+          "morte",
+          "mortalidade",
+          "eventos cardiovasculares",
+          "eventos cardiacos"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'enfarte', 'arritmia', 'morte', 'mortalidade', 'eventos cardiovasculares', 'eventos cardiacos'"
+      }
+    ]
+  },
+  {
+    "caso": "TAB-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sim",
+          "e uma opcao",
+          "opcao adequada"
+        ],
+        "passou": true,
+        "evidencia": "'sim' em: **resposta clinica** **sim, e geralmente seguro**, desde que a doenca coronaria est..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "enfarte",
+          "arritmia",
+          "morte",
+          "mortalidade",
+          "eventos cardiovasculares",
+          "eventos cardiacos"
+        ],
+        "passou": true,
+        "evidencia": "'enfarte' em: ...es absolutas/relativas:** * **enfarte do miocardio recente:** evitar o uso nas primeiras 2..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sim",
+          "e uma opcao",
+          "opcao adequada"
+        ],
+        "passou": true,
+        "evidencia": "'sim' em: ...o colega, **resposta curta:** sim, o uso de adesivos de nicotina (terapia de substituicao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "enfarte",
+          "arritmia",
+          "morte",
+          "mortalidade",
+          "eventos cardiovasculares",
+          "eventos cardiacos"
+        ],
+        "passou": true,
+        "evidencia": "'arritmia' em: ...tes de iniciar a terapia. * **arritmias graves:** deve ser avaliado o risco em doentes com..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inconclusiv",
+          "nao recomend",
+          "desaconselh",
+          "insuficiente",
+          "nao e seguro"
+        ],
+        "passou": true,
+        "evidencia": "'desaconselh' em: ...sua recomendacao clinicamente desaconselhada. a abordagem recomendada deve basear-se num p..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "consulta",
+          "medicamentos aprovados",
+          "substituicao",
+          "vareniclina"
+        ],
+        "passou": true,
+        "evidencia": "'consulta' em: ...os graves). * **interacoes:** consultar bula para interacoes especificas com farmacos que..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inconclusiv",
+          "nao recomend",
+          "desaconselh",
+          "insuficiente",
+          "nao e seguro"
+        ],
+        "passou": true,
+        "evidencia": "'nao recomend' em: ...| | **cigarro eletronico** | nao recomendado como terapia clinica | evitar em jovens e gr..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "consulta",
+          "medicamentos aprovados",
+          "substituicao",
+          "vareniclina"
+        ],
+        "passou": true,
+        "evidencia": "'consulta' em: ...cotina. **pontos chave para a consulta:** 1. **falta de regulacao:** a composicao dos liqu..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inconclusiv",
+          "nao recomend",
+          "desaconselh",
+          "insuficiente",
+          "nao e seguro"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'inconclusiv', 'nao recomend', 'desaconselh', 'insuficiente', 'nao e seguro'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "consulta",
+          "medicamentos aprovados",
+          "substituicao",
+          "vareniclina"
+        ],
+        "passou": true,
+        "evidencia": "'consulta' em: ...ada com apoio comportamental (consultas de cessacao tabagica). se o paciente insistir no c..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inconclusiv",
+          "nao recomend",
+          "desaconselh",
+          "insuficiente",
+          "nao e seguro"
+        ],
+        "passou": true,
+        "evidencia": "'nao recomend' em: ...| | **cigarro eletronico** | nao recomendado como 1a linha | risco de dependencia mantida..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "consulta",
+          "medicamentos aprovados",
+          "substituicao",
+          "vareniclina"
+        ],
+        "passou": true,
+        "evidencia": "'consulta' em: ...smo efeito. ### resumo para a consulta | opcao | recomendacao | nota clinica | | :--- | :-..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-07",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inconclusiv",
+          "nao recomend",
+          "desaconselh",
+          "insuficiente",
+          "nao e seguro"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'inconclusiv', 'nao recomend', 'desaconselh', 'insuficiente', 'nao e seguro'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "consulta",
+          "medicamentos aprovados",
+          "substituicao",
+          "vareniclina"
+        ],
+        "passou": true,
+        "evidencia": "'consulta' em: ...ao-geral da saude). nao foram consultadas bases de dados especificas de ensaios clinicos r..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "contraindicacao_omitida"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'vareniclina' em: ...macos para cessacao tabagica (vareniclina, bupropiona) nao e aprovada para menores de 18 a..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento",
+          "consulta"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: ...para adolescentes, a terapia comportamental e a primeira linha de tratamento e a unica co..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento",
+          "consulta"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: ...ridade deve ser a intervencao comportamental, dado que a maioria das terapias farmacologic..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento",
+          "consulta"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: ...ar, priorizando a intervencao comportamental, dado que o cerebro adolescente e particularm..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento",
+          "consulta"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: ...imordialmente em intervencoes comportamentais e psicossociais, dado que a dependencia quim..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mapa",
+          "ampa",
+          "ambulatorio",
+          "domicilio",
+          "medicoes repetidas",
+          "repetir",
+          "confirmar",
+          "confirmacao"
+        ],
+        "passou": true,
+        "evidencia": "'mapa' em: ...bulatoria da tensao arterial (mapa)** - padrao-ouro - ou **automonitorizacao da tensao art..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mapa",
+          "ampa",
+          "ambulatorio",
+          "domicilio",
+          "medicoes repetidas",
+          "repetir",
+          "confirmar",
+          "confirmacao"
+        ],
+        "passou": true,
+        "evidencia": "'mapa' em: ...stico, deve optar-se por: * **mapa (monitorizacao ambulatorial da pressao arterial):** e o..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-HTA-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "fragilidade"
+        ],
+        "passou": true,
+        "evidencia": "'fragilidade' em: ...so desta doente de 84 anos, a fragilidade e o historico de quedas recentes sao os fatores..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "ortostat",
+          "hipotensao postural"
+        ],
+        "passou": true,
+        "evidencia": "'ortostat' em: ...vamente o risco de hipotensao ortostatica e sincopes, o que, num contexto de quedas recent..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "individualiz",
+          "desprescri",
+          "nao automaticamente",
+          "decisao partilhada"
+        ],
+        "passou": true,
+        "evidencia": "'individualiz' em: ...s alvos pressoricos devem ser individualizados. para doentes muito idosos e frageis, recom..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "SCORE2 (ESC 2021)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "score2",
+          "score 2"
+        ],
+        "passou": true,
+        "evidencia": "'score2' em: ...instrumento recomendado e o **score2** (*systematic coronary risk evaluation 2*). ### just..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "moderado"
+        ],
+        "passou": true,
+        "evidencia": "'moderado' em: ...ificado como um pais de risco moderado**. **variaveis necessarias para o calculo:** 1. ida..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "inr"
+        ],
+        "passou": true,
+        "evidencia": "'inr' em: ...io normalizado internacional (inr)**. a maioria dos antibioticos pode potenciar o efeito a..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "interac",
+          "aument",
+          "potenci"
+        ],
+        "passou": true,
+        "evidencia": "'interac' em: ...ita e e suscetivel a inumeras interacoes medicamentosas. ### consideracoes clinicas e cuid..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-04",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "contraindicacao_omitida"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "aspirina",
+          "acido acetilsalicilico"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'aspirina' em: ...e. a mae pergunta se pode dar aspirina. **resposta:** **nao.** a administracao de aspirina..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "ibuprofeno"
+        ],
+        "passou": false,
+        "evidencia": "prescreve 'ibuprofeno' em: ...esteroides (aines), como o **ibuprofeno**, em criancas com varicela. existem evidencias q..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "paracetamol"
+        ],
+        "passou": true,
+        "evidencia": "'paracetamol' em: ...tiva terapeutica recomendada: paracetamol** para o controlo da febre e da dor, o farmaco d..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "reye"
+        ],
+        "passou": true,
+        "evidencia": "'reye' em: ...ente o risco de **sindrome de reye**, uma patologia rara, mas potencialmente fatal, caract..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "botulismo"
+        ],
+        "passou": true,
+        "evidencia": "'botulismo' em: ...ulinica. isto pode levar ao **botulismo infantil**, uma doenca grave que causa paralisia f..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 meses",
+          "1 ano",
+          "um ano"
+        ],
+        "passou": true,
+        "evidencia": "'12 meses' em: ...nte (especialmente abaixo dos 12 meses), estes esporos podem germinar, colonizar o intesti..."
+      }
+    ]
+  },
+  {
+    "caso": "PED-10",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "atraso",
+          "recurso",
+          "recuperacao"
+        ],
+        "passou": true,
+        "evidencia": "'recuperacao' em: ...ma situacao de **vacinacao de recuperacao (catch-up)**. o objetivo e atualizar o estado va..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "pnv",
+          "programa nacional de vacinacao"
+        ],
+        "passou": true,
+        "evidencia": "'pnv' em: ...*plano nacional de vacinacao (pnv)** da direcao-geral da saude (dgs) de portugal. ### proc..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sim",
+          "e uma opcao",
+          "opcao adequada"
+        ],
+        "passou": true,
+        "evidencia": "'sim' em: ...colega medico. **resposta:** sim, o uso de adesivos de nicotina (terapia de substituicao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "enfarte",
+          "arritmia",
+          "morte",
+          "mortalidade",
+          "eventos cardiovasculares",
+          "eventos cardiacos"
+        ],
+        "passou": true,
+        "evidencia": "'enfarte' em: ...es absolutas/relativas:** * **enfarte agudo do miocardio (eam) recente:** a tsn e geralmen..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-08",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "vareniclina",
+          "bupropiona",
+          "citisiniclina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "comportament",
+          "aconselhamento",
+          "consulta"
+        ],
+        "passou": true,
+        "evidencia": "'comportament' em: ...a. ### 1. abordagem inicial e comportamental (primeira linha) em adolescentes, a primeira..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-DM-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindicad",
+          "contra-indicad",
+          "suspend",
+          "suspens",
+          "descontinu"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...da e a kdigo), a metformina e contraindicada em doentes com uma taxa de filtracao glomerul..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "SCORE2 (ESC 2021)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "score2",
+          "score 2"
+        ],
+        "passou": true,
+        "evidencia": "'score2' em: ...instrumento recomendado e o **score2** (*systemic coronary risk estimation 2*), de acordo..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "moderado"
+        ],
+        "passou": true,
+        "evidencia": "'moderado' em: ...egoria de risco final (baixo, moderado, alto ou muito alto) e das metas de ldl-c, se o ris..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-FA-02",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "doac",
+          "apixabano",
+          "rivaroxabano",
+          "edoxabano",
+          "dabigatrano"
+        ],
+        "passou": true,
+        "evidencia": "nenhum farmaco excluido foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "varfarina",
+          "vitamina k",
+          "avk",
+          "acenocumarol"
+        ],
+        "passou": true,
+        "evidencia": "'varfarina' em: ...oumarol** (sintrom), embora a varfarina possa ser utilizada. * **farmaco:** acenocoumarol...."
+      }
+    ]
+  },
+  {
+    "caso": "PED-05",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "12 anos"
+        ],
+        "passou": true,
+        "evidencia": "'12 anos' em: ...eina em criancas com menos de 12 anos para o tratamento da tosse esta **contraindicada**...."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "depressao respiratoria"
+        ],
+        "passou": true,
+        "evidencia": "'depressao respiratoria' em: ...nte elevadas, resultando em **depressao respiratoria grave**, que pode ser fatal. de acord..."
+      }
+    ]
+  },
+  {
+    "caso": "ADU-CV-01",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "SCORE2 (ESC 2021)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "score2",
+          "score 2"
+        ],
+        "passou": true,
+        "evidencia": "'score2' em: ...instrumento recomendado e o **score2** (*systematic coronary risk evaluation 2*), desenvol..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "moderado"
+        ],
+        "passou": true,
+        "evidencia": "'moderado' em: ...derado: * **baixo:** < 5% * **moderado:** 5% a 7.5% * **alto:** 7.5% a 10% * **muito alto:..."
+      }
+    ]
+  },
+  {
+    "caso": "TAB-06",
+    "modelo": "gemini:gemma-4-31b-it",
+    "passou": false,
+    "falhas": [
+      "resposta_incompleta"
+    ],
+    "risco": "medio",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "sim",
+          "e uma opcao",
+          "opcao adequada"
+        ],
+        "passou": true,
+        "evidencia": "'sim' em: sim, o uso de adesivos de nicotina (terapia de substituicao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "enfarte",
+          "arritmia",
+          "morte",
+          "mortalidade",
+          "eventos cardiovasculares",
+          "eventos cardiacos"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: 'enfarte', 'arritmia', 'morte', 'mortalidade', 'eventos cardiovasculares', 'eventos cardiacos'"
+      }
+    ]
+  }
+]
