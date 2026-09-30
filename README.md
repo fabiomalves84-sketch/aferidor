@@ -38,7 +38,7 @@ Requer Python 3.10 ou superior. Não tem dependências externas.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 465 testes
+python3 -m unittest discover -s tests          # 466 testes
 python3 -m aferidor verificar                  # coerência dos casos e do corretor
 python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
@@ -112,7 +112,7 @@ documentos públicos ou são sintéticos.
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar`: 27/27 e 30/30 casos coerentes; 307/307 e 138/138 controlos
-  negativos detetados. 465 testes, em Python 3.10 a 3.14 na integração
+  negativos detetados. 466 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 34 de 57 confirmadas por uma pessoa; das restantes, 16 lidas no
   documento original e 7 por confirmar. Detalhe em `casos/VERIFICACAO.md`.

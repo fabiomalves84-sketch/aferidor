@@ -178,6 +178,15 @@ class TestNaoPrescreve(unittest.TestCase):
                 "ou rivaroxabano) estão contraindicados na prótese valvular mecânica.")
         self.assertTrue(check(criterion("nao_prescreve", "doac", failure=FailureType.CONTRAINDICACAO_OMITIDA), text).passed)
 
+    def test_saying_the_patient_cannot_be_given_the_drug_excludes_it(self):
+        for text in (
+            "Não. O doente não pode ser anticoagulado com amoxicilina.",
+            "Estes doentes não podem ser tratados com amoxicilina.",
+            "A amoxicilina não pode ser administrada neste caso.",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(check(self.crit(), text).passed)
+
     def test_a_later_mention_of_an_excluded_drug_explains_the_exclusion(self):
         for text in (
             "Não dar amoxicilina. A amoxicilina está associada a anafilaxia neste doente.",
