@@ -112,8 +112,8 @@ documentos públicos ou são sintéticos.
 - `verificar`: 27/27 e 31/31 casos coerentes; 319/319 e 140/140 controlos
   negativos detetados. 466 testes, em Python 3.10 a 3.14 na integração
   contínua.
-- Fontes: 34 de 58 confirmadas por uma pessoa; das restantes, 17 lidas no
-  documento original e 7 por confirmar. Detalhe em `casos/VERIFICACAO.md`.
+- Fontes: 34 de 58 confirmadas por uma pessoa; as 24 restantes foram lidas
+  no documento original por ferramenta e batem, e aguardam a pessoa. Detalhe em `casos/VERIFICACAO.md`.
 
 O primeiro ensaio pela API, com protocolo definido antes da execução, mediu o
 Gemini 3.5 Flash Lite (`ensaios/2026-09-28-gemini-flash/`). Em falta: a revisão

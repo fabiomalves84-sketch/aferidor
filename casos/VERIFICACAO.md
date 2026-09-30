@@ -287,3 +287,41 @@ Pessoa**, que continua por marcar nestas 23 linhas.
 Das 23, 16 batem com o documento lido, e 7 ficaram por ler por o editor não
 permitir a leitura automática (ESC e ADA). Para essas 7, a ligação está na
 tabela e a confirmação tem de ser feita à mão.
+
+## Leitura por ferramenta das 7 por ler, 30/09/2026
+
+As 7 fontes da ESC e da ADA que ficaram por ler a 27/09 foram lidas no texto
+integral por outras vias. **Isto não marca a coluna Pessoa**, que continua
+por preencher nas 24 linhas; serve para a confirmação humana saber exatamente
+que frase procurar e em que página.
+
+Vias usadas:
+
+- **ESC:** cópias do PDF do editor, com o carimbo de descarga da OUP e o DOI na
+  primeira página, alojadas por terceiros: a de 2021 no repositório
+  institucional de Oxford (ORA), as de 2024 em sítios de sociedades médicas.
+  Não são o sítio do editor, que bloqueia a leitura automática; a pessoa que
+  confirmar deve abrir o artigo pelo DOI.
+- **ADA:** texto integral no PubMed Central (PMC12690185, PMC12690187,
+  PMC12690176, PMC12690177 e PMC12690186).
+
+| Caso | Documento lido | Onde | Resultado |
+|---|---|---|---|
+| ADU-HTA-01 | ESC 2024 HTA, doi:10.1093/eurheartj/ehae178, PDF (SHA-256 37f1c96768e7) | Recommendation Table 6, p. 32 | Bate. Com TA de consultório 140–159/90–99, o diagnóstico assenta em MAPA ou AMPA; se não for exequível, em medições repetidas "on more than one visit" (I B). A parte da DGS já batia |
+| ADU-HTA-03 | ESC 2024 HTA | Recommendation Table 16, p. 51; secção 8.3.4, p. 48 | Bate. Combinação como terapêutica inicial na maioria (IECA ou ARA II com BCC di-hidropiridínico ou diurético), de preferência "fixed-dose single-pill combination" (I B); p. 48: "Upfront low-dose combination therapy". Exceções: ≥ 85 anos, hipotensão ortostática sintomática, fragilidade moderada a grave |
+| ADU-HTA-04 | ESC 2024 HTA | Recommendation Tables 23, p. 62; 24, p. 64; 18, p. 55 | Bate. Rastrear a fragilidade e decisão partilhada (IIa C); testar a hipotensão ortostática antes de iniciar ou intensificar (I B); alvos mais permissivos na fragilidade moderada a grave (IIb C) e princípio ALARA; se a TA baixar com a fragilidade, "deprescription … may be considered" (IIb C) |
+| ADU-CV-01 | ESC 2021 prevenção, doi:10.1093/eurheartj/ehab484, PDF do ORA (SHA-256 c953acd33aee) | secção 3.2.3, pp. 3245-3250 (PDF 19-24); Recommendation, p. 3256 | Bate. SCORE2 para 40–69 anos, risco a 10 anos de eventos fatais e não fatais (I B); Portugal na lista dos países de risco moderado |
+| ADU-FA-02 | ESC 2024 FA, doi:10.1093/eurheartj/ehae176, PDF (SHA-256 b5169c856fb3) | Recommendation Table 7, p. 3344; secção 6.2.2, p. 3345 | Bate. DOAC preferidos aos AVK "except in patients with mechanical heart valves" (I A); os AVK são "the only treatment option" com prótese mecânica; INR alvo 2,0–3,0. A p. 3370 diz "contraindicated" |
+| ADU-DM-02 | ADA 2026, secções 9 e 10 (PMC) | 9.8; 10.41a | Bate. 9.8: iSGLT2 na IC com fração de ejeção reduzida ou preservada "irrespective of A1C" (A); 10.41a: iSGLT2 com benefício comprovado para reduzir o agravamento da IC e a morte cardiovascular (A) |
+| ADU-DM-03 | ADA 2026, secção 13 (PMC) | 13.7b, 13.7c; tabela 13.2 | Bate. Saúde complexa ou intermédia (incluindo défice cognitivo ligeiro a moderado): HbA1c < 8,0%. Muito complexa (défice moderado a grave): "Avoid reliance on A1C", evitar hipoglicemia e hiperglicemia sintomática |
+| ADU-DM-04 | ADA 2026, secções 11 e 12 (PMC) | 11.1a; 12.5; 12.17; 12.18 | Bate. RAC urinária e TFGe pelo menos anualmente na diabetes tipo 2 (B); retinopatia de 1 em 1 a 2 anos se exames normais e glicemia no alvo; neuropatia pelo menos anualmente; monofilamento de 10 g anual |
+| ADU-AVC-01 | SNS, Via Verde do AVC, 30/03/2022 | texto da notícia | Bate. Perante boca ao lado, falta de força num braço ou dificuldade em falar, "ligar de imediato" o 112; as primeiras horas são essenciais |
+
+Não foram lidas as fontes acessórias que estes casos também citam: ESC IC 2021
+e a atualização de 2023 (ADU-DM-02), ESC/EACTS 2025 de valvulopatias
+(ADU-FA-02) e a Revista Portuguesa de Cardiologia 2024 (ADU-CV-01). Em nenhum
+dos três casos a resposta de referência depende só delas.
+
+Com esta leitura, as 23 linhas por confirmar de 27/09 e o ADU-AVC-01 foram
+todas lidas por ferramenta no documento citado, e todas batem. **Continuam 24
+caixas por marcar na coluna Pessoa.**

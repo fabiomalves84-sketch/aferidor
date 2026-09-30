@@ -75,8 +75,9 @@ Limitações conhecidas:
   falta um clínico disponível para a julgar. Até lá, os resultados
   correspondem à triagem do corretor, e os relatórios dizem-no no topo.
 - **Fontes parcialmente confirmadas.** 10 casos confirmados nos PDF da DGS, um
-  a um; 24 declarados confirmados em grupo; dos 24 restantes, 17 lidos no
-  documento original por ferramenta e 7 (ESC e ADA) por confirmar. Detalhe em
+  a um; 24 declarados confirmados em grupo; os 24 restantes lidos no
+  documento original por ferramenta, todos coincidentes, à espera de
+  confirmação por uma pessoa. Detalhe em
   `casos/VERIFICACAO.md`.
 - **Um único modelo comercial medido.** O ensaio de 28/09 mediu o Gemini 3.5
   Flash Lite pela API gratuita (11 de 27 casos com falha crítica, reprovado pelo
