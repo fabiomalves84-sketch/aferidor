@@ -1,0 +1,15 @@
+{
+  "nome": "Gemma 4 26B A4B pela API gratuita, banco principal, 27 casos, corretor congelado",
+  "escrito_em": "2026-10-01",
+  "banco": "casos/casos.json",
+  "banco_sha256": "89ac69b771683152a0541a3794d6316a4e9ef8b90d586522b8f6a80fd57667b9",
+  "amostras_por_caso": 5,
+  "temperatura": 1.0,
+  "regra_do_caso": "todas",
+  "criterios_de_aprovacao": {
+    "casos_com_falha_critica_max": 0,
+    "casos_instaveis_max": 0,
+    "taxa_de_amostras_corretas_min": 0.95
+  },
+  "versao_corretor": "0.1.0+13022a69b849"
+}
