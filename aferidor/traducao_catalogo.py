@@ -319,6 +319,16 @@ _ROWS: tuple[tuple[str, str, str, str, str], ...] = (
      "la banque de cas exécutée n'est pas celle pour laquelle le protocole a été rédigé (SHA-256 différent)",
      "die ausgeführte Fallsammlung ist nicht die, für die das Protokoll verfasst wurde (anderer SHA-256)"),
     ("{modelo} correu com {n} amostras por caso; o protocolo previa {previsto}", "{modelo} ran with {n} samples per case; the protocol specified {previsto}", "{modelo} se ejecutó con {n} muestras por caso; el protocolo preveía {previsto}", "{modelo} a été exécuté avec {n} échantillons par cas ; le protocole en prévoyait {previsto}", "{modelo} lief mit {n} Stichproben pro Fall; das Protokoll sah {previsto} vor"),
+    ("{modelo} respondeu com a versão {versao}; o protocolo fixou o corretor na versão {previsto}",
+     "{modelo} answered with version {versao}; the protocol froze the grader at version {previsto}",
+     "{modelo} respondió con la versión {versao}; el protocolo fijó el corrector en la versión {previsto}",
+     "{modelo} a répondu avec la version {versao} ; le protocole a figé le correcteur à la version {previsto}",
+     "{modelo} antwortete mit Version {versao}; das Protokoll hat den Bewerter auf Version {previsto} festgelegt"),
+    ("esta correção foi feita com a versão {versao}; o protocolo fixou o corretor na versão {previsto}: o corretor mudou depois do protocolo",
+     "this grading was done with version {versao}; the protocol froze the grader at version {previsto}: the grader changed after the protocol",
+     "esta corrección se hizo con la versión {versao}; el protocolo fijó el corrector en la versión {previsto}: el corrector cambió después del protocolo",
+     "cette correction a été faite avec la version {versao} ; le protocole a figé le correcteur à la version {previsto} : le correcteur a changé après le protocole",
+     "diese Bewertung erfolgte mit Version {versao}; das Protokoll hat den Bewerter auf Version {previsto} festgelegt: der Bewerter wurde nach dem Protokoll geändert"),
     ("{modelo} correu à temperatura {valor}; o protocolo previa {previsto}", "{modelo} ran at temperature {valor}; the protocol specified {previsto}", "{modelo} se ejecutó a temperatura {valor}; el protocolo preveía {previsto}", "{modelo} a été exécuté à la température {valor} ; le protocole prévoyait {previsto}", "{modelo} lief bei Temperatur {valor}; das Protokoll sah {previsto} vor"),
 
     # ---- model labels

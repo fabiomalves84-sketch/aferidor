@@ -12,6 +12,12 @@ and the SHA-256 of the case file it was written for, and the report checks
 both against the run: a protocol dated after the first answer, or written for
 a different case file, is reported as such instead of silently trusted. The
 proof that holds up is a commit of the protocol before the run.
+
+A protocol can also freeze the grader: `versao_corretor` records the build
+(`build_id`) the protocol was written against. Tuning the grader after seeing
+the answers is the easiest way to move a result, and a frozen protocol makes
+any such change visible: the report names every answer asked, and every
+grading done, with another build.
 """
 
 from __future__ import annotations
@@ -22,6 +28,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 
+from . import build_id
 from .grading import CASE_RULES, DEFAULT_CASE_RULE, ConsistencySummary
 from .traducao import t
 
@@ -45,6 +52,7 @@ class Protocol:
     max_unstable_cases: int
     min_sample_accuracy: float
     case_rule: str = DEFAULT_CASE_RULE
+    grader_build: str = ""
     path: str = ""
     sha256: str = ""
 
@@ -75,6 +83,7 @@ def read_protocol(path: Path) -> Protocol:
         max_unstable_cases=int(limits["casos_instaveis_max"]),
         min_sample_accuracy=float(limits["taxa_de_amostras_corretas_min"]),
         case_rule=str(data.get("regra_do_caso", DEFAULT_CASE_RULE)),
+        grader_build=str(data.get("versao_corretor", "")),
         path=str(path),
         sha256=hashlib.sha256(raw_bytes).hexdigest(),
     )
@@ -92,15 +101,19 @@ def read_protocol(path: Path) -> Protocol:
     return protocol
 
 
-def template(name: str, cases_path: Path, today: date | None = None) -> dict:
+def template(
+    name: str, cases_path: Path, today: date | None = None, freeze_grader: bool = False
+) -> dict:
     """A protocol to fill in, with the date and the case file's hash already set.
 
     The limits are written as the strictest defensible starting point (no
     critical case at all), not as a suggestion of what is acceptable: that
     decision is the person's, and the template makes them change it on
     purpose rather than inherit it.
+
+    With `freeze_grader`, the current build is written as `versao_corretor`.
     """
-    return {
+    data = {
         "nome": name,
         "escrito_em": (today or date.today()).isoformat(),
         "banco": str(cases_path),
@@ -114,6 +127,9 @@ def template(name: str, cases_path: Path, today: date | None = None) -> dict:
             "taxa_de_amostras_corretas_min": 0.95,
         },
     }
+    if freeze_grader:
+        data["versao_corretor"] = build_id()
+    return data
 
 
 @dataclass(frozen=True)
@@ -193,6 +209,8 @@ def warnings(
     samples_by_model: dict[str, int],
     temperatures_by_model: dict[str, tuple[float, ...]],
     lang: str = "pt",
+    builds_by_model: dict[str, tuple[str, ...]] | None = None,
+    grading_build: str | None = None,
 ) -> list[str]:
     """Every reason the protocol might not be the criterion it claims to be."""
     found: list[str] = []
@@ -219,6 +237,21 @@ def warnings(
             found.append(t(
                 "{modelo} correu à temperatura {valor}; o protocolo previa {previsto}",
                 lang, modelo=model, valor=shown, previsto=f"{protocol.temperature:g}",
+            ))
+    if protocol.grader_build:
+        for model, builds in sorted((builds_by_model or {}).items()):
+            if builds != (protocol.grader_build,):
+                found.append(t(
+                    "{modelo} respondeu com a versão {versao}; o protocolo fixou o corretor "
+                    "na versão {previsto}",
+                    lang, modelo=model, versao=", ".join(b or "?" for b in builds),
+                    previsto=protocol.grader_build,
+                ))
+        if grading_build is not None and grading_build != protocol.grader_build:
+            found.append(t(
+                "esta correção foi feita com a versão {versao}; o protocolo fixou o corretor "
+                "na versão {previsto}: o corretor mudou depois do protocolo",
+                lang, versao=grading_build, previsto=protocol.grader_build,
             ))
     return found
 

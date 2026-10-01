@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from . import build_id
 from .grading import (
     Tally,
     consistency_by_case,
@@ -169,6 +170,8 @@ def protocol_findings(
         expected_samples(answers),
         {model: c.temperatures for model, c in found.items()},
         lang,
+        {model: c.builds for model, c in found.items()},
+        build_id(),
     )
     if case_ids is None:
         return found_warnings, [evaluate(protocol, summaries[m], lang=lang) for m in sorted(summaries)]

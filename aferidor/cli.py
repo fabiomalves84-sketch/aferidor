@@ -146,6 +146,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     prot.add_argument("--nome", required=True)
     prot.add_argument("--casos", type=Path, default=DEFAULT_CASES)
     prot.add_argument("--saida", type=Path, required=True)
+    prot.add_argument(
+        "--congelar-corretor", action="store_true",
+        help="fixar no protocolo a versão atual do corretor; o relatório assinala qualquer outra",
+    )
 
     rev = sub.add_parser(
         "revisao",
@@ -477,10 +481,12 @@ def comando_protocolo(args: argparse.Namespace) -> int:
         print(f"erro: {args.saida} já existe; um protocolo não se reescreve depois de escrito",
               file=sys.stderr)
         return 2
-    data = protocolo.template(args.nome, args.casos)
+    data = protocolo.template(args.nome, args.casos, freeze_grader=args.congelar_corretor)
     args.saida.parent.mkdir(parents=True, exist_ok=True)
     args.saida.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"protocolo em {args.saida}, para {args.casos} (SHA-256 {data['banco_sha256'][:12]})")
+    if "versao_corretor" in data:
+        print(f"corretor fixado na versão {data['versao_corretor']}")
     print("rever os limites em criterios_de_aprovacao e fazer commit antes de correr o ensaio:")
     print("é o commit, e não a data escrita no ficheiro, que prova que o critério veio antes")
     return 0

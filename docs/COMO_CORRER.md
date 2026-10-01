@@ -70,6 +70,12 @@ casos com falha crítica); qualquer alívio deve ser uma decisão explícita. O
 protocolo deve ser commitado **antes** do ensaio e passado ao comando com
 `--protocolo`.
 
+Com `--congelar-corretor`, o protocolo fixa também a versão do corretor
+(`versao_corretor`). O código deve estar commitado antes de escrever o
+protocolo. O relatório assinala qualquer resposta obtida, ou correção feita,
+com outra versão: um corretor afinado depois de ver as respostas deixa de
+passar despercebido.
+
 ## 6. Execução
 
 ```

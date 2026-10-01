@@ -10,7 +10,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from datetime import date, datetime
 from pathlib import Path
 
-from aferidor import html_report, report
+from aferidor import build_id, html_report, report
 from aferidor.cli import main
 from aferidor.grading import ConsistencySummary, grade
 from aferidor.models import Answer
@@ -153,6 +153,41 @@ class TestWarnings(unittest.TestCase):
     def test_other_samples_or_temperature_are_named(self):
         found = warnings(self.protocol, None, None, {"m": 3}, {"m": (0.0,)})
         self.assertEqual(len(found), 2)
+
+
+class TestFrozenGrader(unittest.TestCase):
+    def frozen(self, folder: str):
+        data = template("x", REAL_CASES, today=date(2026, 9, 1), freeze_grader=True)
+        path = Path(folder) / "protocolo.json"
+        path.write_text(json.dumps(data), encoding="utf-8")
+        return read_protocol(path)
+
+    def test_the_frozen_template_carries_the_current_build(self):
+        self.assertEqual(template("x", REAL_CASES, freeze_grader=True)["versao_corretor"], build_id())
+        self.assertNotIn("versao_corretor", template("x", REAL_CASES))
+
+    def test_answers_and_grading_with_the_frozen_build_raise_nothing(self):
+        with tempfile.TemporaryDirectory() as folder:
+            protocol = self.frozen(folder)
+        found = warnings(protocol, None, None, {}, {}, "pt", {"m": (build_id(),)}, build_id())
+        self.assertEqual(found, [])
+
+    def test_a_grader_changed_after_the_protocol_is_named(self):
+        with tempfile.TemporaryDirectory() as folder:
+            protocol = self.frozen(folder)
+        found = warnings(protocol, None, None, {}, {}, "pt", {"m": (build_id(),)}, "0.1.0+outro")
+        self.assertTrue(any("o corretor mudou depois do protocolo" in w for w in found))
+
+    def test_answers_asked_with_another_build_are_named(self):
+        with tempfile.TemporaryDirectory() as folder:
+            protocol = self.frozen(folder)
+        found = warnings(protocol, None, None, {}, {}, "pt", {"m": ("0.1.0+outro",)}, build_id())
+        self.assertTrue(any("m respondeu com a versão 0.1.0+outro" in w for w in found))
+
+    def test_an_unfrozen_protocol_ignores_the_build(self):
+        with tempfile.TemporaryDirectory() as folder:
+            protocol = read_protocol(write_protocol(folder))
+        self.assertEqual(warnings(protocol, None, None, {}, {}, "pt", {"m": ("a",)}, "b"), [])
 
 
 class TestReports(unittest.TestCase):
