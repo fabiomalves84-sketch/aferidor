@@ -217,6 +217,7 @@ não mudaram entre o ensaio e essa data.
 | `2026-09-29-gemini-consulta/` | Primeiro ensaio do banco de consulta: Gemini 3.5 Flash Lite, 30 casos, 5 amostras, protocolo prévio. 150 de 150 respostas; 6 de 30 casos com falha crítica; reprovado pelo protocolo. As respostas levaram a afinar o `nao_prescreve` (commit `3fc49ba`), antes de registar os resultados. |
 | `2026-09-29-gemma4-31b-casos/` | Gemma 4 31B (modelo aberto, pela API gratuita) no banco principal, protocolo prévio. 135 de 135 respostas; 10 de 27 casos com falha crítica; reprovado. |
 | `2026-09-29-gemma4-31b-consulta/` | Gemma 4 31B no banco de consulta, protocolo prévio. 150 de 150 respostas; 4 de 30 casos com falha crítica; reprovado. Levou a afinar o `nao_prescreve` (commit `0cbfda6`). |
+| `2026-10-01-gemma4-26b-casos/` e `2026-10-01-gemma4-26b-consulta/` | Primeiro ensaio com o corretor congelado no protocolo (`versao_corretor`): Gemma 4 26B A4B nos dois bancos, 290 de 290 respostas; 12 de 27 e 5 de 31 casos com falha crítica; reprovado. Publicado sem afinação; os falsos positivos do corretor estão descritos no README de cada pasta e não alteram os números. |
 
 Depois de 27/09, vários casos mudaram de fonte e de formulação. Os resultados
 registados em cada ensaio correspondem ao instrumento da altura e não são
