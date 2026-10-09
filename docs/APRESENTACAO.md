@@ -103,7 +103,7 @@ evidência:
 | Registo íntegro dos resultados | `data/respostas.jsonl`, escrito à medida que as respostas chegam; em cada ensaio registado, `MANIFESTO.sha256` com o SHA-256 de cada ficheiro (`aferidor manifesto --verificar`) |
 | Relatório para revisão humana | `relatorios/relatorio.md` e `.html`, com condições do ensaio e intervalos de confiança |
 | Validação do método de medida | `aferidor revisao` e `concordancia`: corretor contra clínico, às cegas |
-| Requisitos rastreáveis e gestão de riscos | `docs/QUALIDADE.md`: 24 requisitos ligados aos testes que os verificam, 12 riscos do instrumento com mitigação e risco residual; um teste garante que os testes citados existem |
+| Requisitos rastreáveis e gestão de riscos | `docs/QUALIDADE.md`: 25 requisitos ligados aos testes que os verificam, 12 riscos do instrumento com mitigação e risco residual; um teste garante que os testes citados existem |
 
 O comando `verificar` avalia a resposta de referência de cada caso contra os
 seus próprios critérios. Na primeira execução detetou dois casos defeituosos
