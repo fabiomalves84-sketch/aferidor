@@ -181,6 +181,52 @@ class TestCaseSummaryNamesTheModels(unittest.TestCase):
                 self.assertIn(f'<span class="vh">{_h.escape(said)}</span>', self.summary(self.page(lingua=lang)))
 
 
+class TestFullCaseLinkOpensTheCase(unittest.TestCase):
+    """"Ver o caso completo" must point inside the case's <details>: that is what makes a
+    browser open it. Checked in Brave, Firefox and Safari on 09/10/2026 (see the commit)."""
+
+    def page(self) -> str:
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [
+            an_answer("Amoxicilina 500 mg", "C1", model="local:llama3.1:8b"),
+            an_answer("Amoxicilina 500 mg", "C2", model="local:llama3.1:8b"),
+        ]
+        return build(cases, answers)
+
+    def targets(self, text: str) -> list[str]:
+        worst = text.split('id="erros"', 1)[1].split("</section>", 1)[0]
+        return re.findall(r'href="#(corpo-[^"]+)">Ver o caso completo', worst)
+
+    def test_every_link_points_at_an_id_that_exists_exactly_once(self):
+        text = self.page()
+        targets = self.targets(text)
+        self.assertTrue(targets)
+        for target in targets:
+            with self.subTest(target=target):
+                self.assertEqual(text.count(f'id="{target}"'), 1)
+
+    def test_the_target_sits_inside_the_details_after_its_summary(self):
+        text = self.page()
+        for target in self.targets(text):
+            with self.subTest(target=target):
+                at = text.index(f'id="{target}"')
+                opened = text.rfind("<details>", 0, at)
+                closed_before = text.rfind("</details>", 0, at)
+                summary_ends = text.rfind("</summary>", 0, at)
+                self.assertGreater(opened, closed_before)  # still inside that <details>
+                self.assertGreater(summary_ends, opened)  # after its <summary>
+
+    def test_the_summary_keeps_its_old_id_so_shared_links_still_work(self):
+        self.assertIn('<summary id="caso-C1">', self.page())
+
+    def test_the_body_leaves_room_for_the_fixed_bar_and_the_summary(self):
+        self.assertIn(
+            ".detalhe-corpo { padding: 0.9rem 1rem 1rem; border-top: 1px solid var(--grid); scroll-margin-top: 8rem; }",
+            html_estilo.STYLE,
+        )
+        self.assertIn(".detalhe-corpo { scroll-margin-top: 10rem; }", html_estilo.STYLE)
+
+
 class TestHeadline(unittest.TestCase):
     def test_the_critical_case_count_is_shown_per_model(self):
         text = build([a_case()], [an_answer("500 mg")])
@@ -434,8 +480,9 @@ class TestWhatJumpsOut(unittest.TestCase):
         worst = text.split('id="erros"', 1)[1].split("</section>", 1)[0]
         self.assertIn("A referência diz", worst)
         self.assertIn("Dose incorreta", worst)
-        self.assertIn('href="#caso-C1"', worst)
-        self.assertIn('id="caso-C1"', text)
+        self.assertIn('href="#corpo-C1"', worst)
+        self.assertIn('id="corpo-C1"', text)
+        self.assertIn('id="caso-C1"', text)  # the summary keeps its id, for links already shared
 
     def test_small_local_models_are_put_in_context(self):
         self.assertIn("modelos abertos de pequena dimensão", self.two_models())

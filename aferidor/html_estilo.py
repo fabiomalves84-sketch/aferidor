@@ -223,7 +223,7 @@ td.cel.erro .ic { color: var(--critical-text); }
 .mini { display: inline-flex; align-items: center; justify-content: center; width: 1.35rem; height: 1.35rem; border-radius: 50%;
   font-size: 0.75rem; font-weight: 700; color: #0b0b0b; flex: none; }
 .mini.ok { background: var(--good); } .mini.instavel { background: var(--warning); } .mini.erro { background: var(--critical); color: #ffffff; }
-.detalhe-corpo { padding: 0.9rem 1rem 1rem; border-top: 1px solid var(--grid); }
+.detalhe-corpo { padding: 0.9rem 1rem 1rem; border-top: 1px solid var(--grid); scroll-margin-top: 8rem; }
 .referencia { background: var(--surface-2); border-radius: 8px; padding: 0.75rem 0.9rem; margin: 0.5rem 0 1rem; }
 .referencia p { margin: 0 0 0.35rem; } .fonte { color: var(--ink-2); font-size: 0.88rem; }
 .detalhe h4 { margin: 1.1rem 0 0.4rem; font-size: 0.98rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
@@ -284,6 +284,7 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
   .erros { grid-template-columns: 1fr; }
   .erro-par { grid-template-columns: 1fr; }
   .comp-lista li, .comp-eixo { grid-template-columns: 6rem 1fr 6.5rem; }
+  .detalhe-corpo { scroll-margin-top: 10rem; }
 }
 @media print {
   nav.indice { position: static; }

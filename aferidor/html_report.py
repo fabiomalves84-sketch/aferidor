@@ -813,7 +813,10 @@ def _worst(cases, consistency, pairs) -> str:
             f'<p class="erro-ref" lang="pt-PT">{_gloss(_esc(case.reference))}</p>'
             f'<p class="fonte">{_gloss(_esc(case.source.name))}, {_esc(case.source.reference)}</p></div></div>'
             f'<p class="erro-chips">{chips}</p>'
-            f'<p><a href="#caso-{_esc(case.case_id)}">{_t("Ver o caso completo")}</a></p></article>'
+            # Points into the case's body, not at its <summary>: a browser opens the
+            # <details> that holds a fragment target, but not one whose target is the
+            # always-visible <summary>, so the reader would land on a closed case.
+            f'<p><a href="#corpo-{_esc(case.case_id)}">{_t("Ver o caso completo")}</a></p></article>'
         )
     out.append("</div></section>")
     return "".join(out)
@@ -1007,7 +1010,7 @@ def _detail(
             f'<span class="resumo-pergunta" lang="pt-PT">{_esc(case.question)}</span>'
             f'<span class="minis">{"".join(minis)}</span></summary>'
         )
-        out.append('<div class="detalhe-corpo">')
+        out.append(f'<div class="detalhe-corpo" id="corpo-{_esc(case.case_id)}">')
         out.append(
             f'<p><strong>{_t("Pergunta.")}</strong> <span lang="pt-PT">{_gloss(_esc(case.question))}</span></p>'
         )
