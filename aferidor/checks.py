@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from functools import lru_cache
 
 from .models import Criterion, CriterionResult
 from .risk import FailureType
@@ -387,7 +388,14 @@ def _is_excluded_at(haystack: str, position: int, length: int, restating: bool =
     # Markdown emphasis is layout, not content: "deve ser **evitado**" excludes.
     around = NEGATED_EXCLUSION.sub(" ", haystack[start:end].replace("*", ""))
     markers = EXCLUSION_MARKERS + HISTORY_MARKERS if restating else EXCLUSION_MARKERS
-    return any(marker in around for marker in markers)
+    return _markers_pattern(markers).search(around) is not None
+
+
+@lru_cache(maxsize=None)
+def _markers_pattern(markers: tuple[str, ...]) -> re.Pattern[str]:
+    """Markers are stems, so they may end mid-word, but must start a word:
+    `evit` is found in `evitando` and not in `inevitavel`."""
+    return re.compile(r"(?<![a-z0-9])(?:" + "|".join(re.escape(m) for m in markers) + ")")
 
 
 def _check_not_prescribed(

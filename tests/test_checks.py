@@ -194,6 +194,16 @@ class TestNaoPrescreve(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertTrue(check(self.crit(), text).passed)
 
+    def test_an_exclusion_marker_must_start_a_word(self):
+        """`evit` is a stem so as to catch "evitando" and "evitada", but it was also
+        found in the middle of "inevitavel": "se a associacao for inevitavel, dar
+        amoxicilina 500 mg" read as the drug being ruled out (INT-COL-016,
+        AJU-APX-026, INT-CLA-015 all say "inevitavel" in the stored runs)."""
+        self.assertFalse(
+            check(self.crit(), "Se a associação for inevitável, dar amoxicilina 500 mg de 8/8h.").passed
+        )
+        self.assertTrue(check(self.crit(), "Evitando a amoxicilina, dar azitromicina.").passed)
+
     def test_lack_of_evidence_for_a_drug_counts_as_ruling_it_out(self):
         """Seen in TAB-08, samples 1 to 3 of the 26B run: the answer declines the
         drug for lack of data in adolescents, without the word "contraindicado".
