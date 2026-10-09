@@ -15,8 +15,10 @@ class TestShippedCases(unittest.TestCase):
     def setUpClass(cls):
         cls.cases = read_cases(CASES)
 
-    def test_the_set_loads_and_is_not_empty(self):
-        self.assertGreaterEqual(len(self.cases), 10)
+    def test_the_set_has_exactly_the_cases_the_documents_say(self):
+        """The README, the CLAUDE.md and the presentation say 27. Losing a case
+        silently, or adding one without updating them, must fail here."""
+        self.assertEqual(len(self.cases), 27)
 
     def test_every_case_cites_a_document_and_a_place_in_it(self):
         for case in self.cases:
@@ -77,7 +79,7 @@ class TestShippedCases(unittest.TestCase):
 
 
 class TestAnnotatedBank(unittest.TestCase):
-    """The 30-case bank with risk levels, review state and source sections."""
+    """The 31-case bank with risk levels, review state and source sections."""
 
     @classmethod
     def setUpClass(cls):
@@ -88,7 +90,7 @@ class TestAnnotatedBank(unittest.TestCase):
 
     def test_it_loads_every_case(self):
         self.assertEqual(len(self.cases), len(self.raw["casos"]))
-        self.assertGreaterEqual(len(self.cases), 30)
+        self.assertEqual(len(self.cases), 31)
 
     def test_every_reference_passes_its_own_criteria(self):
         from aferidor.grading import self_check

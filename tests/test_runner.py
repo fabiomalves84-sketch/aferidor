@@ -10,8 +10,8 @@ from aferidor.models import Case, Criterion, Source
 from aferidor.providers import FakeProvider, Provider, ProviderError, Reply
 from aferidor.risk import FailureType
 from aferidor import build_id
-from aferidor.runner import ConditionsMismatch, RunConfig, build_prompt, prompt_digest, run
-from aferidor.storage import read_answers, write_answers
+from aferidor.runner import INSTRUCTION, ConditionsMismatch, RunConfig, build_prompt, prompt_digest, run
+from aferidor.storage import read_answers, read_cases, write_answers
 
 
 def a_case(case_id: str = "ATB-001") -> Case:
@@ -45,6 +45,30 @@ class TestPrompt(unittest.TestCase):
         for criterion in case.criteria:
             for term in criterion.terms:
                 self.assertNotIn(term, prompt)
+
+
+class TestWhatTheProviderSeesOnTheRealBanks(unittest.TestCase):
+    """The wall, tested on the 58 real cases and on what `ask` actually receives,
+    not on one invented case: the provider must never see the reference answer,
+    the criteria, the alternatives or the notes. Equality with the instruction
+    plus the question is the real proof; the substrings name what would be leaked."""
+
+    ROOT = Path(__file__).resolve().parent.parent / "casos"
+
+    def test_the_provider_receives_the_instruction_and_the_question_and_nothing_else(self):
+        for bank in ("casos.json", "consulta.json"):
+            cases = read_cases(self.ROOT / bank)
+            provider = FakeProvider(default="x")
+            run(cases, provider)
+            self.assertEqual(len(provider.prompts), len(cases))
+            for case, prompt in zip(cases, provider.prompts):
+                with self.subTest(case=case.case_id):
+                    self.assertEqual(prompt, INSTRUCTION.format(question=case.question))
+                    # The source name is not searched: a question may name it ("segundo a DGS").
+                    hidden = [case.reference, case.notes]
+                    hidden += [a.reference for a in case.alternatives]
+                    for secret in filter(None, (h.strip() for h in hidden)):
+                        self.assertNotIn(secret, prompt)
 
 
 class TestRun(unittest.TestCase):
