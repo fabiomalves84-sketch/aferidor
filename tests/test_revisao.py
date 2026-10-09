@@ -176,6 +176,58 @@ class TestSheet(unittest.TestCase):
         self.assertIn("R00", str(raised.exception))
 
 
+    def test_a_key_that_is_not_a_key_names_the_file(self):
+        with tempfile.TemporaryDirectory() as folder:
+            sheet, _ = self.write(folder)
+            self.fill(sheet, lambda r: "certa")
+            key_path_for(sheet).write_text("{}", encoding="utf-8")
+            with self.assertRaises(ValueError) as raised:
+                read_review(sheet, key_path_for(sheet))
+        self.assertIn(str(key_path_for(sheet)), str(raised.exception))
+
+    def test_a_sheet_and_a_key_from_different_reviews_are_refused(self):
+        """Same R001, R002... in both would give an agreement with no meaning."""
+        with tempfile.TemporaryDirectory() as folder:
+            sheet, _ = self.write(folder)
+            key = key_path_for(sheet)
+            data = json.loads(key.read_text(encoding="utf-8"))
+            data["itens"]["R001"]["caso"] = "OUTRO-999"
+            key.write_text(json.dumps(data), encoding="utf-8")
+            self.fill(sheet, lambda r: "certa")
+            with self.assertRaises(ValueError) as raised:
+                read_review(sheet, key)
+        self.assertIn("revisões diferentes", str(raised.exception))
+
+    def test_a_repeated_or_deleted_row_is_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            sheet, _ = self.write(folder)
+            self.fill(sheet, lambda r: "certa")
+            with sheet.open(encoding="utf-8-sig", newline="") as handle:
+                rows = list(csv.DictReader(handle, delimiter=";"))
+            for label, changed, expected in (
+                ("repetida", rows + [rows[0]], "mais do que uma vez"),
+                ("apagada", rows[1:], "faltam linhas"),
+            ):
+                with self.subTest(label):
+                    with sheet.open("w", encoding="utf-8-sig", newline="") as handle:
+                        writer = csv.DictWriter(handle, fieldnames=list(rows[0]), delimiter=";")
+                        writer.writeheader()
+                        writer.writerows(changed)
+                    with self.assertRaises(ValueError) as raised:
+                        read_review(sheet, key_path_for(sheet))
+                    self.assertIn(expected, str(raised.exception))
+
+    def test_answers_changed_since_the_sheet_was_made_are_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            sheet, _ = self.write(folder)
+            self.fill(sheet, lambda r: "certa")
+            source = Path(folder) / "respostas.jsonl"
+            source.write_text(source.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+            with self.assertRaises(ValueError) as raised:
+                read_review(sheet, key_path_for(sheet))
+        self.assertIn("SHA-256 diferente", str(raised.exception))
+
+
 class TestAgreementNumbers(unittest.TestCase):
     def test_kappa_on_a_known_table(self):
         # 20 both right, 15 both wrong, 5 false passes, 10 false fails.

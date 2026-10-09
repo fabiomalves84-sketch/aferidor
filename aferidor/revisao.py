@@ -222,14 +222,24 @@ def read_review(sheet: Path, key: Path) -> Agreement:
     the row it is in; guessing what the reviewer meant would be putting
     words in a clinician's mouth.
     """
-    grader = json.loads(Path(key).read_text(encoding="utf-8"))["itens"]
+    grader = _read_key(Path(key))
     counts = {"both_right": 0, "both_wrong": 0, "false_pass": 0, "false_fail": 0}
     unjudged: list[str] = []
+    seen: set[str] = set()
     with Path(sheet).open(encoding="utf-8-sig", newline="") as handle:
         for row in csv.DictReader(handle, delimiter=";"):
             review_id = (row.get("revisao") or "").strip()
             if review_id not in grader:
                 raise ValueError(f"{sheet}: a linha {review_id!r} não existe na chave {key}")
+            if review_id in seen:
+                raise ValueError(f"{sheet}: a linha {review_id} aparece mais do que uma vez")
+            seen.add(review_id)
+            sheet_case = (row.get("caso") or "").strip()
+            if sheet_case != grader[review_id].get("caso"):
+                raise ValueError(
+                    f"{sheet}, {review_id}: o caso da folha ({sheet_case!r}) não é o da chave "
+                    f"({grader[review_id].get('caso')!r}); a folha e a chave são de revisões diferentes"
+                )
             raw = (row.get("juizo") or "").strip().lower()
             if not raw:
                 unjudged.append(review_id)
@@ -249,7 +259,33 @@ def read_review(sheet: Path, key: Path) -> Agreement:
                 counts["false_pass"] += 1
             else:
                 counts["false_fail"] += 1
+    missing = sorted(set(grader) - seen)
+    if missing:
+        shown = ", ".join(missing[:5]) + (f" (e mais {len(missing) - 5})" if len(missing) > 5 else "")
+        raise ValueError(f"{sheet}: faltam linhas que a chave tem: {shown}")
     return Agreement(unjudged=tuple(unjudged), **counts)
+
+
+def _read_key(key: Path) -> dict:
+    """The key's items, or an error that says which file and what is wrong with it.
+
+    The key records the SHA-256 of the answers it was drawn from. When that
+    file is still where the key says it was, it has to be the same one:
+    otherwise the person judged answers that are no longer these.
+    """
+    try:
+        data = json.loads(key.read_text(encoding="utf-8"))
+        items = data["itens"]
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise ValueError(f"{key}: chave de revisão ilegível ou sem itens ({error!r})") from None
+    source = Path(str(data.get("respostas", "")))
+    if data.get("respostas_sha256") and source.is_file():
+        if hashlib.sha256(source.read_bytes()).hexdigest() != data["respostas_sha256"]:
+            raise ValueError(
+                f"{key}: {source} mudou depois de a folha ser feita (SHA-256 diferente); "
+                "as respostas julgadas já não são estas"
+            )
+    return items
 
 
 def format_agreement(result: Agreement) -> str:
