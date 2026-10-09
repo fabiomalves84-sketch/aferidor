@@ -396,6 +396,62 @@ class TestReferenceThresholdWithoutProtocol(unittest.TestCase):
                 self.assertIn(f"✕ {t('não cumpre o limiar de referência', lang)}</span>", text)
 
 
+class TestWhatComesBeforeTheFirstResult(unittest.TestCase):
+    """The first result comes first. Background notices follow the model cards, with a pointer
+    left at the top; notices that qualify the counts themselves stay above the summary."""
+
+    def page(self, **kwargs) -> str:
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [
+            an_answer("Amoxicilina 500 mg", "C1", model="local:llama3.1:8b"),
+            an_answer("Amoxicilina 500 mg", "C2", model="local:llama3.1:8b"),
+        ]
+        return build(cases, answers, **kwargs)
+
+    def test_the_sources_notice_follows_the_model_cards(self):
+        text = self.page()
+        notice = text.index('id="aviso-fontes"')
+        self.assertGreater(notice, text.index('class="cartoes"'))
+        self.assertLess(notice, text.index('id="erros"'))
+        self.assertGreater(notice, text.index('<section id="resumo">'))
+
+    def test_a_pointer_at_the_top_links_to_it(self):
+        text = self.page()
+        intro = text[text.index('class="intro"'):text.index('<section id="resumo">')]
+        self.assertIn('<li><a href="#aviso-fontes">fontes por confirmar</a></li>', intro)
+
+    def test_with_the_sources_confirmed_there_is_neither_pointer_nor_notice(self):
+        text = self.page(sources_verified=True)
+        self.assertNotIn("aviso-fontes", text)
+        self.assertNotIn("fontes por confirmar", text)
+        self.assertNotIn("Nem todas as fontes", text)
+
+    def test_the_context_note_follows_the_model_cards(self):
+        text = self.page()
+        note = text.index('class="contexto"')
+        self.assertGreater(note, text.index('class="cartoes"'))
+        self.assertLess(note, text.index('id="aviso-fontes"'))
+
+    def test_notices_that_qualify_the_counts_stay_above_the_summary(self):
+        answers = [an_answer("Amoxicilina 500 mg", "C1", model="local:llama3.1:8b")]  # C2 never answered
+        text = build([a_case("C1"), a_case("C2")], answers)
+        self.assertLess(text.index("Casos sem resposta."), text.index('<section id="resumo">'))
+
+    def test_without_verdicts_the_sources_notice_still_appears(self):
+        text = build([a_case()], [])
+        self.assertIn("Não há veredictos para relatar.", text)
+        self.assertIn('id="aviso-fontes"', text)
+
+    def test_the_pointer_follows_the_language_of_the_page(self):
+        from aferidor.traducao import LANGS, t
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                self.assertIn(
+                    f'<li><a href="#aviso-fontes">{t("fontes por confirmar", lang)}</a></li>', self.page(lingua=lang)
+                )
+
+
 class TestHeadline(unittest.TestCase):
     def test_the_critical_case_count_is_shown_per_model(self):
         text = build([a_case()], [an_answer("500 mg")])

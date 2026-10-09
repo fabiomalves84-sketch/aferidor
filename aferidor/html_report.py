@@ -73,6 +73,8 @@ _LANG: contextvars.ContextVar[str] = contextvars.ContextVar("lingua", default="p
 REPO_URL = "https://github.com/fabiomalves84-sketch/aferidor"
 PREVIEW_IMAGE_URL = "https://fabiomalves84-sketch.github.io/aferidor/imagens/resumo.png"
 PREVIEW_IMAGE_SIZE = (1327, 896)
+# Where the "sources not yet confirmed" notice can be linked to from the top of the page.
+SOURCES_NOTICE_ID = "aviso-fontes"
 
 
 def _t(text: str, **values: object) -> str:
@@ -449,10 +451,11 @@ def _interval(successes: int, total: int) -> str:
     return _gloss(_esc(text), ("IC 95%",))
 
 
-def _aviso(title: str, body: str) -> str:
-    """A notice box; `body` must already be escaped."""
+def _aviso(title: str, body: str, anchor: str = "") -> str:
+    """A notice box; `body` must already be escaped. `anchor` gives it an id to link to."""
+    ident = f' id="{anchor}"' if anchor else ""
     return (
-        '<div class="aviso" role="note"><span class="aviso-icone" aria-hidden="true">!</span>'
+        f'<div class="aviso"{ident} role="note"><span class="aviso-icone" aria-hidden="true">!</span>'
         f"<div><strong>{title}</strong> {body}</div></div>"
     )
 
@@ -488,7 +491,10 @@ def _repo_link() -> str:
 # ---------------------------------------------------------------- opening
 
 
-def _intro(cases: list[Case], models: list[str], answers: list[Answer], how_counted: str) -> str:
+def _intro(
+    cases: list[Case], models: list[str], answers: list[Answer], how_counted: str,
+    sources_pending: bool = False,
+) -> str:
     samples = max(expected_samples(answers).values(), default=0)
     facts = [
         _plural(len(cases), "caso clínico", "casos clínicos"),
@@ -497,6 +503,9 @@ def _intro(cases: list[Case], models: list[str], answers: list[Answer], how_coun
     if samples:
         facts.append(_plural(samples, "amostra por caso", "amostras por caso"))
     fact_items = "".join(f"<li>{_esc(f)}</li>" for f in facts)
+    if sources_pending:
+        # The full notice follows the model cards; this keeps it in sight at the top.
+        fact_items += f'<li><a href="#{SOURCES_NOTICE_ID}">{_t("fontes por confirmar")}</a></li>'
     reading = _t(
         "<li><strong>O valor em destaque</strong> indica os casos com pelo menos uma "
         "{falha}. Na prática clínica é observada uma única resposta; uma falha crítica é "
@@ -531,35 +540,40 @@ def _notices(
     missing: list[str] | None,
     reasons: dict[str, str] | None,
     sources_verified: bool,
-) -> list[str]:
-    out: list[str] = []
+) -> tuple[list[str], list[str]]:
+    """The notices, by where they go. `early` qualifies the counts themselves (cases or samples
+    that never came back) and stays above the summary; `late` is background (the language of the
+    cases, sources not yet confirmed) and follows the model cards, so the first result comes first."""
+    early: list[str] = []
+    late: list[str] = []
     if _LANG.get() != "pt":
-        out.append(_aviso(
+        late.append(_aviso(
             _t("Língua dos casos."),
             _t("As perguntas, as respostas de referência e as respostas dos modelos são "
                "apresentadas no original, em português europeu: são o objeto da avaliação."),
         ))
     if not sources_verified:
-        out.append(_aviso(
+        late.append(_aviso(
             _t("Aviso."),
             _t("Nem todas as fontes destes casos foram confirmadas por uma pessoa. Até essa "
                "confirmação, os resultados medem o modelo contra valores transcritos "
                "automaticamente. Ver {ficheiro}.", ficheiro="<code>casos/VERIFICACAO.md</code>"),
+            anchor=SOURCES_NOTICE_ID,
         ))
     if missing:
-        out.append(_aviso(
+        early.append(_aviso(
             _t("Casos sem resposta."),
             _esc(format_missing(missing, reasons))
             + " " + _t("Não entram em nenhuma contagem deste relatório."),
         ))
     gaps = missing_samples(cases, answers)
     if gaps:
-        out.append(_aviso(
+        early.append(_aviso(
             _t("Amostras em falta."),
             _esc(format_missing_samples(gaps, expected_samples(answers), _LANG.get()))
             + " " + _t("Não muda nenhuma contagem abaixo; só nomeia o que já era invisível nelas."),
         ))
-    return out
+    return early, late
 
 
 # ---------------------------------------------------------------- summary
@@ -1248,11 +1262,16 @@ def _build(
 
     rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
     samples_n = max(expected_samples(answers).values(), default=0)
-    out.append(_intro(cases, models, answers, _how_counted(samples_n, rule) if models else ""))
-    out.extend(_notices(cases, answers, missing, reasons, sources_verified))
+    early, late = _notices(cases, answers, missing, reasons, sources_verified)
+    out.append(_intro(
+        cases, models, answers, _how_counted(samples_n, rule) if models else "",
+        sources_pending=not sources_verified,
+    ))
+    out.extend(early)
 
     if not models:
         out.append(f'<section id="resumo"><p>{_t("Não há veredictos para relatar.")}</p></section>')
+        out.extend(late)
     else:
         summaries = consistency_by_model(consistency)
         states = states_by_model(consistency)
@@ -1274,7 +1293,6 @@ def _build(
         out.append(f'<section id="resumo"><h2>{_t("Resumo")}</h2>')
         if protocol is None:
             out.append(_reference_verdict(summaries))
-        out.append(_context_note(models))
         out.append(_comparison(summaries, consistency))
         out.append('<div class="cartoes">')
         for model in models:
@@ -1285,6 +1303,8 @@ def _build(
                 )
             )
         out.append("</div>")
+        out.append(_context_note(models))
+        out.extend(late)
         out.append("</section>")
         out.append(protocol_html)
         out.append(_worst(cases, consistency, pairs))

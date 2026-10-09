@@ -46,6 +46,8 @@ _ROWS: tuple[tuple[str, str, str, str, str], ...] = (
      "Mejor resultado: {a} de {b} casos con {falha}.",
      "Meilleur résultat : {a} cas sur {b} avec une {falha}.",
      "Bestes Ergebnis: {a} von {b} Fällen, in denen ein {falha} auftritt."),
+    ("fontes por confirmar", "sources to be confirmed", "fuentes por confirmar", "sources à confirmer",
+     "Quellen noch zu bestätigen"),
     ("cumpre o limiar de referência", "meets the reference threshold", "cumple el umbral de referencia",
      "respecte le seuil de référence", "erfüllt die Referenzschwelle"),
     ("não cumpre o limiar de referência", "does not meet the reference threshold", "no cumple el umbral de referencia",

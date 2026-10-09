@@ -156,8 +156,9 @@ temperatura, limite de tokens e versão do Aferidor. Quando um ficheiro mistura
 condições, todos os valores são apresentados.
 
 Casos sem resposta são identificados e excluídos das contagens. Enquanto as
-fontes não estiverem confirmadas por uma pessoa, o relatório apresenta um
-aviso no topo.
+fontes não estiverem confirmadas por uma pessoa, o relatório sinaliza-o no topo,
+com uma etiqueta "fontes por confirmar" que liga ao aviso completo, que vem logo
+a seguir aos cartões dos modelos.
 
 ## Limites conhecidos
 

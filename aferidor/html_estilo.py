@@ -151,7 +151,7 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .lingua-linha { font-size: 0.86rem; color: var(--ink-2); margin: 0; }
 .protocolo .cartao { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
 .protocolo ul { padding-left: 1.2rem; margin-bottom: 0; }
-.contexto { background: var(--surface-2); border-radius: 10px; padding: 0.75rem 1rem; max-width: 48rem; font-size: 0.92rem; color: var(--ink-2); }
+.contexto { background: var(--surface-2); border-radius: 10px; padding: 0.75rem 1rem; max-width: 48rem; font-size: 0.92rem; color: var(--ink-2); margin-top: 1rem; }
 .contexto strong { color: var(--ink); }
 .comparacao { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
 .comp-frase { font-size: 1.05rem; }
