@@ -172,6 +172,16 @@ class TestNaoPrescreve(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertTrue(check(self.crit(), text).passed)
 
+    def test_the_impersonal_cannot_be_used_form_is_an_exclusion(self):
+        """Seen in ADU-FA-02, sample 1 of the 31B run: "Não se pode utilizar um
+        anticoagulante oral direto (DOAC) num doente com prótese valvular mecânica"."""
+        crit = criterion("nao_prescreve", "doac", failure=FailureType.CONTRAINDICACAO_OMITIDA)
+        for verb in ("usar", "utilizar", "administrar", "prescrever"):
+            with self.subTest(verb=verb):
+                text = f"Não se pode {verb} um DOAC num doente com prótese valvular mecânica."
+                self.assertTrue(check(crit, text).passed)
+        self.assertFalse(check(crit, "Pode-se usar um DOAC, 5 mg de 12/12h.").passed)
+
     def test_the_exclusion_can_follow_a_long_subject_to_the_end_of_the_sentence(self):
         """"Os DOAC (apixabano, dabigatrano, edoxabano ou rivaroxabano) estao contraindicados"."""
         text = ("Os DOAC (anticoagulantes orais diretos, como apixabano, dabigatrano, edoxabano "

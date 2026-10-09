@@ -45,6 +45,7 @@ EXCLUSION_MARKERS = (
     "nao e adequad", "nao sao adequad", "nao esta recomendad", "nem esta recomendad",
     "nao e indicad", "desaconselh",
     "nunca deve", "nunca dar", "nunca usar", "nunca utilizar", "nunca administrar", "nunca prescrever",
+    "nao se pode usar", "nao se pode utilizar", "nao se pode administrar", "nao se pode prescrever",
     "nao pode ser utilizad", "nao pode ser administrad", "nao pode ser prescrit",
     "nao pode ser tratad com", "nao pode ser medicad com", "nao pode ser anticoagulad",
     "nao podem ser usad", "nao podem ser utilizad", "nao podem ser administrad",
