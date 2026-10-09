@@ -285,6 +285,17 @@ class TestNaoPrescreve(unittest.TestCase):
         """Once a known limit of the README: "Evitar alcool" used to excuse the drug."""
         self.assertFalse(check(self.crit(), "Amoxicilina 1000 mg 8/8h. Evitar álcool.").passed)
 
+    def test_markdown_bold_after_the_full_stop_still_ends_the_sentence(self):
+        """Seen in ADU-HTA-02, sample 4 of the 26B run: "(ARA II, como o losartan).**"
+        did not end the sentence, so a "evitado" about the NSAIDs two lines down
+        was read as being about losartan."""
+        crit = criterion(
+            "nao_prescreve", "losartan", failure=FailureType.CONTRAINDICACAO_OMITIDA
+        )
+        text = ("**Antagonistas dos recetores da angiotensina II (como o losartan).** "
+                "* **AINEs:** deve ser evitado na gravidez.")
+        self.assertFalse(check(crit, text).passed)
+
     def test_a_semicolon_or_a_numbered_list_does_not_end_the_sentence(self):
         crit = criterion(
             "nao_prescreve", "cefuroxima", failure=FailureType.CONTRAINDICACAO_OMITIDA
