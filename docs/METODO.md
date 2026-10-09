@@ -214,24 +214,28 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   falha": 26 `<details>` com 397 respostas completas. Cada língua é um ficheiro
   completo, 5 × cerca de 1,6 MB, com o mesmo texto português dos casos.
 - *Grelha de resultados.* Em 390 px a tabela tem 1025 px de largura dentro de um
-  contentor de 356 px (`html_estilo.py:201-205`) e a primeira coluna não fica
-  fixa: ao rolar para ver outro modelo, as células perdem o rótulo do caso.
+  contentor de 356 px (regras `table.grade` em `html_estilo.py`) e a primeira
+  coluna não fica fixa: ao rolar para ver outro modelo, as células perdem o
+  rótulo do caso.
 - *Eixo da comparação em telemóvel.* Em 390 px os cinco rótulos (0% a 100%)
-  sobrepõem-se e leem-se como "0%25%50%75%100%" (`html_estilo.py:168-170`); as
-  linhas dos intervalos ficam com cerca de 80 px.
+  sobrepõem-se e leem-se como "0%25%50%75%100%" (regras `.comp-ticks` em
+  `html_estilo.py`); as linhas dos intervalos ficam com cerca de 80 px.
 - *Barra de navegação fixa.* Mede 107 px a 390 px e 76 px a 768 px, e o
-  `scroll-margin-top` das secções é 56 px (`html_estilo.py:56`, `:258`): nas
-  âncoras, o título fica em parte sob a barra. Deduzido da medição, não visto
-  com scroll real.
+  `scroll-margin-top` das secções é 56 px (regras `section` e `details.recolhe`
+  em `html_estilo.py`): nas âncoras, o título fica em parte sob a barra.
+  Deduzido da medição, não visto com scroll real.
 - *Blocos de resposta.* 382 dos 397 `<blockquote>` têm `max-height` e
-  `overflow:auto` (`html_estilo.py:179`, `:234-235`): scroll dentro do scroll, e
-  não são focáveis, por isso não se rolam com o teclado.
+  `overflow:auto` (regras `blockquote` e `.erro-par blockquote` em
+  `html_estilo.py`): scroll dentro do scroll, e não são focáveis, por isso não
+  se rolam com o teclado.
 - *Cartões de falhas por tipo.* Em 360 px estendem-se até 389 px
-  (`minmax(22rem, 1fr)`, `html_estilo.py:189`); em 390 px cabem.
+  (`minmax(22rem, 1fr)` na regra `.falhas-grelha` de `html_estilo.py`); em
+  390 px cabem.
 - *Informação só em `title`.* 311 elementos (segmentos das barras, pontos de
   amostra, pergunta cortada) que não aparecem em toque.
 - *Testes de contraste.* Cobrem 6 cores de texto sobre 3 fundos, nos dois temas
-  (`tests/test_html_report.py:515-522`). Não cobrem o contraste dos elementos
+  (`test_every_text_colour_reads_on_the_page_and_on_cards_in_both_themes`, em
+  `tests/test_html_report.py`). Não cobrem o contraste dos elementos
   gráficos contra o cartão (WCAG 1.4.11, 3:1): no tema claro `warning` 1,83,
   `serious` 2,64, `neutral` 2,41 e `good` 3,35; no escuro `critical` 3,55 e
   `neutral` 3,16. São as cores dos segmentos das barras e das legendas, que
@@ -244,10 +248,11 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   `aria-label` do `<abbr>` dos códigos de caso (`_case_code()`).
 - *Movimento e impressão.* `scroll-behavior: smooth` sem
   `prefers-reduced-motion` (`html_estilo.py:43`). Ao imprimir, os 31 `<details>`
-  ficam fechados e o detalhe dos casos não sai (`:288-292` só evita quebras de
-  página).
+  ficam fechados e o detalhe dos casos não sai (a regra `@media print` só evita
+  quebras de página).
 - *Regra CSS inerte.* `.intro { grid-template-columns: 1fr }`
-  (`html_estilo.py:276`) não se aplica, porque `.intro` não é uma grelha.
+  (dentro de `@media (max-width: 46rem)` em `html_estilo.py`) não se aplica,
+  porque `.intro` não é uma grelha.
 
 Não testado: leitor de ecrã, telemóvel real, outras versões de navegador. As
 larguras de 390 e 360 px foram emuladas com uma janela dentro de um `<iframe>`.
