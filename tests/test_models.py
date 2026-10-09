@@ -40,6 +40,21 @@ class TestCriterion(unittest.TestCase):
             Criterion("contem", (), FailureType.ALUCINACAO)
 
 
+    def test_a_malformed_numeric_criterion_is_refused_when_it_is_built(self):
+        """It used to load fine and fail on the first answer graded, as a bare
+        ValueError, and as an IndexError in the negative controls."""
+        for terms in (("500",), ("500", "mg", "5", "extra"), ("muito", "mg"), ("500", "mg", "pouco")):
+            with self.subTest(terms=terms):
+                with self.assertRaises(ValueError) as raised:
+                    Criterion("valor_numerico", terms, FailureType.DOSE_INCORRETA)
+                self.assertIn("valor_numerico", str(raised.exception))
+
+    def test_a_well_formed_numeric_criterion_is_accepted(self):
+        for terms in (("500", "mg"), ("2,5", "mg", "0,5"), ("80", "mg/kg", "10")):
+            with self.subTest(terms=terms):
+                Criterion("valor_numerico", terms, FailureType.DOSE_INCORRETA)
+
+
 class TestCase(unittest.TestCase):
     def test_a_case_without_criteria_is_refused(self):
         with self.assertRaises(ValueError) as caught:

@@ -49,6 +49,29 @@ class Criterion:
             raise ValueError(f"tipo de critério desconhecido {self.kind!r}; esperava um de {self.KINDS}")
         if not self.terms:
             raise ValueError(f"criterion {self.kind!r} needs at least one term")
+        if self.kind == "valor_numerico":
+            self._check_numeric_terms()
+
+    def _check_numeric_terms(self) -> None:
+        """A `valor_numerico` is (value, unit) or (value, unit, tolerance).
+
+        Refused when the case is loaded, with the terms in the message, and not
+        deep inside the grader on the first answer, where a malformed one
+        was a bare ValueError (and an IndexError in the negative controls).
+        """
+        terms = self.terms
+        if not 2 <= len(terms) <= 3:
+            raise ValueError(
+                f"valor_numerico precisa de valor, unidade e, se quiser, tolerância; recebeu {terms!r}"
+            )
+        for position, label in ((0, "valor"), (2, "tolerância")):
+            if position < len(terms):
+                try:
+                    float(terms[position].replace(",", "."))
+                except ValueError:
+                    raise ValueError(
+                        f"valor_numerico: o {label} {terms[position]!r} não é um número (termos {terms!r})"
+                    ) from None
 
 
 @dataclass(frozen=True)
