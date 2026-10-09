@@ -378,11 +378,7 @@ def _is_excluded_at(haystack: str, position: int, length: int, restating: bool =
     which is what a plain `nao_contem` does, and which marks a correct answer
     wrong for adding a warning.
     """
-    sentence_start = 0
-    for boundary in _SENTENCE_END.finditer(haystack, 0, position):
-        sentence_start = boundary.end()
-    following = _SENTENCE_END.search(haystack, position + length)
-    sentence_end = following.start() + 1 if following else len(haystack)
+    sentence_start, sentence_end = _sentence_bounds(haystack, position, length)
     start = max(sentence_start, position - EXCLUSION_WINDOW)
     end = min(sentence_end, position + length + EXCLUSION_AFTER)
     # Markdown emphasis is layout, not content: "deve ser **evitado**" excludes.

@@ -378,7 +378,7 @@ def consistency_by_model(
             model=model,
             cases=len(entries),
             critical_cases=sum(
-                1 for e in entries if e.worst_failure and e.worst_failure.risk == Risk.CRITICO
+                1 for e in entries if _critical(e)
             ),
             unstable_cases=sum(1 for e in entries if e.state is ConsistencyState.INSTAVEL),
             sample_accuracy=(total_passed / total_samples) if total_samples else 0.0,
@@ -400,7 +400,7 @@ DEFAULT_CASE_RULE = "todas"
 
 def case_is_right(entry: "Consistency", rule: str = DEFAULT_CASE_RULE) -> bool:
     """One case, one model, one yes or no, by the named rule."""
-    critical = entry.worst_failure is not None and entry.worst_failure.risk == Risk.CRITICO
+    critical = _critical(entry)
     if rule == "todas":
         return entry.passed == entry.samples
     if rule == "maioria_sem_critica":
@@ -452,7 +452,7 @@ def critical_by_category(
         category = by_id[case_id].category
         row = table.setdefault(model, {c: (0, 0) for c in categories})
         critical, answered = row[category]
-        is_critical = entry.worst_failure is not None and entry.worst_failure.risk == Risk.CRITICO
+        is_critical = _critical(entry)
         row[category] = (critical + int(is_critical), answered + 1)
     return categories, dict(sorted(table.items()))
 
@@ -549,7 +549,7 @@ def worst_examples(
                 continue
             if entry.state is not ConsistencyState.ESTAVEL_ERRADO:
                 continue
-            if entry.worst_failure is None or entry.worst_failure.risk != Risk.CRITICO:
+            if not _critical(entry):
                 continue
             for answer, verdict in pairs.get((case_id, model), []):
                 if verdict.worst_risk == Risk.CRITICO:
