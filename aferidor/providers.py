@@ -14,6 +14,7 @@ import http.client
 import json
 import os
 import re
+import ssl
 import time
 import urllib.error
 import urllib.request
@@ -152,12 +153,18 @@ def _request_json(
             retryable=error.code == 429 or error.code >= 500,
         ) from None
     except urllib.error.URLError as error:
+        if isinstance(error.reason, ssl.SSLCertVerificationError):
+            raise ProviderError(f"{url}: certificado recusado: {error.reason}", retryable=False) from None
         raise ProviderError(f"{url} inacessível: {error.reason}", retryable=True) from None
-    except (ConnectionResetError, http.client.RemoteDisconnected, http.client.IncompleteRead) as error:
-        raise ProviderError(f"{url} desligou a meio da leitura: {error}", retryable=True) from None
+    except ssl.SSLCertVerificationError as error:
+        raise ProviderError(f"{url}: certificado recusado: {error}", retryable=False) from None
     except TimeoutError:
         raise ProviderError(f"{url} excedeu {timeout}s", retryable=True) from None
-    except json.JSONDecodeError:
+    except (OSError, http.client.HTTPException) as error:
+        # Reset, abort, broken pipe, SSL error, hang-up or short read mid-reply:
+        # whatever the socket raises, the call did not finish and may be repeated.
+        raise ProviderError(f"{url} desligou a meio da leitura: {error}", retryable=True) from None
+    except (json.JSONDecodeError, UnicodeDecodeError):
         raise ProviderError(f"{url} devolveu uma resposta que não é JSON", retryable=True) from None
 
 

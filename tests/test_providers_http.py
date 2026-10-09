@@ -12,6 +12,7 @@ going to clear.
 from __future__ import annotations
 
 import http.client
+import ssl
 import io
 import json
 import unittest
@@ -83,6 +84,27 @@ class TestErrorClassification(unittest.TestCase):
 
     def test_a_connection_reset_mid_read_is_retryable(self):
         self.assertTrue(self.ask_with(failing(ConnectionResetError("ligacao fechada"))).retryable)
+
+    def test_any_other_socket_failure_mid_read_is_retryable(self):
+        """These used to escape as OSError and abort the whole run, with every
+        later case unasked."""
+        for error in (
+            ssl.SSLError("EOF occurred in violation of protocol"),
+            ConnectionAbortedError("abortada"),
+            BrokenPipeError("pipe partido"),
+            http.client.BadStatusLine("lixo"),
+        ):
+            with self.subTest(error=type(error).__name__):
+                self.assertTrue(self.ask_with(failing(error)).retryable)
+
+    def test_a_reply_that_is_not_valid_utf8_is_retryable(self):
+        self.assertTrue(self.ask_with(replying(b"\xff\xfe")).retryable)
+
+    def test_a_certificate_the_client_refuses_is_not_retryable(self):
+        """Repeating it three times cannot change the answer."""
+        refused = ssl.SSLCertVerificationError("certificate verify failed")
+        self.assertFalse(self.ask_with(failing(refused)).retryable)
+        self.assertFalse(self.ask_with(failing(urllib.error.URLError(refused))).retryable)
 
     def test_the_server_hanging_up_mid_read_is_retryable(self):
         self.assertTrue(
