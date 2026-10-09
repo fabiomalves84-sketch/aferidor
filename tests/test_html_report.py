@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from datetime import date
 
-from aferidor import html_report, report
+from aferidor import html_estilo, html_report, report
 from aferidor.grading import consistency_by_case, consistency_by_model, grade_all
 from aferidor.models import Case, Criterion, Source
 from aferidor.risk import FailureType
@@ -508,13 +508,13 @@ class TestTheme(unittest.TestCase):
 
     def test_both_themes_define_the_same_tokens(self):
         self.assertEqual(
-            set(re.findall(r"--([a-z0-9-]+):", html_report._LIGHT_TOKENS)),
-            set(re.findall(r"--([a-z0-9-]+):", html_report._DARK_TOKENS)),
+            set(re.findall(r"--([a-z0-9-]+):", html_estilo.LIGHT_TOKENS)),
+            set(re.findall(r"--([a-z0-9-]+):", html_estilo.DARK_TOKENS)),
         )
 
     def test_every_text_colour_reads_on_the_page_and_on_cards_in_both_themes(self):
         """4.5:1 is the WCAG AA floor for body text; computed, not judged by eye."""
-        for name, block in (("claro", html_report._LIGHT_TOKENS), ("escuro", html_report._DARK_TOKENS)):
+        for name, block in (("claro", html_estilo.LIGHT_TOKENS), ("escuro", html_estilo.DARK_TOKENS)):
             colours = tokens(block)
             for text in ("ink", "ink-2", "muted", "accent", "success-text", "critical-text"):
                 for ground in ("page", "surface", "surface-2"):
