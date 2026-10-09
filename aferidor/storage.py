@@ -8,6 +8,7 @@ can trust.
 from __future__ import annotations
 
 import json
+import os
 from datetime import date, datetime
 from pathlib import Path
 
@@ -246,10 +247,21 @@ def answer_from_dict(data: dict, where: str) -> Answer:
 
 
 def write_answers(answers: list[Answer], path: Path) -> int:
-    """One JSON object per line, so a long run can be appended to and resumed."""
-    with Path(path).open("w", encoding="utf-8") as handle:
-        for answer in answers:
-            handle.write(json.dumps(answer_to_dict(answer), ensure_ascii=False) + "\n")
+    """One JSON object per line, so a long run can be appended to and resumed.
+
+    Written beside the target and moved over it, so an error halfway (or a
+    crash) leaves the file as it was: this rewrites answers that were paid for.
+    """
+    target = Path(path)
+    partial = target.with_name(target.name + ".tmp")
+    try:
+        with partial.open("w", encoding="utf-8") as handle:
+            for answer in answers:
+                handle.write(json.dumps(answer_to_dict(answer), ensure_ascii=False) + "\n")
+        os.replace(partial, target)
+    except BaseException:
+        partial.unlink(missing_ok=True)
+        raise
     return len(answers)
 
 

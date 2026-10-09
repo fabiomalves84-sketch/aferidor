@@ -99,6 +99,20 @@ class TestAnswerRoundTrip(unittest.TestCase):
             recovered = read_answers(path)
         self.assertEqual(recovered, answers)
 
+    def test_a_failed_rewrite_leaves_the_file_as_it_was(self):
+        """--recomecar rewrites answers that were paid for: an error halfway must
+        not leave a truncated file behind."""
+        good = [Answer("C-001", "m", "a", datetime(2026, 9, 14, 10, 0))]
+        bad = good + [Answer("C-002", "m", object(), datetime(2026, 9, 14, 10, 1))]
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            write_answers(good, path)
+            before = path.read_bytes()
+            with self.assertRaises(TypeError):
+                write_answers(bad, path)
+            self.assertEqual(path.read_bytes(), before)
+            self.assertEqual(sorted(p.name for p in Path(folder).iterdir()), ["respostas.jsonl"])
+
     def test_one_answer_per_line(self):
         answers = [Answer("C-001", "m", "a\nb", datetime(2026, 9, 14, 10, 0))]
         with tempfile.TemporaryDirectory() as folder:
