@@ -140,6 +140,17 @@ class TestRun(unittest.TestCase):
         result = run([a_case("A")], provider, config=RunConfig(attempts=1))
         self.assertEqual(result.answers, [])
         self.assertEqual(list(result.errors), ["A"])
+        self.assertIn("sem texto", result.errors["A"])
+        self.assertNotIn("truncada", result.errors["A"])
+
+    def test_a_reply_cut_by_the_providers_filter_is_not_graded_as_an_answer(self):
+        """A content filter stopping the reply says nothing about the model; the
+        partial text it left must not be graded as if it were the whole answer."""
+        provider = FakeProvider(default="Amoxicilina 1000 mg e depois", finish_reason="filtered")
+        result = run([a_case("A")], provider, config=RunConfig(attempts=3, sleep=lambda _: None))
+        self.assertEqual(result.answers, [])
+        self.assertIn("filtro", result.errors["A"])
+        self.assertEqual(len(provider.prompts), 1)
 
     def test_a_cut_off_reply_is_not_retried(self):
         """Retrying would just hit the same `max_tokens` again.

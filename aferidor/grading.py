@@ -233,7 +233,10 @@ def tally(verdicts: list[Verdict]) -> Tally:
             counts.passed += 1
             continue
         failures = verdict.failures
-        counts.failed_cases[verdict.case_id] = tuple(f.value for f in failures)
+        seen = counts.failed_cases.get(verdict.case_id, ())
+        counts.failed_cases[verdict.case_id] = seen + tuple(
+            f.value for f in failures if f.value not in seen
+        )
         for failure in failures:
             counts.by_failure[failure] += 1
         if verdict.worst_risk:

@@ -243,6 +243,17 @@ class TestTally(unittest.TestCase):
         verdicts = [grade(a_case("C2"), an_answer("Amoxicilina 500 mg", case_id="C2"))]
         self.assertEqual(tally(verdicts).failed_cases["C2"], ("dose_incorreta",))
 
+    def test_a_case_failing_in_two_samples_names_both_failures(self):
+        """With several samples the case used to keep only the last failing
+        sample's failures, hiding that it failed in two different ways."""
+        verdicts = [
+            grade(a_case("C2"), an_answer("Dar 1000 mg", case_id="C2", sample=1)),
+            grade(a_case("C2"), an_answer("Amoxicilina 500 mg", case_id="C2", sample=2)),
+            grade(a_case("C2"), an_answer("Amoxicilina 500 mg", case_id="C2", sample=3)),
+        ]
+        named = tally(verdicts).failed_cases["C2"]
+        self.assertEqual(sorted(named), ["dose_incorreta", "resposta_incompleta"])
+
     def test_an_empty_tally_does_not_divide_by_zero(self):
         self.assertEqual(tally([]).accuracy, 0.0)
 

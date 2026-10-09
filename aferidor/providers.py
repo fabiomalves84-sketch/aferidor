@@ -39,7 +39,7 @@ class Reply:
 
 
 def normalize_finish_reason(raw: str | None) -> str:
-    """Fold every vendor's own vocabulary into "stop", "length" or "unknown".
+    """Fold every vendor's own vocabulary into "stop", "length", "filtered" or "unknown".
 
     OpenAI's chat completions and Ollama's compatible layer say "stop" or
     "length"; Anthropic says "end_turn"/"stop_sequence" or "max_tokens". A
@@ -50,6 +50,8 @@ def normalize_finish_reason(raw: str | None) -> str:
         return "stop"
     if raw in ("length", "max_tokens"):
         return "length"
+    if raw in ("content_filter", "refusal"):
+        return "filtered"
     return "unknown"
 
 

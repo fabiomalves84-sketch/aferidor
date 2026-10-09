@@ -166,8 +166,12 @@ def _check_reply(reply: Reply) -> None:
     different budget mid-run would leave two different measurements in the
     same file.
     """
-    if reply.finish_reason == "length" or not reply.text.strip():
+    if reply.finish_reason == "filtered":
+        raise ProviderError("resposta cortada pelo filtro do fornecedor", retryable=False)
+    if reply.finish_reason == "length":
         raise ProviderError("resposta truncada no limite de tokens", retryable=False)
+    if not reply.text.strip():
+        raise ProviderError("resposta sem texto", retryable=False)
 
 
 def _ask_with_retry(

@@ -54,6 +54,10 @@ class TestFinishReason(unittest.TestCase):
         self.assertEqual(normalize_finish_reason("stop_sequence"), "stop")
         self.assertEqual(normalize_finish_reason("max_tokens"), "length")
 
+    def test_a_content_filter_is_named_and_not_taken_for_unknown(self):
+        self.assertEqual(normalize_finish_reason("content_filter"), "filtered")
+        self.assertEqual(normalize_finish_reason("refusal"), "filtered")
+
     def test_anything_else_is_unknown_rather_than_guessed_at(self):
         self.assertEqual(normalize_finish_reason("tool_calls"), "unknown")
         self.assertEqual(normalize_finish_reason(None), "unknown")
