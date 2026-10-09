@@ -30,11 +30,22 @@ OG_LOCALE = {"pt": "pt_PT", "en": "en_US", "es": "es_ES", "fr": "fr_FR", "de": "
 
 MISSING: set[tuple[str, str]] = set()
 
+# Grammatical forms of a term, for the languages whose word changes with the case. Keyed by the
+# Portuguese term and the form. A language not listed here shows the plain CATALOG entry, so only
+# German is written out (the other four languages read as "falha crítica" in every form).
+FORMS: dict[tuple[str, str], dict[str, str]] = {
+    ("falha crítica", "com artigo"): {"de": "kritischen Fehler"},  # mit einem / einen ...
+    ("falha crítica", "sem artigo"): {"de": "kritischem Fehler"},  # mit ... in einer ...
+}
 
-def t(text: str, lang: str = "pt", **values: object) -> str:
-    """`text` in `lang`, with its placeholders filled."""
+
+def t(text: str, lang: str = "pt", form: str = "", **values: object) -> str:
+    """`text` in `lang`, with its placeholders filled. `form` picks a grammatical form of a
+    term (see FORMS); a language without that form shows the plain translation."""
     if lang != "pt":
-        translated = CATALOG.get(text, {}).get(lang)
+        translated = FORMS.get((text, form), {}).get(lang) if form else None
+        if translated is None:
+            translated = CATALOG.get(text, {}).get(lang)
         if translated is None:
             MISSING.add((lang, text))
         else:
@@ -47,4 +58,4 @@ def decimal(value: str, lang: str) -> str:
     return value.replace(",", ".") if lang == "en" else value.replace(".", ",")
 
 
-__all__ = ["LANGS", "NAMES", "HTML_LANG", "OG_LOCALE", "MISSING", "t", "decimal", "CATALOG"]
+__all__ = ["LANGS", "NAMES", "HTML_LANG", "OG_LOCALE", "MISSING", "FORMS", "t", "decimal", "CATALOG"]

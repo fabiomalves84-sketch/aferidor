@@ -513,7 +513,7 @@ def _intro(
         "cada modelo: casos {sempre}, {parcial} e {nunca}.</li><li><strong>A secção Casos "
         "com falha</strong> apresenta, para cada caso, a pergunta, a referência, a resposta "
         "do modelo e o critério não cumprido, para que cada veredicto possa ser verificado.</li>",
-        falha=_term("falha crítica"),
+        falha=_term("falha crítica", _t("falha crítica", form="com artigo")),
         sempre=_term("sempre correto", _t("sempre corretos")),
         parcial=_term("parcialmente correto", _t("parcialmente corretos")),
         nunca=_term("nunca correto", _t("nunca corretos")),
@@ -652,7 +652,7 @@ def _how_counted(samples: int, rule: str) -> str:
   <p>{_t("Cada caso foi colocado {vezes} a cada modelo; cada resposta é uma {amostra}. Na grelha, cada ponto representa uma amostra, pela ordem de execução: {certa} correta, {errada} incorreta, {falta} sem resposta.", vezes=_esc(times), amostra=_term("amostra"), certa='<span class="pt certa">●</span>', errada='<span class="pt errada">✕</span>', falta='<span class="pt falta">○</span>')}</p>
   <ul>{items}</ul>
   <p>{_t("{casos}: veredicto binário por caso. Regra deste relatório: um caso é correto quando {regra}.", casos="<strong>" + _term("casos corretos", _t("Casos corretos")) + "</strong>", regra=_esc(_t(CASE_RULES[rule])))}</p>
-  <p>{_t("<strong>Um caso nunca correto não tem necessariamente uma {falha}</strong>, e um caso parcialmente correto pode ter uma. Por esse motivo, as falhas críticas são contadas à parte.", falha=_term("falha crítica"))}</p>
+  <p>{_t("<strong>Um caso nunca correto não tem necessariamente uma {falha}</strong>, e um caso parcialmente correto pode ter uma. Por esse motivo, as falhas críticas são contadas à parte.", falha=_term("falha crítica", _t("falha crítica", form="com artigo")))}</p>
 </div>"""
 
 
@@ -702,7 +702,7 @@ def _model_card(
         )
     legend = _t(
         "de {total} casos com {falha} em alguma amostra ({ic})",
-        total=summary.cases, falha=_term("falha crítica"),
+        total=summary.cases, falha=_term("falha crítica", _t("falha crítica", form="sem artigo")),
         ic=_interval(summary.critical_cases, summary.cases),
     )
     line = _t(

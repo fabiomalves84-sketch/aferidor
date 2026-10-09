@@ -78,6 +78,48 @@ class TestCatalogue(unittest.TestCase):
         traducao.MISSING.clear()
 
 
+class TestGrammaticalForms(unittest.TestCase):
+    """German changes the adjective with the case, so one translation of "falha crítica" cannot
+    serve "mit mindestens einem ...", "einen ..." and "mit ... in einer ..." at once."""
+
+    def page(self, lang: str) -> str:
+        return page_of([a_case()], [an_answer("500 mg")], lingua=lang)
+
+    def test_german_declines_the_term_where_the_sentence_needs_it(self):
+        text = self.page("de")
+        # "... zeigt die Fälle mit mindestens einem kritischen Fehler"
+        self.assertRegex(text, r"mit mindestens einem <abbr[^>]*>kritischen Fehler</abbr>")
+        # "... hat nicht unbedingt einen kritischen Fehler"
+        self.assertRegex(text, r"nicht unbedingt einen <abbr[^>]*>kritischen Fehler</abbr>")
+        # "von 1 Fällen mit kritischem Fehler in mindestens einer Stichprobe"
+        self.assertRegex(text, r"Fällen mit <abbr[^>]*>kritischem Fehler</abbr> in mindestens einer Stichprobe")
+
+    def test_the_nominative_is_kept_where_the_sentence_has_the_term_alone(self):
+        self.assertRegex(self.page("de"), r"in dem ein <abbr[^>]*>kritischer Fehler</abbr> auftritt")
+
+    def test_the_other_languages_read_the_same_in_every_form(self):
+        for lang in ("pt", "en", "es", "fr"):
+            for form in ("", "com artigo", "sem artigo"):
+                with self.subTest(lingua=lang, form=form):
+                    self.assertEqual(t("falha crítica", lang, form=form), t("falha crítica", lang))
+
+    def test_a_form_falls_back_to_the_plain_entry_without_counting_as_missing(self):
+        traducao.MISSING.clear()
+        self.assertEqual(t("falha crítica", "en", form="com artigo"), "critical failure")
+        self.assertEqual(traducao.MISSING, set())
+
+    def test_every_form_belongs_to_a_catalogue_term_and_a_known_language(self):
+        for (term, form), versions in traducao.FORMS.items():
+            with self.subTest(term=term, form=form):
+                self.assertIn(term, CATALOG)
+                self.assertTrue(form)
+                self.assertTrue(set(versions) <= set(LANGS[1:]))
+                self.assertTrue(all(v.strip() for v in versions.values()))
+
+    def test_the_glossary_key_stays_portuguese_whatever_the_form(self):
+        self.assertIn('data-termo="falha crítica"', self.page("de"))
+
+
 class TestReportInEveryLanguage(unittest.TestCase):
     """A real trial, with a protocol, built in each language, uses no string the catalogue lacks."""
 
