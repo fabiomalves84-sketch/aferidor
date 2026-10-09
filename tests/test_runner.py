@@ -198,6 +198,49 @@ class TestResume(unittest.TestCase):
             self.assertEqual(len(provider.prompts), 1)
             self.assertEqual(len(read_answers(path)), 2)
 
+    def test_a_last_line_cut_by_a_crash_is_dropped_and_asked_again(self):
+        """A crash while appending leaves half a line. Reading it used to fail on
+        resume, which is the one moment the file exists to serve."""
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            cases = [a_case("A"), a_case("B")]
+            run(cases, FakeProvider(default="x"), path=path)
+            whole = path.read_bytes()
+            path.write_bytes(whole[: len(whole) - 40])  # cuts inside B's line
+
+            provider = FakeProvider(default="y")
+            result = run(cases, provider, path=path)
+
+            self.assertEqual(result.skipped, ["A"])
+            self.assertEqual(len(provider.prompts), 1)
+            self.assertEqual(len(result.notes), 1)
+            self.assertIn("cortada a meio", result.notes[0])
+            self.assertEqual([an.case_id for an in read_answers(path)], ["A", "B"])
+            self.assertFalse(Path(str(path) + ".tmp").exists())
+
+    def test_a_whole_last_line_without_a_newline_does_not_swallow_the_next_answer(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            cases = [a_case("A"), a_case("B")]
+            run(cases[:1], FakeProvider(default="x"), path=path)
+            path.write_bytes(path.read_bytes().rstrip(b"\n"))
+
+            result = run(cases, FakeProvider(default="y"), path=path)
+
+            self.assertEqual(len(result.notes), 1)
+            self.assertEqual([an.case_id for an in read_answers(path)], ["A", "B"])
+
+    def test_a_bad_line_in_the_middle_is_damage_and_is_not_repaired(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "respostas.jsonl"
+            cases = [a_case("A"), a_case("B")]
+            run(cases, FakeProvider(default="x"), path=path)
+            first, second = path.read_bytes().splitlines(keepends=True)
+            path.write_bytes(first[:30] + b"\n" + second)
+
+            with self.assertRaises(ValueError):
+                run(cases, FakeProvider(default="y"), path=path)
+
     def test_answers_from_another_model_do_not_count_as_done(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "respostas.jsonl"

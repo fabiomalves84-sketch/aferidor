@@ -277,6 +277,50 @@ def append_answer(answer: Answer, path: Path) -> None:
         handle.write(json.dumps(answer_to_dict(answer), ensure_ascii=False) + "\n")
 
 
+def discard_truncated_tail(path: Path) -> str | None:
+    """Make a file that a crash cut in the middle of its last line safe to append to.
+
+    `append_answer` writes a line at a time, so a crash can leave the last one
+    cut. Reading it fails, and appending after it would glue the next answer
+    to the fragment. The fragment is removed (it was never a whole answer) and
+    a final line that is whole but has no newline gets one. Returns what was
+    done, in words, or None when the file needed nothing. A bad line anywhere
+    else is not repaired: that is damage, and `read_answers` will say so.
+    """
+    target = Path(path)
+    raw = target.read_bytes()
+    if not raw or raw.endswith(b"\n") and _last_line_is_whole(raw):
+        return None
+    start = raw.rstrip(b"\n").rfind(b"\n") + 1
+    if _last_line_is_whole(raw):
+        _replace_bytes(target, raw + b"\n")
+        return f"{target}: a última linha não acabava em mudança de linha, acrescentada"
+    _replace_bytes(target, raw[:start])
+    return (f"{target}: descartada a última linha, cortada a meio ({len(raw) - start} bytes); "
+            "essa resposta será pedida outra vez")
+
+
+def _last_line_is_whole(raw: bytes) -> bool:
+    last = raw.rstrip(b"\n").rsplit(b"\n", 1)[-1]
+    if not last.strip():
+        return True
+    try:
+        json.loads(last.decode("utf-8"))
+    except ValueError:
+        return False
+    return True
+
+
+def _replace_bytes(target: Path, content: bytes) -> None:
+    partial = target.with_name(target.name + ".tmp")
+    try:
+        partial.write_bytes(content)
+        os.replace(partial, target)
+    except BaseException:
+        partial.unlink(missing_ok=True)
+        raise
+
+
 def read_answers(path: Path) -> list[Answer]:
     answers: list[Answer] = []
     with Path(path).open(encoding="utf-8") as handle:
@@ -320,6 +364,7 @@ __all__ = [
     "read_answers",
     "write_answers",
     "append_answer",
+    "discard_truncated_tail",
     "write_verdicts",
     "case_from_dict",
     "case_to_dict",

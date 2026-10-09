@@ -24,7 +24,7 @@ from typing import Callable
 from . import build_id
 from .models import Answer, Case
 from .providers import Provider, ProviderError, Reply
-from .storage import append_answer, read_answers
+from .storage import append_answer, discard_truncated_tail, read_answers
 
 # The instruction is written in correct European Portuguese, accents
 # included. Until 27/09/2026 it went out without a single accent ("Responde
@@ -78,6 +78,7 @@ class RunResult:
     answers: list[Answer] = field(default_factory=list)
     skipped: list[str] = field(default_factory=list)
     errors: dict[str, str] = field(default_factory=dict)
+    notes: list[str] = field(default_factory=list)
 
     @property
     def complete(self) -> bool:
@@ -212,8 +213,12 @@ def run(
     config = config or RunConfig()
     temperature = getattr(provider, "temperature", 0.0)
     max_tokens = getattr(provider, "max_tokens", None)
-    _check_same_conditions(path, provider, cases, temperature, max_tokens)
     result = RunResult(run_id=run_id or uuid.uuid4().hex[:12], model=provider.name)
+    if path is not None and Path(path).exists():
+        repaired = discard_truncated_tail(Path(path))
+        if repaired:
+            result.notes.append(repaired)
+    _check_same_conditions(path, provider, cases, temperature, max_tokens)
     done = _answered_already(path, provider.name)
     build = build_id()
 

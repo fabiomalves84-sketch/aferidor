@@ -260,6 +260,8 @@ def comando_executar(
         )
         return 2
 
+    for note in result.notes:
+        print(f"aviso: {note}", file=sys.stderr)
     print(result.summary())
     print(f"respostas em {args.saida}")
     for case_id, message in result.errors.items():
