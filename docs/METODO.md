@@ -186,6 +186,25 @@ contrário da bupropiona, [a vareniclina] não está contraindicada". É prefer�
 anterior, que tratava qualquer menção como prescrição e reprovava respostas
 corretas que incluíam um aviso. Não constitui compreensão de texto.
 
+**Duas falhas falsas conhecidas, deixadas como estão por decisão.** Ambas dão
+errado, no corretor atual, um modelo que acertou em substância: a direção que
+mais custa.
+
+- *ADU-HTA-02, amostra 4 do Gemma 4 26B A4B (consulta).* A resposta lista os ARA
+  II sob um título de contraindicações absolutas na gravidez, mas o título fica
+  fora da janela de 70 carateres que antecede o nome do fármaco, e o corretor
+  não o liga ao losartan. A regra de título de lista (um marcador num título
+  que vale para os itens abaixo) não foi implementada.
+- *INT-COL-016, amostra 3 do Gemma 4 26B A4B (banco principal).* A resposta
+  escreve "se for inevitável (ex.: claritromicina…)" antes de dizer "evitar a
+  combinação". O `nao_prescreve` falha qualquer menção que não esteja excluída
+  nessa frase, e a primeira o não está. O desenho não foi alterado.
+
+Ambas já falhavam antes da afinação; passaram por coincidência com um
+marcador demasiado largo e voltaram à falha quando as correções de fronteira de
+frase e de início de palavra o desfizeram. Estão descritas nas mensagens dos
+commits `f202e37` e `886f637`.
+
 **Fontes.** As fontes estão marcadas como confirmadas desde 27/09/2026 com
 dois níveis de evidência, identificados em `casos/VERIFICACAO.md`: dez casos
 de infeção confirmados nos PDF das normas da DGS, um a um; 24 declarados
@@ -214,14 +233,28 @@ não mudaram entre o ensaio e essa data.
 | `2026-09-16-comparacao-local/` | A mesma comparação em condições válidas: dois modelos locais, 27 casos, 5 amostras. Reclassificada a 27/09 com o corretor corrigido, sem repetir perguntas nem alterar os originais. |
 | `2026-09-27-locais-12-14b/` | Primeiro ensaio com o instrumento completo: protocolo commitado antes da primeira pergunta, condições registadas em cada resposta, casos de infeção com fontes da DGS. Gemma 3 12B e Phi-4 14B, 27 casos, 5 amostras; 270 de 270 respostas; ambos reprovados pelo protocolo. |
 | `2026-09-28-gemini-flash/` | Primeiro ensaio com um modelo comercial: Gemini 3.5 Flash Lite pela API gratuita, com protocolo commitado antes da primeira resposta. 27 casos, 5 amostras; 135 de 135 respostas; 11 de 27 casos com falha crítica; reprovado pelo protocolo. |
-| `2026-09-29-gemini-consulta/` | Primeiro ensaio do banco de consulta: Gemini 3.5 Flash Lite, 30 casos, 5 amostras, protocolo prévio. 150 de 150 respostas; 6 de 30 casos com falha crítica; reprovado pelo protocolo. As respostas levaram a afinar o `nao_prescreve` (commit `3fc49ba`), antes de registar os resultados. |
-| `2026-09-29-gemma4-31b-casos/` | Gemma 4 31B (modelo aberto, pela API gratuita) no banco principal, protocolo prévio. 135 de 135 respostas; 10 de 27 casos com falha crítica; reprovado. |
+| `2026-09-29-gemini-consulta/` | Primeiro ensaio do banco de consulta: Gemini 3.5 Flash Lite, 30 casos, 5 amostras, protocolo prévio. 150 de 150 respostas; 4 de 30 casos com falha crítica¹ (6 à data do ensaio); reprovado pelo protocolo. As respostas levaram a afinar o `nao_prescreve` (commit `3fc49ba`), antes de registar os resultados. |
+| `2026-09-29-gemma4-31b-casos/` | Gemma 4 31B (modelo aberto, pela API gratuita) no banco principal, protocolo prévio. 135 de 135 respostas; 8 de 27 casos com falha crítica¹ (10 à data do ensaio); reprovado. |
 | `2026-09-29-gemma4-31b-consulta/` | Gemma 4 31B no banco de consulta, protocolo prévio. 150 de 150 respostas; 4 de 30 casos com falha crítica; reprovado. Levou a afinar o `nao_prescreve` (commit `0cbfda6`). |
 | `2026-10-01-gemma4-26b-casos/` e `2026-10-01-gemma4-26b-consulta/` | Primeiro ensaio com o corretor congelado no protocolo (`versao_corretor`): Gemma 4 26B A4B nos dois bancos, 290 de 290 respostas; 12 de 27 e 5 de 31 casos com falha crítica; reprovado. Publicado sem afinação; os falsos positivos do corretor estão descritos no README de cada pasta e não alteram os números. |
 
 Depois de 27/09, vários casos mudaram de fonte e de formulação. Os resultados
 registados em cada ensaio correspondem ao instrumento da altura e não são
 comparáveis com ensaios posteriores.
+
+### Que números levam o corretor atual
+
+Nas tabelas do `README.md` e nesta, um só critério decide: o ensaio tinha, ou
+não, um compromisso escrito de congelar o corretor no protocolo
+(`versao_corretor`). Os ensaios sem esse compromisso (Gemma 4 31B, Gemini 3.5
+Flash Lite, Gemma 3 12B, Phi-4 14B) mostram os números com o corretor atual,
+marcados com ¹, e quando diferem da data do ensaio a data vem entre parênteses.
+O ensaio com compromisso (Gemma 4 26B A4B, 01/10) mostra o número tal como foi
+publicado, com os seus intervalos, e isso não é uma inconsistência: reclassificá-lo
+tiraria o sentido ao congelamento. A diferença fica sempre dita na nota, e `ensaios/` guarda os relatórios com os números da data.
+
+¹ Corretor atual: o das afinações `83d951b`, `f202e37`, `3fa7e65` e `886f637`;
+a razão de cada uma está na mensagem do respetivo commit.
 
 ## Roteiro
 

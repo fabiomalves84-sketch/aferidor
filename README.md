@@ -14,21 +14,38 @@ espanhol, francês e alemão).
 ## Resultados
 
 5 amostras por caso, temperatura 1,0, protocolo commitado antes de cada
-ensaio. Todas as respostas corrigidas com os bancos e o corretor atuais.
+ensaio. Os números dependem da versão do corretor, e o critério para saber
+qual vale em cada linha é um só: o ensaio tinha, ou não, um compromisso escrito
+de congelar o corretor (`versao_corretor` no protocolo). Sem esse compromisso
+(¹), as respostas estão corrigidas com o corretor atual. Com ele (²), o número
+é o que foi publicado. A diferença de tratamento é deliberada.
 
 | Modelo | Banco principal (27 casos): casos com falha crítica (IC 95%) | Banco de consulta (30 casos à data dos ensaios): casos com falha crítica (IC 95%) | Protocolo |
 |---|---|---|---|
-| Gemma 4 31B (Google, aberto, API) | 9 (19% a 52%) | 4 (5% a 30%) | reprovado |
-| Gemma 4 26B A4B (Google, aberto, API), corretor congelado | 12 (28% a 63%) | 5 de 31 (7% a 33%) | reprovado |
-| Gemini 3.5 Flash Lite (Google, comercial, API) | 11 (25% a 59%) | 6 (10% a 37%) | reprovado |
-| Gemma 3 12B (Google, aberto, local) | 16 (41% a 75%) | — | reprovado |
-| Phi-4 14B (Microsoft, aberto, local) | 22 (63% a 92%) | — | reprovado |
+| Gemma 4 31B (Google, aberto, API)¹ | 8 (16% a 48%) | 4 (5% a 30%) | reprovado |
+| Gemma 4 26B A4B (Google, aberto, API), corretor congelado² | 12 (28% a 63%) | 5 de 31 (7% a 33%) | reprovado |
+| Gemini 3.5 Flash Lite (Google, comercial, API)¹ | 11 (25% a 59%) | 4 (5% a 30%) | reprovado |
+| Gemma 3 12B (Google, aberto, local)¹ | 16 (41% a 75%) | — | reprovado |
+| Phi-4 14B (Microsoft, aberto, local)¹ | 22 (63% a 92%) | — | reprovado |
 
-Os protocolos exigem zero casos com falha crítica. Entre os dois melhores, o
-teste de McNemar exato sobre os casos discordantes não mostra diferença (p =
-0,625 no banco principal, 0,500 no de consulta); entre o Gemma 4 31B e o
-Gemma 3 12B, 2 contra 9 casos, p = 0,065. Os veredictos são a triagem do
-corretor, ainda sem validação por um especialista. Detalhe em `ensaios/`.
+¹ Corretor atual: o das afinações dos commits `83d951b`, `f202e37`, `3fa7e65`
+e `886f637`, cada uma com a razão escrita na mensagem do commit. Antes delas, o
+Gemma 4 31B tinha 9 casos com falha crítica no banco principal e o Gemini 6 no
+de consulta. Os outros números desta coluna não mudam com o corretor atual.
+
+² Corretor congelado no protocolo antes do ensaio, com o compromisso de
+publicar o resultado tal como saiu, sem afinação posterior. O número e os
+intervalos ficam como foram publicados, e não por esquecimento: é o ponto do
+protocolo. Com o corretor atual o resultado seria diferente.
+
+Os protocolos exigem zero casos com falha crítica. Entre os dois melhores
+(Gemma 4 31B e Gemini 3.5 Flash Lite), o teste de McNemar exato sobre os casos
+discordantes não mostra diferença (p = 0,375 no banco principal, 1,000 no de
+consulta). Entre o Gemma 4 31B e o Gemma 3 12B, 1 contra 9 casos, p = 0,021, sem
+correção para comparações múltiplas; com o corretor anterior era p = 0,065. Os
+veredictos são a triagem do corretor, ainda sem validação por um especialista.
+Detalhe em `ensaios/`, cujos relatórios e READMEs guardam os números da data
+de cada ensaio; `aferidor relatorio` regenera-os com o corretor atual.
 
 O ensaio do Gemma 4 26B A4B (01 a 03/10) foi o primeiro com o corretor
 congelado no protocolo: o resultado é publicado tal como saiu. Lidas uma a
