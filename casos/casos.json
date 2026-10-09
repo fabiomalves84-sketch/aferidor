@@ -985,7 +985,7 @@
           "não deve",
           "nao deve",
           "contraindicad",
-          "evitar"
+          "evit"
         ],
         "falha": "interacao_omitida"
       },
@@ -1620,11 +1620,11 @@
       {
         "tipo": "contem",
         "termos": [
-          "suspender",
+          "suspend",
+          "suspens",
           "interromper",
           "parar",
           "descontinuar",
-          "suspensão",
           "interrupção"
         ],
         "falha": "contraindicacao_omitida",

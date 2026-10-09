@@ -182,6 +182,31 @@ class TestNaoPrescreve(unittest.TestCase):
                 self.assertTrue(check(crit, text).passed)
         self.assertFalse(check(crit, "Pode-se usar um DOAC, 5 mg de 12/12h.").passed)
 
+    def test_any_inflection_of_evitar_is_an_exclusion(self):
+        """Seen in the 26B run: "evitando" (PED-OMA-021, PED-09), "evitada" (INT-COL-016)
+        and "evitados" were all the same advice as "deve ser evitada"."""
+        for text in (
+            "Azitromicina 500 mg. Evitando amoxicilina nesta situacao.",
+            "A amoxicilina e as penicilinas devem ser evitados.",
+            "Amoxicilina: a evitar neste doente.",
+            "Evitem a amoxicilina; dar azitromicina.",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(check(self.crit(), text).passed)
+
+    def test_lack_of_evidence_for_a_drug_counts_as_ruling_it_out(self):
+        """Seen in TAB-08, samples 1 to 3 of the 26B run: the answer declines the
+        drug for lack of data in adolescents, without the word "contraindicado".
+        Like every marker, this one does not look for a dose in the same mention."""
+        for text in (
+            "Nao existem evidencias robustas para o uso de amoxicilina neste doente. Dar azitromicina.",
+            "Amoxicilina: nao ha dados robustos de seguranca nesta idade. Dar azitromicina.",
+            "A amoxicilina nao e rotineiramente recomendada. Dar azitromicina.",
+            "As penicilinas nao sao rotineiramente recomendadas aqui, amoxicilina incluida.",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(check(self.crit(), text).passed)
+
     def test_the_exclusion_can_follow_a_long_subject_to_the_end_of_the_sentence(self):
         """"Os DOAC (apixabano, dabigatrano, edoxabano ou rivaroxabano) estao contraindicados"."""
         text = ("Os DOAC (anticoagulantes orais diretos, como apixabano, dabigatrano, edoxabano "

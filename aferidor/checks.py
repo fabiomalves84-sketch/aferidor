@@ -50,7 +50,9 @@ EXCLUSION_MARKERS = (
     "nao pode ser tratad com", "nao pode ser medicad com", "nao pode ser anticoagulad",
     "nao podem ser usad", "nao podem ser utilizad", "nao podem ser administrad",
     "nao podem ser prescrit", "nao podem ser tratad", "nao podem ser anticoagulad",
-    "esta excluid", "deve ser evitad", "evitar",
+    "esta excluid", "deve ser evitad", "evit",
+    "nao ha dados robustos", "nao existem evidencias robustas",
+    "nao e rotineiramente recomendad", "nao sao rotineiramente recomendad",
 )
 # Phrases that deny an exclusion ("nao esta contraindicada", "sem
 # contraindicacao"). They contain an exclusion marker but say the opposite, so
