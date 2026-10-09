@@ -1259,6 +1259,9 @@ def _build(
         + "".join(f'<li><a href="#{anchor}">{_esc(_t(label))}</a></li>' for anchor, label in sections)
         + "</ul></nav>"
     )
+    # The content sits in one <main> landmark, between the navigation and the footer, so a screen
+    # reader can jump straight to it. The header, the navigation and the footer stay outside.
+    out.append("<main>")
 
     rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
     samples_n = max(expected_samples(answers).values(), default=0)
@@ -1382,7 +1385,7 @@ def _build(
             "O método completo, os limites conhecidos e a confirmação das fontes estão no "
             "repositório do Aferidor, em {metodo} e {verificacao}.",
             metodo="<code>docs/METODO.md</code>", verificacao="<code>casos/VERIFICACAO.md</code>",
-        ) + "</p></div></details>"
+        ) + "</p></div></details></main>"
         f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p><p class="repo">{_repo_link()}</p></footer>'
     )
     out.append("</body></html>")

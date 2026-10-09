@@ -237,7 +237,7 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   `neutral` 3,16. São as cores dos segmentos das barras e das legendas, que
   levam também ícone e texto. O texto sobre fundos translúcidos (mínimo medido
   5,33) e sobre os círculos (4,80 a 10,73) passa, mas sem teste.
-- *Estrutura.* Sem `<main>` nem ligação para saltar para o conteúdo, e 173
+- *Estrutura.* Sem ligação para saltar para o conteúdo, e 173
   elementos com `tabindex=0` (os termos do glossário) antes de qualquer secção.
   As tabelas têm `scope` mas não `<caption>` (`html_report.py:848`, `:878`). Não
   foi verificado se os leitores de ecrã anunciam o `aria-label` do `<abbr>` dos

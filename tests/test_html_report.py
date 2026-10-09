@@ -91,6 +91,50 @@ class TestDocument(unittest.TestCase):
     def test_it_carries_the_date(self):
         self.assertIn("2026-09-14", build([a_case()], [an_answer("1 g")]))
 
+    def test_the_content_sits_in_one_main_landmark_between_the_navigation_and_the_footer(self):
+        text = build([a_case()], [an_answer("1 g")])
+        self.assertEqual(text.count("<main>"), 1)
+        self.assertEqual(text.count("</main>"), 1)
+        self.assertLess(text.index("</nav>"), text.index("<main>"))
+        self.assertLess(text.index("</main>"), text.index("<footer"))
+
+    def test_the_header_the_navigation_and_the_footer_stay_outside_main_and_the_sections_inside(self):
+        from html.parser import HTMLParser
+
+        outside: set[str] = set()
+        inside: set[str] = set()
+
+        class Landmarks(HTMLParser):
+            depth = 0
+
+            def handle_starttag(self, tag, attrs):
+                if tag == "main":
+                    self.depth += 1
+                    return
+                a = dict(attrs)
+                where = inside if self.depth else outside
+                if (tag, a.get("class")) in (("header", "topo"), ("nav", "indice"), ("footer", "rodape")):
+                    where.add(f"{tag}.{a['class']}")
+                if tag == "section":
+                    where.add(f"section#{a.get('id') or a.get('class')}")
+
+            def handle_endtag(self, tag):
+                if tag == "main":
+                    self.depth -= 1
+
+        Landmarks().feed(build([a_case()], [an_answer("500 mg")]))
+        self.assertEqual(outside, {"header.topo", "nav.indice", "footer.rodape"})
+        self.assertIn("section#resumo", inside)
+        self.assertIn("section#intro", inside)
+
+    def test_there_is_a_main_in_every_language_and_in_a_page_without_verdicts(self):
+        from aferidor.traducao import LANGS
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                self.assertEqual(build([a_case()], [an_answer("1 g")], lingua=lang).count("<main>"), 1)
+        self.assertEqual(build([a_case()], []).count("<main>"), 1)
+
 
 class TestEscaping(unittest.TestCase):
     def test_a_scripted_answer_is_escaped_not_executed(self):
