@@ -994,14 +994,18 @@ def _detail(
             if entry is None:
                 continue
             css, icon = _STATE_STYLE[entry.state]
+            said = f"{_model_short(model)}: {_t(entry.state.label)}"
+            # The glyph is decoration; the model and its state are written out for
+            # screen readers, which otherwise hear which case failed but not for whom.
             minis.append(
-                f'<span class="mini {css}" title="{_esc(_model_short(model))}: {_esc(_t(entry.state.label))}">{icon}</span>'
+                f'<span class="mini {css}" title="{_esc(said)}">'
+                f'<span aria-hidden="true">{icon}</span><span class="vh">{_esc(said)}. </span></span>'
             )
         out.append("<details>")
         out.append(
             f'<summary id="caso-{_esc(case.case_id)}"><span class="caso-id">{_case_code(case.case_id)}</span>'
             f'<span class="resumo-pergunta" lang="pt-PT">{_esc(case.question)}</span>'
-            f'<span class="minis" aria-hidden="true">{"".join(minis)}</span></summary>'
+            f'<span class="minis">{"".join(minis)}</span></summary>'
         )
         out.append('<div class="detalhe-corpo">')
         out.append(

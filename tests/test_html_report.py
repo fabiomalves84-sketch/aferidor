@@ -127,6 +127,60 @@ class TestEveryFieldIsEscaped(unittest.TestCase):
         self.assert_inert(page)
 
 
+class TestCaseSummaryNamesTheModels(unittest.TestCase):
+    """A closed case is announced with who failed it and how, not only its code and question.
+
+    The coloured circles at the end of each case line used to be hidden from
+    assistive technology as a whole, so a screen reader heard which case it was
+    but never which models got it wrong."""
+
+    def page(self, **kwargs) -> str:
+        answers = [
+            an_answer("500 mg", model="falso"),
+            an_answer("1 g", model="local:llama3.1:8b"),
+        ]
+        return build([a_case()], answers, **kwargs)
+
+    def summary(self, text: str) -> str:
+        start = text.index('<summary id="caso-C1">')
+        return text[start:text.index("</summary>", start)]
+
+    def spoken(self, summary: str) -> str:
+        """The summary's text without what is marked aria-hidden, as a reader hears it."""
+        import html as _h
+
+        kept = re.sub(r'<span aria-hidden="true">.*?</span>', "", summary)
+        return " ".join(_h.unescape(re.sub(r"<[^>]+>", " ", kept)).split())
+
+    def test_the_circles_are_no_longer_hidden_as_a_group(self):
+        summary = self.summary(self.page())
+        self.assertIn('<span class="minis">', summary)
+        self.assertNotIn('class="minis" aria-hidden', summary)
+
+    def test_each_circle_says_the_model_and_its_state_and_hides_only_the_glyph(self):
+        summary = self.summary(self.page())
+        self.assertIn('<span aria-hidden="true">✕</span><span class="vh">Fornecedor de teste: nunca correto. </span>', summary)
+        self.assertIn('<span aria-hidden="true">✓</span><span class="vh">Llama 3.1: sempre correto. </span>', summary)
+
+    def test_what_a_screen_reader_hears_ends_with_every_model_in_circle_order(self):
+        spoken = self.spoken(self.summary(self.page()))
+        self.assertTrue(
+            spoken.endswith("Fornecedor de teste: nunca correto. Llama 3.1: sempre correto."), spoken
+        )
+
+    def test_the_mouse_tooltip_is_kept(self):
+        self.assertIn('title="Fornecedor de teste: nunca correto"', self.summary(self.page()))
+
+    def test_the_state_is_spoken_in_the_language_of_the_page(self):
+        import html as _h
+        from aferidor.traducao import LANGS, t
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                said = f"{t('Fornecedor de teste', lang)}: {t('nunca correto', lang)}. "
+                self.assertIn(f'<span class="vh">{_h.escape(said)}</span>', self.summary(self.page(lingua=lang)))
+
+
 class TestHeadline(unittest.TestCase):
     def test_the_critical_case_count_is_shown_per_model(self):
         text = build([a_case()], [an_answer("500 mg")])
