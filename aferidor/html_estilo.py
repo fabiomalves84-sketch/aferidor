@@ -181,6 +181,7 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .erro-chips { margin: 0.6rem 0 0.3rem; }
 .intro a, .erro-cartao a, .rodape a { color: var(--accent); }
 .repo { font-size: 0.92rem; margin: 0 0 0.75rem; }
+.veredicto { font-size: 1.05rem; max-width: 48rem; margin: 0 0 0.5rem; }
 table.areas { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
 table.areas th, table.areas td { border-bottom: 1px solid var(--grid); padding: 0.5rem 0.75rem; text-align: left; }
 table.areas thead th { font-size: 0.85rem; }

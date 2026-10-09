@@ -51,7 +51,7 @@ from .grading import (
 from .html_estilo import STYLE
 from .lingua import LanguageSummary, language_by_model, language_line
 from .models import Answer, Case, Verdict
-from .protocolo import Protocol
+from .protocolo import REFERENCE_CRITICAL_LIMIT, Protocol
 from .report import (
     HEADER_NOTE,
     conditions_rows,
@@ -642,6 +642,28 @@ def _how_counted(samples: int, rule: str) -> str:
 </div>"""
 
 
+def _reference_verdict(summaries: dict[str, ConsistencySummary]) -> str:
+    """What a report without a protocol can still say: whether any model reached the reference
+    threshold. It is not an approval, and the text says so."""
+    meeting = sum(1 for s in summaries.values() if s.critical_cases <= REFERENCE_CRITICAL_LIMIT)
+    line = _t("Modelos que cumprem o limiar de referência: {k} de {n}.", k=meeting, n=len(summaries))
+    best = ""
+    if meeting == 0:
+        rows = compare_critical(summaries).rows  # fewest critical cases first
+        if rows:
+            _, critical, cases_n, _, _ = rows[0]
+            best = " " + _t(
+                "Melhor resultado: {a} de {b} casos com {falha}.",
+                a=critical, b=cases_n, falha=_term("falha crítica"),
+            )
+    why = _t(
+        "Limiar de referência: nenhum caso com {falha}, o limiar usado nos protocolos do projeto. "
+        "Não é um protocolo escrito antes do ensaio.",
+        falha=_term("falha crítica"),
+    )
+    return f'<p class="veredicto"><strong>{line}</strong>{best}</p><p class="seccao-intro">{why}</p>'
+
+
 def _model_card(
     model: str,
     summary: ConsistencySummary,
@@ -649,6 +671,7 @@ def _model_card(
     states: dict[ConsistencyState, int],
     verdict: bool | None,
     right: tuple[int, int],
+    reference: bool | None = None,
 ) -> str:
     badge = ""
     if verdict is not None:
@@ -656,6 +679,12 @@ def _model_card(
             f'<span class="selo aprovado">✓ {_t("aprovado pelo protocolo")}</span>'
             if verdict
             else f'<span class="selo reprovado">✕ {_t("reprovado pelo protocolo")}</span>'
+        )
+    elif reference is not None:
+        badge = (
+            f'<span class="selo aprovado">✓ {_t("cumpre o limiar de referência")}</span>'
+            if reference
+            else f'<span class="selo reprovado">✕ {_t("não cumpre o limiar de referência")}</span>'
         )
     legend = _t(
         "de {total} casos com {falha} em alguma amostra ({ic})",
@@ -1237,7 +1266,14 @@ def _build(
                 protocol, answers, summaries, cases_source, [c.case_id for c in cases]
             )
 
+        reference = (
+            {m: summaries[m].critical_cases <= REFERENCE_CRITICAL_LIMIT for m in models}
+            if protocol is None else {}
+        )
+
         out.append(f'<section id="resumo"><h2>{_t("Resumo")}</h2>')
+        if protocol is None:
+            out.append(_reference_verdict(summaries))
         out.append(_context_note(models))
         out.append(_comparison(summaries, consistency))
         out.append('<div class="cartoes">')
@@ -1245,7 +1281,7 @@ def _build(
             out.append(
                 _model_card(
                     model, summaries[model], per_model[model], states[model],
-                    approved.get(model), right[model],
+                    approved.get(model), right[model], reference=reference.get(model),
                 )
             )
         out.append("</div>")

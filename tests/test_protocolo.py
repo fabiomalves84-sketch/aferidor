@@ -44,6 +44,17 @@ class TestReading(unittest.TestCase):
     def test_the_template_starts_from_the_strictest_limit(self):
         self.assertEqual(template("x", REAL_CASES)["criterios_de_aprovacao"]["casos_com_falha_critica_max"], 0)
 
+    def test_the_reference_limit_is_the_one_a_new_protocol_starts_from(self):
+        """A report without a protocol compares against this limit and says so; it must be
+        the same number the template writes, not a second copy of a zero."""
+        from aferidor.protocolo import REFERENCE_CRITICAL_LIMIT
+
+        self.assertEqual(REFERENCE_CRITICAL_LIMIT, 0)
+        self.assertEqual(
+            template("x", REAL_CASES)["criterios_de_aprovacao"]["casos_com_falha_critica_max"],
+            REFERENCE_CRITICAL_LIMIT,
+        )
+
     def test_a_protocol_that_leaves_a_limit_out_is_refused(self):
         with tempfile.TemporaryDirectory() as folder:
             path = write_protocol(folder)

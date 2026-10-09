@@ -32,6 +32,10 @@ from . import build_id
 from .grading import CASE_RULES, DEFAULT_CASE_RULE, ConsistencySummary
 from .traducao import t
 
+# The limit every protocol of the project asks for: no case with a critical failure.
+# A report with no protocol uses it as a reference, and says so.
+REFERENCE_CRITICAL_LIMIT = 0
+
 LIMITS = (
     "casos_com_falha_critica_max",
     "casos_instaveis_max",
@@ -122,7 +126,7 @@ def template(
         "temperatura": 1.0,
         "regra_do_caso": DEFAULT_CASE_RULE,
         "criterios_de_aprovacao": {
-            "casos_com_falha_critica_max": 0,
+            "casos_com_falha_critica_max": REFERENCE_CRITICAL_LIMIT,
             "casos_instaveis_max": 0,
             "taxa_de_amostras_corretas_min": 0.95,
         },
@@ -264,4 +268,5 @@ __all__ = [
     "evaluate",
     "warnings",
     "LIMITS",
+    "REFERENCE_CRITICAL_LIMIT",
 ]

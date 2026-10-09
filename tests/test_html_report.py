@@ -314,6 +314,88 @@ class TestPreviewAndRepositoryLink(unittest.TestCase):
                 self.assertIn(f'rel="noopener">{t(self.LINK_TEXT, lang)}</a>', self.page(lingua=lang))
 
 
+class TestReferenceThresholdWithoutProtocol(unittest.TestCase):
+    """Without a protocol there is no "approved", but the page still says whether any model
+    reached the reference threshold (no case with a critical failure), and that it is only a
+    reference and not a protocol written before the trial."""
+
+    BAD = "Amoxicilina 500 mg"  # not the dose asked for: a critical failure
+    GOOD = "Amoxicilina 1 g"
+
+    def page(self, answers_by_model, **kwargs) -> str:
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [
+            an_answer(text, case_id, model=model)
+            for model, texts in answers_by_model.items()
+            for case_id, text in zip(("C1", "C2"), texts)
+        ]
+        return build(cases, answers, **kwargs)
+
+    def test_when_no_model_meets_it_the_best_result_is_given(self):
+        text = self.page({"local:llama3.1:8b": (self.BAD, self.BAD), "local:qwen3:8b": (self.GOOD, self.BAD)})
+        self.assertIn(
+            "Modelos que cumprem o limiar de referência: 0 de 2. "
+            "Melhor resultado: 1 de 2 casos com falha crítica.",
+            visible(text),
+        )
+        self.assertEqual(text.count("✕ não cumpre o limiar de referência"), 2)
+        self.assertNotIn("✓ cumpre o limiar de referência", text)
+
+    def test_when_every_model_meets_it_there_is_no_best_result_to_give(self):
+        text = self.page({"local:llama3.1:8b": (self.GOOD, self.GOOD), "local:qwen3:8b": (self.GOOD, self.GOOD)})
+        self.assertIn("Modelos que cumprem o limiar de referência: 2 de 2.", visible(text))
+        self.assertNotIn("Melhor resultado", text)
+        self.assertEqual(text.count("✓ cumpre o limiar de referência"), 2)
+
+    def test_when_only_some_meet_it_each_card_says_its_own(self):
+        text = self.page({"local:llama3.1:8b": (self.GOOD, self.GOOD), "local:qwen3:8b": (self.BAD, self.BAD)})
+        self.assertIn("Modelos que cumprem o limiar de referência: 1 de 2.", visible(text))
+        self.assertNotIn("Melhor resultado", text)
+        self.assertEqual(text.count("✓ cumpre o limiar de referência"), 1)
+        self.assertEqual(text.count("✕ não cumpre o limiar de referência"), 1)
+
+    def test_a_single_model_is_counted_as_one(self):
+        text = self.page({"local:llama3.1:8b": (self.BAD, self.BAD)})
+        self.assertIn(
+            "Modelos que cumprem o limiar de referência: 0 de 1. Melhor resultado: 2 de 2 casos com falha crítica.",
+            visible(text),
+        )
+
+    def test_the_page_says_it_is_not_a_protocol(self):
+        text = self.page({"falso": (self.BAD, self.BAD)})
+        self.assertIn("Não é um protocolo escrito antes do ensaio.", visible(text))
+        self.assertLess(text.index('class="veredicto"'), text.index('class="cartoes"'))
+
+    def test_with_a_protocol_nothing_about_the_reference_appears(self):
+        import json
+        import tempfile
+        from pathlib import Path
+
+        from aferidor.protocolo import read_protocol, template
+
+        bank = Path(__file__).resolve().parent.parent / "casos" / "casos.json"
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "p.json"
+            path.write_text(json.dumps(template("x", bank)), encoding="utf-8")
+            protocol = read_protocol(path)
+        text = self.page({"falso": (self.BAD, self.BAD)}, protocol=protocol)
+        self.assertNotIn("limiar de referência", text)
+        self.assertNotIn('class="veredicto"', text)
+        self.assertIn("reprovado pelo protocolo", text)
+
+    def test_the_verdict_and_the_seals_follow_the_language_of_the_page(self):
+        from aferidor.traducao import LANGS, t
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                text = self.page({"falso": (self.BAD, self.BAD)}, lingua=lang)
+                self.assertIn(
+                    f"<strong>{t('Modelos que cumprem o limiar de referência: {k} de {n}.', lang, k=0, n=1)}</strong>",
+                    text,
+                )
+                self.assertIn(f"✕ {t('não cumpre o limiar de referência', lang)}</span>", text)
+
+
 class TestHeadline(unittest.TestCase):
     def test_the_critical_case_count_is_shown_per_model(self):
         text = build([a_case()], [an_answer("500 mg")])
