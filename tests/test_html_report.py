@@ -5,12 +5,13 @@ from __future__ import annotations
 import re
 import unittest
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date
 
 from aferidor import html_report, report
 from aferidor.grading import consistency_by_case, consistency_by_model, grade_all
-from aferidor.models import Answer, Case, Criterion, Source
+from aferidor.models import Case, Criterion, Source
 from aferidor.risk import FailureType
+from tests.helpers import an_answer
 
 
 def a_case(case_id: str = "C1", category: str = "dose") -> Case:
@@ -23,12 +24,6 @@ def a_case(case_id: str = "C1", category: str = "dose") -> Case:
         criteria=(
             Criterion(kind="contem", terms=("1000 mg", "1 g"), failure=FailureType.DOSE_INCORRETA),
         ),
-    )
-
-
-def an_answer(text: str, case_id: str = "C1", model: str = "falso", sample: int = 1) -> Answer:
-    return Answer(
-        case_id=case_id, model=model, text=text, asked_at=datetime(2026, 9, 14), sample=sample
     )
 
 

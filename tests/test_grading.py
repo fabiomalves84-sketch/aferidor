@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import unittest
-from datetime import datetime
 
 from aferidor.grading import (
     Consistency,
@@ -25,8 +24,9 @@ from aferidor.grading import (
     tally_by_model,
     uncaught_controls,
 )
-from aferidor.models import Alternative, Answer, Case, Criterion, Source
+from aferidor.models import Alternative, Case, Criterion, Source
 from aferidor.risk import FailureType, Risk
+from tests.helpers import an_answer
 
 
 def a_case(case_id: str = "C1") -> Case:
@@ -40,12 +40,6 @@ def a_case(case_id: str = "C1") -> Case:
             Criterion(kind="contem", terms=("amoxicilina",), failure=FailureType.RESPOSTA_INCOMPLETA),
             Criterion(kind="contem", terms=("1000 mg", "1 g"), failure=FailureType.DOSE_INCORRETA),
         ),
-    )
-
-
-def an_answer(text: str, case_id: str = "C1", model: str = "falso", sample: int = 1) -> Answer:
-    return Answer(
-        case_id=case_id, model=model, text=text, asked_at=datetime(2026, 9, 14), sample=sample
     )
 
 

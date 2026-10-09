@@ -9,6 +9,7 @@ from aferidor import report
 from aferidor.grading import grade
 from aferidor.models import Answer, Case, Criterion, Source
 from aferidor.risk import FailureType
+from tests.helpers import an_answer
 
 
 def a_case(case_id: str = "C1") -> Case:
@@ -21,12 +22,6 @@ def a_case(case_id: str = "C1") -> Case:
         criteria=(
             Criterion(kind="contem", terms=("1000 mg", "1 g"), failure=FailureType.DOSE_INCORRETA),
         ),
-    )
-
-
-def an_answer(text: str, case_id: str = "C1", model: str = "falso", sample: int = 1) -> Answer:
-    return Answer(
-        case_id=case_id, model=model, text=text, asked_at=datetime(2026, 9, 14), sample=sample
     )
 
 
