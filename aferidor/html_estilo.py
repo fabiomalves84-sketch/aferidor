@@ -179,7 +179,8 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-deco
 .erro-par blockquote { max-height: 12rem; font-size: 0.84rem; }
 .erro-ref { background: var(--good-bg); border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.88rem; margin-bottom: 0.4rem; }
 .erro-chips { margin: 0.6rem 0 0.3rem; }
-.erro-cartao a, .rodape a { color: var(--accent); }
+.intro a, .erro-cartao a, .rodape a { color: var(--accent); }
+.repo { font-size: 0.92rem; margin: 0 0 0.75rem; }
 table.areas { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
 table.areas th, table.areas td { border-bottom: 1px solid var(--grid); padding: 0.5rem 0.75rem; text-align: left; }
 table.areas thead th { font-size: 0.85rem; }

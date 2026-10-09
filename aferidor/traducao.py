@@ -25,6 +25,8 @@ NAMES = {
     "de": "Deutsch",
 }
 HTML_LANG = {"pt": "pt-PT", "en": "en", "es": "es", "fr": "fr", "de": "de"}
+# What a link preview (og:locale) wants: language_TERRITORY.
+OG_LOCALE = {"pt": "pt_PT", "en": "en_US", "es": "es_ES", "fr": "fr_FR", "de": "de_DE"}
 
 MISSING: set[tuple[str, str]] = set()
 
@@ -45,4 +47,4 @@ def decimal(value: str, lang: str) -> str:
     return value.replace(",", ".") if lang == "en" else value.replace(".", ",")
 
 
-__all__ = ["LANGS", "NAMES", "HTML_LANG", "MISSING", "t", "decimal", "CATALOG"]
+__all__ = ["LANGS", "NAMES", "HTML_LANG", "OG_LOCALE", "MISSING", "t", "decimal", "CATALOG"]

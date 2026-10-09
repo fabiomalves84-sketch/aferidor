@@ -50,11 +50,40 @@ class TestDocument(unittest.TestCase):
         self.assertIn("</html>", text)
 
     def test_it_loads_nothing_from_the_network(self):
+        """Opening the report fetches nothing: no resource attribute, no stylesheet link, no
+        script, no import. The only addresses are a link the reader may follow and the preview
+        image that link previews read (see the next test)."""
         text = build([a_case()], [an_answer("1 g")])
         self.assertNotIn("http://", text)
-        self.assertNotIn("https://", text)
-        self.assertNotIn("<link ", text)
-        self.assertNotIn("<script", text)
+        for forbidden in ("<link ", "<script", "<img", "<iframe", "<object", "<embed", " src=", "@import", "url("):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, text)
+
+    def test_the_only_addresses_in_attributes_are_the_project_link_and_the_preview_image(self):
+        """What a model wrote is untrusted text: an address in an answer, even a whole <a> tag,
+        stays escaped text and never becomes a link, an image or a resource."""
+        from html.parser import HTMLParser
+
+        answer = '500 mg. Ver https://exemplo.pt/x e <a href="https://mau.pt">aqui</a>'
+        text = build([a_case()], [an_answer(answer)])
+        found = []
+
+        class Attributes(HTMLParser):
+            def handle_starttag(self, tag, attrs):
+                for name, value in attrs:
+                    if value and value.startswith(("http://", "https://")):
+                        found.append((tag, name, value))
+
+        Attributes().feed(text)
+        self.assertEqual(
+            sorted(found),
+            sorted([
+                ("a", "href", html_report.REPO_URL),
+                ("a", "href", html_report.REPO_URL),
+                ("meta", "content", html_report.PREVIEW_IMAGE_URL),
+            ]),
+        )
+        self.assertIn("https://exemplo.pt/x", text)  # the answer is still shown, as text
 
     def test_it_works_in_dark_mode(self):
         self.assertIn("prefers-color-scheme: dark", build([a_case()], [an_answer("1 g")]))
@@ -225,6 +254,64 @@ class TestFullCaseLinkOpensTheCase(unittest.TestCase):
             html_estilo.STYLE,
         )
         self.assertIn(".detalhe-corpo { scroll-margin-top: 10rem; }", html_estilo.STYLE)
+
+
+class TestPreviewAndRepositoryLink(unittest.TestCase):
+    """What a pasted link shows, and the way back to the project."""
+
+    LINK_TEXT = "Código, método e casos no GitHub"
+
+    def page(self, **kwargs) -> str:
+        return build([a_case()], [an_answer("1 g")], **kwargs)
+
+    def meta(self, text: str) -> dict[str, str]:
+        import html as _h
+
+        head = text[: text.index("</head>")]
+        found = re.findall(r'<meta (?:name|property)="([^"]+)" content="([^"]*)">', head)
+        return {name: _h.unescape(content) for name, content in found}
+
+    def test_the_head_carries_a_description_and_the_open_graph_tags(self):
+        meta = self.meta(self.page())
+        self.assertEqual(meta["og:type"], "website")
+        self.assertEqual(meta["og:title"], "Relatório do Aferidor")
+        self.assertEqual(meta["description"], meta["og:description"])
+        self.assertIn("Respostas clínicas de modelos de linguagem", meta["og:description"])
+        self.assertEqual(meta["og:locale"], "pt_PT")
+        self.assertEqual(meta["og:image"], html_report.PREVIEW_IMAGE_URL)
+        self.assertEqual((meta["og:image:width"], meta["og:image:height"]), ("1327", "896"))
+        self.assertIn("falha crítica", meta["og:image:alt"])
+
+    def test_there_is_no_og_url_because_a_local_report_does_not_know_its_address(self):
+        self.assertNotIn("og:url", self.page())
+
+    def test_the_tags_follow_the_language_of_the_page(self):
+        from aferidor.traducao import LANGS, OG_LOCALE, t
+
+        subtitle = "Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública."
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                meta = self.meta(self.page(lingua=lang))
+                self.assertEqual(meta["og:locale"], OG_LOCALE[lang])
+                self.assertEqual(meta["og:title"], t("Relatório do Aferidor", lang))
+                self.assertEqual(meta["og:description"], t(subtitle, lang))
+
+    def test_the_link_to_the_project_is_in_the_introduction_and_in_the_footer(self):
+        text = self.page()
+        link = f'<a href="{html_report.REPO_URL}" rel="noopener">{self.LINK_TEXT}</a>'
+        self.assertEqual(text.count(link), 2)
+        start = text.index('<section class="intro"')
+        intro = text[start:text.index("</section>", start)]
+        self.assertIn(link, intro)
+        self.assertLess(intro.index('class="lead"'), intro.index('class="repo"'))
+        self.assertIn(link, text[text.index('<footer class="rodape">'):])
+
+    def test_the_link_text_follows_the_language_of_the_page(self):
+        from aferidor.traducao import LANGS, t
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                self.assertIn(f'rel="noopener">{t(self.LINK_TEXT, lang)}</a>', self.page(lingua=lang))
 
 
 class TestHeadline(unittest.TestCase):

@@ -29,7 +29,7 @@ documento não descrever verificações que já não se fazem.
 | R14 | O critério de aprovação é prévio, e o relatório assinala o contrário. | `test_a_protocol_dated_after_the_first_answer_is_not_a_prior_criterion` |
 | R15 | Só é aprovado um modelo com todos os casos e amostras; o protocolo é lido antes do primeiro pedido. | `test_a_model_that_answered_part_of_the_bank_is_not_approved`; `test_a_missing_protocol_stops_before_asking_anything`; `test_a_protocol_with_limite_is_refused` |
 | R16 | Casos defeituosos impedem a execução antes de qualquer pedido. | `test_broken_cases_stop_the_run_before_anything_is_asked` |
-| R17 | O texto dos modelos é escapado; o relatório não tem script nem recursos externos. | `test_a_scripted_answer_is_escaped_not_executed`; `test_it_loads_nothing_from_the_network`; `test_still_no_script_in_any_language` |
+| R17 | O texto dos modelos é escapado; o relatório não tem script nem recursos externos. | `test_a_scripted_answer_is_escaped_not_executed`; `test_it_loads_nothing_from_the_network`; `test_the_only_addresses_in_attributes_are_the_project_link_and_the_preview_image`; `test_still_no_script_in_any_language` |
 | R18 | O relatório diz que os veredictos são triagem, a validar por um especialista. | `test_the_first_screen_says_the_verdicts_are_triage_for_a_specialist` |
 | R19 | A folha de revisão é cega e não executa fórmulas. | `test_the_sheet_is_blind_to_the_verdict_and_the_model`; `test_an_answer_that_looks_like_a_formula_is_written_as_text` |
 | R20 | Cada ensaio registado corresponde ao seu manifesto SHA-256. | `test_every_trial_folder_is_intact` |

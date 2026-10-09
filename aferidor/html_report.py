@@ -13,7 +13,9 @@ The page is written for someone who has never heard of the Aferidor: it
 opens by saying what the bench is and how to read the page, before any
 number. It is one self contained file with no script and nothing loaded
 from the network, so it opens the same way from an email attachment, a
-shared drive or a laptop without internet. Colour always travels with an
+shared drive or a laptop without internet. The only addresses in it are a
+link to the project and the preview image that link previews show
+(`REPO_URL`, `PREVIEW_IMAGE_URL`); opening the report fetches neither. Colour always travels with an
 icon and a written label: a state is never shown by colour alone. The page
 follows the system's light or dark setting, and a switch in the header
 changes it; the switch is CSS alone, so the no-script promise holds.
@@ -60,11 +62,17 @@ from .report import (
     protocol_findings,
 )
 from .risk import FailureType, Risk
-from .traducao import HTML_LANG, NAMES, decimal, t as _translate
+from .traducao import HTML_LANG, NAMES, OG_LOCALE, decimal, t as _translate
 
 # The language the page being built is written in. Set by `build`, read by
 # every helper through `_t`, so the helpers keep their signatures.
 _LANG: contextvars.ContextVar[str] = contextvars.ContextVar("lingua", default="pt")
+
+# The only addresses on the page: a link to the project, and the image a link preview (a
+# chat, LinkedIn) shows. Opening the report fetches neither; a crawler reads the second.
+REPO_URL = "https://github.com/fabiomalves84-sketch/aferidor"
+PREVIEW_IMAGE_URL = "https://fabiomalves84-sketch.github.io/aferidor/imagens/resumo.png"
+PREVIEW_IMAGE_SIZE = (1327, 896)
 
 
 def _t(text: str, **values: object) -> str:
@@ -449,6 +457,34 @@ def _aviso(title: str, body: str) -> str:
     )
 
 
+def _preview_meta(title: str) -> str:
+    """The description and the Open Graph tags a link preview reads. No og:url: a report
+    generated locally does not know where it will be published."""
+    description = _t(
+        "Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública."
+    )
+    width, height = PREVIEW_IMAGE_SIZE
+    tags = (
+        ("name", "description", description),
+        ("property", "og:type", "website"),
+        ("property", "og:title", title),
+        ("property", "og:description", description),
+        ("property", "og:locale", OG_LOCALE[_LANG.get()]),
+        ("property", "og:image", PREVIEW_IMAGE_URL),
+        ("property", "og:image:width", str(width)),
+        ("property", "og:image:height", str(height)),
+        (
+            "property", "og:image:alt",
+            _t("Resumo do relatório: modelos comparados pelo número de casos com falha crítica"),
+        ),
+    )
+    return "".join(f'<meta {kind}="{name}" content="{_esc(value)}">' for kind, name, value in tags)
+
+
+def _repo_link() -> str:
+    return f'<a href="{REPO_URL}" rel="noopener">{_t("Código, método e casos no GitHub")}</a>'
+
+
 # ---------------------------------------------------------------- opening
 
 
@@ -477,6 +513,7 @@ def _intro(cases: list[Case], models: list[str], answers: list[Answer], how_coun
 <section class="intro" aria-labelledby="sobre">
   <h2 id="sobre" class="vh">{_t("Sobre este relatório")}</h2>
   <p class="lead">{_t("O <strong>Aferidor</strong> avalia a exatidão de modelos de linguagem em perguntas clínicas em português europeu e classifica os erros pelo risco clínico.")}</p>
+  <p class="repo">{_repo_link()}</p>
   <p class="triagem">{_t("Os veredictos são a triagem automática do corretor; a validação por um especialista faz-se à parte, numa folha cega ({comando}).", comando="<code>aferidor revisao</code>")}</p>
   <ul class="factos">{fact_items}</ul>
   <details class="recolhe ler">
@@ -1142,7 +1179,7 @@ def _build(
         "<!DOCTYPE html>",
         f'<html lang="{HTML_LANG[_LANG.get()]}"><head><meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
-        f"<title>{title}</title><style>{STYLE}</style></head><body>",
+        f"<title>{title}</title>{_preview_meta(title)}<style>{STYLE}</style></head><body>",
     ]
     menu = _language_menu(alternates) if alternates else ""
     out.append(
@@ -1290,7 +1327,7 @@ def _build(
             "repositório do Aferidor, em {metodo} e {verificacao}.",
             metodo="<code>docs/METODO.md</code>", verificacao="<code>casos/VERIFICACAO.md</code>",
         ) + "</p></div></details>"
-        f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p></footer>'
+        f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p><p class="repo">{_repo_link()}</p></footer>'
     )
     out.append("</body></html>")
     return "".join(out)
