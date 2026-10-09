@@ -77,6 +77,61 @@ class TestEscaping(unittest.TestCase):
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", text)
 
 
+class TestEveryFieldIsEscaped(unittest.TestCase):
+    """Hostile text in every field that reaches the page, not only the answer.
+
+    The model id, the case id, the question, the reference, the source and the
+    criteria are all written into the HTML; the safety of the page rests on
+    each of them being escaped at its own point of use."""
+
+    HOSTILE = '"><img src=x onerror=alert(1)><script>alert(2)</script>'
+
+    def hostile_case(self) -> Case:
+        h = self.HOSTILE
+        return Case(
+            case_id="C" + h,
+            category="dose" + h,
+            question="Que dose?" + h,
+            reference="Amoxicilina 1000 mg" + h,
+            source=Source(name="Guia" + h, reference="p. 17" + h),
+            criteria=(
+                Criterion(kind="contem", terms=("1000 mg" + h,), failure=FailureType.DOSE_INCORRETA,
+                          description="descrição" + h),
+            ),
+        )
+
+    def assert_inert(self, page: str) -> None:
+        """Parse the page as a browser would: the hostile text may appear as
+        text or inside an attribute value, but never as a tag or an attribute."""
+        from html.parser import HTMLParser
+
+        found: list[str] = []
+
+        class Watcher(HTMLParser):
+            def handle_starttag(self, tag, attrs):
+                if tag in ("img", "script", "iframe", "object"):
+                    found.append(f"<{tag}>")
+                found.extend(f"{tag}[{name}]" for name, _ in attrs if name.startswith("on"))
+
+        Watcher().feed(page)
+        self.assertEqual(found, [], "the hostile text became markup")
+
+    def test_hostile_case_fields_model_and_answer_are_inert(self):
+        case = self.hostile_case()
+        answers = [
+            an_answer("500 mg" + self.HOSTILE, case_id=case.case_id, model="modelo" + self.HOSTILE, sample=n)
+            for n in (1, 2)
+        ]
+        self.assert_inert(build([case], answers))
+
+    def test_the_language_links_are_escaped_too(self):
+        page = build(
+            [a_case()], [an_answer("1 g")],
+            alternates={"en": '"><img src=x onerror=alert(1)>', "pt": "relatorio.html"},
+        )
+        self.assert_inert(page)
+
+
 class TestHeadline(unittest.TestCase):
     def test_the_critical_case_count_is_shown_per_model(self):
         text = build([a_case()], [an_answer("500 mg")])
