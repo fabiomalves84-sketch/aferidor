@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import html_report, manifesto, protocolo, report, revisao
+from . import build_id, html_report, manifesto, protocolo, report, revisao
 from .grading import (
     grade_all,
     met_by_the_question,
@@ -404,6 +404,32 @@ def _protocol_problem(args: argparse.Namespace) -> str | None:
     return problem
 
 
+def _protocol_mismatches(args: argparse.Namespace) -> list[str]:
+    """Where this run would not be the one the protocol was written for.
+
+    The report flags every one of these afterwards, but by then the run is
+    paid for. A protocol that froze the grader also refuses any other build.
+    """
+    protocol = protocolo.read_protocol(args.protocolo)
+    found = []
+    if args.repeticoes != protocol.samples:
+        found.append(
+            f"--repeticoes {args.repeticoes}, mas o protocolo prevê {protocol.samples} amostras por caso"
+        )
+    if args.temperatura != protocol.temperature:
+        found.append(
+            f"--temperatura {args.temperatura:g}, mas o protocolo prevê {protocol.temperature:g}"
+        )
+    if hashlib.sha256(Path(args.casos).read_bytes()).hexdigest() != protocol.cases_sha256:
+        found.append("o banco de casos não é o banco para que o protocolo foi escrito (SHA-256 diferente)")
+    if protocol.grader_build and protocol.grader_build != build_id():
+        found.append(
+            f"o protocolo fixou o corretor na versão {protocol.grader_build}, "
+            f"mas esta é a {build_id()}"
+        )
+    return found
+
+
 def comando_relatorio(
     args: argparse.Namespace, reasons: dict[str, str] | None = None
 ) -> int:
@@ -572,6 +598,12 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     # file found only at the report would already have paid for the run.
     if getattr(args, "protocolo", None) is not None:
         if _protocol_problem(args) is not None:
+            return 2
+        mismatches = _protocol_mismatches(args)
+        for mismatch in mismatches:
+            print(f"erro: {mismatch}", file=sys.stderr)
+        if mismatches:
+            print("corrigir antes de gastar uma execução; o relatório assinalaria o mesmo", file=sys.stderr)
             return 2
     cases = read_cases(args.casos)
     broken = self_check(cases)

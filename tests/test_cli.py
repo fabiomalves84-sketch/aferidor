@@ -454,6 +454,48 @@ class TestProtocolBeforeThePaidRun(unittest.TestCase):
             self.assertFalse((f / "r.jsonl").exists())
 
 
+    def _ensaio(self, f: Path, protocol: dict, *extra: str):
+        (f / "p.json").write_text(json.dumps(protocol), encoding="utf-8")
+        return run(
+            "ensaio", "--fornecedor", "falso", "--casos", str(REAL_CASES),
+            "--saida", str(f / "r.jsonl"), "--vereditos", str(f / "v.json"),
+            "--relatorio", str(f / "rel.md"), "--protocolo", str(f / "p.json"), *extra,
+        )
+
+    def test_a_run_that_does_not_match_the_protocol_stops_before_asking(self):
+        """The report flags a different temperature, sample count, bank or grader
+        build, but only after the run was paid for."""
+        from aferidor.protocolo import template
+
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            wrong_bank = template("x", REAL_CASES)
+            wrong_bank["banco_sha256"] = "0" * 64
+            for protocol, expected in (
+                (template("x", REAL_CASES), "--repeticoes 1, mas o protocolo prevê 5"),
+                (template("x", REAL_CASES), "--temperatura 0, mas o protocolo prevê 1"),
+                (wrong_bank, "SHA-256 diferente"),
+                ({**template("x", REAL_CASES), "versao_corretor": "0.0.0+aaaaaaaaaaaa"},
+                 "fixou o corretor na versão 0.0.0+aaaaaaaaaaaa"),
+            ):
+                with self.subTest(expected=expected):
+                    code, _, err = self._ensaio(f, protocol)
+                    self.assertEqual(code, 2)
+                    self.assertIn(expected, err)
+                    self.assertFalse((f / "r.jsonl").exists(), "nothing may be asked")
+
+    def test_a_run_that_matches_the_protocol_is_not_stopped_by_it(self):
+        from aferidor import build_id
+        from aferidor.protocolo import template
+
+        with tempfile.TemporaryDirectory() as folder:
+            f = Path(folder)
+            protocol = {**template("x", REAL_CASES), "amostras_por_caso": 1,
+                        "temperatura": 0.0, "versao_corretor": build_id()}
+            _, _, err = self._ensaio(f, protocol, "--repeticoes", "1", "--temperatura", "0")
+            self.assertNotIn("corrigir antes de gastar", err)
+            self.assertTrue((f / "r.jsonl").exists())
+
 
 class TestBrokenFiles(unittest.TestCase):
     """A missing or malformed file ends in a message and exit code 2, never a traceback."""
