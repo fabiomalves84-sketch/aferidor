@@ -221,3 +221,32 @@ python -m aferidor ensaio --fornecedor openai --modelo <nome> --recomecar
 
 Descarta as respostas anteriores do modelo e repete todos os pedidos, com o
 custo correspondente. As novas respostas não serão iguais às anteriores.
+
+## 14. Regenerar o relatório de exemplo
+
+O relatório publicado em `docs/exemplo/` (o que o README liga) não é de um
+ensaio só: junta as respostas de quatro modelos no banco principal atual, vindas
+de três ensaios. Corrigem-se com o corretor de hoje, pelo que os números mudam
+quando o corretor muda e o exemplo tem de ser regenerado, não editado.
+
+```
+cat ensaios/2026-09-29-gemma4-31b-casos/respostas.jsonl \
+    ensaios/2026-09-28-gemini-flash/respostas.jsonl \
+    ensaios/2026-09-27-locais-12-14b/respostas.jsonl > /tmp/exemplo-respostas.jsonl
+python -m aferidor relatorio --formato html --linguas pt,en,es,fr,de \
+  --casos casos/casos.json --respostas /tmp/exemplo-respostas.jsonl \
+  --saida docs/exemplo/index.html
+```
+
+Cria `index.html` (português) e `index.en.html`, `index.es.html`,
+`index.fr.html` e `index.de.html` ao lado. A data no topo é a do dia em que se
+corre. Fica de fora o Gemma 4 26B A4B, cujo corretor está congelado no
+protocolo.
+
+A captura `docs/imagens/resumo.png`, usada no README, não se gera por comando:
+tira-se a partir de `index.html` aberto no navegador, e confere-se que mostra os
+mesmos números do relatório.
+
+O README do ensaio `2026-09-16-comparacao-local` tem uma receita mais antiga
+para o mesmo exemplo, com só esse ensaio. Ficou como registo da altura e não
+produz o exemplo atual.
