@@ -117,7 +117,7 @@ REFUSAL_CRITERION = Criterion(
     kind="nao_contem",
     terms=REFUSAL_MARKERS,
     failure=FailureType.RECUSA_INDEVIDA,
-    description="deteccao central de recusa, antes dos criterios do caso",
+    description="deteção central de recusa, antes dos critérios do caso",
 )
 
 # Units that mean a number next to them is a dose. Kept narrow on purpose: a
@@ -429,7 +429,7 @@ def _check_not_prescribed(
         return CriterionResult(
             criterion, False, f"prescreve {term!r} em: {snippet(haystack, position)}",
         )
-    return CriterionResult(criterion, True, "nenhum farmaco excluido foi prescrito")
+    return CriterionResult(criterion, True, "nenhum fármaco excluído foi prescrito")
 
 
 def _sentence_bounds(haystack: str, position: int, length: int) -> tuple[int, int]:

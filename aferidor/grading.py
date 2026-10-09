@@ -304,7 +304,7 @@ def match_answers(
     matched = [a for a in answers if a.case_id in known_ids]
     if len(matched) != len(verdicts):
         raise ValueError(
-            "answers e verdicts fora de sincronia; correr de novo grade_all(cases, answers)"
+            "as respostas e os veredictos estão fora de sincronia; correr de novo grade_all(cases, answers)"
         )
     return list(zip(matched, verdicts))
 

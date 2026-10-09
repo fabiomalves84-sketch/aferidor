@@ -23,6 +23,18 @@ class TestMarkers(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertTrue(any(g == BRAZILIAN for g, _ in markers_in(text)))
 
+    def test_decomposed_accents_are_found_like_composed_ones(self):
+        """Text in NFD (a letter plus a combining accent) escaped the markers,
+        while the grader, which normalises, would have read it fine."""
+        import unicodedata
+
+        for text in ("Doença crônica.", "Você deve", "O câncer"):
+            decomposed = unicodedata.normalize("NFD", text)
+            self.assertNotEqual(decomposed, text)
+            with self.subTest(text=text):
+                self.assertEqual(markers_in(decomposed), markers_in(text))
+                self.assertTrue(markers_in(decomposed))
+
     def test_european_forms_are_not(self):
         for text in ("Doença crónica.", "Está a tomar amoxicilina.", "A equipa", "Entre em contacto",
                      "O cancro", "A diarreia", "A infeção", "Dor de estômago.", "O cônjuge"):

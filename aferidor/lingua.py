@@ -27,6 +27,7 @@ measurement of how Portuguese an answer reads.
 from __future__ import annotations
 
 import re
+import unicodedata
 from collections import Counter
 from dataclasses import dataclass
 
@@ -61,7 +62,7 @@ _COMPILED = tuple((group, label, re.compile(pattern)) for group, label, pattern 
 
 def markers_in(text: str) -> list[tuple[str, str]]:
     """Every (group, marker) found in the text, each marker once."""
-    lowered = text.lower()
+    lowered = unicodedata.normalize("NFC", text).lower()
     return [(group, label) for group, label, rx in _COMPILED if rx.search(lowered)]
 
 

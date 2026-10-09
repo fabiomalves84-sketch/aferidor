@@ -48,7 +48,7 @@ class Criterion:
         if self.kind not in self.KINDS:
             raise ValueError(f"tipo de critério desconhecido {self.kind!r}; esperava um de {self.KINDS}")
         if not self.terms:
-            raise ValueError(f"criterion {self.kind!r} needs at least one term")
+            raise ValueError(f"o critério {self.kind!r} precisa de pelo menos um termo")
         if self.kind == "valor_numerico":
             self._check_numeric_terms()
 
@@ -93,9 +93,9 @@ class Alternative:
         if not self.description.strip():
             raise ValueError("uma alternativa precisa de descrição")
         if not self.reference.strip():
-            raise ValueError(f"alternative {self.description!r} needs a reference answer")
+            raise ValueError(f"a alternativa {self.description!r} precisa de uma resposta de referência")
         if not self.criteria:
-            raise ValueError(f"alternative {self.description!r} has no criteria")
+            raise ValueError(f"a alternativa {self.description!r} não tem critérios")
 
 
 @dataclass(frozen=True)
@@ -120,9 +120,9 @@ class Case:
         if not self.case_id.strip():
             raise ValueError("um caso precisa de identificador")
         if not self.question.strip():
-            raise ValueError(f"case {self.case_id} needs a question")
+            raise ValueError(f"o caso {self.case_id} precisa de uma pergunta")
         if not self.reference.strip():
-            raise ValueError(f"case {self.case_id} needs a reference answer")
+            raise ValueError(f"o caso {self.case_id} precisa de uma resposta de referência")
         if not self.criteria and not self.alternatives:
             raise ValueError(
                 f"case {self.case_id} has no acceptance criteria; "
