@@ -239,9 +239,9 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   5,33) e sobre os círculos (4,80 a 10,73) passa, mas sem teste.
 - *Estrutura.* Sem ligação para saltar para o conteúdo, e 173
   elementos com `tabindex=0` (os termos do glossário) antes de qualquer secção.
-  As tabelas têm `scope` mas não `<caption>` (`html_report.py:848`, `:878`). Não
-  foi verificado se os leitores de ecrã anunciam o `aria-label` do `<abbr>` dos
-  códigos de caso (`:355-356`).
+  As tabelas têm `scope` mas não `<caption>` (`_areas()` e `_grid()`, em
+  `html_report.py`). Não foi verificado se os leitores de ecrã anunciam o
+  `aria-label` do `<abbr>` dos códigos de caso (`_case_code()`).
 - *Movimento e impressão.* `scroll-behavior: smooth` sem
   `prefers-reduced-motion` (`html_estilo.py:43`). Ao imprimir, os 31 `<details>`
   ficam fechados e o detalhe dos casos não sai (`:288-292` só evita quebras de
