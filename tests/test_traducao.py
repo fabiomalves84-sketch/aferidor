@@ -205,6 +205,18 @@ class TestReportInEveryLanguage(unittest.TestCase):
         for page in self.pages.values():
             self.assertNotIn("<script", page)
 
+    def test_the_count_of_cases_is_said_in_the_language_of_the_page(self):
+        """"a de n" is a sentence fragment, not a name: it was once listed as the same in every
+        language, so the chart of the Results page and the maps said "8 de 27" in English, French and German."""
+        joiner = {"pt": "de", "en": "of", "es": "de", "fr": "sur", "de": "von"}
+        for lang, page in self.pages.items():
+            counts = re.findall(r'class="comp-valor">(\d+ \S+ \d+) ', page)
+            with self.subTest(lang=lang):
+                self.assertTrue(counts)
+                self.assertEqual({c.split()[1] for c in counts}, {joiner[lang]})
+                if lang != "pt":
+                    self.assertEqual(CATALOG["{a} de {n}"][lang], f"{{a}} {joiner[lang]} {{n}}")
+
 
 class TestSingleLanguage(unittest.TestCase):
     def test_without_alternates_there_is_no_menu(self):

@@ -16,7 +16,6 @@ _SAME = (
     "DPOC", "TFG", "AVC", "HbA1c", "INR", "IECA", "ECA", "ARA II", "DOAC", "TSN", "SGLT2",
     "CYP3A4", "MAPA", "AMPA", "TA", "IM", "IV", "SCORE2", "SCORE", "SHA-256", "Ollama",
     "tokens_max", "COVID-19", "Helicobacter pylori",
-    "{a} de {n}",
 )
 
 _ROWS: tuple[tuple[str, str, str, str, str], ...] = (
@@ -67,6 +66,8 @@ _ROWS: tuple[tuple[str, str, str, str, str], ...] = (
      "Los veredictos son un cribado automático; la validación por un especialista se hace aparte, en una hoja ciega.",
      "Les verdicts sont un tri automatique ; la validation par un spécialiste se fait à part, sur une feuille en aveugle.",
      "Die Urteile sind eine automatische Vorauswahl; die Validierung durch eine Fachperson erfolgt separat, auf einem verblindeten Bogen."),
+    # ---- a count of cases ("8 of 27"): the chart of the Results page and the maps
+    ("{a} de {n}", "{a} of {n}", "{a} de {n}", "{a} sur {n}", "{a} von {n}"),
     # ---- the Sources page: which sources the cases cite, and how far they are confirmed
     ("Casos que citam cada fonte: {lista}.", "Cases citing each source: {lista}.", "Casos que citan cada fuente: {lista}.",
      "Cas citant chaque source : {lista}.", "Fälle, die die jeweilige Quelle zitieren: {lista}."),
