@@ -138,6 +138,11 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); }
   main > .painel { display: none; }
   main:not(:has(:target)) > #inicio, main > .painel:target, main > .painel:has(:target) { display: block; }
 }
+.painel h3 + ul.conclusoes, ul.conclusoes { max-width: 46rem; margin: 0 0 1.25rem; padding-left: 1.25rem; }
+ul.conclusoes li { margin: 0 0 0.45rem; }
+.painel a { color: var(--accent); }
+.painel h3:has(+ ul.conclusoes) { font-size: 1.1rem; margin: 1.1rem 0 0.5rem; }
+.fecho { max-width: 46rem; margin: 1rem 0 0; padding-top: 0.9rem; border-top: 1px solid var(--grid); color: var(--ink-2); }
 .inicio-corpo { max-width: 46rem; }
 .porque { font-size: 1.12rem; margin-bottom: 1.1rem; }
 .objetivos { margin: 0 0 1.1rem; }

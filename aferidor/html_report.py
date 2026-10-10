@@ -790,28 +790,152 @@ def _model_card(
 </article>"""
 
 
-def _context_note(models: list[str]) -> str:
-    """Say plainly when the models measured are small local ones.
+def _link(anchor: str, label: str) -> str:
+    return f'<a href="#{anchor}">{_esc(_t(label))}</a>'
 
-    A reader who sees 22 critical cases out of 27 without knowing the models
-    are 8-billion-parameter models on a laptop may blame the bench. This
-    states what they are; it does not interpret the results.
+
+def _tied_line(group: int, models: int, count: str | None) -> str:
+    """The line about the best result when several models share it: it names no single "best".
+
+    `count` is "a de b" when they share the same numbers, and None when only the proportion is the
+    same (for example 4 of 10 and 8 of 20), in which case no number is given.
     """
-    local = [m for m in models if m.startswith("local:")]
-    if not local:
-        return ""
-    shorts = [_model_short(m) for m in local]
-    names = shorts[0] if len(shorts) == 1 else ", ".join(shorts[:-1]) + _t(" e ") + shorts[-1]
-    sentence = _t(
-        "{nomes} foi executado localmente, num computador portátil, através do Ollama. São "
-        "modelos abertos de pequena dimensão; os resultados não são extrapoláveis para os "
-        "modelos comerciais disponibilizados por API." if len(local) == 1 else
-        "{nomes} foram executados localmente, num computador portátil, através do Ollama. São "
-        "modelos abertos de pequena dimensão; os resultados não são extrapoláveis para os "
-        "modelos comerciais disponibilizados por API.",
-        nomes=_esc(names),
-    )
-    return f'<p class="contexto"><strong>{_t("Contexto.")}</strong> {sentence}</p>'
+    if count is None:
+        if group == models:
+            return _t("Os dois têm a mesma proporção de casos com falha crítica.") if models == 2 \
+                else _t("Todos têm a mesma proporção de casos com falha crítica.")
+        if group == 2:
+            return _t("Os dois melhores têm a mesma proporção de casos com falha crítica.")
+        return _t("Os {t} melhores têm a mesma proporção de casos com falha crítica.", t=group)
+    a, b = count
+    if group == models:
+        return _t("Os dois têm {a} de {b} casos com falha crítica.", a=a, b=b) if models == 2 \
+            else _t("Todos têm {a} de {b} casos com falha crítica.", a=a, b=b)
+    if group == 2:
+        return _t("Os dois melhores têm {a} de {b} casos com falha crítica.", a=a, b=b)
+    return _t("Os {t} melhores têm {a} de {b} casos com falha crítica.", t=group, a=a, b=b)
+
+
+def _conclusions_page(
+    models: list[str], summaries: dict[str, ConsistencySummary], consistency,
+    confirmation: "_fontes.Confirmation | None", sources_verified: bool,
+    protocol: Protocol | None = None, protocol_outcomes: list | None = None,
+    protocol_warnings: list[str] | None = None,
+) -> list[tuple[str, str]]:
+    """What the numbers allow saying, and what they do not, as named elements in reading order.
+
+    Everything here is a count the report already made: the result is the one `grading` or
+    `protocolo` computed, the interval is the Wilson interval of the best model rounded as every
+    other interval of the report, and the state of the sources is what `fontes` read. No sentence
+    recommends a model. The line about the review follows `report.CLINICAL_REVIEW_DONE`.
+    """
+    n = len(summaries)
+    comparison = compare_critical(summaries, consistency)
+    rows = comparison.rows                          # (model, critical, cases, low, high), fewest first
+    best = rows[0]
+    tied = [r for r in rows if r[1] * best[2] == best[1] * r[2]]   # the same proportion as the first
+    tie = len(tied) > 1
+    same_numbers = all((r[1], r[2]) == (best[1], best[2]) for r in tied)
+    elements: list[tuple[str, str]] = [("pode", f'<h3>{_t("Pode concluir-se")}</h3>')]
+
+    # 1. the result against the threshold, or against the protocol
+    said_best = False
+    if protocol is not None and protocol_outcomes is not None:
+        approved = sum(1 for o in protocol_outcomes if o.approved)
+        elements.append(("limiar", "<li>" + _t(
+            "{k} de {n} modelos aprovados pelo protocolo (critérios completos no {inicio}).",
+            k=approved, n=n, inicio=_link("inicio", "Início"),
+        ) + "</li>"))
+        if protocol_warnings:
+            elements.append(("remate", "<li>" + _t(
+                "O protocolo tem avisos (ver {metodo}).", metodo=_link("criterio", "Método"),
+            ) + "</li>"))
+    else:
+        meeting = sum(1 for s in summaries.values() if s.critical_cases <= REFERENCE_CRITICAL_LIMIT)
+        count = (best[1], best[2])
+        if n == 1 and meeting == 0:
+            text = _t("O modelo não cumpre o limiar de referência (que não é um protocolo prévio).") + " " \
+                + _t("Tem {a} de {b} casos com falha crítica.", a=count[0], b=count[1])
+            said_best = True
+        elif n == 1:
+            text = _t("O modelo cumpre o limiar de referência (que não é um protocolo prévio).")
+        elif meeting == 0:
+            text = _t("Nenhum dos {n} modelos cumpre o limiar de referência (que não é um protocolo prévio).", n=n) + " "
+            text += _tied_line(len(tied), n, count if same_numbers else None) if tie else \
+                _t("O melhor tem {a} de {b} casos com falha crítica.", a=count[0], b=count[1])
+            said_best = True
+        else:
+            text = _t(
+                "Modelos que cumprem o limiar de referência (que não é um protocolo prévio): {k} de {n}.",
+                k=meeting, n=n,
+            )
+        elements.append(("limiar", f"<li>{text}</li>"))
+
+    # 2. the two best, when there are two and they do not share the top
+    if n >= 2 and not tie and comparison.p_value is not None:
+        elements.append(("comparacao", "<li>" + _t(
+            "Entre os dois melhores, a diferença é estatisticamente significativa (McNemar exato, {p})."
+            if comparison.p_value < 0.05 else
+            "Entre os dois melhores, a diferença pode ser acaso (McNemar exato, {p}).",
+            p=_p_value(comparison.p_value),
+        ) + "</li>"))
+
+    # what cannot be concluded
+    cannot: list[tuple[str, str]] = []
+    if any(m.startswith("local:") for m in models):
+        cannot.append(("locais", _t("Que os modelos locais representem os comerciais.")))
+    cannot.append((
+        "revisao",
+        _t("Que um veredicto seja validação clínica: é triagem.") if _report.CLINICAL_REVIEW_DONE
+        else _t("Que um veredicto seja validação clínica: é triagem, sem revisão por especialista."),
+    ))
+    cannot.append(("heuristico", _t(
+        "Que uma falha crítica seja sempre um erro real do modelo: o corretor é heurístico, com falsos "
+        "passes e falsos falhanços conhecidos (ver {metodo}).", metodo=_link("metodo", "Método"),
+    )))
+    if tie and not same_numbers:
+        interval = _t("Nada de firme sobre outros casos: os intervalos são largos.")
+    else:
+        low, high = wilson_interval(best[1], best[2])
+        who = (
+            _t("{a} de {n}", a=best[1], n=best[2]) if said_best
+            else _t("os melhores, {a} de {n},", a=best[1], n=best[2]) if tie
+            else _t("o melhor, {a} de {n},", a=best[1], n=best[2])
+        )
+        interval = _t(
+            "Nada de firme sobre outros casos: com {n} casos os intervalos são largos ({quem} é compatível com {low} a {high}).",
+            n=best[2], quem=who, low=_pct(low), high=_pct(high),
+        )
+    cannot.append(("intervalo", interval))
+    if not sources_verified:
+        if confirmation is None:
+            cannot.append(("fontes", _t("Que as fontes estejam confirmadas: o estado da confirmação não foi lido neste relatório.")))
+        else:
+            bank = confirmation.bank
+            cannot.append(("fontes", _t(
+                "Que as fontes estejam confirmadas: neste banco, uma a uma {a}, em grupo {b}, por confirmar {c} (ver {fontes}).",
+                a=bank.one_by_one, b=bank.in_group, c=bank.pending, fontes=_link("fontes", "Fontes"),
+            )))
+    elements.append(("nao", f'<h3>{_t("Não se pode concluir")}</h3>'))
+    elements += [(name, f"<li>{text}</li>") for name, text in cannot]
+    elements.append(("fecho", f'<p class="fecho">{_t("Este relatório não recomenda nenhum modelo: mede, não aconselha.")}</p>'))
+    return elements
+
+
+def _conclusions_html(elements: list[tuple[str, str]]) -> str:
+    """The elements as two lists, "can be concluded" and "cannot", and the closing line."""
+    out, open_list = [], False
+    for name, html in elements:
+        if html.startswith("<li>") and not open_list:
+            out.append('<ul class="conclusoes">')
+            open_list = True
+        elif not html.startswith("<li>") and open_list:
+            out.append("</ul>")
+            open_list = False
+        out.append(html.replace("<li>", f'<li class="c-{name}">', 1) if html.startswith("<li>") else html)
+    if open_list:
+        out.append("</ul>")
+    return "".join(out)
 
 
 def _p_value(p: float) -> str:
@@ -1541,8 +1665,10 @@ def _build(
         # Conclusões: what the numbers allow saying.
         out.append(_panel(
             "conclusoes", _t("Conclusões"),
-            f'<p class="triagem">{_t("Os veredictos são a triagem automática do corretor; a validação por um especialista faz-se à parte, numa folha cega ({comando}).", comando="<code>aferidor revisao</code>")}</p>',
-            _context_note(models),
+            _conclusions_html(_conclusions_page(
+                models, summaries, consistency, confirmation, sources_verified,
+                protocol, protocol_outcomes, protocol_warnings,
+            )),
         ))
 
     # Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
