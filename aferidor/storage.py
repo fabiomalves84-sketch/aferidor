@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import date, datetime
 from pathlib import Path
@@ -240,7 +241,7 @@ def answer_from_dict(data: dict, where: str) -> Answer:
 
 
 @contextmanager
-def _moved_over(target: Path):
+def _moved_over(target: Path) -> Iterator[Path]:
     """Yield a file beside `target` to write, and move it over `target` when the block ends well.
 
     An error halfway, or an interruption, removes the partial file and leaves `target` as it was.

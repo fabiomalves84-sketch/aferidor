@@ -63,9 +63,9 @@ from .comparacao import (
     top_tie,
 )
 from .html_estilo import STYLE
-from .lingua import language_by_model, language_line
+from .lingua import LanguageSummary, language_by_model, language_line
 from .models import Answer, Case, Verdict
-from .protocolo import Protocol
+from .protocolo import Outcome, Protocol
 from .report import (
     HEADER_NOTE,
     conditions_rows,
@@ -965,7 +965,7 @@ class _Standing:
         return len(self.tied) > 1
 
 
-def _standing(summaries: dict[str, ConsistencySummary], consistency) -> _Standing:
+def _standing(summaries: dict[str, ConsistencySummary], consistency: dict[tuple[str, str], Consistency] | None) -> _Standing:
     comparison = ranking(summaries, consistency)
     tied = top_tie(comparison.rows)
     return _Standing(len(summaries), comparison, comparison.rows[0], tied, same_numbers(tied))
@@ -973,7 +973,7 @@ def _standing(summaries: dict[str, ConsistencySummary], consistency) -> _Standin
 
 def _first_line(
     standing: _Standing, summaries: dict[str, ConsistencySummary], protocol: Protocol | None,
-    protocol_outcomes: list | None, protocol_warnings: list[str] | None,
+    protocol_outcomes: list[Outcome] | None, protocol_warnings: list[str] | None,
 ) -> tuple[list[tuple[str, str]], bool]:
     """The result against the protocol, or against the reference threshold; and whether the line already
     said how many cases the best model had (the interval line then does not repeat who it is)."""
@@ -1075,9 +1075,9 @@ def _cannot_lines(
 
 
 def _conclusions_page(
-    models: list[str], summaries: dict[str, ConsistencySummary], consistency,
+    models: list[str], summaries: dict[str, ConsistencySummary], consistency: dict[tuple[str, str], Consistency] | None,
     confirmation: "_fontes.Confirmation | None", sources_verified: bool,
-    protocol: Protocol | None = None, protocol_outcomes: list | None = None,
+    protocol: Protocol | None = None, protocol_outcomes: list[Outcome] | None = None,
     protocol_warnings: list[str] | None = None,
 ) -> list[tuple[str, str]]:
     """What the numbers allow saying, and what they do not, as named elements in reading order.
@@ -1122,7 +1122,7 @@ def _p_value(p: float) -> str:
     return "p " + decimal(shown, _LANG.get())
 
 
-def _comparison(summaries: dict[str, ConsistencySummary], consistency=None) -> str:
+def _comparison(summaries: dict[str, ConsistencySummary], consistency: dict[tuple[str, str], Consistency] | None = None) -> str:
     """Which model had the fewest critical cases, and whether that could be chance.
 
     With the cases known, the two best models are compared on the cases both
@@ -1238,7 +1238,7 @@ def _plain(text: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", text)
 
 
-def _worst(cases, consistency, pairs) -> str:
+def _worst(cases: list[Case], consistency: dict[tuple[str, str], Consistency], pairs: dict[tuple[str, str], list[tuple[Answer, Verdict]]]) -> str:
     examples = worst_examples(cases, consistency, pairs)
     if not examples:
         return ""
@@ -1274,7 +1274,7 @@ def _worst(cases, consistency, pairs) -> str:
     return "".join(out)
 
 
-def _areas(cases, models, consistency) -> str:
+def _areas(cases: list[Case], models: list[str], consistency: dict[tuple[str, str], Consistency]) -> str:
     categories, table = critical_by_category(cases, consistency)
     head = "".join(f'<th scope="col">{_esc(_model_short(m))}</th>' for m in models)
     rows = []
@@ -1369,7 +1369,7 @@ def _grid(
     return "".join(out)
 
 
-def _always_right(case: Case, models: list[str], consistency, expected: dict[str, int]) -> bool:
+def _always_right(case: Case, models: list[str], consistency: dict[tuple[str, str], Consistency], expected: dict[str, int]) -> bool:
     """Every model answered every sample of this case, and every one was right."""
     entries = [(consistency.get((case.case_id, m)), expected.get(m, 0)) for m in models]
     return all(
@@ -1497,7 +1497,8 @@ def _detail(
 
 
 def _protocol_section(
-    protocol: Protocol, answers: list[Answer], summaries: dict, cases_source, case_ids: list[str]
+    protocol: Protocol, answers: list[Answer], summaries: dict[str, ConsistencySummary],
+    cases_source: tuple[str, str] | None, case_ids: list[str],
 ) -> tuple[str, dict[str, bool]]:
     found_warnings, outcomes = protocol_findings(
         protocol, answers, summaries, cases_source, case_ids, _LANG.get()
@@ -1727,19 +1728,21 @@ class _ReportData:
     rule: str
     early: list[str]
     late: list[str]
-    consistency: dict | None = None
-    pairs: list | None = None
+    consistency: dict[tuple[str, str], Consistency] | None = None
+    pairs: dict[tuple[str, str], list[tuple[Answer, Verdict]]] | None = None
     summaries: dict[str, ConsistencySummary] | None = None
-    languages: dict | None = None
-    protocol_outcomes: list | None = None
+    languages: dict[str, LanguageSummary] | None = None
+    protocol_outcomes: list[Outcome] | None = None
     protocol_warnings: list[str] | None = None
     protocol_html: str = ""
-    approved: dict = field(default_factory=dict)
+    approved: dict[str, bool] = field(default_factory=dict)
 
 
 def _prepare(
-    cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
-    protocol, alternates, confirmation=None,
+    cases: list[Case], answers: list[Answer], verdicts: list[Verdict], missing: list[str] | None,
+    reasons: dict[str, str] | None, sources_verified: bool, today: date | None,
+    cases_source: tuple[str, str] | None, protocol: Protocol | None,
+    alternates: dict[str, str] | None, confirmation: "_fontes.Confirmation | None" = None,
 ) -> _ReportData:
     per_model = tally_by_model(verdicts)
     models = list(per_model)
@@ -1990,8 +1993,10 @@ def _foot_html(data: _ReportData) -> str:
 
 
 def _build(
-    cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
-    protocol, alternates, confirmation=None,
+    cases: list[Case], answers: list[Answer], verdicts: list[Verdict], missing: list[str] | None,
+    reasons: dict[str, str] | None, sources_verified: bool, today: date | None,
+    cases_source: tuple[str, str] | None, protocol: Protocol | None,
+    alternates: dict[str, str] | None, confirmation: "_fontes.Confirmation | None" = None,
 ) -> str:
     data = _prepare(
         cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,

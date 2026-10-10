@@ -22,6 +22,7 @@ from .grading import (
     uncaught_controls,
     verdict_changes,
 )
+from .models import Answer, Case
 from .providers import (
     AnthropicProvider,
     FakeProvider,
@@ -248,7 +249,7 @@ def _executar(
 
     print(f"{len(cases)} casos x {repeticoes} amostra(s), modelo {provider.name}")
 
-    def progress(case, answer, status) -> None:
+    def progress(case: Case, answer: Answer | None, status: str) -> None:
         mark = "." if status == "ok" else ("-" if status == "já respondido" else "!")
         detail = f" {status}" if status not in ("ok",) else ""
         print(f"  {mark} {case.case_id}{detail}")
