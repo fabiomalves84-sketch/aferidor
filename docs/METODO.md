@@ -206,6 +206,73 @@ marcador demasiado largo e voltaram à falha quando as correções de fronteira 
 frase e de início de palavra o desfizeram. Estão descritas nas mensagens dos
 commits `f202e37` e `886f637`.
 
+**`nao_prescreve` e o marcador `evit`: um falso passe, a direção que deixa passar
+um erro.** O marcador `evit` conta como exclusão em qualquer ponto da janela do
+fármaco (até 70 carateres antes do nome, até 200 depois, dentro da mesma frase),
+sem exigir que o "evitar" diga respeito ao fármaco. Executado a 10/10/2026 contra
+um `nao_prescreve claritromicina`:
+
+- "Pode usar claritromicina 500 mg 12/12h; evitar tomar em jejum." passa
+  (`nenhum fármaco excluído foi prescrito`).
+- "A claritromicina é uma boa opção, sem problemas, evitando atrasos no
+  tratamento." passa.
+
+São frases construídas, não respostas de modelos. Para saber quanto pesa nas
+respostas reais, corrigiram-se as 1400 respostas dos `ensaios/` que têm
+`casos.json` com o `evit` retirado da lista, só em memória: 19 veredictos mudam,
+todos de passa para falha. Os 19 foram lidos um a um, **por leitura do Claude
+Code, sem revisão clínica**:
+
+- *16 exclusões legítimas* (o `evit` está a fazer o que deve): por exemplo, "Deve-se
+  evitar a utilização de ibuprofeno em crianças com varicela" (PED-04, Gemma 4
+  31B, amostra 2), "Evitar sumos de fruta, refrigerantes e
+  bebidas desportivas" (PED-09, Gemma 4 26B A4B) e "deve-se evitar a
+  claritromicina" (INT-COL-016, Gemma 4 26B A4B).
+- *2 discutíveis*, exclusões parciais: PED-09, Gemini 3.5 Flash Lite, amostra 2
+  ("evitando açúcares refinados e sumos hiperosmolares") e PED-09, Gemma 4 31B,
+  amostra 2 ("evitando-se apenas sumos excessivamente doces"). A referência manda
+  evitar sumos em geral.
+- *1 provável falso passe*: PED-04, Gemini 3.5 Flash Lite, amostra 5. A resposta
+  diz "deve utilizar-se **paracetamol** (ou ibuprofeno, embora o paracetamol seja
+  frequentemente preferido em fases iniciais da varicela, devendo evitar-se o
+  ibuprofeno em caso de suspeita de infeção bacteriana secundária da pele)".
+  Apresenta o ibuprofeno como opção, e o critério crítico do caso é que o
+  ibuprofeno se evita na varicela. O `evit` da segunda metade da frase desculpa a
+  primeira.
+
+Não se encontrou nenhuma resposta que prescreva claramente o fármaco proibido.
+O marcador não pode simplesmente sair: 16 de 19 são exclusões que dependem dele.
+
+*Uma inconsistência no mesmo caso.* No `vereditos.json` gravado do ensaio de
+29/09 (Gemini no banco de consulta, corretor anterior às afinações), a amostra 4
+do PED-04 está como falha `contraindicacao_omitida`, e é uma exclusão clara
+("Deve ser evitado o uso de anti-inflamatórios não esteroides (AINEs), como o
+ibuprofeno"); a amostra 5, que oferece o ibuprofeno como opção, passou. O corretor
+falhou a resposta certa e passou a duvidosa. Com o corretor atual as cinco
+amostras passam: a 4 deixou de falhar com as afinações posteriores, a 5 continua a
+passar.
+
+*O que mudaria se a amostra 5 fosse falha, e em que base.* O "4 de 30" do README
+e da tabela de ensaios deste documento é a base do **corretor atual** (nota ¹); o
+"6 de 30" do README e do relatório da pasta do ensaio
+(`ensaios/2026-09-29-gemini-consulta/`) é a dos **veredictos gravados**, e
+nela o PED-04 já conta como falha crítica por causa da amostra 4.
+
+| Base | Casos com falha crítica | Casos parcialmente corretos | Amostras corretas | Se a amostra 5 fosse falha |
+|---|---|---|---|---|
+| Veredictos gravados | 6 de 30 (10% a 37%) | 10 | 122 de 150 | o destaque **não muda**; só as amostras corretas passam a 121 de 150 |
+| Corretor atual | 4 de 30 (5% a 30%) | 8 | 126 de 150 | 5 de 30 (7% a 34%), 9 parcialmente corretos, 125 de 150 |
+
+O protocolo continua reprovado nas duas bases, e o p do McNemar entre o Gemini e o
+Gemma 4 31B no banco de consulta fica em 1,000 (corretor atual: discordantes 2 e 2
+passam a 1 e 2). Nada foi reclassificado, e os ensaios registados não foram
+alterados.
+
+*O que o `verificar` não apanha.* Os controlos negativos do `nao_prescreve`
+acrescentam "Iniciar X" à referência (e variantes com recusa e com "não está
+contraindicado"), nunca uma prescrição com "evitar" na mesma frase, por isso este
+limite passa nos controlos todos. Não se propõe aqui nenhuma alteração ao corretor.
+
 **Relatório HTML: o que ainda não está tratado.** Diagnóstico de 09/10/2026
 sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brave
 154 e por leitura do código. São limites conhecidos, sem código que os corrija.
