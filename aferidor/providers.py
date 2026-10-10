@@ -76,6 +76,10 @@ class Provider(ABC):
     """
 
     name: str
+    # The conditions the runner writes to every answer; a provider sets them in `__init__`, and the
+    # defaults are those of one that does not ask for either.
+    temperature: float = 0.0
+    max_tokens: int | None = None
 
     @abstractmethod
     def ask(self, prompt: str) -> Reply:

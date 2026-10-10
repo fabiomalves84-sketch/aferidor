@@ -215,11 +215,11 @@ def run(
     raises `ConditionsMismatch` before anything is asked.
     """
     config = config or RunConfig()
-    temperature = getattr(provider, "temperature", 0.0)
-    max_tokens = getattr(provider, "max_tokens", None)
+    temperature = provider.temperature
+    max_tokens = provider.max_tokens
     result = RunResult(run_id=run_id or uuid.uuid4().hex[:12], model=provider.name)
-    if path is not None and Path(path).exists():
-        repaired = discard_truncated_tail(Path(path))
+    if path is not None and path.exists():
+        repaired = discard_truncated_tail(path)
         if repaired:
             result.notes.append(repaired)
     _check_same_conditions(path, provider, cases, temperature, max_tokens)
@@ -227,6 +227,7 @@ def run(
     build = build_id()
 
     for case in cases:
+        prompt = build_prompt(case)  # the same for every sample of the case
         for sample in range(1, repetitions + 1):
             if (case.case_id, sample) in done:
                 result.skipped.append(case.case_id)
@@ -234,7 +235,6 @@ def run(
                     progress(case, None, "já respondido")
                 continue
 
-            prompt = build_prompt(case)
             try:
                 reply, latency_ms = _ask_with_retry(provider, prompt, config)
             except ProviderError as error:
@@ -260,7 +260,7 @@ def run(
                 build=build,
             )
             if path is not None:
-                append_answer(answer, Path(path))
+                append_answer(answer, path)
             result.answers.append(answer)
             if progress:
                 progress(case, answer, "ok")
