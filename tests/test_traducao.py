@@ -121,6 +121,24 @@ class TestNoOverclaimAboutWhenCriteriaWereSet(unittest.TestCase):
                     self.assertNotIn(phrase, text)
 
 
+class TestOneTermForTrial(unittest.TestCase):
+    """"Ensaio" is one thing in the report, so it has one name in each language. ("Banco de ensaio" is
+    another thing, a test bench, and is left out.)"""
+
+    TERMS = {"en": ("trial", "test"), "es": ("ensayo", "prueba"), "fr": ("essai", None), "de": ("Versuch", "Test")}
+
+    def test_every_string_that_says_trial_uses_the_same_word_in_each_language(self):
+        strings = [s for s in interface_strings() if "ensaio" in s.lower() and "banco de ensaio" not in s.lower()]
+        self.assertTrue(strings)
+        for text in strings:
+            row = CATALOG[text]
+            for lang, (word, other) in self.TERMS.items():
+                with self.subTest(lingua=lang, cadeia=text[:50]):
+                    self.assertIn(word.lower(), row[lang].lower())
+                    if other:
+                        self.assertNotRegex(row[lang], rf"\b{other}", f"{lang} diz '{other}' onde as outras cadeias dizem '{word}'")
+
+
 class TestMachineTranslation(unittest.TestCase):
     def test_only_languages_the_report_has_can_be_unreviewed_and_portuguese_never_is(self):
         self.assertTrue(set(traducao.UNREVIEWED) <= set(LANGS))
