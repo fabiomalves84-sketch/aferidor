@@ -14,12 +14,15 @@ es, fr e de levam o aviso de tradução não revista).
 
 ## Resultados
 
-5 amostras por caso, temperatura 1,0, protocolo commitado antes de cada
-ensaio. Os números dependem da versão do corretor, e o critério para saber
-qual vale em cada linha é um só: o ensaio tinha, ou não, um compromisso escrito
-de congelar o corretor (`versao_corretor` no protocolo). Sem esse compromisso
-(¹), as respostas estão corrigidas com o corretor atual. Com ele (²), o número
-é o que foi publicado. A diferença de tratamento é deliberada.
+5 amostras por caso, temperatura 1,0. Cada ensaio da tabela tem um protocolo de
+aprovação commitado antes da primeira resposta, no histórico git (a verificação
+está em `docs/METODO.md`). O protocolo fixa os critérios de aprovação; só nos
+dois ensaios do Gemma 4 26B A4B fixa também a versão do corretor. Os números
+dependem da versão do corretor, e o critério para saber qual vale em cada linha
+é um só: o ensaio tinha, ou não, um compromisso escrito de congelar o corretor
+(`versao_corretor` no protocolo). Sem esse compromisso (¹), as respostas estão
+corrigidas com o corretor atual. Com ele (²), o número é o que foi publicado. A
+diferença de tratamento é deliberada.
 
 | Modelo | Banco principal (27 casos): casos com falha crítica (IC 95%) | Banco de consulta (30 casos à data dos ensaios): casos com falha crítica (IC 95%) | Protocolo |
 |---|---|---|---|
@@ -61,7 +64,7 @@ Requer Python 3.10 ou superior. Não tem dependências externas.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 652 testes
+python3 -m unittest discover -s tests          # 653 testes
 python3 -m aferidor verificar                  # coerência dos casos e do corretor
 python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
@@ -88,7 +91,9 @@ respostas corretas parece adequado; se os 8% de erros forem doses pediátricas,
 ## Funcionamento
 
 1. Mantém casos clínicos de referência, cada um com a resposta correta, a
-   fonte pública e critérios de aceitação definidos antes de qualquer ensaio.
+   fonte pública e os critérios de correção, em código e com histórico de
+   alterações. O corretor foi afinado depois de alguns ensaios, e cada afinação
+   está registada, com a razão no commit.
 2. Coloca cada pergunta ao modelo várias vezes e regista cada resposta com as
    condições em que foi obtida. O modelo nunca vê a resposta de referência.
 3. Corrige cada resposta contra os critérios, de forma textual e determinista,
@@ -137,7 +142,7 @@ documentos públicos ou são sintéticos.
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar`: 27/27 e 31/31 casos coerentes; 319/319 e 140/140 controlos
-  negativos detetados. 652 testes, em Python 3.10 a 3.14 na integração
+  negativos detetados. 653 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 10 de 58 confirmadas por uma pessoa, caso a caso, nos PDF da DGS; 24
   declaradas confirmadas em grupo, sem registo de página por caso; as 24

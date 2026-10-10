@@ -100,6 +100,27 @@ class TestNoDashes(unittest.TestCase):
                 self.assertNotIn("\u2013", shown)
 
 
+class TestNoOverclaimAboutWhenCriteriaWereSet(unittest.TestCase):
+    """The criteria of a case are in code and have a history; only a protocol written before the trial is a
+    prior criterion. No interface string may say otherwise, whatever the language."""
+
+    FORBIDDEN = (
+        "critérios de aceitação definidos antes",
+        "critérios definidos previamente",
+        "acceptance criteria defined before",
+        "criterios de aceptación definidos antes",
+        "critères d'acceptation définis avant",
+        "vor dem Test festgelegte Akzeptanzkriterien",
+    )
+
+    def test_no_interface_string_says_the_criteria_were_defined_before_the_trial(self):
+        texts = set(interface_strings()) | {s for s in CATALOG} | {v for row in CATALOG.values() for v in row.values()}
+        for text in texts:
+            for phrase in self.FORBIDDEN:
+                with self.subTest(frase=phrase):
+                    self.assertNotIn(phrase, text)
+
+
 class TestMachineTranslation(unittest.TestCase):
     def test_only_languages_the_report_has_can_be_unreviewed_and_portuguese_never_is(self):
         self.assertTrue(set(traducao.UNREVIEWED) <= set(LANGS))

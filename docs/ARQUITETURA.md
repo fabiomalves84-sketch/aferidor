@@ -49,10 +49,14 @@ determinista e repetível. Um modelo a julgar outro colocaria dois sistemas em
 avaliação, sem forma de determinar qual errou. O custo é a exigência na
 redação de cada critério, incorrido uma vez, quando o caso é escrito.
 
-**Os critérios são definidos antes de qualquer execução.** Definir o que conta
-como resposta correta depois de ver os resultados é a forma mais comum de
+**Os critérios devem ser definidos antes de qualquer execução.** Definir o que
+conta como resposta correta depois de ver os resultados é a forma mais comum de
 enviesar uma validação. A ISO 13485 e o Regulamento de Dispositivos Médicos
-exigem critérios de aceitação definidos antes do ensaio.
+exigem critérios de aceitação definidos antes do ensaio. O projeto aplica-o nos
+protocolos de aprovação, que são opcionais e escritos antes do ensaio; sem
+protocolo, o relatório usa o limiar de referência e diz que não é prévio. Os
+critérios de cada caso e o corretor estão em código, com histórico; o corretor
+foi afinado depois de alguns ensaios, e cada afinação tem a razão no commit.
 
 **As respostas são gravadas à medida que chegam.** Uma execução interrompida
 é retomada, não repetida. Repetir teria custo e alteraria a amostra: uma nova

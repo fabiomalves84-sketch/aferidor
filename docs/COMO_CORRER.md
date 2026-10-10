@@ -59,7 +59,7 @@ Recomenda-se usar ficheiros de saída próprios (`--saida`, `--vereditos`,
 
 ## 5. Protocolo, antes do ensaio
 
-O critério de aprovação define-se antes de ver qualquer resposta:
+O critério de aprovação, opcional, define-se antes de ver qualquer resposta:
 
 ```
 python -m aferidor protocolo --nome "<nome do ensaio>" --saida protocolos/<nome>.json

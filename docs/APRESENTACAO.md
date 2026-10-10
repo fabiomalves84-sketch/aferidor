@@ -17,8 +17,8 @@ importa.
 
 O Aferidor é um instrumento de medida. Mantém perguntas clínicas com resposta
 correta conhecida e citável, envia-as a um modelo de linguagem, corrige cada
-resposta contra critérios definidos previamente e classifica cada falha por
-tipo e por risco clínico.
+resposta contra os critérios de cada caso, em código e com histórico de
+alterações, e classifica cada falha por tipo e por risco clínico.
 
 O relatório apresenta, antes de qualquer percentagem, os casos com falha de
 risco crítico, cada um com a pergunta, a resposta de referência, a fonte e o
@@ -59,14 +59,16 @@ julgamento clínico.
 - **Rastreabilidade.** Cada resposta regista o SHA-256 do texto enviado, a
   temperatura, o limite de tokens e a versão do código. Uma retoma recusa
   condições diferentes. O relatório indica o banco, as condições e as datas.
-- **Critério de aprovação prévio**, definido num protocolo. O relatório indica
-  aprovado ou reprovado e assinala protocolos escritos depois do ensaio.
+- **Critério de aprovação prévio, opcional**, definido num protocolo escrito
+  antes do ensaio. Sem protocolo, o relatório usa o limiar de referência e diz
+  que não é prévio; com protocolo, indica aprovado ou reprovado e assinala os
+  escritos depois do ensaio.
 - **Folha cega para revisão clínica** e medida de concordância com o corretor.
 - Intervalos de confiança nos resultados principais e um indicador de
   português europeu independente das falhas clínicas.
 - Adaptadores para OpenAI, Anthropic, Google Gemini e modelos locais através
   do Ollama.
-- 652 testes automáticos, sem dependências externas.
+- 653 testes automáticos, sem dependências externas.
 
 Limitações conhecidas:
 
@@ -91,12 +93,14 @@ Limitações conhecidas:
 A ISO/IEC 42001 exige avaliação de desempenho documentada e tratamento dos
 riscos identificados. A ISO 13485 e o Regulamento de Dispositivos Médicos
 exigem verificação e validação com critérios de aceitação definidos **antes**
-do ensaio. O projeto produz, à escala de uma demonstração, esse tipo de
-evidência:
+do ensaio. O limiar de referência dos relatórios sem protocolo não é um critério
+prévio, e o corretor foi afinado depois de alguns ensaios; só os protocolos de
+aprovação escritos antes do ensaio são prévios. O projeto produz, à escala de
+uma demonstração, esse tipo de evidência:
 
 | Exigência | Implementação |
 |---|---|
-| Critérios de aceitação prévios | critérios de cada caso, alterados apenas com justificação no commit; protocolo de aprovação (`aferidor protocolo`) |
+| Critérios de aceitação prévios | critérios de cada caso, em código, com a razão de cada alteração no commit (o corretor foi afinado depois de alguns ensaios); protocolo de aprovação opcional (`aferidor protocolo`), escrito antes do ensaio |
 | Rastreabilidade à fonte | documento e página em cada caso |
 | Verificação dos dados de origem | `casos/VERIFICACAO.md` e comando `verificar` |
 | Classificação de falhas por risco | `aferidor/risk.py` |
@@ -118,7 +122,7 @@ não nos casos.
 ## Demonstração
 
 ```
-python -m unittest discover -s tests   # 652 testes
+python -m unittest discover -s tests   # 653 testes
 python -m aferidor verificar           # 27/27 casos, 319/319 controlos negativos
 python -m aferidor verificar --casos casos/consulta.json   # 31/31, 140/140
 python -m aferidor executar --fornecedor falso
