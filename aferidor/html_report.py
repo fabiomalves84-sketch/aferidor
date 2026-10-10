@@ -626,7 +626,7 @@ def _start_page(
 # What the command block of the About page says: the lines of the README, section "Instalação e
 # primeira execução", without the one that runs the tests (its comment holds a count that changes).
 ABOUT_COMMANDS = (
-    "git clone https://github.com/fabiomalves84-sketch/aferidor.git\n"
+    f"git clone {REPO_URL}.git\n"
     "cd aferidor\n"
     "python3 -m aferidor verificar                  # coerência dos casos e do corretor\n"
     "python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo"
