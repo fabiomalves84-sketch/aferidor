@@ -317,10 +317,28 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
 - *Eixo da comparação em telemóvel.* Em 390 px os cinco rótulos (0% a 100%)
   sobrepõem-se e leem-se como "0%25%50%75%100%" (regras `.comp-ticks` em
   `html_estilo.py`); as linhas dos intervalos ficam com cerca de 80 px.
-- *Barra de navegação fixa.* Mede 107 px a 390 px e 76 px a 768 px, e o
-  `scroll-margin-top` das secções é 56 px (regras `section` e `details.recolhe`
-  em `html_estilo.py`): nas âncoras, o título fica em parte sob a barra.
-  Deduzido da medição, não visto com scroll real.
+- *Barra fixa e páginas.* O relatório passou a ter sete páginas, mostradas uma
+  de cada vez só com CSS (`main > .painel` em `html_estilo.py`), e a barra fixa
+  (navegação, controlos e o aviso de triagem) é a variável `--barra`, que o
+  `scroll-padding-top` da página deixa livre: um separador ou uma âncora abre
+  logo por baixo dela. Medido a 10/10/2026, com cliques reais, em Chromium,
+  Firefox e WebKit, a 1280 e 390 px (`#corpo-<caso>` abre o painel Casos e o
+  `<details>` do caso). A barra mede 74 px a 1280 px e 132 px a 390 px; nas
+  línguas com o aviso de tradução automática, 91 px e 167 px (184 px em alemão).
+  **Em telemóvel a barra ocupa cerca de um sexto do ecrã** e fica por afinar.
+  A altura de `--barra` está escrita à mão em `html_estilo.py` (`BAR_HEIGHT`) e
+  tem de se remedir se o texto da barra mudar.
+- *Navegação sem `aria-current`.* A navegação é uma lista de ligações e não
+  marca a página atual para tecnologias de apoio, porque sem script o estado
+  não se mantém e marcar uma página que deixou de o ser diria uma coisa falsa.
+  O `<h2>` de cada página (o `<h1>` no Início) é o que indica onde se está, e as
+  páginas ocultas saem da árvore de acessibilidade. A ligação atual só se
+  distingue visualmente. Sem `:has()` (navegadores anteriores a 2022 a 2023) as
+  sete páginas ficam visíveis em sequência.
+- *Tradução automática.* O espanhol, o francês e o alemão foram traduzidos por
+  uma máquina e nenhum falante nativo os reviu; dizem-no na barra de todas as
+  páginas (`UNREVIEWED` em `aferidor/traducao.py`). Rever uma língua é tirá-la
+  dessa lista.
 - *Blocos de resposta.* 382 dos 397 `<blockquote>` têm `max-height` e
   `overflow:auto` (regras `blockquote` e `.erro-par blockquote` em
   `html_estilo.py`): scroll dentro do scroll, e não são focáveis, por isso não
@@ -347,15 +365,13 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   `prefers-reduced-motion` (`html_estilo.py:43`). Ao imprimir, os 31 `<details>`
   ficam fechados e o detalhe dos casos não sai (a regra `@media print` só evita
   quebras de página).
-- *Regra CSS inerte.* `.intro { grid-template-columns: 1fr }`
-  (dentro de `@media (max-width: 46rem)` em `html_estilo.py`) não se aplica,
-  porque `.intro` não é uma grelha.
 
-Não testado: leitor de ecrã, telemóvel real, outras versões de navegador. As
-larguras de 390 e 360 px foram emuladas com uma janela dentro de um `<iframe>`.
-Fica uma dúvida em aberto: o `scrollWidth` do documento mediu 875 px com a
-janela a 390 px, provavelmente por elementos `.vh` escondidos dentro da grelha,
-mas não se confirmou que a página arraste para o lado.
+Não testado: leitor de ecrã, telemóvel real. A dúvida sobre a página arrastar
+para o lado em 390 px ficou respondida a 10/10/2026, com uma janela real de
+390 px (Playwright): o `scrollWidth` do documento é 875 px no painel Casos em
+Chromium e em WebKit (914 px em alemão), e 390 px nos restantes painéis; no
+Firefox não passa de 390 px. A causa provável continua a ser a dos elementos
+`.vh` dentro da grelha, não confirmada.
 
 **Fontes.** As fontes estão marcadas como confirmadas desde 27/09/2026 com
 dois níveis de evidência, identificados em `casos/VERIFICACAO.md`: dez casos

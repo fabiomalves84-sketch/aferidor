@@ -38,9 +38,28 @@ THEME_CSS = (
     "@media print {\n"
     "  :root, :root:has(#tema-escuro:checked) { color-scheme: light;" + LIGHT_TOKENS + "}\n}\n"
 )
-STYLE = THEME_CSS + """
+PANEL_IDS = ("inicio", "fontes", "resultados", "areas", "casos", "conclusoes", "metodo")
+# Height of the fixed bar, which the scroll padding leaves free so a page opens just below it. The
+# bar is taller where the notice about a machine translation adds a line, and on a narrow screen,
+# where the controls and the pages stack. Measured in a browser at 1280 and 390 px, plus half a
+# rem of slack for the differences between engines; the report of the work has the numbers.
+BAR_HEIGHT = (
+    "html { --barra: 5.2rem; }\n"
+    'html[lang="es"], html[lang="fr"], html[lang="de"] { --barra: 6.2rem; }\n'
+    "@media (max-width: 46rem) {\n"
+    "  html { --barra: 9rem; }\n"
+    '  html[lang="es"], html[lang="fr"] { --barra: 11rem; }\n'
+    '  html[lang="de"] { --barra: 12.2rem; }\n'
+    "}\n"
+)
+CURRENT_PAGE = "".join(
+    f'body:has(main #{ident}:target) nav.indice a[href="#{ident}"], '
+    f'body:has(main #{ident} :target) nav.indice a[href="#{ident}"], '
+    for ident in PANEL_IDS[1:]
+) + 'body:not(:has(main :target)) nav.indice a[href="#inicio"], body:has(main #inicio:target) nav.indice a[href="#inicio"], body:has(main #inicio :target) nav.indice a[href="#inicio"]'
+STYLE = THEME_CSS + BAR_HEIGHT + """
 * { box-sizing: border-box; }
-html { background: var(--page); scroll-behavior: smooth; }
+html { background: var(--page); scroll-behavior: smooth; scroll-padding-top: var(--barra); }
 body {
   margin: 0 auto; max-width: 72rem; padding: 0 1rem 3rem;
   background: var(--page); color: var(--ink);
@@ -53,9 +72,12 @@ h3 { font-size: 1.05rem; }
 p { margin: 0 0 0.75rem; }
 code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em;
   background: var(--surface-2); padding: 0.1rem 0.3rem; border-radius: 4px; }
-section { margin-top: 2.5rem; scroll-margin-top: 3.5rem; }
-.topo { padding: 2rem 0 1rem; position: relative; }
-.controlos { position: absolute; top: 1.6rem; right: 0; display: flex; gap: 0.5rem; align-items: flex-start; }
+section { margin-top: 2.5rem; }
+/* The fixed bar: brand and controls, the pages, and the notice every page carries. Its height
+   is --barra, which the scroll padding uses so a page opens just below it. */
+.topo { position: sticky; top: 0; z-index: 5; background: var(--page); border-bottom: 1px solid var(--grid); padding-top: 0.4rem; }
+.topo-linha { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem 1rem; }
+.controlos { display: flex; gap: 0.5rem; align-items: flex-start; }
 .linguas { position: relative; }
 .linguas > summary { list-style: none; cursor: pointer; padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.85rem;
   color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--border); user-select: none; }
@@ -86,14 +108,31 @@ section { margin-top: 2.5rem; scroll-margin-top: 3.5rem; }
   :root:not(:has(#tema-claro:checked)) .tema label[for="tema-claro"] { background: none; color: var(--ink-2); box-shadow: none; }
 }
 .marca { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-.topo h1 { font-size: 2rem; margin: 0.25rem 0 0.4rem; }
+.titulo-inicio { padding: 0.5rem 0 0; margin-bottom: 1.25rem; }
+.titulo-inicio h1 { font-size: 2rem; margin: 0 0 0.4rem; }
 .subtitulo { color: var(--ink-2); margin: 0; }
 .data { color: var(--muted); font-size: 0.9rem; margin: 0.35rem 0 0; }
-nav.indice { position: sticky; top: 0; z-index: 2; background: var(--page);
-  border-top: 1px solid var(--grid); border-bottom: 1px solid var(--grid); padding: 0.6rem 0; }
-nav.indice ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; }
-nav.indice a { color: var(--ink-2); text-decoration: none; font-size: 0.92rem; }
-nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); text-decoration: underline; }
+nav.indice { min-width: 0; }
+nav.indice ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.1rem; }
+nav.indice a { display: inline-block; padding: 0.15rem 0; color: var(--ink-2); text-decoration: none; font-size: 0.95rem;
+  border-bottom: 2px solid transparent; }
+nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); }
+.faixa { margin: 0; padding: 0.25rem 0 0.4rem; font-size: 0.8rem; line-height: 1.35; color: var(--ink-2); }
+.faixa a { color: var(--accent); }
+@supports selector(:has(*)) {
+  """ + CURRENT_PAGE + """ { color: var(--ink); font-weight: 650; border-bottom-color: var(--accent); }
+}
+.faixa .traducao { display: block; }
+/* One page at a time, by CSS alone: the page named in the address, or the first one when the
+   address names none. Where :has() is not understood every page stays visible, in order. */
+@supports selector(:has(*)) {
+  main > .painel { display: none; }
+  main:not(:has(:target)) > #inicio, main > .painel:target, main > .painel:has(:target) { display: block; }
+}
+.painel { margin-top: 0; padding-top: 1rem; }
+.painel > h2 { font-size: 1.6rem; margin: 0 0 1rem; }
+.painel > section:first-of-type, .painel > .cartoes:first-child { margin-top: 0; }
+.painel section > h3 { font-size: 1.2rem; margin-bottom: 0.6rem; }
 .intro { margin-top: 1.5rem;
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
 .lead { font-size: 1.12rem; }
@@ -225,7 +264,7 @@ td.cel.erro .ic { color: var(--critical-text); }
 .mini { display: inline-flex; align-items: center; justify-content: center; width: 1.35rem; height: 1.35rem; border-radius: 50%;
   font-size: 0.75rem; font-weight: 700; color: #0b0b0b; flex: none; }
 .mini.ok { background: var(--good); } .mini.instavel { background: var(--warning); } .mini.erro { background: var(--critical); color: #ffffff; }
-.detalhe-corpo { padding: 0.9rem 1rem 1rem; border-top: 1px solid var(--grid); scroll-margin-top: 8rem; }
+.detalhe-corpo { padding: 0.9rem 1rem 1rem; border-top: 1px solid var(--grid); scroll-margin-top: 3.5rem; }
 .referencia { background: var(--surface-2); border-radius: 8px; padding: 0.75rem 0.9rem; margin: 0.5rem 0 1rem; }
 .referencia p { margin: 0 0 0.35rem; } .fonte { color: var(--ink-2); font-size: 0.88rem; }
 .detalhe h4 { margin: 1.1rem 0 0.4rem; font-size: 0.98rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
@@ -257,7 +296,7 @@ abbr.termo:hover::after, abbr.termo:focus::after {
   box-shadow: 0 4px 14px var(--tooltip-shadow); pointer-events: none; }
 abbr.termo.lado:hover::after, abbr.termo.lado:focus::after { left: calc(100% + 8px); top: -0.3rem; }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-details.recolhe { margin-top: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; scroll-margin-top: 3.5rem; }
+details.recolhe { margin-top: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
 details.recolhe > summary { cursor: pointer; padding: 0.8rem 1.25rem; font-weight: 650; }
 details.recolhe[open] > summary { border-bottom: 1px solid var(--grid); }
 details.recolhe > :not(summary) { margin-left: 1.25rem; margin-right: 1.25rem; }
@@ -272,25 +311,29 @@ details.recolhe h3 { margin-top: 1.25rem; }
 .glossario dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 0.4rem 1.5rem; }
 .glossario dt { font-weight: 650; font-size: 0.9rem; }
 .glossario dd { margin: 0 0 0.5rem; color: var(--ink-2); font-size: 0.86rem; }
-footer.rodape { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--grid); color: var(--ink-2); font-size: 0.88rem; scroll-margin-top: 3.5rem; }
+footer.rodape { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--grid); color: var(--ink-2); font-size: 0.88rem; }
 footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 @media (max-width: 46rem) {
-  .intro { grid-template-columns: 1fr; }
+  .topo-linha { flex-wrap: wrap; justify-content: flex-start; }
+  .controlos { order: -1; }
+  nav.indice { flex: 1 1 100%; }
+  nav.indice ul { flex-wrap: nowrap; overflow-x: auto; gap: 0.25rem 0.9rem; padding-bottom: 0.2rem; }
+  nav.indice a { white-space: nowrap; }
   .detalhe summary { grid-template-columns: 1fr auto; }
   .resumo-pergunta { display: none; }
   .barras-falhas li { grid-template-columns: 8.5rem 1fr 2rem; }
   .destaque { font-size: 2.6rem; }
-  .topo h1 { font-size: 1.6rem; }
-  .controlos { position: static; margin-top: 0.75rem; }
+  .titulo-inicio h1 { font-size: 1.6rem; }
   .metricas { grid-template-columns: 1fr; }
   .erros { grid-template-columns: 1fr; }
   .erro-par { grid-template-columns: 1fr; }
   .comp-lista li, .comp-eixo { grid-template-columns: 6rem 1fr 6.5rem; }
-  .detalhe-corpo { scroll-margin-top: 10rem; }
 }
 @media print {
-  nav.indice { position: static; }
+  .topo { position: static; }
   .controlos { display: none; }
+  main > .painel { display: block !important; break-before: page; }
+  main > .painel:first-child { break-before: auto; }
   details { break-inside: avoid; }
 }
 """

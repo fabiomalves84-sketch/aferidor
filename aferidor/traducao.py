@@ -30,6 +30,11 @@ OG_LOCALE = {"pt": "pt_PT", "en": "en_US", "es": "es_ES", "fr": "fr_FR", "de": "
 
 MISSING: set[tuple[str, str]] = set()
 
+# Languages whose interface was translated by a machine and not yet read by a native speaker.
+# A report in one of them says so on every page. Reviewing a language is taking it off this list.
+UNREVIEWED = ("es", "fr", "de")
+UNREVIEWED_NOTICE = "Tradução automática, não revista por um falante nativo; em caso de dúvida vale o português."
+
 # Grammatical forms of a term, for the languages whose word changes with the case. Keyed by the
 # Portuguese term and the form. A language not listed here shows the plain CATALOG entry, so only
 # German is written out (the other four languages read as "falha crítica" in every form).
@@ -58,4 +63,7 @@ def decimal(value: str, lang: str) -> str:
     return value.replace(",", ".") if lang == "en" else value.replace(".", ",")
 
 
-__all__ = ["LANGS", "NAMES", "HTML_LANG", "OG_LOCALE", "MISSING", "FORMS", "t", "decimal", "CATALOG"]
+__all__ = [
+    "LANGS", "NAMES", "HTML_LANG", "OG_LOCALE", "MISSING", "FORMS", "UNREVIEWED", "UNREVIEWED_NOTICE",
+    "t", "decimal", "CATALOG",
+]

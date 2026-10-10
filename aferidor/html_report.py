@@ -62,7 +62,7 @@ from .report import (
     protocol_findings,
 )
 from .risk import FailureType, Risk
-from .traducao import HTML_LANG, NAMES, OG_LOCALE, decimal, t as _translate
+from .traducao import HTML_LANG, NAMES, OG_LOCALE, UNREVIEWED, UNREVIEWED_NOTICE, decimal, t as _translate
 
 # The language the page being built is written in. Set by `build`, read by
 # every helper through `_t`, so the helpers keep their signatures.
@@ -871,7 +871,7 @@ def _worst(cases, consistency, pairs) -> str:
     if not examples:
         return ""
     out = [
-        f'<section id="erros"><h2>{_t("Erros mais graves")}</h2>',
+        f'<section id="erros"><h3>{_t("Erros mais graves")}</h3>',
         '<p class="seccao-intro">'
         + _t("Casos em que todas as amostras falharam, com pelo menos uma falha de risco "
              "crítico. Selecionados por regra fixa: os primeiros casos que a cumprem, "
@@ -922,7 +922,7 @@ def _areas(cases, models, consistency) -> str:
             )
         rows.append(f'<tr><th scope="row">{_esc(_category(category))}</th>{"".join(cells)}</tr>')
     return (
-        f'<section id="areas"><h2>{_t("Falhas críticas por área clínica")}</h2>'
+        f'<section id="mapa-areas"><h3>{_t("Falhas críticas por área clínica")}</h3>'
         '<p class="seccao-intro">'
         + _t("Casos com falha crítica em pelo menos uma amostra, por área. Um resultado médio "
              "aceitável pode ocultar uma área de risco. A intensidade da cor é proporcional à "
@@ -1052,7 +1052,7 @@ def _detail(
     pairs: dict[tuple[str, str], list[tuple[Answer, Verdict]]],
 ) -> str:
     out = [
-        f'<section class="detalhe" id="casos-com-falha"><h2>{_t("Casos com falha")}</h2>',
+        f'<section class="detalhe" id="casos-com-falha"><h3>{_t("Casos com falha")}</h3>',
         '<p class="seccao-intro">'
         + _t("Cada caso apresenta a pergunta, a resposta de referência com a fonte e cada "
              "resposta distinta do modelo, com o critério não cumprido e a evidência encontrada "
@@ -1131,7 +1131,7 @@ def _protocol_section(
         protocol, answers, summaries, cases_source, case_ids, _LANG.get()
     )
     parts = [
-        f'<section class="protocolo" id="criterio"><h2>{_t("Critério de aprovação")}</h2><div class="cartao">'
+        f'<section class="protocolo" id="criterio"><h3>{_t("Critério de aprovação")}</h3><div class="cartao">'
     ]
     parts.append("<p>" + _t(
         "Protocolo {nome}, escrito a {data} ({ficheiro}, {sha} {resumo}).",
@@ -1209,6 +1209,45 @@ def build(
         _LANG.reset(token)
 
 
+# The pages of the report, in the order of the navigation. Each one is a panel of the same
+# file; CSS alone shows one at a time (`html_estilo`), so there is still no script.
+PANELS = (
+    ("inicio", "Início"),
+    ("fontes", "Fontes"),
+    ("resultados", "Resultados"),
+    ("areas", "Por área clínica"),
+    ("casos", "Casos"),
+    ("conclusoes", "Conclusões"),
+    ("metodo", "Método"),
+)
+
+
+def _panel(ident: str, heading: str, *content: str) -> str:
+    """One page of the report: a section with its own `<h2>`, shown alone by the CSS.
+
+    `heading` is already in the language of the page.
+    """
+    return (
+        f'<section class="painel" id="{ident}" aria-labelledby="t-{ident}">'
+        f'<h2 id="t-{ident}">{_esc(heading)}</h2>{"".join(content)}</section>'
+    )
+
+
+def _strip(sources_pending: bool) -> str:
+    """The notice every page carries, in the fixed bar, so no page is read without it.
+
+    Short on purpose: it says what the verdicts are and, while sources are unconfirmed, links to
+    the page that explains it. A language whose interface was machine translated and not yet
+    read by a native speaker says so here too.
+    """
+    parts = [_esc(_t("Veredictos: triagem automática do corretor, sem validação clínica."))]
+    if sources_pending:
+        parts.append(f'<a href="#fontes">{_esc(_t("Fontes por confirmar."))}</a>')
+    if _LANG.get() in UNREVIEWED:
+        parts.append(f'<span class="traducao">{_esc(_t(UNREVIEWED_NOTICE))}</span>')
+    return f'<p class="faixa" role="note">{" ".join(parts)}</p>'
+
+
 def _build(
     cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
     protocol, alternates,
@@ -1225,56 +1264,60 @@ def _build(
         f"<title>{title}</title>{_preview_meta(title)}<style>{STYLE}</style></head><body>",
     ]
     menu = _language_menu(alternates) if alternates else ""
+    if models:
+        consistency = consistency_by_case(cases, answers, verdicts)
+        pairs = pairs_by_case(cases, answers, verdicts)
+    # Without verdicts there is nothing to break down, so those pages do not exist.
+    without_verdicts = ("areas", "casos", "conclusoes")
+    present = [(a, label) for a, label in PANELS if models or a not in without_verdicts]
+    # The fixed bar: the pages and the controls on one line, and the notice that stays on every page.
     out.append(
-        f'<header class="topo"><div class="marca">{_t("Aferidor · banco de ensaio clínico")}</div>'
+        '<header class="topo"><div class="topo-linha">'
+        f'<nav class="indice" aria-label="{_esc(_t("Secções"))}"><ul>'
+        + "".join(f'<li><a href="#{anchor}">{_esc(_t(label))}</a></li>' for anchor, label in present)
+        + "</ul></nav>"
         '<div class="controlos">' + menu
         + f'<div class="tema" role="radiogroup" aria-label="{_esc(_t("Tema"))}">'
         '<input type="radio" name="tema" id="tema-claro"><label for="tema-claro">'
         f'<span aria-hidden="true">☀</span> {_t("Claro")}</label>'
         '<input type="radio" name="tema" id="tema-escuro"><label for="tema-escuro">'
-        f'<span aria-hidden="true">☾</span> {_t("Escuro")}</label></div></div>'
-        f"<h1>{title}</h1>"
-        f'<p class="subtitulo">{_t("Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública.")}</p>'
-        f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(written))}</p></header>'
+        f'<span aria-hidden="true">☾</span> {_t("Escuro")}</label></div></div></div>'
+        + _strip(not sources_verified)
+        + "</header>"
     )
-
-    sections = []
-    if models:
-        consistency = consistency_by_case(cases, answers, verdicts)
-        pairs = pairs_by_case(cases, answers, verdicts)
-        sections.append(("resumo", "Resumo"))
-        if protocol is not None:
-            sections.append(("criterio", "Critério de aprovação"))
-        if worst_examples(cases, consistency, pairs):
-            sections.append(("erros", "Erros mais graves"))
-        sections += [
-            ("areas", "Por área clínica"),
-            ("grelha", "Resultados por caso"),
-            ("casos-com-falha", "Casos com falha"),
-            ("falhas", "Mais indicadores"),
-        ]
-    sections.append(("detalhes", "Detalhes técnicos"))
-    out.append(
-        f'<nav class="indice" aria-label="{_esc(_t("Secções"))}"><ul>'
-        + "".join(f'<li><a href="#{anchor}">{_esc(_t(label))}</a></li>' for anchor, label in sections)
-        + "</ul></nav>"
-    )
-    # The content sits in one <main> landmark, between the navigation and the footer, so a screen
+    # The content sits in one <main> landmark, between the bar and the footer, so a screen
     # reader can jump straight to it. The header, the navigation and the footer stay outside.
     out.append("<main>")
 
     rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
     samples_n = max(expected_samples(answers).values(), default=0)
     early, late = _notices(cases, answers, missing, reasons, sources_verified)
-    out.append(_intro(
-        cases, models, answers, _how_counted(samples_n, rule) if models else "",
-        sources_pending=not sources_verified,
-    ))
-    out.extend(early)
+
+    # Início: what the report is, and how to read it.
+    out.append(
+        '<section class="painel" id="inicio" aria-labelledby="titulo-relatorio">'
+        f'<div class="titulo-inicio"><div class="marca">{_t("Aferidor · banco de ensaio clínico")}</div>'
+        f'<h1 id="titulo-relatorio">{title}</h1>'
+        f'<p class="subtitulo">{_t("Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública.")}</p>'
+        f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(written))}</p></div>'
+        + _intro(
+            cases, models, answers, _how_counted(samples_n, rule) if models else "",
+            sources_pending=not sources_verified,
+        )
+        + "</section>"
+    )
+
+    # Fontes: where the cases come from, and what is still to be confirmed.
+    sources = list(late)
+    if sources_verified:
+        sources.append(f'<p class="seccao-intro">{_t("Todas as fontes destes casos foram confirmadas por uma pessoa.")}</p>')
+    out.append(_panel("fontes", _t("Fontes"), *sources))
 
     if not models:
-        out.append(f'<section id="resumo"><p>{_t("Não há veredictos para relatar.")}</p></section>')
-        out.extend(late)
+        out.append(_panel(
+            "resultados", _t("Resultados"), *early,
+            f"<p>{_t('Não há veredictos para relatar.')}</p>",
+        ))
     else:
         summaries = consistency_by_model(consistency)
         states = states_by_model(consistency)
@@ -1293,41 +1336,26 @@ def _build(
             if protocol is None else {}
         )
 
-        out.append(f'<section id="resumo"><h2>{_t("Resumo")}</h2>')
-        if protocol is None:
-            out.append(_reference_verdict(summaries))
-        out.append(_comparison(summaries, consistency))
-        out.append('<div class="cartoes">')
+        # Resultados: the first result, with the notices that qualify the counts above it.
+        cards = ['<div class="cartoes">']
         for model in models:
-            out.append(
+            cards.append(
                 _model_card(
                     model, summaries[model], per_model[model], states[model],
                     approved.get(model), right[model], reference=reference.get(model),
                 )
             )
-        out.append("</div>")
-        out.append(_context_note(models))
-        out.extend(late)
-        out.append("</section>")
-        out.append(protocol_html)
-        out.append(_worst(cases, consistency, pairs))
-        out.append(_areas(cases, models, consistency))
+        cards.append("</div>")
+        out.append(_panel(
+            "resultados", _t("Resultados"), *early,
+            _reference_verdict(summaries) if protocol is None else "",
+            _comparison(summaries, consistency), *cards,
+        ))
 
-        out.append(f'<section id="grelha"><h2>{_t("Resultados por caso")}</h2>')
-        out.append(
-            '<p class="seccao-intro">'
-            + _t("Casos com falha em pelo menos um modelo. Cada ponto é uma amostra (● correta, "
-                 "✕ incorreta, ○ sem resposta); por baixo, o tipo de falha mais grave.")
-            + "</p>"
-        )
-        out.append(_grid_legend())
-        out.append(_grid(cases, models, consistency, pairs, expected))
-        out.append("</section>")
-        out.append(_detail(cases, models, consistency, pairs))
-
-        more = [
-            f'<details class="recolhe mais" id="falhas"><summary>{_t("Mais indicadores: falhas por tipo e português europeu")}</summary>',
-            f"<h3>{_t('Falhas por tipo')}</h3>",
+        # Por área clínica: the heat map, and the failures by type, collapsed.
+        top = max((n for tally in per_model.values() for _, n in tally.worst_first()), default=1)
+        by_type = [
+            f'<details class="recolhe mais" id="falhas"><summary>{_t("Falhas por tipo")}</summary>',
             '<p class="seccao-intro">'
             + _t("Quantas respostas tiveram cada tipo de falha, do risco mais alto para o mais "
                  "baixo. Uma resposta pode ter mais do que um tipo.")
@@ -1335,11 +1363,39 @@ def _build(
             _risk_legend(),
             '<div class="falhas-grelha">',
         ]
-        top = max((n for tally in per_model.values() for _, n in tally.worst_first()), default=1)
         for model in models:
-            more.append(_failure_chart(model, per_model[model], top))
-        more.append("</div>")
-        more.append(
+            by_type.append(_failure_chart(model, per_model[model], top))
+        by_type.append("</div></details>")
+        out.append(_panel("areas", _t("Por área clínica"), _areas(cases, models, consistency), *by_type))
+
+        # Casos: the gravest mistakes, the grid, and every failing case, collapsed.
+        grid = [f'<section id="grelha"><h3>{_t("Resultados por caso")}</h3>']
+        grid.append(
+            '<p class="seccao-intro">'
+            + _t("Casos com falha em pelo menos um modelo. Cada ponto é uma amostra (● correta, "
+                 "✕ incorreta, ○ sem resposta); por baixo, o tipo de falha mais grave.")
+            + "</p>"
+        )
+        grid.append(_grid_legend())
+        grid.append(_grid(cases, models, consistency, pairs, expected))
+        grid.append("</section>")
+        out.append(_panel(
+            "casos", _t("Casos"), _worst(cases, consistency, pairs), *grid,
+            _detail(cases, models, consistency, pairs),
+        ))
+
+        # Conclusões: what the numbers allow saying.
+        out.append(_panel(
+            "conclusoes", _t("Conclusões"),
+            f'<p class="triagem">{_t("Os veredictos são a triagem automática do corretor; a validação por um especialista faz-se à parte, numa folha cega ({comando}).", comando="<code>aferidor revisao</code>")}</p>',
+            _context_note(models),
+        ))
+
+    # Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
+    method: list[str] = []
+    if models:
+        method.append(protocol_html)
+        method.append(
             f'<div class="lingua"><h3>{_t("Português europeu")}</h3><ul>'
             + "".join(
                 f"<li><strong>{_esc(_model_short(m))}</strong> <code>{_esc(m)}</code>: "
@@ -1350,31 +1406,28 @@ def _build(
             + _t("Indicador independente, baseado numa lista curta de formas alheias ao "
                  "português europeu atual. Não entra na contagem de falhas e subestima a "
                  "frequência real.")
-            + "</p></div></details>"
+            + "</p></div>"
         )
-        out.extend(more)
-
     rows = conditions_rows(in_bank(cases, answers), cases_source, _LANG.get())
-    out.append(
-        f'<details class="recolhe tecnico" id="detalhes"><summary>{_t("Detalhes técnicos: condições do ensaio, glossário e método")}</summary>'
-    )
-    out.append(f'<div class="condicoes" id="condicoes"><h3>{_t("Condições do ensaio")}</h3>')
+    technical = [
+        f'<details class="recolhe tecnico" id="detalhes"><summary>{_t("Detalhes técnicos: condições do ensaio, glossário e método")}</summary>',
+        f'<div class="condicoes" id="condicoes"><h3>{_t("Condições do ensaio")}</h3>',
+    ]
     if rows:
-        out.append("<dl>")
+        technical.append("<dl>")
         for label, value in rows:
             shown = _t(label) if label == "Banco de casos" else f"{_model_short(label)} ({label})"
-            out.append(
+            technical.append(
                 f"<dt>{_esc(shown)}</dt>"
                 f"<dd>{_gloss(_esc(value), ('SHA-256', 'tokens_max'))}</dd>"
             )
-        out.append("</dl>")
+        technical.append("</dl>")
     else:
-        out.append(f"<p>{_t('Sem respostas registadas.')}</p>")
-    out.append("</div>")
-
-    out.append(_glossary_section("".join(out)))
-    out.append(
-        f'<div class="metodo" id="metodo"><h3>{_t("Método")}</h3>'
+        technical.append(f"<p>{_t('Sem respostas registadas.')}</p>")
+    technical.append("</div>")
+    technical.append(_glossary_section("".join(out) + "".join(method) + "".join(technical)))
+    technical.append(
+        f'<div class="metodo" id="metodo-texto"><h3>{_t("Método")}</h3>'
         "<p>" + _t(
             "A correção é textual e determinista: cada critério procura termos e valores na "
             "resposta, e o mesmo texto dá sempre o mesmo veredicto. O próprio corretor é "
@@ -1385,7 +1438,11 @@ def _build(
             "O método completo, os limites conhecidos e a confirmação das fontes estão no "
             "repositório do Aferidor, em {metodo} e {verificacao}.",
             metodo="<code>docs/METODO.md</code>", verificacao="<code>casos/VERIFICACAO.md</code>",
-        ) + "</p></div></details></main>"
+        ) + "</p></div></details>"
+    )
+    out.append(_panel("metodo", _t("Método e detalhes técnicos"), *method, *technical))
+    out.append("</main>")
+    out.append(
         f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p><p class="repo">{_repo_link()}</p></footer>'
     )
     out.append("</body></html>")

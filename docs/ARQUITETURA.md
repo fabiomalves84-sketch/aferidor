@@ -27,7 +27,7 @@ flowchart LR
 | `checks.py` | Avaliação de uma resposta contra um critério |
 | `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |
 | `report.py` | Relatório em Markdown |
-| `html_report.py` | O mesmo relatório em HTML, num único ficheiro |
+| `html_report.py` | O mesmo relatório em HTML, num único ficheiro, em sete páginas mostradas uma de cada vez só com CSS |
 | `html_estilo.py` | A folha de estilo e as cores do relatório HTML, à parte do código que monta a página |
 | `traducao.py` | A interface do relatório HTML em inglês, espanhol, francês e alemão; os casos e as respostas ficam em português |
 | `lingua.py` | Indicador de português europeu, independente da correção clínica |

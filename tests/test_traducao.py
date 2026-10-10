@@ -50,6 +50,8 @@ def interface_strings() -> set[str]:
     found.update(sentence for _, sentence in html_report._EVIDENCE)
     found.update(CASE_RULES.values())
     found.update(state.label for state in ConsistencyState)
+    found.update(label for _, label in html_report.PANELS)
+    found.add(traducao.UNREVIEWED_NOTICE)
     return found
 
 
@@ -76,6 +78,33 @@ class TestCatalogue(unittest.TestCase):
         self.assertEqual(t("texto que não existe no catálogo", "en"), "texto que não existe no catálogo")
         self.assertIn(("en", "texto que não existe no catálogo"), traducao.MISSING)
         traducao.MISSING.clear()
+
+
+class TestNoDashes(unittest.TestCase):
+    """The text of the interface is written without em or en dashes, in every language."""
+
+    def test_no_translation_has_an_em_or_en_dash(self):
+        offenders = [
+            (lang, text) for text, by_lang in CATALOG.items()
+            for lang, translated in {"pt": text, **by_lang}.items()
+            if "\u2014" in translated or "\u2013" in translated
+        ]
+        self.assertEqual(offenders, [])
+
+    def test_the_visible_interface_of_a_page_has_none_either(self):
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                page = page_of([a_case()], [an_answer("500 mg")], lingua=lang)
+                shown = re.sub(r"<(blockquote|style)[^>]*>.*?</\\1>", "", page, flags=re.S)
+                self.assertNotIn("\u2014", shown)
+                self.assertNotIn("\u2013", shown)
+
+
+class TestMachineTranslation(unittest.TestCase):
+    def test_only_languages_the_report_has_can_be_unreviewed_and_portuguese_never_is(self):
+        self.assertTrue(set(traducao.UNREVIEWED) <= set(LANGS))
+        self.assertNotIn("pt", traducao.UNREVIEWED)
+        self.assertNotIn("en", traducao.UNREVIEWED)
 
 
 class TestGrammaticalForms(unittest.TestCase):

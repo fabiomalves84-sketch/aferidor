@@ -124,8 +124,9 @@ class TestDocument(unittest.TestCase):
 
         Landmarks().feed(build([a_case()], [an_answer("500 mg")]))
         self.assertEqual(outside, {"header.topo", "nav.indice", "footer.rodape"})
-        self.assertIn("section#resumo", inside)
+        self.assertIn("section#resultados", inside)
         self.assertIn("section#intro", inside)
+        self.assertIn("section#inicio", inside)
 
     def test_there_is_a_main_in_every_language_and_in_a_page_without_verdicts(self):
         from aferidor.traducao import LANGS
@@ -293,11 +294,13 @@ class TestFullCaseLinkOpensTheCase(unittest.TestCase):
         self.assertIn('<summary id="caso-C1">', self.page())
 
     def test_the_body_leaves_room_for_the_fixed_bar_and_the_summary(self):
+        """The bar is cleared by the page's scroll padding (its height is `--barra`); the body
+        only has to leave room for its own summary above it."""
+        self.assertIn("scroll-padding-top: var(--barra)", html_estilo.STYLE)
         self.assertIn(
-            ".detalhe-corpo { padding: 0.9rem 1rem 1rem; border-top: 1px solid var(--grid); scroll-margin-top: 8rem; }",
+            ".detalhe-corpo { padding: 0.9rem 1rem 1rem; border-top: 1px solid var(--grid); scroll-margin-top: 3.5rem; }",
             html_estilo.STYLE,
         )
-        self.assertIn(".detalhe-corpo { scroll-margin-top: 10rem; }", html_estilo.STYLE)
 
 
 class TestPreviewAndRepositoryLink(unittest.TestCase):
@@ -440,9 +443,9 @@ class TestReferenceThresholdWithoutProtocol(unittest.TestCase):
                 self.assertIn(f"✕ {t('não cumpre o limiar de referência', lang)}</span>", text)
 
 
-class TestWhatComesBeforeTheFirstResult(unittest.TestCase):
-    """The first result comes first. Background notices follow the model cards, with a pointer
-    left at the top; notices that qualify the counts themselves stay above the summary."""
+class TestEachNoticeLivesInItsPage(unittest.TestCase):
+    """The background notices live in the page that explains them, with a pointer from the
+    first page; notices that qualify the counts themselves open the page with the counts."""
 
     def page(self, **kwargs) -> str:
         cases = [a_case("C1"), a_case("C2")]
@@ -452,34 +455,35 @@ class TestWhatComesBeforeTheFirstResult(unittest.TestCase):
         ]
         return build(cases, answers, **kwargs)
 
-    def test_the_sources_notice_follows_the_model_cards(self):
+    def test_the_sources_notice_is_in_the_sources_page(self):
         text = self.page()
         notice = text.index('id="aviso-fontes"')
-        self.assertGreater(notice, text.index('class="cartoes"'))
-        self.assertLess(notice, text.index('id="erros"'))
-        self.assertGreater(notice, text.index('<section id="resumo">'))
+        self.assertGreater(notice, text.index('<section class="painel" id="fontes"'))
+        self.assertLess(notice, text.index('<section class="painel" id="resultados"'))
 
-    def test_a_pointer_at_the_top_links_to_it(self):
+    def test_a_pointer_in_the_first_page_links_to_it(self):
         text = self.page()
-        intro = text[text.index('class="intro"'):text.index('<section id="resumo">')]
-        self.assertIn('<li><a href="#aviso-fontes">fontes por confirmar</a></li>', intro)
+        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="fontes"')]
+        self.assertIn('<li><a href="#aviso-fontes">fontes por confirmar</a></li>', first)
 
     def test_with_the_sources_confirmed_there_is_neither_pointer_nor_notice(self):
         text = self.page(sources_verified=True)
         self.assertNotIn("aviso-fontes", text)
         self.assertNotIn("fontes por confirmar", text)
+        self.assertNotIn("Fontes por confirmar", text)
         self.assertNotIn("Nem todas as fontes", text)
+        self.assertIn("Todas as fontes destes casos foram confirmadas por uma pessoa.", text)
 
-    def test_the_context_note_follows_the_model_cards(self):
+    def test_the_context_note_is_in_the_conclusions_page(self):
         text = self.page()
-        note = text.index('class="contexto"')
-        self.assertGreater(note, text.index('class="cartoes"'))
-        self.assertLess(note, text.index('id="aviso-fontes"'))
+        self.assertGreater(text.index('class="contexto"'), text.index('<section class="painel" id="conclusoes"'))
 
-    def test_notices_that_qualify_the_counts_stay_above_the_summary(self):
+    def test_notices_that_qualify_the_counts_open_the_results_page(self):
         answers = [an_answer("Amoxicilina 500 mg", "C1", model="local:llama3.1:8b")]  # C2 never answered
         text = build([a_case("C1"), a_case("C2")], answers)
-        self.assertLess(text.index("Casos sem resposta."), text.index('<section id="resumo">'))
+        notice = text.index("Casos sem resposta.")
+        self.assertGreater(notice, text.index('<section class="painel" id="resultados"'))
+        self.assertLess(notice, text.index('class="cartoes"'))
 
     def test_without_verdicts_the_sources_notice_still_appears(self):
         text = build([a_case()], [])
@@ -501,6 +505,129 @@ class TestHeadline(unittest.TestCase):
         text = build([a_case()], [an_answer("500 mg")])
         self.assertIn('<span class="destaque">1</span>', text)
         self.assertIn("de 1 casos com falha crítica em alguma amostra", visible(text))
+
+
+PAGES = ("inicio", "fontes", "resultados", "areas", "casos", "conclusoes", "metodo")
+
+
+def navigation(text: str) -> list[str]:
+    nav = re.search(r'<nav class="indice".*?</nav>', text, flags=re.S).group(0)
+    return re.findall(r'href="#([^"]+)"', nav)
+
+
+def panels(text: str) -> list[str]:
+    return re.findall(r'<section class="painel" id="([^"]+)"', text)
+
+
+class TestSevenPages(unittest.TestCase):
+    """Each tab is its own page of the same file, shown alone by CSS (no script)."""
+
+    def page(self, **kwargs) -> str:
+        return build([a_case()], [an_answer("500 mg")], **kwargs)
+
+    def test_the_report_is_seven_pages_each_with_its_own_heading(self):
+        text = self.page()
+        self.assertEqual(panels(text), list(PAGES))
+        self.assertEqual(text.count("<h1"), 1)  # the first page is titled by the report's own title
+        self.assertIn('<section class="painel" id="inicio" aria-labelledby="titulo-relatorio">', text)
+        for ident in PAGES[1:]:
+            with self.subTest(page=ident):
+                self.assertEqual(text.count(f'<h2 id="t-{ident}">'), 1)
+                self.assertIn(f'aria-labelledby="t-{ident}"', text)
+
+    def test_every_link_in_the_navigation_is_a_page_and_every_page_is_linked(self):
+        self.assertEqual(navigation(self.page()), list(PAGES))
+
+    def test_the_navigation_is_a_list_of_links_and_does_not_claim_a_current_page(self):
+        """Without a script the state of a tab cannot be kept, and a page marked current that no
+        longer is would say something false to a screen reader; the heading of the page is
+        what announces where the reader is."""
+        text = self.page()
+        self.assertNotIn("aria-current=\"page\"", re.search(r'<nav class="indice".*?</nav>', text, flags=re.S).group(0))
+        self.assertNotIn('role="tab', text)
+        self.assertNotIn('role="tablist"', text)
+
+    def test_the_first_page_comes_first_and_is_shown_when_the_address_names_none(self):
+        self.assertIn("main:not(:has(:target)) > #inicio", html_estilo.STYLE)
+        self.assertEqual(panels(self.page())[0], "inicio")
+
+    def test_a_page_is_shown_when_it_is_the_target_or_holds_the_target(self):
+        """`#corpo-<caso>` points inside the Casos page: that page has to open, not only the
+        one whose id is in the address."""
+        self.assertIn("main > .painel:target, main > .painel:has(:target)", html_estilo.STYLE)
+
+    def test_pages_are_hidden_only_where_has_is_understood(self):
+        """Otherwise every page would be hidden and nothing could be shown."""
+        css = html_estilo.STYLE
+        self.assertEqual(css.count("main > .painel { display: none; }"), 1)
+        before = css[:css.index("main > .painel { display: none; }")]
+        block = before[before.rindex("@supports selector(:has(*))"):]
+        self.assertGreater(block.count("{") - block.count("}"), 0)  # still inside that @supports
+
+    def test_printing_shows_every_page(self):
+        css = html_estilo.STYLE
+        printing = css[css.index("@media print"):]
+        self.assertIn("main > .painel { display: block !important;", printing)
+
+    def test_a_report_without_verdicts_has_only_the_pages_that_exist(self):
+        text = build([a_case()], [])
+        self.assertEqual(panels(text), ["inicio", "fontes", "resultados", "metodo"])
+        self.assertEqual(navigation(text), ["inicio", "fontes", "resultados", "metodo"])
+
+    def test_the_bar_is_fixed_and_the_scroll_padding_clears_it(self):
+        css = html_estilo.STYLE
+        self.assertIn(".topo { position: sticky; top: 0;", css)
+        self.assertIn("scroll-padding-top: var(--barra)", css)
+        self.assertIn("--barra:", css)
+
+    def test_every_language_whose_bar_is_taller_has_its_own_height(self):
+        """The notice about a machine translation adds a line to the bar of those languages."""
+        from aferidor.traducao import UNREVIEWED
+
+        for lang in UNREVIEWED:
+            with self.subTest(lingua=lang):
+                self.assertIn(f'html[lang="{lang}"]', html_estilo.STYLE)
+
+
+class TestTheNoticeEveryPageCarries(unittest.TestCase):
+    """What the verdicts are, and where the sources stand, stays in the fixed bar."""
+
+    def bar(self, lang: str = "pt", **kwargs) -> str:
+        text = build([a_case()], [an_answer("500 mg")], lingua=lang, **kwargs)
+        return re.search(r'<header class="topo">.*?</header>', text, flags=re.S).group(0)
+
+    def test_the_bar_says_the_verdicts_are_triage_and_links_the_sources_page(self):
+        bar = self.bar()
+        self.assertIn("Veredictos: triagem automática do corretor, sem validação clínica.", bar)
+        self.assertIn('<a href="#fontes">Fontes por confirmar.</a>', bar)
+
+    def test_with_the_sources_confirmed_the_bar_keeps_only_the_first_sentence(self):
+        bar = self.bar(sources_verified=True)
+        self.assertIn("Veredictos: triagem automática do corretor", bar)
+        self.assertNotIn("Fontes por confirmar", bar)
+
+    def test_the_notice_follows_the_language_of_the_page(self):
+        from aferidor.traducao import LANGS, t
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                bar = self.bar(lang)
+                self.assertIn(t("Veredictos: triagem automática do corretor, sem validação clínica.", lang), bar)
+                self.assertIn(t("Fontes por confirmar.", lang), bar)
+
+    def test_a_machine_translated_language_says_so_on_the_bar_and_the_others_do_not(self):
+        from aferidor.traducao import LANGS, UNREVIEWED, UNREVIEWED_NOTICE, t
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                said = 'class="traducao"' in self.bar(lang)
+                self.assertEqual(said, lang in UNREVIEWED)
+                if lang in UNREVIEWED:
+                    self.assertIn(t(UNREVIEWED_NOTICE, lang), self.bar(lang))
+
+    def test_the_bar_sits_outside_main_so_it_is_on_every_page(self):
+        text = build([a_case()], [an_answer("500 mg")])
+        self.assertLess(text.index('class="faixa"'), text.index("<main>"))
 
 
 class TestGrid(unittest.TestCase):
@@ -654,7 +781,7 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_every_section_is_reachable_from_the_index(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        for anchor in ("resumo", "erros", "areas", "grelha", "casos-com-falha", "falhas", "detalhes"):
+        for anchor in ("inicio", "fontes", "resultados", "areas", "casos", "conclusoes", "metodo"):
             with self.subTest(anchor=anchor):
                 self.assertIn(f'href="#{anchor}"', text)
                 self.assertIn(f'id="{anchor}"', text)
@@ -672,6 +799,9 @@ class TestReadableByAnOutsider(unittest.TestCase):
         text = build([a_case()], [an_answer("1 g")])
         self.assertNotIn('href="#erros"', text)
         self.assertNotIn('id="erros"', text)
+        for anchor in re.findall(r'<nav class="indice".*?</nav>', text, flags=re.S)[0].split('href="#')[1:]:
+            with self.subTest(anchor=anchor[:12]):
+                self.assertIn(f'id="{anchor.split(chr(34))[0]}"', text)
 
     def test_failure_charts_share_one_scale_across_models(self):
         """Two charts on their own scales make a smaller count look as long as a bigger one."""
