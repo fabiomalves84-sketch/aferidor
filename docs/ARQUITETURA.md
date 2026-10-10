@@ -27,6 +27,7 @@ flowchart LR
 | `checks.py` | Avaliação de uma resposta contra um critério |
 | `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |
 | `report.py` | Relatório em Markdown |
+| `condicoes.py` | O que os dois relatórios dizem do ensaio antes dos resultados: as condições em que foi feito, os casos e as amostras que não vieram, e o que o protocolo faz deles |
 | `comparacao.py` | O que os números de uma comparação decidem, numa só função cada: o limiar de referência, o empate no topo, a significância (p abaixo de 0,05) e o arredondamento das percentagens; os dois relatórios usam-no, para não discordarem |
 | `html_report.py` | O mesmo relatório em HTML, num único ficheiro, em oito páginas mostradas uma de cada vez só com CSS |
 | `html_estilo.py` | A folha de estilo e as cores do relatório HTML, à parte do código que monta a página |
@@ -85,7 +86,12 @@ de amostras corretas: na prática clínica é observada uma única resposta.
 
 **O relatório HTML não calcula; apresenta o que `grading` produziu.**
 `html_report.py` usa as mesmas contagens e a mesma estrutura de consistência
-que `report.py`, pelo que os dois formatos coincidem por construção.
+que `report.py`, e ambos leem as condições do ensaio de `condicoes.py` e as
+decisões sobre os números de `comparacao.py`, pelo que os dois formatos
+coincidem por construção. O relatório HTML só depende de `report.py` numa
+constante, `CLINICAL_REVIEW_DONE`: os testes fazem patch nela (em `report`) para
+verificar a frase da primeira página com e sem revisão, e mudá-la de módulo
+deixaria esses patches sem efeito.
 `grading.match_answers` e `grading.pairs_by_case` garantem que ambos usam o
 mesmo emparelhamento entre resposta e veredicto.
 As decisões sobre essas contagens (o limiar de referência, o empate no topo, a
@@ -99,7 +105,9 @@ tradução. As perguntas, as referências e as respostas dos modelos são o
 objeto medido e nunca são traduzidas. Cada língua é um ficheiro próprio, com
 um menu entre elas, para o relatório continuar sem script e com o mesmo
 peso. Um teste gera um ensaio real nas cinco línguas e exige que nenhum texto
-fique sem tradução.
+fique sem tradução. O teste que procura cadeias sem uso lê os módulos à mão, em
+`interface_strings()` (`tests/test_traducao.py`): um módulo novo com cadeias de
+interface tem de ser acrescentado a essa lista, como `condicoes.py` foi.
 
 ## Sem dependências externas
 

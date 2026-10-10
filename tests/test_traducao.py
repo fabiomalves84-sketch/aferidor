@@ -32,7 +32,7 @@ def placeholders(text: str) -> list[str]:
 def interface_strings() -> set[str]:
     """Every Portuguese string the code hands to the catalogue, found in the source."""
     found: set[str] = set()
-    for name in ("html_report", "report", "protocolo", "lingua"):
+    for name in ("html_report", "report", "condicoes", "protocolo", "lingua"):
         tree = ast.parse((ROOT / "aferidor" / f"{name}.py").read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call) or getattr(node.func, "id", None) not in ("_t", "t", "_plural"):

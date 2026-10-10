@@ -62,11 +62,7 @@ from .comparacao import (
     same_proportion,
     top_tie,
 )
-from .html_estilo import STYLE
-from .lingua import LanguageSummary, language_by_model, language_line
-from .models import Answer, Case, Verdict
-from .protocolo import Outcome, Protocol
-from .report import (
+from .condicoes import (
     HEADER_NOTE,
     conditions_rows,
     format_missing,
@@ -74,6 +70,10 @@ from .report import (
     in_bank,
     protocol_findings,
 )
+from .html_estilo import STYLE
+from .lingua import LanguageSummary, language_by_model, language_line
+from .models import Answer, Case, Verdict
+from .protocolo import Outcome, Protocol
 from .risk import FailureType, Risk
 from .traducao import HTML_LANG, NAMES, OG_LOCALE, UNREVIEWED, UNREVIEWED_NOTICE, decimal, t as _translate
 
