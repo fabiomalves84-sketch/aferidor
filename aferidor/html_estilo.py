@@ -176,9 +176,6 @@ footer.rodape .traducao { margin-top: 0.9rem; }
 .painel > h2 { font-size: 1.6rem; margin: 0 0 1rem; }
 .painel > section:first-of-type, .painel > .cartoes:first-child { margin-top: 0; }
 .painel section > h3 { font-size: 1.2rem; margin-bottom: 0.6rem; }
-.intro { margin-top: 1.5rem;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
-.lead { font-size: 1.12rem; }
 .triagem { color: var(--ink-2); font-size: 0.9rem; margin-top: -0.25rem; }
 .factos { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .factos li { background: var(--highlight); border-radius: 999px; padding: 0.2rem 0.75rem; font-size: 0.88rem; color: var(--ink-2); }
@@ -196,8 +193,6 @@ footer.rodape .traducao { margin-top: 0.9rem; }
 .modelo-nome { font-size: 1.15rem; font-weight: 650; display: block; }
 .modelo-desc { display: block; color: var(--ink-2); font-size: 0.85rem; margin-top: 0.1rem; }
 .modelo-id { display: inline-block; margin-top: 0.3rem; font-size: 0.72rem; color: var(--muted); background: none; padding: 0; }
-.cabecalho-modelo .modelo-nome { font-size: 0.95rem; }
-.cabecalho-modelo .modelo-desc { font-weight: 400; font-size: 0.76rem; }
 .selo { font-size: 0.8rem; font-weight: 600; border-radius: 999px; padding: 0.15rem 0.6rem; }
 .selo.aprovado { background: var(--good-bg); color: var(--success-text); }
 .selo.reprovado { background: var(--critical-bg); color: var(--ink); }
@@ -214,11 +209,6 @@ footer.rodape .traducao { margin-top: 0.9rem; }
   font-size: 0.85rem; color: var(--ink-2); }
 .legenda-estados strong { color: var(--ink); }
 .swatch { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 3px; margin-right: 0.35rem; vertical-align: -0.05rem; }
-.metricas { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1rem 0 0.75rem; }
-.metricas div { background: var(--surface-2); border-radius: 8px; padding: 0.5rem 0.7rem; }
-.metricas dt { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.metricas dd { margin: 0.1rem 0 0; font-weight: 600; font-size: 0.95rem; }
-.metricas dd.unidade { font-weight: 400; font-size: 0.78rem; color: var(--muted); }
 .pontos { display: inline-flex; gap: 2px; margin-left: 0.4rem; font-size: 0.72rem; letter-spacing: 0; vertical-align: 0.05rem; }
 .pt.certa { color: var(--success-text); }
 .pt { display: inline-block; width: 0.85em; text-align: center; }
@@ -230,11 +220,8 @@ footer.rodape .traducao { margin-top: 0.9rem; }
 .como-se-conta ul { list-style: none; padding: 0; margin: 0.5rem 0; }
 .como-se-conta li { margin: 0.25rem 0; }
 .como-se-conta li .pontos { display: inline-flex; min-width: 5.5rem; margin: 0 0.6rem 0 0; }
-.lingua-linha { font-size: 0.86rem; color: var(--ink-2); margin: 0; }
 .protocolo .cartao { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
 .protocolo ul { padding-left: 1.2rem; margin-bottom: 0; }
-.contexto { background: var(--surface-2); border-radius: 10px; padding: 0.75rem 1rem; max-width: 48rem; font-size: 0.92rem; color: var(--ink-2); margin-top: 1rem; }
-.contexto strong { color: var(--ink); }
 .comparacao { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
 .comp-frase { font-size: 1.05rem; }
 .comp-lista, .comp-eixo { list-style: none; margin: 0; padding: 0; }
@@ -261,7 +248,7 @@ footer.rodape .traducao { margin-top: 0.9rem; }
 .erro-par blockquote { max-height: 12rem; font-size: 0.84rem; }
 .erro-ref { background: var(--good-bg); border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.88rem; margin-bottom: 0.4rem; }
 .erro-chips { margin: 0.6rem 0 0.3rem; }
-.intro a, .erro-cartao a, .rodape a { color: var(--accent); }
+.erro-cartao a, .rodape a { color: var(--accent); }
 .repo { font-size: 0.92rem; margin: 0 0 0.75rem; }
 .veredicto { font-size: 1.05rem; max-width: 48rem; margin: 0 0 0.5rem; }
 table.areas { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
@@ -346,7 +333,6 @@ details.recolhe > :not(summary) { margin-left: 1.25rem; margin-right: 1.25rem; }
 details.recolhe > :last-child { margin-bottom: 1rem; }
 details.mais, details.tecnico { margin-top: 2.5rem; }
 details.recolhe h3 { margin-top: 1.25rem; }
-.intro details.ler { margin-top: 1rem; background: var(--surface-2); }
 .card-linha { font-size: 0.9rem; color: var(--ink-2); margin: 0.75rem 0 0; }
 .card-linha strong { color: var(--ink); }
 .lista-certos { list-style: none; padding: 0; margin: 0.75rem 1.25rem 1rem; font-size: 0.88rem; color: var(--ink-2); }
@@ -368,7 +354,6 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
   .barras-falhas li { grid-template-columns: 8.5rem 1fr 2rem; }
   .destaque { font-size: 2.6rem; }
   .titulo-inicio h1 { font-size: 1.6rem; }
-  .metricas { grid-template-columns: 1fr; }
   .erros { grid-template-columns: 1fr; }
   .erro-par { grid-template-columns: 1fr; }
   .comp-lista li, .comp-eixo { grid-template-columns: 6rem 1fr 6.5rem; }

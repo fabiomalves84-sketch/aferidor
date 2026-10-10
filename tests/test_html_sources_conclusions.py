@@ -215,7 +215,6 @@ class TestConclusionsPage(unittest.TestCase):
     def test_the_old_note_and_triage_paragraph_are_gone_from_the_page(self):
         page = _Example.page()
         conclusions = page[page.index('id="conclusoes"'):page.index('id="metodo"')]
-        self.assertNotIn('class="contexto"', conclusions)
         self.assertNotIn('class="triagem"', conclusions)
 
 
