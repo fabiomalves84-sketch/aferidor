@@ -11,9 +11,8 @@ from aferidor import html_estilo, html_report, report
 from aferidor.grading import consistency_by_case, consistency_by_model, grade_all
 from aferidor.models import Case, Criterion, Source
 from aferidor.risk import FailureType
-from tests.helpers import an_answer
+from tests.helpers import a_case, an_answer
 from tests.html_support import (
-    a_case,
     build,
     panel_html,
     visible,

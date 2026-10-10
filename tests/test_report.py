@@ -7,22 +7,8 @@ from datetime import date, datetime
 
 from aferidor import report
 from aferidor.grading import grade
-from aferidor.models import Answer, Case, Criterion, Source
-from aferidor.risk import FailureType
-from tests.helpers import an_answer
-
-
-def a_case(case_id: str = "C1") -> Case:
-    return Case(
-        case_id=case_id,
-        category="dose",
-        question="Que dose de amoxicilina?",
-        reference="Amoxicilina 1000 mg de 8/8h",
-        source=Source(name="Guia ATB", reference="p. 17"),
-        criteria=(
-            Criterion(kind="contem", terms=("1000 mg", "1 g"), failure=FailureType.DOSE_INCORRETA),
-        ),
-    )
+from aferidor.models import Answer
+from tests.helpers import a_case, a_two_regimen_case, an_answer
 
 
 def build(cases, answers, **kwargs) -> str:
@@ -94,7 +80,6 @@ class TestConditions(unittest.TestCase):
 class TestAlternativeShown(unittest.TestCase):
     def test_a_failed_answer_says_which_regimen_it_was_judged_against(self):
         from aferidor import html_report
-        from tests.test_grading import a_two_regimen_case
 
         case = a_two_regimen_case()
         answer = Answer(

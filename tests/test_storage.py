@@ -6,12 +6,12 @@ from pathlib import Path
 
 from aferidor.models import Answer, Case, Criterion, Source
 from aferidor.risk import FailureType
-from tests.helpers import write_cases
 from aferidor.storage import (
     read_answers,
     read_cases,
     write_answers,
 )
+from tests.helpers import a_two_regimen_case, an_answer, write_cases
 
 
 def a_case(case_id: str = "C-001") -> Case:
@@ -185,7 +185,6 @@ class TestAnswerConditions(unittest.TestCase):
 
 class TestAlternativesOnDisk(unittest.TestCase):
     def test_a_case_with_alternatives_survives_a_write_and_a_read(self):
-        from tests.test_grading import a_two_regimen_case
 
         case = a_two_regimen_case()
         with tempfile.TemporaryDirectory() as folder:
@@ -197,7 +196,6 @@ class TestAlternativesOnDisk(unittest.TestCase):
     def test_the_verdict_on_disk_names_the_alternative(self):
         from aferidor.grading import grade
         from aferidor.storage import verdict_to_dict
-        from tests.test_grading import a_two_regimen_case, an_answer
 
         verdict = grade(
             a_two_regimen_case(),

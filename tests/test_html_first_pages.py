@@ -11,7 +11,7 @@ from aferidor import html_estilo, html_report
 from aferidor import report as _report
 from aferidor.models import Case, Criterion, Source
 from aferidor.risk import FailureType
-from tests.helpers import an_answer
+from tests.helpers import a_case, an_answer
 from tests.html_support import (
     ABOUT_PAGE_WORDS,
     FIRST_PAGE_WORDS,
@@ -19,7 +19,6 @@ from tests.html_support import (
     ROOT,
     TRANSLATION_NOTICE_WORDS,
     _Example,
-    a_case,
     build,
     element_text,
     navigation,

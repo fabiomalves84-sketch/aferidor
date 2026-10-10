@@ -15,7 +15,7 @@ from aferidor.cli import main
 from aferidor.grading import ConsistencySummary, grade
 from aferidor.models import Answer
 from aferidor.protocolo import evaluate, read_protocol, template, warnings
-from tests.test_report import a_case
+from tests.helpers import a_case
 
 REAL_CASES = Path(__file__).resolve().parent.parent / "casos" / "casos.json"
 

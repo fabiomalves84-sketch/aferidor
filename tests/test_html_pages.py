@@ -7,11 +7,10 @@ import unittest
 from pathlib import Path
 
 from aferidor import html_estilo
-from tests.helpers import an_answer
+from tests.helpers import a_case, an_answer
 from tests.html_support import (
     PAGES,
     _Example,
-    a_case,
     build,
     navigation,
     panel_html,

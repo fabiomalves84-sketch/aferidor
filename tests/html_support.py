@@ -12,25 +12,10 @@ from pathlib import Path
 from aferidor import html_report
 from aferidor import report as _report
 from aferidor.grading import grade_all
-from aferidor.models import Case, Criterion, Source
 from aferidor.protocolo import read_protocol as _read_protocol
 from aferidor.protocolo import template as _template
-from aferidor.risk import FailureType
 from aferidor.storage import read_answers as _read_answers
 from aferidor.storage import read_cases as _read_cases
-
-
-def a_case(case_id: str = "C1", category: str = "dose") -> Case:
-    return Case(
-        case_id=case_id,
-        category=category,
-        question="Que dose de amoxicilina?",
-        reference="Amoxicilina 1000 mg de 8/8h",
-        source=Source(name="Guia ATB", reference="p. 17"),
-        criteria=(
-            Criterion(kind="contem", terms=("1000 mg", "1 g"), failure=FailureType.DOSE_INCORRETA),
-        ),
-    )
 
 
 def visible(page: str) -> str:

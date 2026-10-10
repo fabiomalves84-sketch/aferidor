@@ -9,7 +9,7 @@ from aferidor import html_report, report
 from aferidor.grading import grade
 from aferidor.lingua import BRAZILIAN, PRE_AGREEMENT, language_by_model, markers_in
 from aferidor.models import Answer
-from tests.test_report import a_case
+from tests.helpers import a_case
 
 
 def labels(text: str) -> list[str]:

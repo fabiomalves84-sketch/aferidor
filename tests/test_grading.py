@@ -13,20 +13,20 @@ from aferidor.grading import (
     expected_samples,
     grade,
     grade_all,
-    missing_samples,
     mcnemar_exact,
     met_by_the_question,
-    verdict_changes,
+    missing_samples,
     negative_controls,
     right_cases_by_model,
     self_check,
     tally,
     tally_by_model,
     uncaught_controls,
+    verdict_changes,
 )
-from aferidor.models import Alternative, Case, Criterion, Source
+from aferidor.models import Case, Criterion, Source
 from aferidor.risk import FailureType, Risk
-from tests.helpers import an_answer
+from tests.helpers import a_two_regimen_case, an_answer
 
 
 def a_case(case_id: str = "C1") -> Case:
@@ -589,43 +589,6 @@ class TestNegativeControls(unittest.TestCase):
         total, uncaught = uncaught_controls([a_wide_case("600")])
         self.assertEqual(total, 1)
         self.assertEqual(uncaught, [])
-
-
-def a_two_regimen_case() -> Case:
-    """Like ATB-FAR-013: ten days of amoxicillin, or one dose of benzathine penicillin."""
-    return Case(
-        case_id="AMIG",
-        category="pediatria",
-        question="Amigdalite estreptocócica numa criança de 30 kg. Primeira linha?",
-        reference="Amoxicilina 50 mg/kg/dia 12/12h durante 10 dias, ou penicilina G benzatínica 1.200.000 U IM em dose única.",
-        source=Source(name="DGS", reference="Norma 020/2012, ponto 10"),
-        criteria=(
-            Criterion(
-                kind="nao_prescreve", terms=("azitromicina",),
-                failure=FailureType.RESPOSTA_INCOMPLETA,
-            ),
-        ),
-        alternatives=(
-            Alternative(
-                description="amoxicilina 10 dias",
-                reference="Amoxicilina 50 mg/kg/dia de 12/12h durante 10 dias.",
-                criteria=(
-                    Criterion(kind="contem", terms=("amoxicilina",), failure=FailureType.RESPOSTA_INCOMPLETA),
-                    Criterion(kind="valor_numerico", terms=("50", "mg/kg/dia"), failure=FailureType.DOSE_INCORRETA),
-                    Criterion(kind="contem", terms=("10 dias",), failure=FailureType.RESPOSTA_INCOMPLETA),
-                ),
-            ),
-            Alternative(
-                description="penicilina benzatínica em dose única",
-                reference="Penicilina G benzatínica 1.200.000 U IM em dose única.",
-                criteria=(
-                    Criterion(kind="contem", terms=("benzatinica",), failure=FailureType.RESPOSTA_INCOMPLETA),
-                    Criterion(kind="contem", terms=("1.200.000", "1 200 000"), failure=FailureType.DOSE_INCORRETA),
-                    Criterion(kind="contem", terms=("dose unica", "toma unica"), failure=FailureType.DOSE_INCORRETA),
-                ),
-            ),
-        ),
-    )
 
 
 class TestAlternatives(unittest.TestCase):

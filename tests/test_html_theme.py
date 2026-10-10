@@ -6,9 +6,8 @@ import re
 import unittest
 
 from aferidor import html_estilo
-from tests.helpers import an_answer
+from tests.helpers import a_case, an_answer
 from tests.html_support import (
-    a_case,
     build,
     contrast,
     tokens,
