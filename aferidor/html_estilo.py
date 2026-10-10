@@ -38,7 +38,7 @@ THEME_CSS = (
     "@media print {\n"
     "  :root, :root:has(#tema-escuro:checked) { color-scheme: light;" + LIGHT_TOKENS + "}\n}\n"
 )
-PANEL_IDS = ("inicio", "fontes", "resultados", "areas", "casos", "conclusoes", "metodo")
+PANEL_IDS = ("inicio", "sobre", "fontes", "resultados", "areas", "casos", "conclusoes", "metodo")
 # Height of the fixed bar. It is declared, not measured: `.topo` has exactly this height and the
 # page's scroll padding leaves exactly this much free, so a page or an anchor opens just below the
 # bar in every language and at every width. What it holds has to fit: the pages never wrap (they
@@ -143,11 +143,18 @@ ul.conclusoes li { margin: 0 0 0.45rem; }
 .painel a { color: var(--accent); }
 .painel h3:has(+ ul.conclusoes) { font-size: 1.1rem; margin: 1.1rem 0 0.5rem; }
 .fecho { max-width: 46rem; margin: 1rem 0 0; padding-top: 0.9rem; border-top: 1px solid var(--grid); color: var(--ink-2); }
-.inicio-corpo { max-width: 46rem; }
+.inicio-texto, .inicio-lateral, .sobre { max-width: 38rem; }
+/* From 80rem the numbers and the result sit beside the text; below, they stack under it. */
+@media (min-width: 80rem) {
+  .inicio-corpo { display: grid; grid-template-columns: 38rem 18rem; column-gap: 1.5rem; align-items: start; }
+}
+.saber-mais { margin: 0 0 1.1rem; font-weight: 600; }
+.sobre pre { background: var(--surface-2); border-radius: 8px; padding: 0.75rem 0.9rem; overflow-x: auto; margin: 0 0 1rem; }
+.sobre pre code { background: none; padding: 0; font-size: 0.85rem; }
+.sobre h3 { margin: 1.4rem 0 0.5rem; font-size: 1.1rem; }
+.sobre ul.objetivos { margin: 0 0 0.9rem; padding-left: 1.25rem; color: var(--ink-2); }
 .porque { font-size: 1.12rem; margin-bottom: 1.1rem; }
-.objetivos { margin: 0 0 1.1rem; }
 .objetivos-titulo { margin: 0 0 0.25rem; color: var(--accent); }
-.objetivos ul { margin: 0; padding-left: 1.25rem; color: var(--ink-2); }
 .inicio-corpo .factos { margin: 0 0 1.25rem; }
 .resultado { margin: 0 0 0.6rem; padding: 1rem 1.25rem; font-size: 1.3rem; line-height: 1.4; background: var(--highlight);
   border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 12px; }

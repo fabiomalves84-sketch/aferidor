@@ -73,6 +73,7 @@ _LANG: contextvars.ContextVar[str] = contextvars.ContextVar("lingua", default="p
 # The only addresses on the page: a link to the project, and the image a link preview (a
 # chat, LinkedIn) shows. Opening the report fetches neither; a crawler reads the second.
 REPO_URL = "https://github.com/fabiomalves84-sketch/aferidor"
+COMO_CORRER_URL = f"{REPO_URL}/blob/main/docs/COMO_CORRER.md"
 PREVIEW_IMAGE_URL = "https://fabiomalves84-sketch.github.io/aferidor/imagens/resumo.png"
 PREVIEW_IMAGE_SIZE = (1327, 896)
 # Where the "sources not yet confirmed" notice can be linked to from the top of the page.
@@ -567,11 +568,7 @@ def _start_page(
         ("titulo", f'<h1 id="titulo-relatorio">{_t("Relatório do Aferidor")}</h1>'),
         ("subtitulo", f'<p class="subtitulo">{_t("Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública.")}</p>'),
         ("porque", f'<p class="porque">{_t("Um assistente que responde a um médico sobre dose, interação ou contraindicação participa numa decisão terapêutica. Uma média de respostas corretas pode esconder o que importa, como erros em doses pediátricas.")}</p>'),
-        ("objetivos",
-         f'<div class="objetivos"><p class="objetivos-titulo"><strong>{_t("Objetivos.")}</strong></p><ul>'
-         f'<li>{_t("Medir, sem aconselhar.")}</li>'
-         f'<li>{_t("Mostrar primeiro as falhas críticas, e não a média.")}</li>'
-         f'<li>{_t("Preparar a validação por um especialista.")}</li></ul></div>'),
+        ("sobre", f'<p class="saber-mais"><a href="#sobre">{_t("Saber mais sobre o Aferidor.")}</a></p>'),
         ("numeros", '<ul class="factos">' + "".join(f"<li>{_esc(f)}</li>" for f in facts) + "</ul>"),
     ]
     if summaries:
@@ -613,6 +610,64 @@ def _start_page(
     )
     elements.append(("triagem", f'<p class="triagem">{triage}</p>'))
     return elements
+
+
+# What the command block of the About page says: the lines of the README, section "Instalação e
+# primeira execução", without the one that runs the tests (its comment holds a count that changes).
+ABOUT_COMMANDS = (
+    "git clone https://github.com/fabiomalves84-sketch/aferidor.git\n"
+    "cd aferidor\n"
+    "python3 -m aferidor verificar                  # coerência dos casos e do corretor\n"
+    "python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo"
+)
+
+
+def _about_page(protocol: Protocol | None) -> list[tuple[str, str]]:
+    """The About page, as named elements in reading order. Every sentence is true of every report:
+    it says what the instrument is, what it does and how it is run, from the README, the method and
+    the running guide, and only what holds whether or not a protocol was written first."""
+    start = _link("inicio", "Início")
+    if protocol is None:
+        protocols = _t(
+            "Os protocolos de aprovação, escritos antes do ensaio, são opcionais. Este relatório não tem "
+            "nenhum: usa o limiar de referência, que não é um protocolo prévio."
+        )
+    else:
+        protocols = _t(
+            "Os protocolos de aprovação, escritos antes do ensaio, são opcionais. Este relatório tem um "
+            "protocolo de aprovação; os critérios estão no {inicio}.", inicio=start,
+        )
+    guide = f'<a href="{COMO_CORRER_URL}" rel="noopener"><code>COMO_CORRER.md</code></a>'
+    return [
+        ("o-que-e", f'<h3>{_t("O que é")}</h3>'),
+        ("definicao", "<p>" + _t(
+            "O Aferidor é um banco de ensaio que mede respostas clínicas de modelos de linguagem em "
+            "português europeu, contra casos de referência com fonte pública.") + "</p>"),
+        ("ambito", "<p>" + _t("Mede, não aconselha. Não é um dispositivo médico e não contém dados de doentes.") + "</p>"),
+        ("para-que-serve", f'<h3>{_t("Para que serve")}</h3>'),
+        ("objetivos",
+         f'<p class="objetivos-titulo"><strong>{_t("Objetivos.")}</strong></p><ul class="objetivos">'
+         f'<li>{_t("Medir, sem aconselhar.")}</li>'
+         f'<li>{_t("Mostrar primeiro as falhas críticas, e não a média.")}</li>'
+         f'<li>{_t("Preparar a validação por um especialista.")}</li></ul>'),
+        ("criterios", "<p>" + _t(
+            "Cada resposta é corrigida contra os critérios do caso, de forma textual e determinista. "
+            "Os critérios e o corretor estão em código, versionados.") + "</p>"),
+        ("controlos", "<p>" + _t(
+            "Antes de um ensaio, cada critério tem de aceitar a resposta de referência e rejeitar uma "
+            "resposta errada construída para o efeito.") + "</p>"),
+        ("afinacao", "<p>" + _t(
+            "O corretor foi afinado depois de alguns ensaios, com cada afinação registada e a razão "
+            "escrita no commit; por isso os números dependem da versão do corretor.") + "</p>"),
+        ("protocolos", f"<p>{protocols}</p>"),
+        ("como-se-usa", f'<h3>{_t("Como se usa")}</h3>'),
+        ("experimentar", "<p>" + _t("Para experimentar não é preciso chave nem custo:") + "</p>"),
+        ("comandos", f"<pre><code>{_esc(ABOUT_COMMANDS)}</code></pre>"),
+        ("modelo-real", "<p>" + _t(
+            "A execução contra um modelo real (OpenAI, Anthropic, Google Gemini ou local através do "
+            "Ollama), as chaves de API, o protocolo e a afinação de critérios estão em {ficheiro}. "
+            "As chaves de API são lidas do ambiente e nunca do repositório.", ficheiro=guide) + "</p>"),
+    ]
 
 
 def _notices(
@@ -1408,6 +1463,7 @@ def build(
 # file; CSS alone shows one at a time (`html_estilo`), so there is still no script.
 PANELS = (
     ("inicio", "Início"),
+    ("sobre", "Sobre"),
     ("fontes", "Fontes"),
     ("resultados", "Resultados"),
     ("areas", "Por área clínica"),
@@ -1582,12 +1638,20 @@ def _build(
         cases, models, answers, summaries, protocol, protocol_outcomes, protocol_warnings
     )
     heading = [html for name, html in start if name in ("titulo", "subtitulo")]
-    body = [html for name, html in start if name not in ("titulo", "subtitulo")]
+    reading = [html for name, html in start if name in ("porque", "sobre")]
+    side = [html for name, html in start if name not in ("titulo", "subtitulo", "porque", "sobre")]
     out.append(
         '<section class="painel" id="inicio" aria-labelledby="titulo-relatorio">'
         f'{_translation_notice()}<div class="titulo-inicio">{"".join(heading)}</div>'
-        f'<div class="inicio-corpo">{"".join(body)}</div></section>'
+        f'<div class="inicio-corpo"><div class="inicio-texto">{"".join(reading)}</div>'
+        f'<div class="inicio-lateral">{"".join(side)}</div></div></section>'
     )
+
+    # Sobre: what the instrument is, what it is for and how it is run.
+    out.append(_panel(
+        "sobre", _t("Sobre o Aferidor"),
+        '<div class="sobre">' + "".join(html for _, html in _about_page(protocol)) + "</div>",
+    ))
 
     # Fontes: where the cases come from, and what is still to be confirmed.
     out.append(_panel("fontes", _t("Fontes"), *_sources_page(cases, confirmation, sources_verified, late, written)))

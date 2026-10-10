@@ -317,7 +317,7 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
 - *Eixo da comparação em telemóvel.* Em 390 px os cinco rótulos (0% a 100%)
   sobrepõem-se e leem-se como "0%25%50%75%100%" (regras `.comp-ticks` em
   `html_estilo.py`); as linhas dos intervalos ficam com cerca de 80 px.
-- *Barra fixa e páginas.* O relatório são sete páginas, mostradas uma de cada
+- *Barra fixa e páginas.* O relatório são oito páginas, mostradas uma de cada
   vez só com CSS (`main > .painel` em `html_estilo.py`). A barra fixa
   (navegação, controlos e o aviso de triagem) tem a altura que declara
   (`--barra`, em `BAR_HEIGHT`: 4,8rem, 7rem abaixo de 62rem, 8,6rem abaixo de
@@ -343,7 +343,7 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   O `<h2>` de cada página (o `<h1>` no Início) é o que indica onde se está, e as
   páginas ocultas saem da árvore de acessibilidade. A ligação atual só se
   distingue visualmente. Sem `:has()` (navegadores anteriores a 2022 a 2023) as
-  sete páginas ficam visíveis em sequência.
+  oito páginas ficam visíveis em sequência.
 - *Tradução automática.* O inglês, o espanhol, o francês e o alemão foram
   traduzidos por uma máquina e nenhum falante nativo os reviu; só o português é
   a versão de referência. Dizem-no no cimo de cada página e no rodapé

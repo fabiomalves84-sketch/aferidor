@@ -80,9 +80,12 @@ class TestDocument(unittest.TestCase):
             sorted([
                 ("a", "href", html_report.REPO_URL),
                 ("a", "href", html_report.REPO_URL),
+                ("a", "href", html_report.COMO_CORRER_URL),
                 ("meta", "content", html_report.PREVIEW_IMAGE_URL),
             ]),
         )
+        for _, _, address in found:  # nothing but the repository, and the preview image
+            self.assertTrue(address.startswith(html_report.REPO_URL) or address == html_report.PREVIEW_IMAGE_URL, address)
         self.assertIn("https://exemplo.pt/x", text)  # the answer is still shown, as text
 
     def test_it_works_in_dark_mode(self):
@@ -348,7 +351,7 @@ class TestPreviewAndRepositoryLink(unittest.TestCase):
         text = self.page()
         link = f'<a href="{html_report.REPO_URL}" rel="noopener">{self.LINK_TEXT}</a>'
         self.assertEqual(text.count(link), 2)
-        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="fontes"')]
+        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="sobre"')]
         self.assertNotIn(link, first)
         method = text[text.index('<section class="painel" id="metodo"'):text.index("</main>")]
         self.assertIn(link, method)
@@ -470,7 +473,7 @@ class TestEachNoticeLivesInItsPage(unittest.TestCase):
 
     def test_the_first_page_does_not_repeat_the_pointer_the_bar_already_carries(self):
         text = self.page()
-        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="fontes"')]
+        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="sobre"')]
         self.assertNotIn("aviso-fontes", first)
         self.assertNotIn("fontes por confirmar", first)
         self.assertIn('<a href="#fontes">Fontes por confirmar.</a>', text[:text.index("<main>")])
@@ -503,7 +506,7 @@ class TestHeadline(unittest.TestCase):
         self.assertIn("de 1 casos com falha crítica em alguma amostra", visible(text))
 
 
-PAGES = ("inicio", "fontes", "resultados", "areas", "casos", "conclusoes", "metodo")
+PAGES = ("inicio", "sobre", "fontes", "resultados", "areas", "casos", "conclusoes", "metodo")
 
 
 def navigation(text: str) -> list[str]:
@@ -515,13 +518,13 @@ def panels(text: str) -> list[str]:
     return re.findall(r'<section class="painel" id="([^"]+)"', text)
 
 
-class TestSevenPages(unittest.TestCase):
+class TestEightPages(unittest.TestCase):
     """Each tab is its own page of the same file, shown alone by CSS (no script)."""
 
     def page(self, **kwargs) -> str:
         return build([a_case()], [an_answer("500 mg")], **kwargs)
 
-    def test_the_report_is_seven_pages_each_with_its_own_heading(self):
+    def test_the_report_is_eight_pages_each_with_its_own_heading(self):
         text = self.page()
         self.assertEqual(panels(text), list(PAGES))
         self.assertEqual(text.count("<h1"), 1)  # the first page is titled by the report's own title
@@ -567,8 +570,8 @@ class TestSevenPages(unittest.TestCase):
 
     def test_a_report_without_verdicts_has_only_the_pages_that_exist(self):
         text = build([a_case()], [])
-        self.assertEqual(panels(text), ["inicio", "fontes", "resultados", "metodo"])
-        self.assertEqual(navigation(text), ["inicio", "fontes", "resultados", "metodo"])
+        self.assertEqual(panels(text), ["inicio", "sobre", "fontes", "resultados", "metodo"])
+        self.assertEqual(navigation(text), ["inicio", "sobre", "fontes", "resultados", "metodo"])
 
     def test_the_bar_is_fixed_and_the_scroll_padding_clears_it(self):
         css = html_estilo.STYLE
@@ -651,7 +654,7 @@ class TestTheTranslationNotice(unittest.TestCase):
                 said = t(UNREVIEWED_NOTICE, lang)
                 if lang in UNREVIEWED:
                     notice = f'<p class="traducao" role="note">{said}</p>'
-                    self.assertEqual(text.count(notice), len(PAGES) + 1)  # seven pages and the footer
+                    self.assertEqual(text.count(notice), len(PAGES) + 1)  # eight pages and the footer
                     for ident in PAGES:
                         at = text.index(f'<section class="painel" id="{ident}"')
                         self.assertIn(notice, text[at:text.index("</h2>", at)])
@@ -822,12 +825,12 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_it_opens_by_saying_what_the_aferidor_is_why_it_exists_and_what_it_aims_at(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        first = visible(text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="fontes"')])
-        for sentence in ("Um assistente que responde a um médico", "Objetivos.", "Medir, sem aconselhar.",
-                         "Mostrar primeiro as falhas críticas, e não a média.", "Preparar a validação por um especialista."):
-            with self.subTest(sentence=sentence[:30]):
-                self.assertIn(sentence, first)
-        self.assertLess(first.index("Objetivos."), first.index("Modelos que cumprem"))
+        first = visible(text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="sobre"')])
+        self.assertIn("Um assistente que responde a um médico", first)
+        self.assertIn('<a href="#sobre">Saber mais sobre o Aferidor.</a>', text)
+        self.assertNotIn("Objetivos.", first)  # the aims moved to the About page
+        self.assertLess(first.index("Um assistente"), first.index("Saber mais sobre o Aferidor."))
+        self.assertLess(first.index("Saber mais"), first.index("Modelos que cumprem"))
         self.assertLess(text.index('id="inicio"'), text.index('<span class="destaque">'))
 
     def test_how_to_read_it_is_in_the_method_page_closed(self):
@@ -849,7 +852,7 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_the_first_screen_says_the_verdicts_are_triage_for_a_specialist(self):
         text = build([a_case()], [an_answer("1 g")])
-        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="fontes"')]
+        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="sobre"')]
         self.assertIn("Os veredictos são triagem automática, ainda sem validação por especialista", visible(first))
         self.assertIn("triagem automática do corretor", visible(text[:text.index("<main>")]))  # and the bar says it too
 
@@ -1102,7 +1105,8 @@ EXAMPLE_TRIALS = ("2026-09-29-gemma4-31b-casos", "2026-09-28-gemini-flash", "202
 
 # The most words of interface text each page may carry in Portuguese. A page is read in seconds;
 # a sentence that grows past this has to say why, here, in a commit.
-FIRST_PAGE_WORDS = {"reference": 120, "review_done": 115, "protocol": 130}
+FIRST_PAGE_WORDS = {"reference": 106, "review_done": 101, "protocol": 115}
+ABOUT_PAGE_WORDS = 220
 FRAME_WORDS = 60
 TRANSLATION_NOTICE_WORDS = 20
 
@@ -1174,7 +1178,7 @@ def panel_text(page: str, ident: str) -> str:
 
 def element_text(page: str, css_class: str) -> str:
     """The visible text of the element with this class, on the first page."""
-    first = page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="fontes"')]
+    first = page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="sobre"')]
     at = first.index(f'class="{css_class}"')
     start = first.rindex("<", 0, at)
     tag = re.match(r"<(\w+)", first[start:]).group(1)
@@ -1280,7 +1284,7 @@ SOURCES_PAGE_WORDS = 100
 class TestFirstPageWordBudget(unittest.TestCase):
     """The first page is read in seconds, so it has a word budget, counted per element."""
 
-    ELEMENTS = ("subtitulo", "porque", "objetivos", "factos", "resultado", "triagem")
+    ELEMENTS = ("subtitulo", "porque", "saber-mais", "factos", "resultado", "triagem")
 
     def breakdown(self, page: str) -> str:
         title = words(re.search(r'<h1[^>]*>(.*?)</h1>', page).group(1))
@@ -1309,8 +1313,8 @@ class TestFirstPageWordBudget(unittest.TestCase):
 
     def test_every_element_of_the_first_page_is_there_in_reading_order(self):
         page = _Example.page()
-        first = page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="fontes"')]
-        order = [first.index(f'class="{c}"') for c in ("porque", "objetivos", "factos", "resultado", "triagem")]
+        first = page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="sobre"')]
+        order = [first.index(f'class="{c}"') for c in ("porque", "saber-mais", "factos", "resultado", "triagem")]
         self.assertEqual(order, sorted(order))
         self.assertLess(first.index("<h1"), order[0])
 
@@ -1366,7 +1370,7 @@ class TestFirstPageVariants(unittest.TestCase):
 
     def test_a_protocol_with_warnings_points_at_the_method_page_and_one_without_says_nothing(self):
         with_warnings = _Example.page(protocol=_Example.protocol())
-        first = with_warnings[with_warnings.index('<section class="painel" id="inicio"'):with_warnings.index('<section class="painel" id="fontes"')]
+        first = with_warnings[with_warnings.index('<section class="painel" id="inicio"'):with_warnings.index('<section class="painel" id="sobre"')]
         self.assertIn('<p class="remate">O protocolo tem avisos (ver <a href="#criterio">Método</a>).</p>', first)
         self.assertIn('id="criterio"', with_warnings[with_warnings.index('<section class="painel" id="metodo"'):])
         without = _Example.page(protocol=_Example.protocol(date(2020, 1, 1)))
@@ -1761,3 +1765,86 @@ class TestPaletteContrast(unittest.TestCase):
         bar = re.search(r"\.topo \{[^}]*background: var\(--([a-z0-9-]+)\)", css).group(1)
         self.assertIn(f"linear-gradient(to right, var(--{bar}) 35%, transparent) left center", css)
         self.assertIn(f"linear-gradient(to left, var(--{bar}) 35%, transparent) right center", css)
+
+
+class TestAboutPage(unittest.TestCase):
+    """What the instrument is, what it is for and how it is run: only what is true of every report."""
+
+    def about(self, page: str) -> str:
+        return visible(page[page.index('<section class="painel" id="sobre"'):page.index('<section class="painel" id="fontes"')])
+
+    def test_the_page_says_what_it_is_what_it_is_for_and_how_it_is_run(self):
+        text = self.about(_Example.page())
+        for sentence in (
+            "Sobre o Aferidor", "O que é", "Para que serve", "Como se usa",
+            "O Aferidor é um banco de ensaio que mede respostas clínicas de modelos de linguagem em português europeu, contra casos de referência com fonte pública.",
+            "Mede, não aconselha. Não é um dispositivo médico e não contém dados de doentes.",
+            "Objetivos.", "Medir, sem aconselhar.", "Mostrar primeiro as falhas críticas, e não a média.",
+            "Preparar a validação por um especialista.",
+            "Cada resposta é corrigida contra os critérios do caso, de forma textual e determinista. Os critérios e o corretor estão em código, versionados.",
+            "Antes de um ensaio, cada critério tem de aceitar a resposta de referência e rejeitar uma resposta errada construída para o efeito.",
+            "O corretor foi afinado depois de alguns ensaios, com cada afinação registada e a razão escrita no commit; por isso os números dependem da versão do corretor.",
+            "Para experimentar não é preciso chave nem custo:",
+            "As chaves de API são lidas do ambiente e nunca do repositório.",
+        ):
+            with self.subTest(frase=sentence[:40]):
+                self.assertIn(sentence, text)
+
+    def test_it_never_says_the_criteria_were_defined_before_every_trial(self):
+        for page in (_Example.page(), _Example.page(protocol=_Example.protocol())):
+            text = self.about(page)
+            self.assertNotIn("definidos antes", text)
+            self.assertNotIn("critérios de aceitação", text)
+
+    def test_the_protocol_sentence_follows_whether_the_report_has_one(self):
+        without = self.about(_Example.page())
+        self.assertIn("Este relatório não tem nenhum: usa o limiar de referência, que não é um protocolo prévio.", without)
+        page = _Example.page(protocol=_Example.protocol())
+        with_one = self.about(page)
+        self.assertIn("Este relatório tem um protocolo de aprovação; os critérios estão no Início.", with_one)
+        self.assertNotIn("não tem nenhum", with_one)
+        self.assertIn('os critérios estão no <a href="#inicio">Início</a>', page)
+
+    def test_the_commands_are_the_readme_ones_without_the_line_that_counts_tests(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        shown = html_report.ABOUT_COMMANDS.splitlines()
+        self.assertEqual(len(shown), 4)
+        for line in shown:
+            with self.subTest(linha=line[:40]):
+                self.assertIn(line, readme)  # copied as it is there, comment included
+        self.assertNotIn("unittest", html_report.ABOUT_COMMANDS)
+        self.assertIn("<pre><code>git clone", _Example.page())
+
+    def test_the_only_new_address_is_the_running_guide_in_the_repository(self):
+        page = _Example.page()
+        self.assertIn(f'<a href="{html_report.COMO_CORRER_URL}" rel="noopener"><code>COMO_CORRER.md</code></a>', page)
+        self.assertTrue(html_report.COMO_CORRER_URL.startswith(html_report.REPO_URL + "/"))
+
+    def test_the_first_page_points_to_it_and_the_navigation_has_it_second(self):
+        page = _Example.page()
+        self.assertEqual(navigation(page)[:2], ["inicio", "sobre"])
+        self.assertIn('<p class="saber-mais"><a href="#sobre">Saber mais sobre o Aferidor.</a></p>', page)
+
+    def test_every_variant_fits_the_budget_with_its_headings(self):
+        for label, page in {
+            "sem protocolo": _Example.page(),
+            "com protocolo": _Example.page(protocol=_Example.protocol()),
+        }.items():
+            with self.subTest(variante=label):
+                self.assertLessEqual(words(panel_text(page, "sobre")), ABOUT_PAGE_WORDS)
+
+    def test_the_page_is_in_every_language_and_the_numbers_beside_the_text_start_at_80rem(self):
+        from aferidor.traducao import LANGS
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                self.assertIn('class="sobre"', _Example.page(lingua=lang))
+        css = html_estilo.STYLE
+        self.assertIn("@media (min-width: 80rem)", css)
+        self.assertIn("grid-template-columns: 38rem 18rem", css)
+        self.assertIn(".inicio-texto, .inicio-lateral, .sobre { max-width: 38rem; }", css)
+
+    def test_no_dash_in_what_the_about_page_says(self):
+        text = self.about(_Example.page())
+        self.assertNotIn("\u2014", text)
+        self.assertNotIn("\u2013", text)
