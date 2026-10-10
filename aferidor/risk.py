@@ -69,3 +69,6 @@ def failure_from_label(label: str) -> FailureType:
     except ValueError:
         known = ", ".join(sorted(f.value for f in FailureType))
         raise ValueError(f"tipo de falha desconhecido {label!r}; esperava um de: {known}") from None
+
+
+__all__ = ["Risk", "FailureType", "failure_from_label"]

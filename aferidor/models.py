@@ -224,3 +224,14 @@ class Verdict:
         """Heaviest risk actually incurred, or None when the answer passed."""
         failures = self.failures
         return failures[0].risk if failures else None
+
+
+__all__ = [
+    "Source",
+    "Criterion",
+    "Alternative",
+    "Case",
+    "Answer",
+    "CriterionResult",
+    "Verdict",
+]

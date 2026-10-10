@@ -1,6 +1,6 @@
 [project]
 name = "aferidor"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Banco de ensaio para respostas clínicas de modelos de linguagem em português europeu"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -14,6 +14,9 @@ aferidor = "aferidor.cli:main"
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = { attr = "aferidor.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["aferidor*"]
