@@ -80,6 +80,38 @@ class TestCatalogue(unittest.TestCase):
         traducao.MISSING.clear()
 
 
+# Strings the catalogue translates that the analyser cannot see being asked for, because the code
+# hands them to `_t` through a variable. Each one says where.
+DYNAMIC_STRINGS = {
+    "Banco de casos": "html_report: `_t(label)` over the rows of the conditions list",
+    "todas as amostras corretas": "html_report: `_t(meaning)` in the legend of the grid",
+    "algumas amostras corretas": "html_report: `_t(meaning)` in the legend of the grid",
+    "nenhuma amostra correta": "html_report: `_t(meaning)` in the legend of the grid",
+    "Este documento mede um sistema, não um doente. Não aconselha, não trata e não substitui julgamento clínico.":
+        "html_report: `_t(HEADER_NOTE)` in the footer",
+}
+
+
+class TestNoDeadStrings(unittest.TestCase):
+    """The catalogue keeps no translation nobody asks for, outside a short, explicit list."""
+
+    def test_every_string_of_the_catalogue_is_used_or_is_a_listed_dynamic_one(self):
+        unused = sorted(s for s in CATALOG if s not in interface_strings() and s not in DYNAMIC_STRINGS)
+        self.assertEqual(
+            unused, [],
+            "cadeias do catálogo que o código já não pede e que não estão na lista de exceções dinâmicas "
+            f"({len(unused)}): " + " | ".join(s[:70] for s in unused)
+            + ". Quem as apaga é o Fábio: nada foi apagado.",
+        )
+
+    def test_the_dynamic_ones_are_in_the_catalogue_and_are_really_not_found_by_the_analyser(self):
+        """So the list of exceptions does not rot: a string the analyser now finds leaves it."""
+        for text, where in DYNAMIC_STRINGS.items():
+            with self.subTest(cadeia=text[:40], onde=where):
+                self.assertIn(text, CATALOG)
+                self.assertNotIn(text, interface_strings(), "o analisador já a encontra: sai da lista de exceções")
+
+
 class TestNoDashes(unittest.TestCase):
     """The text of the interface is written without em or en dashes, in every language."""
 
