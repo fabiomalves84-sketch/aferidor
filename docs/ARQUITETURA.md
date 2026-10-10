@@ -27,6 +27,7 @@ flowchart LR
 | `checks.py` | Avaliação de uma resposta contra um critério |
 | `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |
 | `report.py` | Relatório em Markdown |
+| `comparacao.py` | O que os números de uma comparação decidem, numa só função cada: o limiar de referência, o empate no topo, a significância (p abaixo de 0,05) e o arredondamento das percentagens; os dois relatórios usam-no, para não discordarem |
 | `html_report.py` | O mesmo relatório em HTML, num único ficheiro, em oito páginas mostradas uma de cada vez só com CSS |
 | `html_estilo.py` | A folha de estilo e as cores do relatório HTML, à parte do código que monta a página |
 | `traducao.py` | A interface do relatório HTML em inglês, espanhol, francês e alemão; os casos e as respostas ficam em português |
@@ -87,6 +88,9 @@ de amostras corretas: na prática clínica é observada uma única resposta.
 que `report.py`, pelo que os dois formatos coincidem por construção.
 `grading.match_answers` e `grading.pairs_by_case` garantem que ambos usam o
 mesmo emparelhamento entre resposta e veredicto.
+As decisões sobre essas contagens (o limiar de referência, o empate no topo, a
+significância e o arredondamento das percentagens) estão em `comparacao.py`, e os
+dois formatos usam-nas.
 
 **Só a interface muda de língua.** `traducao.py` traduz títulos, explicações,
 legendas e glossário a partir de um catálogo indexado pelo texto português,
