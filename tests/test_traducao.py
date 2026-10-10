@@ -95,7 +95,8 @@ class TestNoDeadStrings(unittest.TestCase):
     """The catalogue keeps no translation nobody asks for, outside a short, explicit list."""
 
     def test_every_string_of_the_catalogue_is_used_or_is_a_listed_dynamic_one(self):
-        unused = sorted(s for s in CATALOG if s not in interface_strings() and s not in DYNAMIC_STRINGS)
+        asked = interface_strings()  # once: it parses the sources, and the catalogue has hundreds of entries
+        unused = sorted(s for s in CATALOG if s not in asked and s not in DYNAMIC_STRINGS)
         self.assertEqual(
             unused, [],
             "cadeias do catálogo que o código já não pede e que não estão na lista de exceções dinâmicas "
@@ -105,10 +106,11 @@ class TestNoDeadStrings(unittest.TestCase):
 
     def test_the_dynamic_ones_are_in_the_catalogue_and_are_really_not_found_by_the_analyser(self):
         """So the list of exceptions does not rot: a string the analyser now finds leaves it."""
+        asked = interface_strings()
         for text, where in DYNAMIC_STRINGS.items():
             with self.subTest(cadeia=text[:40], onde=where):
                 self.assertIn(text, CATALOG)
-                self.assertNotIn(text, interface_strings(), "o analisador já a encontra: sai da lista de exceções")
+                self.assertNotIn(text, asked, "o analisador já a encontra: sai da lista de exceções")
 
 
 class TestNoDashes(unittest.TestCase):
