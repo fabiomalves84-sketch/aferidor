@@ -10,6 +10,12 @@ transcreve mal um número. Vale a regra da `VERIFICACAO.md`: nenhum valor conta
 até alguém abrir o documento na página indicada e o confirmar com os próprios
 olhos. Nenhum caso foi alterado com base neste levantamento.
 
+*Nota de 10/10/2026.* As duas frases anteriores descrevem o levantamento tal
+como foi escrito a 27/09 às 17:03 (commit `6e8396e`) e deixaram de ser
+verdadeiras nesse mesmo dia: os casos de infeção foram alterados a partir das
+17:24, e dez fontes foram confirmadas nos PDF às 20:39 (commit `174bb49`). O
+estado atual de cada caso está em `VERIFICACAO.md`.
+
 ## Como foi feito
 
 - A lista de normas vem do Portal das Normas Clínicas da DGS
