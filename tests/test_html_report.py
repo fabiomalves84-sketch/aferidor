@@ -1069,7 +1069,7 @@ class TestTheme(unittest.TestCase):
         self.assertIn(":root:has(#tema-escuro:checked) { color-scheme: dark;", self.text)
         self.assertRegex(self.text, r"@media print \{\s*:root, :root:has\(#tema-escuro:checked\) \{ color-scheme: light;")
 
-    def test_both_themes_define_the_same_tokens(self):
+    def test_both_themes_define_the_sametokens(self):
         self.assertEqual(
             set(re.findall(r"--([a-z0-9-]+):", html_estilo.LIGHT_TOKENS)),
             set(re.findall(r"--([a-z0-9-]+):", html_estilo.DARK_TOKENS)),
@@ -1080,7 +1080,10 @@ class TestTheme(unittest.TestCase):
         for name, block in (("claro", html_estilo.LIGHT_TOKENS), ("escuro", html_estilo.DARK_TOKENS)):
             colours = tokens(block)
             for text in ("ink", "ink-2", "muted", "accent", "success-text", "critical-text"):
-                for ground in ("page", "surface", "surface-2"):
+                grounds = ("page", "surface", "surface-2")
+                if text in ("ink", "ink-2", "muted", "accent"):
+                    grounds += ("highlight",)  # the chips and the result block of the first page
+                for ground in grounds:
                     with self.subTest(theme=name, text=text, ground=ground):
                         self.assertGreaterEqual(contrast(colours[text], colours[ground]), 4.5)
 
@@ -1712,53 +1715,30 @@ class TestConclusionsTiesAndThresholds(unittest.TestCase):
         self.assertIn("compatível com 0% a 12%", self.lines(("a", 0, 27), ("b", 16, 27))["intervalo"])
 
 
-def _tokens(block: str) -> dict[str, str]:
-    return dict(re.findall(r"--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\b", block))
-
-
-def _luminance(colour: str) -> float:
-    channels = [int(colour[i:i + 2], 16) / 255 for i in (1, 3, 5)]
-    r, g, b = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in channels]
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-
-def contrast(first: str, second: str) -> float:
-    light, dark = sorted((_luminance(first), _luminance(second)), reverse=True)
-    return (light + 0.05) / (dark + 0.05)
-
-
 class TestPaletteContrast(unittest.TestCase):
-    """The petrol palette, in both themes: text 4.5:1, what is not text 3:1, the clinical colours untouched."""
+    """The petrol palette, in both themes: what is not text 3:1, the clinical colours untouched, the bar
+    and its scroll shadow on the same ground. The 4.5:1 for text is in `TestTheme`."""
 
     THEMES = {"claro": html_estilo.LIGHT_TOKENS, "escuro": html_estilo.DARK_TOKENS}
     GROUNDS = ("page", "surface", "surface-2", "highlight")
-    TEXT = ("ink", "ink-2", "muted", "accent")
-
-    def test_every_text_colour_reads_on_every_ground_at_4_5_to_1(self):
-        for theme, block in self.THEMES.items():
-            tokens = _tokens(block)
-            for fg in self.TEXT:
-                for bg in self.GROUNDS:
-                    with self.subTest(tema=theme, texto=fg, fundo=bg):
-                        self.assertGreaterEqual(contrast(tokens[fg], tokens[bg]), 4.5)
 
     def test_what_is_not_text_stands_out_at_3_to_1(self):
         """The accent draws the border of the result and the underline of the current page."""
         for theme, block in self.THEMES.items():
-            tokens = _tokens(block)
+            palette = tokens(block)
             for bg in self.GROUNDS:
                 with self.subTest(tema=theme, fundo=bg):
-                    self.assertGreaterEqual(contrast(tokens["accent"], tokens[bg]), 3.0)
+                    self.assertGreaterEqual(contrast(palette["accent"], palette[bg]), 3.0)
 
     def test_the_clinical_colours_did_not_change_with_the_palette(self):
         for block in self.THEMES.values():
-            tokens = _tokens(block)
+            palette = tokens(block)
             self.assertEqual(
-                (tokens["good"], tokens["warning"], tokens["serious"], tokens["critical"]),
+                (palette["good"], palette["warning"], palette["serious"], palette["critical"]),
                 ("#0ca30c", "#fab219", "#ec835a", "#d03b3b"),
             )
-        self.assertEqual(_tokens(html_estilo.LIGHT_TOKENS)["critical-text"], "#b42a2a")
-        self.assertEqual(_tokens(html_estilo.DARK_TOKENS)["critical-text"], "#ff8f86")
+        self.assertEqual(tokens(html_estilo.LIGHT_TOKENS)["critical-text"], "#b42a2a")
+        self.assertEqual(tokens(html_estilo.DARK_TOKENS)["critical-text"], "#ff8f86")
 
     def test_the_bar_background_and_the_scroll_shadow_cover_use_the_same_token(self):
         css = html_estilo.STYLE

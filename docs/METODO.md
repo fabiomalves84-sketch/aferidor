@@ -372,8 +372,7 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
 - *Informação só em `title`.* 311 elementos (segmentos das barras, pontos de
   amostra, pergunta cortada) que não aparecem em toque.
 - *Testes de contraste.* Cobrem as cores de texto sobre o fundo, o cartão, o
-  segundo cartão e o realce, nos dois temas (`test_every_text_colour_reads_on_the_page_and_on_cards_in_both_themes`
-  e `test_every_text_colour_reads_on_every_ground_at_4_5_to_1`, em
+  segundo cartão e o realce, nos dois temas (`test_every_text_colour_reads_on_the_page_and_on_cards_in_both_themes`, em
   `tests/test_html_report.py`), e o destaque a 3:1 como elemento gráfico
   (`test_what_is_not_text_stands_out_at_3_to_1`). Não cobrem o contraste das
   cores clínicas dos segmentos contra o cartão (WCAG 1.4.11, 3:1): no tema claro `warning` 1,83,
