@@ -273,6 +273,18 @@ acrescentam "Iniciar X" à referência (e variantes com recusa e com "não está
 contraindicado"), nunca uma prescrição com "evitar" na mesma frase, por isso este
 limite passa nos controlos todos. Não se propõe aqui nenhuma alteração ao corretor.
 
+**O `build_id` muda com qualquer edição ao pacote.** O `build_id` é a versão
+mais os primeiros 12 caracteres do SHA-256 de todos os `aferidor/*.py`, por ordem
+de nome (`code_digest`, em `aferidor/__init__.py`). Está escrito em cada resposta
+e é o que um protocolo com `--congelar-corretor` fixa em `versao_corretor`. Por
+isso muda com qualquer edição a qualquer módulo, incluindo o relatório HTML, a
+folha de estilo e as traduções, e não só com uma alteração a `checks.py`, a
+`grading.py` ou aos critérios. Um protocolo com o corretor congelado diz "o
+corretor mudou depois do protocolo" mesmo quando só mudou a apresentação: os dois
+protocolos do Gemma 4 26B A4B já o dizem desde as afinações de 09/10, e continuam
+a dizê-lo com outro número de versão. O âmbito do `build_id` é uma decisão
+registada que fica por rever à parte; aqui fica só escrito o que ele faz.
+
 **Protocolo escrito no mesmo dia da primeira resposta.** `protocolo.warnings` só
 acusa um protocolo posterior se a data for estritamente posterior à da primeira
 resposta (`written_on > first_answer.date()`). Um protocolo escrito no mesmo dia,
