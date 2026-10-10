@@ -146,7 +146,7 @@ python3 -m aferidor ensaio --fornecedor anthropic --modelo <nome>
 
 As respostas dos vários modelos coexistem no mesmo ficheiro e o relatório
 inclui uma tabela de comparação: casos com falha crítica, casos corretos pela
-regra do relatório, casos parcialmente corretos e amostras corretas, cada um
+regra do relatório, casos inconsistentes e amostras corretas, cada um
 com intervalo de confiança. As três primeiras colunas contam casos; a última
 conta respostas.
 

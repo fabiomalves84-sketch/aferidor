@@ -95,7 +95,7 @@ python3 -m aferidor ensaio ... --protocolo protocolos/outubro.json
 ```
 
 O protocolo fixa o máximo de casos com falha crítica, o máximo de casos
-parcialmente corretos, a taxa mínima de amostras corretas, o número de
+inconsistentes (a chave do protocolo continua a chamar-se `casos_instaveis_max`), a taxa mínima de amostras corretas, o número de
 amostras por caso, a temperatura e a regra do caso (`regra_do_caso`), e
 regista o SHA-256 do banco. O relatório indica, por modelo, aprovado ou
 reprovado e o motivo. Assinala também quando o protocolo não constitui um
@@ -258,10 +258,10 @@ e da tabela de ensaios deste documento é a base do **corretor atual** (nota ¹)
 (`ensaios/2026-09-29-gemini-consulta/`) é a dos **veredictos gravados**, e
 nela o PED-04 já conta como falha crítica por causa da amostra 4.
 
-| Base | Casos com falha crítica | Casos parcialmente corretos | Amostras corretas | Se a amostra 5 fosse falha |
+| Base | Casos com falha crítica | Casos inconsistentes | Amostras corretas | Se a amostra 5 fosse falha |
 |---|---|---|---|---|
 | Veredictos gravados | 6 de 30 (10% a 37%) | 10 | 122 de 150 | o destaque **não muda**; só as amostras corretas passam a 121 de 150 |
-| Corretor atual | 4 de 30 (5% a 30%) | 8 | 126 de 150 | 5 de 30 (7% a 34%), 9 parcialmente corretos, 125 de 150 |
+| Corretor atual | 4 de 30 (5% a 30%) | 8 | 126 de 150 | 5 de 30 (7% a 34%), 9 inconsistentes, 125 de 150 |
 
 O protocolo continua reprovado nas duas bases, e o p do McNemar entre o Gemini e o
 Gemma 4 31B no banco de consulta fica em 1,000 (corretor atual: discordantes 2 e 2

@@ -80,7 +80,8 @@ diferentes na mesma contagem; `consistency_by_model` segue a mesma regra.
 
 **O caso, e não a amostra, é a unidade de resultado.** `grading.consistency_by_case`
 agrupa as amostras de um caso e de um modelo e atribui um de três estados:
-sempre correto, parcialmente correto ou nunca correto. `grading.case_is_right`
+sempre correto, inconsistente ou nunca correto (as palavras são do relatório HTML, em
+`_STATE_LABEL`; o estado `INSTAVEL` e a chave `casos_instaveis_max` do protocolo não mudam). `grading.case_is_right`
 converte-os num veredicto binário segundo uma de três regras (`CASE_RULES`); a
 mais estrita, todas as amostras corretas, é a regra por omissão, e o protocolo
 pode fixar outra no campo `regra_do_caso`. O resultado principal do relatório
