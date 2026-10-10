@@ -1920,26 +1920,13 @@ def _conclusions_panel(data: _ReportData) -> str:
     )
 
 
-def _build(
-    cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
-    protocol, alternates, confirmation=None,
-) -> str:
-    data = _prepare(
-        cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
-        protocol, alternates, confirmation,
-    )
-    out: list[str] = [
-        _head_html(data),
-        _start_panel(data),
-        _about_panel(data),
-        _sources_panel(data),
-    ]
+def _method_panel(data: _ReportData, before: str) -> str:
+    """Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
 
-    out.append(_results_panel(data))
-    if data.models:
-        out += [_areas_panel(data), _cases_panel(data), _conclusions_panel(data)]
-
-    # Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
+    `before` is the HTML of everything already built, from the head to the last page: the glossary
+    lists only the terms the page marks, so it is worked out last, over `before`, the method and the
+    technical details. The footer is not part of it, as it never was.
+    """
     method: list[str] = [
         f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(data.samples_n, data.rule) if data.models else ""),
         _verification_block(), _sources_by_body(data.cases),
@@ -1976,7 +1963,7 @@ def _build(
     else:
         technical.append(f"<p>{_t('Sem respostas registadas.')}</p>")
     technical.append("</div>")
-    technical.append(_glossary_section("".join(out) + "".join(method) + "".join(technical)))
+    technical.append(_glossary_section(before + "".join(method) + "".join(technical)))
     technical.append(
         f'<div class="metodo" id="metodo-texto"><h3>{_t("Método")}</h3>'
         "<p>" + _t(
@@ -1991,13 +1978,39 @@ def _build(
             metodo="<code>docs/METODO.md</code>", verificacao="<code>casos/VERIFICACAO.md</code>",
         ) + "</p></div></details>"
     )
-    out.append(_panel("metodo", _t("Método e detalhes técnicos"), *method, *technical))
-    out.append("</main>")
-    out.append(
+    return _panel("metodo", _t("Método e detalhes técnicos"), *method, *technical)
+
+
+def _foot_html(data: _ReportData) -> str:
+    return (
         f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p>{_translation_notice()}<p class="repo">{_repo_link()}</p>'
         f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(data.written))}</p>'
         f'<p class="marca">{_t("Aferidor · banco de ensaio clínico")}</p></footer>'
     )
+
+
+def _build(
+    cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
+    protocol, alternates, confirmation=None,
+) -> str:
+    data = _prepare(
+        cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
+        protocol, alternates, confirmation,
+    )
+    out: list[str] = [
+        _head_html(data),
+        _start_panel(data),
+        _about_panel(data),
+        _sources_panel(data),
+    ]
+
+    out.append(_results_panel(data))
+    if data.models:
+        out += [_areas_panel(data), _cases_panel(data), _conclusions_panel(data)]
+
+    out.append(_method_panel(data, "".join(out)))
+    out.append("</main>")
+    out.append(_foot_html(data))
     out.append("</body></html>")
     return "".join(out)
 
