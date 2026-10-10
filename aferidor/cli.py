@@ -70,30 +70,35 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="aferidor", description="Banco de ensaio clínico")
     sub = parser.add_subparsers(dest="comando", required=True)
 
-    executar = sub.add_parser("executar", help="enviar os casos a um modelo")
-    executar.add_argument(
+    # The options `executar` and `ensaio` share, in this order.
+    run_options = argparse.ArgumentParser(add_help=False)
+    run_options.add_argument(
         "--fornecedor", choices=("falso", "openai", "anthropic", "gemini", "local"), default="falso"
     )
-    executar.add_argument("--modelo", default=None, help="identificador do modelo")
-    executar.add_argument("--casos", type=Path, default=DEFAULT_CASES)
-    executar.add_argument("--saida", type=Path, default=DEFAULT_OUTPUT)
-    executar.add_argument("--limite", type=int, default=0, help="0 executa todos")
-    executar.add_argument("--tentativas", type=int, default=3)
-    executar.add_argument(
+    run_options.add_argument("--modelo", default=None, help="identificador do modelo")
+    run_options.add_argument("--casos", type=Path, default=DEFAULT_CASES)
+    run_options.add_argument("--saida", type=Path, default=DEFAULT_OUTPUT)
+    run_options.add_argument(
+        "--limite", type=int, default=0, help="usar só os primeiros N casos; 0 usa todos"
+    )
+    run_options.add_argument("--tentativas", type=int, default=3)
+    run_options.add_argument(
         "--repeticoes", type=int, default=1, help="quantas vezes perguntar cada caso"
     )
-    executar.add_argument(
+    run_options.add_argument(
         "--temperatura", type=float, default=0.0, help="temperatura pedida ao fornecedor"
     )
-    executar.add_argument(
+    run_options.add_argument(
         "--tokens-max", type=int, default=DEFAULT_TOKENS_MAX,
         help="limite de tokens da resposta; um modelo que raciocina antes de responder precisa de mais",
     )
-    executar.add_argument(
+    run_options.add_argument(
         "--recomecar",
         action="store_true",
         help="ignorar respostas anteriores deste modelo e perguntar tudo de novo",
     )
+
+    sub.add_parser("executar", help="enviar os casos a um modelo", parents=[run_options])
 
     verificar = sub.add_parser(
         "verificar", help="verificar se cada caso cumpre os próprios critérios"
@@ -110,34 +115,26 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     ensaio = sub.add_parser(
-        "ensaio", help="executar, classificar e escrever o relatório numa só operação"
+        "ensaio", help="executar, classificar e escrever o relatório numa só operação",
+        parents=[run_options],
     )
     ensaio.add_argument(
-        "--fornecedor", choices=("falso", "openai", "anthropic", "gemini", "local"), default="falso"
-    )
-    ensaio.add_argument("--modelo", default=None)
-    ensaio.add_argument("--casos", type=Path, default=DEFAULT_CASES)
-    ensaio.add_argument("--saida", type=Path, default=DEFAULT_OUTPUT)
-    ensaio.add_argument("--vereditos", type=Path, default=DEFAULT_VERDICTS)
-    ensaio.add_argument("--relatorio", type=Path, default=DEFAULT_REPORT)
-    ensaio.add_argument("--limite", type=int, default=0)
-    ensaio.add_argument("--tentativas", type=int, default=3)
-    ensaio.add_argument(
-        "--repeticoes", type=int, default=1, help="quantas vezes perguntar cada caso"
+        "--vereditos", type=Path, default=DEFAULT_VERDICTS,
+        help="onde gravar os vereditos (por omissão, data/vereditos.json)",
     )
     ensaio.add_argument(
-        "--temperatura", type=float, default=0.0, help="temperatura pedida ao fornecedor"
+        "--relatorio", type=Path, default=DEFAULT_REPORT,
+        help="onde escrever o relatório em Markdown (por omissão, relatorios/relatorio.md)",
     )
-    ensaio.add_argument(
-        "--tokens-max", type=int, default=DEFAULT_TOKENS_MAX,
-        help="limite de tokens da resposta; um modelo que raciocina antes de responder precisa de mais",
-    )
-    ensaio.add_argument("--recomecar", action="store_true")
     ensaio.add_argument(
         "--protocolo", type=Path, default=None,
-        help="protocolo com o critério de aprovação, escrito antes do ensaio",
+        help="protocolo com o critério de aprovação, que deve ser escrito antes do ensaio; "
+        "um protocolo avalia o banco inteiro, por isso não se combina com --limite",
     )
-    ensaio.add_argument("--fontes-confirmadas", action="store_true")
+    ensaio.add_argument(
+        "--fontes-confirmadas", action="store_true",
+        help="omitir o aviso de fontes por confirmar (apenas depois de confirmadas)",
+    )
 
     modelos = sub.add_parser(
         "modelos", help="listar os modelos disponíveis no fornecedor"
