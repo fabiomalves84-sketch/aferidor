@@ -251,6 +251,51 @@ class TestComparison(unittest.TestCase):
         self.assertNotIn("## Comparação", build([a_case()], [an_answer("1 g")]))
 
 
+class TestComparisonSentence(unittest.TestCase):
+    """The sentence under the table of models, built from a ranking made by hand."""
+
+    def sentence(self, *rows, p_value=1.0):
+        from aferidor.comparacao import Ranking, Row
+
+        ranked = tuple(Row(model, critical, cases, 0.0, 1.0) for model, critical, cases in rows)
+        return report._comparison_text(Ranking(ranked, True, 1, 4, p_value))
+
+    def test_without_a_tie_it_says_who_had_fewer_and_whether_it_could_be_chance(self):
+        text = self.sentence(("a", 8, 27), ("b", 11, 27), p_value=0.375)
+        self.assertEqual(
+            text,
+            "`a` teve menos casos com falha crítica do que `b`. Nos casos em que só um dos dois teve falha "
+            "crítica (1 contra 4), a diferença pode dever-se ao acaso (teste de McNemar exato, p = 0,375). "
+            "O teste é emparelhado, porque os modelos responderam aos mesmos casos.",
+        )
+
+    def test_a_tie_with_the_same_numbers_says_only_that_they_share_the_proportion(self):
+        text = self.sentence(("a", 8, 27), ("b", 8, 27), ("c", 16, 27))
+        self.assertEqual(text, "`a` e `b` tiveram a mesma proporção de casos com falha crítica.")
+
+    def test_a_tie_over_different_numbers_of_cases_says_the_same(self):
+        text = self.sentence(("a", 4, 10), ("b", 8, 20), ("c", 9, 10))
+        self.assertEqual(text, "`a` e `b` tiveram a mesma proporção de casos com falha crítica.")
+        self.assertNotIn("McNemar", text)
+
+    def test_with_three_tied_it_names_only_the_first_two(self):
+        text = self.sentence(("a", 8, 27), ("b", 8, 27), ("c", 8, 27), ("d", 22, 27))
+        self.assertEqual(text, "`a` e `b` tiveram a mesma proporção de casos com falha crítica.")
+        self.assertNotIn("`c`", text)
+
+    def test_without_the_cases_known_there_is_no_sentence(self):
+        from aferidor.comparacao import Ranking, Row
+
+        self.assertIsNone(report._comparison_text(Ranking((Row("a", 1, 2, 0.0, 1.0),), False, None, None, None)))
+
+    def test_a_report_with_a_tie_at_the_top_does_not_say_one_had_fewer(self):
+        cases = [a_case("C1"), a_case("C2")]
+        answers = [an_answer("1000 mg", case_id=c.case_id, model=m) for c in cases for m in ("a", "b")]
+        text = build(cases, answers)
+        self.assertIn("`a` e `b` tiveram a mesma proporção de casos com falha crítica.", text)
+        self.assertNotIn("teve menos casos com falha crítica", text)
+
+
 class TestEmpty(unittest.TestCase):
     def test_no_verdicts_says_so_instead_of_reporting_zero_percent(self):
         text = report.build([a_case()], [], [], today=date(2026, 9, 14))

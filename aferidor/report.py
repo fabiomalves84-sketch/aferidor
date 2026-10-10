@@ -20,7 +20,7 @@ from __future__ import annotations
 from datetime import date
 
 from . import build_id
-from .comparacao import is_significant, percent, ranking
+from .comparacao import Ranking, is_significant, percent, ranking, top_tie
 from .grading import (
     Tally,
     consistency_by_case,
@@ -206,6 +206,31 @@ def how_counted(samples: int, rule: str) -> str:
         f"{CASE_RULES[rule]}. Um caso nunca correto não tem necessariamente uma falha crítica, "
         "e um caso parcialmente correto pode ter uma; por isso as falhas críticas são contadas "
         "à parte."
+    )
+
+
+def _comparison_text(paired: Ranking) -> str | None:
+    """The sentence under the table of models: who had fewer cases with a critical failure and whether
+    that could be chance, or, when the two best share the proportion, only that they do.
+
+    With three or more tied at the top the sentence names the first two, as the HTML report does: it
+    is true, and it does not mention the others. None when the cases are not known.
+    """
+    if paired.p_value is None:
+        return None
+    first, second = paired.rows[0].model, paired.rows[1].model
+    if len(top_tie(paired.rows)) > 1:
+        return f"`{first}` e `{second}` tiveram a mesma proporção de casos com falha crítica."
+    verdict = (
+        "a diferença é estatisticamente significativa" if is_significant(paired.p_value)
+        else "a diferença pode dever-se ao acaso"
+    )
+    shown = "p < 0,001" if paired.p_value < 0.001 else f"p = {paired.p_value:.3f}".replace(".", ",")
+    return (
+        f"`{first}` teve menos casos com falha crítica do que `{second}`. Nos casos em "
+        f"que só um dos dois teve falha crítica ({paired.only_first} contra "
+        f"{paired.only_second}), {verdict} (teste de McNemar exato, {shown}). O teste "
+        "é emparelhado, porque os modelos responderam aos mesmos casos."
     )
 
 
@@ -427,20 +452,9 @@ def build(
             "verifica, pelo que é mais estreito do que deveria."
         )
         out.append("")
-        paired = ranking(consistency_per_model, consistency)
-        if paired.p_value is not None:
-            first, second = paired.rows[0].model, paired.rows[1].model
-            verdict = (
-                "a diferença é estatisticamente significativa" if is_significant(paired.p_value)
-                else "a diferença pode dever-se ao acaso"
-            )
-            shown = "p < 0,001" if paired.p_value < 0.001 else f"p = {paired.p_value:.3f}".replace(".", ",")
-            out.append(
-                f"`{first}` teve menos casos com falha crítica do que `{second}`. Nos casos em "
-                f"que só um dos dois teve falha crítica ({paired.only_first} contra "
-                f"{paired.only_second}), {verdict} (teste de McNemar exato, {shown}). O teste "
-                "é emparelhado, porque os modelos responderam aos mesmos casos."
-            )
+        comparison = _comparison_text(ranking(consistency_per_model, consistency))
+        if comparison is not None:
+            out.append(comparison)
             out.append("")
 
     languages = language_by_model(in_bank(cases, answers))
