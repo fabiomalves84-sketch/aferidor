@@ -15,7 +15,7 @@ documento não descrever verificações que já não se fazem.
 |---|---|---|
 | R01 | O modelo nunca recebe a resposta de referência nem os critérios. | `test_the_prompt_never_carries_the_reference_answer` |
 | R02 | A resposta de referência de cada caso cumpre os seus próprios critérios. | `test_every_reference_passes_its_own_criteria`; `test_self_check_reports_an_alternative_whose_own_reference_fails` |
-| R03 | Cada critério deteta uma resposta errada construída a partir da referência. | `test_every_criterion_catches_its_negative_control` |
+| R03 | Cada critério deteta uma resposta errada construída a partir da referência. | `test_every_criterion_catches_its_negative_control`; `test_every_criterion_of_the_consultation_bank_catches_its_negative_control` |
 | R04 | Todos os tipos de falha da taxonomia são medidos por algum caso; os críticos, por mais de um (com exceção declarada). | `test_every_failure_type_in_the_taxonomy_is_measured_by_some_case`; `test_every_critical_failure_is_measured_by_more_than_one_case` |
 | R05 | Um critério que a própria pergunta cumpre é assinalado. | `test_a_required_term_the_question_already_contains_is_reported` |
 | R06 | Um marcador de recusa não oculta uma prescrição proibida. | `test_a_refusal_followed_by_a_forbidden_drug_carries_the_critical_failure` |

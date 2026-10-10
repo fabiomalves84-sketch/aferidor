@@ -98,7 +98,7 @@ class TestAnnotatedBank(unittest.TestCase):
         broken = [case.case_id for case, _ in self_check(self.cases)]
         self.assertEqual(broken, [])
 
-    def test_every_criterion_catches_its_negative_control(self):
+    def test_every_criterion_of_the_consultation_bank_catches_its_negative_control(self):
         from aferidor.grading import uncaught_controls
 
         _, uncaught = uncaught_controls(self.cases)
