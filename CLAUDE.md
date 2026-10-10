@@ -67,6 +67,7 @@ python3 -m unittest discover -s tests   # 655 testes
 python3 -m aferidor verificar           # 27/27 casos, 319/319 controlos negativos
 python3 -m aferidor verificar --casos casos/consulta.json   # 31/31, 140/140
 python3 -m aferidor ensaio --fornecedor falso
+ruff check .   # opcional, ferramenta de desenvolvimento: imports não usados e erros evidentes
 ```
 
 `docs/COMO_CORRER.md` cobre a execução contra um modelo real.
