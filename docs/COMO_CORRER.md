@@ -239,8 +239,9 @@ python -m aferidor relatorio --formato html --linguas pt,en,es,fr,de \
 ```
 
 Cria `index.html` (português) e `index.en.html`, `index.es.html`,
-`index.fr.html` e `index.de.html` ao lado. A data no topo é a do dia em que se
-corre. Fica de fora o Gemma 4 26B A4B, cujo corretor está congelado no
+`index.fr.html` e `index.de.html` ao lado. En, es, fr e de levam o aviso de
+tradução não revista, e rever uma língua é tirá-la de `UNREVIEWED`, em
+`aferidor/traducao.py`. A data no topo é a do dia em que se corre. Fica de fora o Gemma 4 26B A4B, cujo corretor está congelado no
 protocolo.
 
 A captura `docs/imagens/resumo.png`, usada no README, não se gera por comando:

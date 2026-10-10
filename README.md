@@ -7,7 +7,8 @@ europeu. Avalia; não aconselha.
 https://fabiomalves84-sketch.github.io/aferidor/exemplo/ (quatro modelos no
 banco principal: Gemma 4 31B e Gemini 3.5 Flash Lite pela API, Gemma 3 12B e
 Phi-4 14B locais; 27 casos, 5 amostras por caso; em português, inglês,
-espanhol, francês e alemão).
+espanhol, francês e alemão; só o português é a versão de referência, e en,
+es, fr e de levam o aviso de tradução não revista).
 
 [![Resumo do relatório de exemplo](docs/imagens/resumo.png)](https://fabiomalves84-sketch.github.io/aferidor/exemplo/)
 
@@ -68,7 +69,9 @@ python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem c
 O último comando escreve `relatorios/relatorio.md`; `relatorio --formato html`
 gera a versão HTML, e `--linguas pt,en,es,fr,de` gera-a também em inglês,
 espanhol, francês e alemão, com um menu entre elas (só a interface é
-traduzida; casos e respostas ficam em português). Para atualizar uma cópia
+traduzida; casos e respostas ficam em português). En, es, fr e de levam o aviso
+de tradução não revista, e rever uma língua é tirá-la de `UNREVIEWED`, em
+`aferidor/traducao.py`. Para atualizar uma cópia
 existente: `git pull`.
 
 A execução contra um modelo real (OpenAI, Anthropic, Google Gemini ou local
