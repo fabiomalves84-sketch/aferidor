@@ -273,6 +273,36 @@ acrescentam "Iniciar X" à referência (e variantes com recusa e com "não está
 contraindicado"), nunca uma prescrição com "evitar" na mesma frase, por isso este
 limite passa nos controlos todos. Não se propõe aqui nenhuma alteração ao corretor.
 
+**Protocolo escrito no mesmo dia da primeira resposta.** `protocolo.warnings` só
+acusa um protocolo posterior se a data for estritamente posterior à da primeira
+resposta (`written_on > first_answer.date()`). Um protocolo escrito no mesmo dia,
+depois da primeira resposta, passa sem aviso, e a data do ficheiro é declarativa.
+A prova é o commit do protocolo. Verificado a 10/10/2026 com o `git log` de cada
+protocolo contra a primeira resposta do ensaio (hora de Lisboa; `asked_at` não
+tem fuso e assumiu-se o do commit):
+
+| Protocolo | Commit do protocolo | Primeira resposta | Anterior? |
+|---|---|---|---|
+| 2026-09-27-locais-12-14b | `b71d72b`, 27/09 23:44:40 | 27/09 23:52:11 | sim, 7 min |
+| 2026-09-28-gemini-flash | `826cbea`, 28/09 12:43:11 | 28/09 18:26:04 | sim, 5 h |
+| 2026-09-29-gemini-consulta | `afbd43f`, 29/09 11:06:53 | 29/09 11:07:07 | sim, 14 s |
+| 2026-09-29-gemma4-31b-casos | `414c859`, 29/09 12:46:50 | 29/09 12:54:06 | sim, 7 min |
+| 2026-09-29-gemma4-31b-consulta | `414c859`, 29/09 12:46:50 | 29/09 21:40:21 | sim, 9 h |
+| 2026-10-01-gemma4-26b-casos | `caa28a3`, 01/10 10:58:37 | 01/10 11:22:09 | sim, 24 min |
+| 2026-10-01-gemma4-26b-consulta | `caa28a3`, 01/10 10:58:37 | 03/10 14:20:36 | sim, 2 dias |
+
+Os sete protocolos são anteriores à primeira resposta. Em todos, a data do ficheiro
+é a do dia da primeira resposta ou anterior, e o aviso do código não os distinguiria
+de um protocolo escrito depois no mesmo dia. O commit prova a ordem no histórico
+local; não prova que o relógio da máquina estava certo.
+
+**Comparação entre modelos: o par é escolhido depois dos dados.**
+`grading.compare_critical` ordena os modelos pelo número de casos com falha
+crítica e aplica o teste de McNemar exato aos dois primeiros. O par é, portanto,
+escolhido pelo resultado, e o p calculado nele não conta com essa seleção. O
+README já diz que não há correção para comparações múltiplas; o p lê-se como
+descrição dos dois melhores, não como teste de uma hipótese fixada antes.
+
 **Relatório HTML: o que ainda não está tratado.** Diagnóstico de 09/10/2026
 sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brave
 154 e por leitura do código. São limites conhecidos, sem código que os corrija.
