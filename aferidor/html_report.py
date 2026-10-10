@@ -26,7 +26,7 @@ from __future__ import annotations
 import contextvars
 import html as _html
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 from .grading import (
@@ -1702,13 +1702,87 @@ def _sources_by_body(cases: list[Case]) -> str:
     )
 
 
+@dataclass(frozen=True)
+class _ReportData:
+    """What every page of the report reads, worked out once.
+
+    The fields after `late` exist only when there are verdicts; without them they are None, empty or
+    an empty string, and the pages that need them are not built.
+    """
+
+    cases: list[Case]
+    answers: list[Answer]
+    verdicts: list[Verdict]
+    missing: list[str] | None
+    reasons: dict[str, str] | None
+    sources_verified: bool
+    cases_source: tuple[str, str] | None
+    protocol: Protocol | None
+    confirmation: "_fontes.Confirmation | None"
+    alternates: dict[str, str] | None
+    written: str
+    models: list[str]
+    per_model: dict[str, Tally]
+    samples_n: int
+    rule: str
+    early: list[str]
+    late: list[str]
+    consistency: dict | None = None
+    pairs: list | None = None
+    summaries: dict[str, ConsistencySummary] | None = None
+    languages: dict | None = None
+    protocol_outcomes: list | None = None
+    protocol_warnings: list[str] | None = None
+    protocol_html: str = ""
+    approved: dict = field(default_factory=dict)
+
+
+def _prepare(
+    cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
+    protocol, alternates, confirmation=None,
+) -> _ReportData:
+    per_model = tally_by_model(verdicts)
+    models = list(per_model)
+    early, late = _notices(cases, answers, missing, reasons, sources_verified)
+    data = dict(
+        cases=cases, answers=answers, verdicts=verdicts, missing=missing, reasons=reasons,
+        sources_verified=sources_verified, cases_source=cases_source, protocol=protocol,
+        confirmation=confirmation, alternates=alternates,
+        written=(today or date.today()).isoformat(), models=models, per_model=per_model,
+        samples_n=max(expected_samples(answers).values(), default=0),
+        rule=protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE,
+        early=early, late=late,
+    )
+    if not models:
+        return _ReportData(**data)
+    consistency = consistency_by_case(cases, answers, verdicts)
+    summaries = consistency_by_model(consistency)
+    # What the first page states needs the summaries and, with a protocol, its outcomes and warnings.
+    # Nothing is decided here that `grading` and `protocolo` did not decide.
+    protocol_outcomes = protocol_warnings = None
+    protocol_html, approved = "", {}
+    if protocol is not None:
+        protocol_warnings, protocol_outcomes = protocol_findings(
+            protocol, answers, summaries, cases_source, [c.case_id for c in cases], _LANG.get()
+        )
+        protocol_html, approved = _protocol_section(
+            protocol, answers, summaries, cases_source, [c.case_id for c in cases]
+        )
+    return _ReportData(
+        **data, consistency=consistency, pairs=pairs_by_case(cases, answers, verdicts), summaries=summaries,
+        languages=language_by_model(in_bank(cases, answers)), protocol_outcomes=protocol_outcomes,
+        protocol_warnings=protocol_warnings, protocol_html=protocol_html, approved=approved,
+    )
+
+
 def _build(
     cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
     protocol, alternates, confirmation=None,
 ) -> str:
-    per_model = tally_by_model(verdicts)
-    models = list(per_model)
-    written = (today or date.today()).isoformat()
+    data = _prepare(
+        cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
+        protocol, alternates, confirmation,
+    )
     title = _t("Relatório do Aferidor")
 
     out: list[str] = [
@@ -1717,13 +1791,10 @@ def _build(
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
         f"<title>{title}</title>{_preview_meta(title)}<style>{STYLE}</style></head><body>",
     ]
-    menu = _language_menu(alternates) if alternates else ""
-    if models:
-        consistency = consistency_by_case(cases, answers, verdicts)
-        pairs = pairs_by_case(cases, answers, verdicts)
+    menu = _language_menu(data.alternates) if data.alternates else ""
     # Without verdicts there is nothing to break down, so those pages do not exist.
     without_verdicts = ("areas", "casos", "conclusoes")
-    present = [(a, label) for a, label in PANELS if models or a not in without_verdicts]
+    present = [(a, label) for a, label in PANELS if data.models or a not in without_verdicts]
     # The fixed bar: the pages and the controls on one line, and the notice that stays on every page.
     out.append(
         '<header class="topo"><div class="topo-linha">'
@@ -1736,29 +1807,17 @@ def _build(
         f'<span aria-hidden="true">☀</span> {_t("Claro")}</label>'
         '<input type="radio" name="tema" id="tema-escuro"><label for="tema-escuro">'
         f'<span aria-hidden="true">☾</span> {_t("Escuro")}</label></div></div></div>'
-        + _strip(not sources_verified)
+        + _strip(not data.sources_verified)
         + "</header>"
     )
     # The content sits in one <main> landmark, between the bar and the footer, so a screen
     # reader can jump straight to it. The header, the navigation and the footer stay outside.
     out.append("<main>")
 
-    rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
-    samples_n = max(expected_samples(answers).values(), default=0)
-    early, late = _notices(cases, answers, missing, reasons, sources_verified)
-
-    # What the first page states is computed first: it needs the summaries and, with a protocol,
-    # its outcomes and warnings. Nothing is decided here that `grading` and `protocolo` did not decide.
-    summaries = consistency_by_model(consistency) if models else None
-    protocol_outcomes = protocol_warnings = None
-    if protocol is not None and models:
-        protocol_warnings, protocol_outcomes = protocol_findings(
-            protocol, answers, summaries, cases_source, [c.case_id for c in cases], _LANG.get()
-        )
-
     # Início: what the report is, why it exists, what it aims at, and what it found.
     start = _start_page(
-        cases, models, answers, summaries, protocol, protocol_outcomes, protocol_warnings
+        data.cases, data.models, data.answers, data.summaries, data.protocol,
+        data.protocol_outcomes, data.protocol_warnings,
     )
     heading = [html for name, html in start if name in ("titulo", "subtitulo")]
     reading = [html for name, html in start if name in ("porque", "sobre")]
@@ -1773,32 +1832,29 @@ def _build(
     # Sobre: what the instrument is, what it is for and how it is run.
     out.append(_panel(
         "sobre", _t("Sobre o Aferidor"),
-        '<div class="sobre">' + "".join(_about_page(protocol, cases)) + "</div>",
+        '<div class="sobre">' + "".join(_about_page(data.protocol, data.cases)) + "</div>",
     ))
 
     # Fontes: where the cases come from, and what is still to be confirmed.
-    out.append(_panel("fontes", _t("Fontes"), *_sources_page(cases, confirmation, sources_verified, late, written)))
+    out.append(_panel("fontes", _t("Fontes"), *_sources_page(
+        data.cases, data.confirmation, data.sources_verified, data.late, data.written,
+    )))
 
-    if not models:
+    if not data.models:
         out.append(_panel(
-            "resultados", _t("Resultados"), *early,
+            "resultados", _t("Resultados"), *data.early,
             f"<p>{_t('Não há veredictos para relatar.')}</p>",
         ))
     else:
+        models, cases, per_model = data.models, data.cases, data.per_model
+        summaries, consistency, pairs = data.summaries, data.consistency, data.pairs
         states = states_by_model(consistency)
-        languages = language_by_model(in_bank(cases, answers))
-        expected = expected_samples(answers)
-        right = right_cases_by_model(consistency, rule)
-
-        protocol_html, approved = ("", {})
-        if protocol is not None:
-            protocol_html, approved = _protocol_section(
-                protocol, answers, summaries, cases_source, [c.case_id for c in cases]
-            )
+        expected = expected_samples(data.answers)
+        right = right_cases_by_model(consistency, data.rule)
 
         reference = (
             {m: meets_reference(summaries[m]) for m in models}
-            if protocol is None else {}
+            if data.protocol is None else {}
         )
 
         # Resultados: the first result, with the notices that qualify the counts above it.
@@ -1807,13 +1863,13 @@ def _build(
             cards.append(
                 _model_card(
                     model, summaries[model], per_model[model], states[model],
-                    approved.get(model), right[model], reference=reference.get(model),
+                    data.approved.get(model), right[model], reference=reference.get(model),
                 )
             )
         cards.append("</div>")
         out.append(_panel(
-            "resultados", _t("Resultados"), *early,
-            _reference_note() if protocol is None else "",
+            "resultados", _t("Resultados"), *data.early,
+            _reference_note() if data.protocol is None else "",
             _comparison(summaries, consistency), *cards,
         ))
 
@@ -1853,24 +1909,24 @@ def _build(
         out.append(_panel(
             "conclusoes", _t("Conclusões"),
             _conclusions_html(_conclusions_page(
-                models, summaries, consistency, confirmation, sources_verified,
-                protocol, protocol_outcomes, protocol_warnings,
+                models, summaries, consistency, data.confirmation, data.sources_verified,
+                data.protocol, data.protocol_outcomes, data.protocol_warnings,
             )),
         ))
 
     # Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
     method: list[str] = [
-        f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(samples_n, rule) if models else ""),
-        _verification_block(), _sources_by_body(cases),
+        f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(data.samples_n, data.rule) if data.models else ""),
+        _verification_block(), _sources_by_body(data.cases),
     ]
-    if models:
-        method.append(protocol_html)
+    if data.models:
+        method.append(data.protocol_html)
         method.append(
             f'<div class="lingua"><h3>{_t("Português europeu")}</h3><ul>'
             + "".join(
                 f"<li><strong>{_esc(_model_short(m))}</strong> <code>{_esc(m)}</code>: "
-                f"{_gloss(_esc(language_line(languages[m], _LANG.get())), ('Acordo Ortográfico',))}</li>"
-                for m in models
+                f"{_gloss(_esc(language_line(data.languages[m], _LANG.get())), ('Acordo Ortográfico',))}</li>"
+                for m in data.models
             )
             + '</ul><p class="seccao-intro">'
             + _t("Indicador independente, baseado numa lista curta de formas alheias ao "
@@ -1878,7 +1934,7 @@ def _build(
                  "frequência real.")
             + "</p></div>"
         )
-    rows = conditions_rows(in_bank(cases, answers), cases_source, _LANG.get())
+    rows = conditions_rows(in_bank(data.cases, data.answers), data.cases_source, _LANG.get())
     technical = [
         f'<details class="recolhe tecnico" id="detalhes"><summary>{_t("Detalhes técnicos: condições do ensaio, glossário e método")}</summary>',
         f'<div class="condicoes" id="condicoes"><h3>{_t("Condições do ensaio")}</h3>',
@@ -1914,7 +1970,7 @@ def _build(
     out.append("</main>")
     out.append(
         f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p>{_translation_notice()}<p class="repo">{_repo_link()}</p>'
-        f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(written))}</p>'
+        f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(data.written))}</p>'
         f'<p class="marca">{_t("Aferidor · banco de ensaio clínico")}</p></footer>'
     )
     out.append("</body></html>")
