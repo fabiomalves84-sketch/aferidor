@@ -6,11 +6,11 @@ from pathlib import Path
 
 from aferidor.models import Answer, Case, Criterion, Source
 from aferidor.risk import FailureType
+from tests.helpers import write_cases
 from aferidor.storage import (
     read_answers,
     read_cases,
     write_answers,
-    write_cases,
 )
 
 

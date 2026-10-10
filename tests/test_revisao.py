@@ -24,7 +24,8 @@ from aferidor.revisao import (
 )
 from aferidor.risk import FailureType
 from aferidor.runner import build_prompt, prompt_digest
-from aferidor.storage import write_answers, write_cases
+from aferidor.storage import write_answers
+from tests.helpers import write_cases
 
 
 def a_case(case_id: str) -> Case:

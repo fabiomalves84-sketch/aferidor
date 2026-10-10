@@ -204,14 +204,6 @@ def read_cases(path: Path) -> list[Case]:
     return cases
 
 
-def write_cases(cases: list[Case], path: Path) -> int:
-    payload = [case_to_dict(c) for c in cases]
-    Path(path).write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    return len(payload)
-
-
 def answer_to_dict(answer: Answer) -> dict:
     return {
         "caso": answer.case_id,
@@ -360,7 +352,6 @@ def write_verdicts(verdicts: list[Verdict], path: Path) -> int:
 
 __all__ = [
     "read_cases",
-    "write_cases",
     "read_answers",
     "write_answers",
     "append_answer",
