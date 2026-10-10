@@ -196,9 +196,10 @@ def interval_text(successes: int, total: int) -> str:
 def how_counted(samples: int, rule: str) -> str:
     """How a case's samples become its state and its verdict, in plain words.
 
-    Shared by both reports: the states and the right-or-wrong rule are the
-    report's own vocabulary, and a reader who does not know them reads the
-    numbers wrong.
+    The Markdown report's version; the HTML report has its own (`_how_counted`),
+    with a row of dots for each state. Both say the same: the states and the
+    right-or-wrong rule are the report's own vocabulary, and a reader who does
+    not know them reads the numbers wrong.
     """
     n = samples or 1
     return (
