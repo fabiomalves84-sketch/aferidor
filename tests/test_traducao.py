@@ -9,13 +9,12 @@ import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 
 from aferidor import html_report, traducao
 from aferidor.cli import main
 from aferidor.grading import CASE_RULES, ConsistencyState, grade_all
-from aferidor.models import Answer
 from aferidor.protocolo import read_protocol, template
 from aferidor.storage import read_answers, read_cases
 from aferidor.traducao import CATALOG, LANGS, t

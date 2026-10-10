@@ -51,7 +51,7 @@ from .grading import (
 from . import fontes as _fontes
 from . import report as _report
 from .html_estilo import STYLE
-from .lingua import LanguageSummary, language_by_model, language_line
+from .lingua import language_by_model, language_line
 from .models import Answer, Case, Verdict
 from .protocolo import REFERENCE_CRITICAL_LIMIT, Protocol
 from .report import (
@@ -60,7 +60,6 @@ from .report import (
     format_missing,
     format_missing_samples,
     in_bank,
-    interval_text,
     protocol_findings,
 )
 from .risk import FailureType, Risk
