@@ -45,6 +45,11 @@ HEADER_NOTE = (
     "Este documento mede um sistema, não um doente. Não aconselha, não trata e "
     "não substitui julgamento clínico."
 )
+# Whether a specialist has reviewed a sample of the verdicts. The HTML report says "there is no
+# reviewer yet" while this is False; when it becomes True the sentence stops saying so and claims
+# nothing else about the review, because the report does not know which review it was. Changing it
+# is a decision with a record: BRIEFING.md and the README have to say the same, and a test checks both.
+CLINICAL_REVIEW_DONE = False
 TRIAGE_NOTE = (
     "Os veredictos são a triagem automática do corretor; a validação por um "
     "especialista faz-se à parte, numa folha cega (`aferidor revisao`)."
@@ -506,4 +511,5 @@ __all__ = [
     "format_missing_samples",
     "HEADER_NOTE",
     "TRIAGE_NOTE",
+    "CLINICAL_REVIEW_DONE",
 ]

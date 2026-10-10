@@ -181,11 +181,10 @@ class TestReportInEveryLanguage(unittest.TestCase):
         self.assertIn('<html lang="pt-PT">', self.pages["pt"])
 
     def test_the_interface_is_in_the_chosen_language(self):
-        self.assertIn("About this report", self.pages["en"])
-        self.assertNotIn("Sobre este relatório", self.pages["en"])
-        self.assertIn("Sobre este informe", self.pages["es"])
-        self.assertIn("À propos de ce rapport", self.pages["fr"])
-        self.assertIn("Über diesen Bericht", self.pages["de"])
+        self.assertIn("Aims.", self.pages["en"])
+        self.assertNotIn("Objetivos.", self.pages["en"])
+        self.assertIn("Objectifs.", self.pages["fr"])
+        self.assertIn("Ziele.", self.pages["de"])
 
     def test_the_answers_and_the_cases_stay_in_portuguese(self):
         answer = html_report._esc(self.answers[0].text)

@@ -125,7 +125,6 @@ class TestDocument(unittest.TestCase):
         Landmarks().feed(build([a_case()], [an_answer("500 mg")]))
         self.assertEqual(outside, {"header.topo", "nav.indice", "footer.rodape"})
         self.assertIn("section#resultados", inside)
-        self.assertIn("section#intro", inside)
         self.assertIn("section#inicio", inside)
 
     def test_there_is_a_main_in_every_language_and_in_a_page_without_verdicts(self):
@@ -343,14 +342,16 @@ class TestPreviewAndRepositoryLink(unittest.TestCase):
                 self.assertEqual(meta["og:title"], t("Relatório do Aferidor", lang))
                 self.assertEqual(meta["og:description"], t(subtitle, lang))
 
-    def test_the_link_to_the_project_is_in_the_introduction_and_in_the_footer(self):
+    def test_the_link_to_the_project_is_in_the_method_page_and_in_the_footer(self):
+        """Not on the first page, which has a word budget: whoever wants the code finds it where the
+        method is, and at the foot of every page."""
         text = self.page()
         link = f'<a href="{html_report.REPO_URL}" rel="noopener">{self.LINK_TEXT}</a>'
         self.assertEqual(text.count(link), 2)
-        start = text.index('<section class="intro"')
-        intro = text[start:text.index("</section>", start)]
-        self.assertIn(link, intro)
-        self.assertLess(intro.index('class="lead"'), intro.index('class="repo"'))
+        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="fontes"')]
+        self.assertNotIn(link, first)
+        method = text[text.index('<section class="painel" id="metodo"'):text.index("</main>")]
+        self.assertIn(link, method)
         self.assertIn(link, text[text.index('<footer class="rodape">'):])
 
     def test_the_link_text_follows_the_language_of_the_page(self):
@@ -381,7 +382,7 @@ class TestReferenceThresholdWithoutProtocol(unittest.TestCase):
     def test_when_no_model_meets_it_the_best_result_is_given(self):
         text = self.page({"local:llama3.1:8b": (self.BAD, self.BAD), "local:qwen3:8b": (self.GOOD, self.BAD)})
         self.assertIn(
-            "Modelos que cumprem o limiar de referência: 0 de 2. "
+            "Modelos que cumprem o limiar de referência (nenhum caso com falha crítica): 0 de 2. "
             "Melhor resultado: 1 de 2 casos com falha crítica.",
             visible(text),
         )
@@ -390,13 +391,13 @@ class TestReferenceThresholdWithoutProtocol(unittest.TestCase):
 
     def test_when_every_model_meets_it_there_is_no_best_result_to_give(self):
         text = self.page({"local:llama3.1:8b": (self.GOOD, self.GOOD), "local:qwen3:8b": (self.GOOD, self.GOOD)})
-        self.assertIn("Modelos que cumprem o limiar de referência: 2 de 2.", visible(text))
+        self.assertIn("Modelos que cumprem o limiar de referência (nenhum caso com falha crítica): 2 de 2.", visible(text))
         self.assertNotIn("Melhor resultado", text)
         self.assertEqual(text.count("✓ cumpre o limiar de referência"), 2)
 
     def test_when_only_some_meet_it_each_card_says_its_own(self):
         text = self.page({"local:llama3.1:8b": (self.GOOD, self.GOOD), "local:qwen3:8b": (self.BAD, self.BAD)})
-        self.assertIn("Modelos que cumprem o limiar de referência: 1 de 2.", visible(text))
+        self.assertIn("Modelos que cumprem o limiar de referência (nenhum caso com falha crítica): 1 de 2.", visible(text))
         self.assertNotIn("Melhor resultado", text)
         self.assertEqual(text.count("✓ cumpre o limiar de referência"), 1)
         self.assertEqual(text.count("✕ não cumpre o limiar de referência"), 1)
@@ -404,14 +405,18 @@ class TestReferenceThresholdWithoutProtocol(unittest.TestCase):
     def test_a_single_model_is_counted_as_one(self):
         text = self.page({"local:llama3.1:8b": (self.BAD, self.BAD)})
         self.assertIn(
-            "Modelos que cumprem o limiar de referência: 0 de 1. Melhor resultado: 2 de 2 casos com falha crítica.",
+            "Modelos que cumprem o limiar de referência (nenhum caso com falha crítica): 0 de 1. "
+            "Melhor resultado: 2 de 2 casos com falha crítica.",
             visible(text),
         )
 
     def test_the_page_says_it_is_not_a_protocol(self):
         text = self.page({"falso": (self.BAD, self.BAD)})
         self.assertIn("Não é um protocolo escrito antes do ensaio.", visible(text))
-        self.assertLess(text.index('class="veredicto"'), text.index('class="cartoes"'))
+        # the result opens the report; the caveat sits next to the seals of the cards, in Resultados
+        self.assertLess(text.index('class="resultado"'), text.index('class="cartoes"'))
+        results = text[text.index('<section class="painel" id="resultados"'):text.index('<section class="painel" id="areas"')]
+        self.assertIn('id="limiar-referencia"', results)
 
     def test_with_a_protocol_nothing_about_the_reference_appears(self):
         import json
@@ -427,7 +432,8 @@ class TestReferenceThresholdWithoutProtocol(unittest.TestCase):
             protocol = read_protocol(path)
         text = self.page({"falso": (self.BAD, self.BAD)}, protocol=protocol)
         self.assertNotIn("limiar de referência", text)
-        self.assertNotIn('class="veredicto"', text)
+        self.assertNotIn("limiar-referencia", text)
+        self.assertIn("Modelos aprovados pelo protocolo (", visible(text))
         self.assertIn("reprovado pelo protocolo", text)
 
     def test_the_verdict_and_the_seals_follow_the_language_of_the_page(self):
@@ -436,10 +442,11 @@ class TestReferenceThresholdWithoutProtocol(unittest.TestCase):
         for lang in LANGS:
             with self.subTest(lingua=lang):
                 text = self.page({"falso": (self.BAD, self.BAD)}, lingua=lang)
-                self.assertIn(
-                    f"<strong>{t('Modelos que cumprem o limiar de referência: {k} de {n}.', lang, k=0, n=1)}</strong>",
-                    text,
+                said = t(
+                    "Modelos que cumprem o limiar de referência (nenhum caso com {falha}): {k} de {n}.", lang,
+                    falha=t("falha crítica", lang, form="sem artigo"), k=0, n=1,
                 )
+                self.assertIn(visible(said), visible(text))
                 self.assertIn(f"✕ {t('não cumpre o limiar de referência', lang)}</span>", text)
 
 
@@ -461,10 +468,12 @@ class TestEachNoticeLivesInItsPage(unittest.TestCase):
         self.assertGreater(notice, text.index('<section class="painel" id="fontes"'))
         self.assertLess(notice, text.index('<section class="painel" id="resultados"'))
 
-    def test_a_pointer_in_the_first_page_links_to_it(self):
+    def test_the_first_page_does_not_repeat_the_pointer_the_bar_already_carries(self):
         text = self.page()
         first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="fontes"')]
-        self.assertIn('<li><a href="#aviso-fontes">fontes por confirmar</a></li>', first)
+        self.assertNotIn("aviso-fontes", first)
+        self.assertNotIn("fontes por confirmar", first)
+        self.assertIn('<a href="#fontes">Fontes por confirmar.</a>', text[:text.index("<main>")])
 
     def test_with_the_sources_confirmed_there_is_neither_pointer_nor_notice(self):
         text = self.page(sources_verified=True)
@@ -489,15 +498,6 @@ class TestEachNoticeLivesInItsPage(unittest.TestCase):
         text = build([a_case()], [])
         self.assertIn("Não há veredictos para relatar.", text)
         self.assertIn('id="aviso-fontes"', text)
-
-    def test_the_pointer_follows_the_language_of_the_page(self):
-        from aferidor.traducao import LANGS, t
-
-        for lang in LANGS:
-            with self.subTest(lingua=lang):
-                self.assertIn(
-                    f'<li><a href="#aviso-fontes">{t("fontes por confirmar", lang)}</a></li>', self.page(lingua=lang)
-                )
 
 
 class TestHeadline(unittest.TestCase):
@@ -824,10 +824,21 @@ class TestNumbersMatchMarkdown(unittest.TestCase):
 class TestReadableByAnOutsider(unittest.TestCase):
     """The page has to say what it is before it shows a number."""
 
-    def test_it_opens_by_saying_what_the_aferidor_is_and_how_to_read_it(self):
+    def test_it_opens_by_saying_what_the_aferidor_is_why_it_exists_and_what_it_aims_at(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        self.assertLess(text.index("Sobre este relatório"), text.index('<span class="destaque">'))
-        self.assertIn("Como interpretar este relatório", text)
+        first = visible(text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="fontes"')])
+        for sentence in ("Um assistente que responde a um médico", "Objetivos.", "Medir, sem aconselhar.",
+                         "Mostrar primeiro as falhas críticas, e não a média.", "Preparar a validação por um especialista."):
+            with self.subTest(sentence=sentence[:30]):
+                self.assertIn(sentence, first)
+        self.assertLess(first.index("Objetivos."), first.index("Modelos que cumprem"))
+        self.assertLess(text.index('id="inicio"'), text.index('<span class="destaque">'))
+
+    def test_how_to_read_it_is_in_the_method_page_closed(self):
+        text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
+        method = text[text.index('<section class="painel" id="metodo"'):text.index("</main>")]
+        self.assertRegex(method, r'<details class="recolhe ler" id="como-ler">\s*<summary>Como interpretar este relatório</summary>')
+        self.assertNotIn("Como interpretar este relatório", text[:text.index('<section class="painel" id="metodo"')])
 
     def test_every_section_is_reachable_from_the_index(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
@@ -842,8 +853,9 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_the_first_screen_says_the_verdicts_are_triage_for_a_specialist(self):
         text = build([a_case()], [an_answer("1 g")])
-        intro = text[text.index('class="intro"'):text.index("<details")]
-        self.assertIn("triagem automática do corretor", intro)
+        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="fontes"')]
+        self.assertIn("Os veredictos são triagem automática, ainda sem validação por especialista", visible(first))
+        self.assertIn("triagem automática do corretor", visible(text[:text.index("<main>")]))  # and the bar says it too
 
     def test_the_index_only_links_sections_that_exist(self):
         text = build([a_case()], [an_answer("1 g")])
@@ -1074,3 +1086,289 @@ class TestTheme(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---------------------------------------------------------------- the first page and its word budget
+
+import json as _json
+import tempfile as _tempfile
+from html.parser import HTMLParser as _HTMLParser
+from unittest import mock as _mock
+
+from aferidor import report as _report
+from aferidor.protocolo import read_protocol as _read_protocol, template as _template
+from aferidor.storage import read_answers as _read_answers, read_cases as _read_cases
+
+ROOT = Path(__file__).resolve().parent.parent
+EXAMPLE_TRIALS = ("2026-09-29-gemma4-31b-casos", "2026-09-28-gemini-flash", "2026-09-27-locais-12-14b")
+
+# The most words of interface text each page may carry in Portuguese. A page is read in seconds;
+# a sentence that grows past this has to say why, here, in a commit.
+FIRST_PAGE_WORDS = {"reference": 120, "review_done": 115, "protocol": 130}
+FRAME_WORDS = 60
+TRANSLATION_NOTICE_WORDS = 20
+
+
+def words(text: str) -> int:
+    """Words as the budget counts them: runs of characters between spaces that hold a letter or a digit."""
+    return len([w for w in text.split() if re.search(r"\w", w)])
+
+
+class _PanelText(_HTMLParser):
+    """The text of one panel as a reader sees it, without what is data or a component.
+
+    Left out: the cases and answers (`lang="pt-PT"`), blockquotes, code, whatever is only for screen
+    readers (`.vh`), the cards, charts and tables, and the inside of a closed <details> (its
+    <summary> counts). A paragraph written later counts by default: this is an exclusion list.
+    """
+
+    SKIP_TAGS = {"blockquote", "code", "style", "script", "table"}
+    SKIP_CLASSES = {"vh", "cartoes", "comparacao", "legenda-estados", "legenda-riscos", "falhas-grelha", "grade-wrap"}
+    VOID = {"br", "hr", "img", "input", "meta", "link"}
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.depth = 0
+        self.skip_from: list[int] = []
+        self.details: list[int] = []
+        self.in_summary = 0
+        self.parts: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.VOID:
+            return
+        self.depth += 1
+        a = dict(attrs)
+        classes = set((a.get("class") or "").split())
+        if tag in self.SKIP_TAGS or a.get("lang") == "pt-PT" or classes & self.SKIP_CLASSES:
+            self.skip_from.append(self.depth)
+        if tag == "details":
+            self.details.append(self.depth)
+        if tag == "summary":
+            self.in_summary += 1
+
+    def handle_endtag(self, tag):
+        if tag in self.VOID:
+            return
+        if self.skip_from and self.skip_from[-1] == self.depth:
+            self.skip_from.pop()
+        if self.details and self.details[-1] == self.depth:
+            self.details.pop()
+        if tag == "summary":
+            self.in_summary -= 1
+        self.depth -= 1
+
+    def handle_data(self, data):
+        if self.skip_from:
+            return
+        if self.details and not self.in_summary:
+            return
+        self.parts.append(data)
+
+
+def panel_text(page: str, ident: str) -> str:
+    start = page.index(f'<section class="painel" id="{ident}"')
+    following = [i for i in (page.find('<section class="painel" id="', start + 10), page.find("</main>", start)) if i > 0]
+    parser = _PanelText()
+    parser.feed(page[start:min(following)])
+    return " ".join(" ".join(parser.parts).split())
+
+
+def element_text(page: str, css_class: str) -> str:
+    """The visible text of the element with this class, on the first page."""
+    first = page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="fontes"')]
+    at = first.index(f'class="{css_class}"')
+    start = first.rindex("<", 0, at)
+    tag = re.match(r"<(\w+)", first[start:]).group(1)
+    depth, i = 0, start
+    for m in re.finditer(rf"</?{tag}\b[^>]*>", first[start:]):
+        depth += -1 if m.group(0).startswith("</") else 1
+        if depth == 0:
+            i = start + m.end()
+            break
+    parser = _PanelText()
+    parser.feed(first[start:i])
+    return " ".join(" ".join(parser.parts).split())
+
+
+class _Example:
+    """The public example: the real bank and the answers of the three trials it is made from."""
+
+    _cache: dict = {}
+
+    @classmethod
+    def data(cls):
+        if not cls._cache:
+            cases = _read_cases(ROOT / "casos" / "casos.json")
+            answers = [a for name in EXAMPLE_TRIALS for a in _read_answers(ROOT / "ensaios" / name / "respostas.jsonl")]
+            verdicts, missing = grade_all(cases, answers)
+            cls._cache.update(cases=cases, answers=answers, verdicts=verdicts, missing=missing)
+        return cls._cache
+
+    @staticmethod
+    def bank_sha256() -> str:
+        import hashlib
+
+        return hashlib.sha256((ROOT / "casos" / "casos.json").read_bytes()).hexdigest()
+
+    @classmethod
+    def page(cls, **kwargs) -> str:
+        d = cls.data()
+        return html_report.build(
+            d["cases"], d["answers"], d["verdicts"], missing=d["missing"], today=date(2026, 10, 10),
+            cases_source=("casos/casos.json", cls.bank_sha256()), **kwargs,
+        )
+
+    @classmethod
+    def protocol(cls, written_on: date | None = None):
+        """A protocol for this bank. With a date before the first answer and the bank's own hash it
+        raises no warning; the real one of 29/09 raises two with these answers."""
+        if written_on is None:
+            return _read_protocol(ROOT / "protocolos" / "2026-09-29-gemma4-31b-casos.json")
+        with _tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "p.json"
+            path.write_text(_json.dumps(_template("x", ROOT / "casos" / "casos.json", today=written_on)), encoding="utf-8")
+            return _read_protocol(path)
+
+
+class TestFirstPageWordBudget(unittest.TestCase):
+    """The first page is read in seconds, so it has a word budget, counted per element."""
+
+    ELEMENTS = ("subtitulo", "porque", "objetivos", "factos", "resultado", "triagem")
+
+    def breakdown(self, page: str) -> str:
+        title = words(re.search(r'<h1[^>]*>(.*?)</h1>', page).group(1))
+        counts = {name: words(element_text(page, name)) for name in self.ELEMENTS}
+        if 'class="remate"' in page:
+            counts["remate"] = words(element_text(page, "remate"))
+        return f"título {title}, " + ", ".join(f"{k} {v}" for k, v in counts.items())
+
+    def total(self, page: str) -> int:
+        return words(panel_text(page, "inicio"))
+
+    def test_the_reference_version_fits_its_budget(self):
+        page = _Example.page()
+        self.assertLessEqual(self.total(page), FIRST_PAGE_WORDS["reference"], self.breakdown(page))
+
+    def test_the_version_with_the_review_done_fits_its_budget(self):
+        with _mock.patch.object(_report, "CLINICAL_REVIEW_DONE", True):
+            page = _Example.page()
+        self.assertLessEqual(self.total(page), FIRST_PAGE_WORDS["review_done"], self.breakdown(page))
+
+    def test_the_versions_with_a_protocol_fit_theirs_with_and_without_the_warnings_pointer(self):
+        for label, protocol in (("com avisos", _Example.protocol()), ("sem avisos", _Example.protocol(date(2020, 1, 1)))):
+            with self.subTest(protocolo=label):
+                page = _Example.page(protocol=protocol)
+                self.assertLessEqual(self.total(page), FIRST_PAGE_WORDS["protocol"], self.breakdown(page))
+
+    def test_every_element_of_the_first_page_is_there_in_reading_order(self):
+        page = _Example.page()
+        first = page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="fontes"')]
+        order = [first.index(f'class="{c}"') for c in ("porque", "objetivos", "factos", "resultado", "triagem")]
+        self.assertEqual(order, sorted(order))
+        self.assertLess(first.index("<h1"), order[0])
+
+    def test_the_frame_in_portuguese_fits_its_budget(self):
+        """The bar, the footer: the same on every page, in the language of the report. The notice about
+        a machine translation is not in this count, because Portuguese never shows it."""
+        page = _Example.page()
+        bar = re.search(r'<p class="faixa"[^>]*>(.*?)</p>', page, flags=re.S).group(1)
+        footer = page[page.index('<footer class="rodape">'):page.index("</footer>")]
+        total = words(visible(bar)) + words(visible(footer))
+        self.assertLessEqual(total, FRAME_WORDS)
+        self.assertNotIn('class="traducao"', page)
+
+    def test_the_translation_notice_is_one_short_sentence_in_every_language_that_shows_it(self):
+        from aferidor.traducao import UNREVIEWED, UNREVIEWED_NOTICE, t
+
+        for lang in UNREVIEWED:
+            with self.subTest(lingua=lang):
+                notice = t(UNREVIEWED_NOTICE, lang)
+                self.assertLessEqual(words(notice), TRANSLATION_NOTICE_WORDS)
+                self.assertEqual(len(re.findall(r"[.!?](?=\s|$)", notice)), 1)
+                self.assertTrue(notice.rstrip().endswith("."))
+
+
+class TestFirstPageVariants(unittest.TestCase):
+    """What the first page says without a protocol, with one, and once a specialist has reviewed."""
+
+    def test_without_a_protocol_the_reference_threshold_is_defined_and_the_best_result_given(self):
+        text = visible(panel_text(_Example.page(), "inicio"))
+        self.assertIn("Modelos que cumprem o limiar de referência (nenhum caso com falha crítica): 0 de 4.", text)
+        self.assertRegex(text, r"Melhor resultado: \d+ de 27 casos com falha crítica\.")
+        self.assertNotIn("aprovados pelo protocolo", text)
+
+    def test_with_a_protocol_the_result_names_all_four_conditions_it_applied(self):
+        text = visible(panel_text(_Example.page(protocol=_Example.protocol(date(2020, 1, 1))), "inicio"))
+        self.assertIn(
+            "Modelos aprovados pelo protocolo (todos os casos e amostras respondidos, nenhum caso com falha "
+            "crítica, nenhum parcialmente correto, pelo menos 95% de amostras corretas): 0 de 4.",
+            text,
+        )
+        self.assertNotIn("Melhor resultado", text)
+        self.assertNotIn("limiar de referência", text)
+
+    def test_the_conditions_are_read_from_the_protocol_and_a_limit_above_zero_says_at_most(self):
+        protocol = _Example.protocol(date(2020, 1, 1))
+        from dataclasses import replace
+
+        looser = replace(protocol, max_critical_cases=3, max_unstable_cases=2, min_sample_accuracy=0.9)
+        text = visible(panel_text(_Example.page(protocol=looser), "inicio"))
+        self.assertIn("no máximo 3 casos com falha crítica", text)
+        self.assertIn("no máximo 2 parcialmente corretos", text)
+        self.assertIn("pelo menos 90% de amostras corretas", text)
+
+    def test_a_protocol_with_warnings_points_at_the_method_page_and_one_without_says_nothing(self):
+        with_warnings = _Example.page(protocol=_Example.protocol())
+        first = with_warnings[with_warnings.index('<section class="painel" id="inicio"'):with_warnings.index('<section class="painel" id="fontes"')]
+        self.assertIn('<p class="remate">O protocolo tem avisos (ver <a href="#criterio">Método</a>).</p>', first)
+        self.assertIn('id="criterio"', with_warnings[with_warnings.index('<section class="painel" id="metodo"'):])
+        without = _Example.page(protocol=_Example.protocol(date(2020, 1, 1)))
+        self.assertNotIn("O protocolo tem avisos", without)
+
+    def test_the_review_sentence_is_true_while_there_is_no_reviewer(self):
+        text = visible(panel_text(_Example.page(), "inicio"))
+        self.assertIn("ainda sem validação por especialista: a folha cega está pronta, mas ainda não há revisor.", text)
+
+    def test_once_the_review_is_done_the_sentence_stops_saying_there_is_no_reviewer_and_claims_nothing_else(self):
+        with _mock.patch.object(_report, "CLINICAL_REVIEW_DONE", True):
+            text = visible(panel_text(_Example.page(), "inicio"))
+        self.assertNotIn("não há revisor", text)
+        self.assertNotIn("ainda sem validação", text)
+        self.assertIn("Os veredictos são triagem automática; a validação por especialista faz-se à parte, numa folha cega.", text)
+        for invented in ("concordância", "kappa", "revisão por", "foi validad", "validados"):
+            self.assertNotIn(invented, text)
+
+    def test_every_variant_is_in_every_language(self):
+        from aferidor.traducao import LANGS
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                for protocol in (None, _Example.protocol(date(2020, 1, 1)), _Example.protocol()):
+                    page = _Example.page(lingua=lang, protocol=protocol)
+                    self.assertIn('class="resultado"', page)
+                with _mock.patch.object(_report, "CLINICAL_REVIEW_DONE", True):
+                    self.assertIn('class="triagem"', _Example.page(lingua=lang))
+
+
+class TestClinicalReviewFlagIsRecorded(unittest.TestCase):
+    """CLINICAL_REVIEW_DONE is one constant. The README says the same thing in words, and the
+    notebook (BRIEFING.md, which is not in the repository) records it, so it is not forgotten."""
+
+    def test_the_readme_says_there_is_no_reviewer_exactly_while_the_constant_is_false(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        says_so = "ainda não tem revisor" in readme
+        self.assertEqual(
+            says_so, not _report.CLINICAL_REVIEW_DONE,
+            "O README e CLINICAL_REVIEW_DONE (aferidor/report.py) têm de dizer o mesmo sobre a revisão clínica: "
+            "se mudaste a constante, muda a frase do README no mesmo commit.",
+        )
+
+    @unittest.skipUnless((ROOT / "BRIEFING.md").exists(), "BRIEFING.md não está no repositório")
+    def test_the_notebook_records_the_constant(self):
+        notebook = (ROOT / "BRIEFING.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "CLINICAL_REVIEW_DONE", notebook,
+            "Falta no BRIEFING.md, nas decisões em aberto, uma linha a registar CLINICAL_REVIEW_DONE "
+            "(aferidor/report.py): quando houver revisor, muda a constante e o relatório precisa de saber de que revisão se trata.",
+        )

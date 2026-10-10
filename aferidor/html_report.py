@@ -48,6 +48,7 @@ from .grading import (
     wilson_interval,
     worst_examples,
 )
+from . import report as _report
 from .html_estilo import STYLE
 from .lingua import LanguageSummary, language_by_model, language_line
 from .models import Answer, Case, Verdict
@@ -491,21 +492,9 @@ def _repo_link() -> str:
 # ---------------------------------------------------------------- opening
 
 
-def _intro(
-    cases: list[Case], models: list[str], answers: list[Answer], how_counted: str,
-    sources_pending: bool = False,
-) -> str:
-    samples = max(expected_samples(answers).values(), default=0)
-    facts = [
-        _plural(len(cases), "caso clínico", "casos clínicos"),
-        _plural(len(models), "modelo", "modelos"),
-    ]
-    if samples:
-        facts.append(_plural(samples, "amostra por caso", "amostras por caso"))
-    fact_items = "".join(f"<li>{_esc(f)}</li>" for f in facts)
-    if sources_pending:
-        # The full notice follows the model cards; this keeps it in sight at the top.
-        fact_items += f'<li><a href="#{SOURCES_NOTICE_ID}">{_t("fontes por confirmar")}</a></li>'
+def _how_to_read(how_counted: str) -> str:
+    """"How to read this report": what a case is, how it is asked and counted. It lives in the Method
+    page, closed, for whoever wants it; the first page says only what the report is and what it found."""
     reading = _t(
         "<li><strong>O valor em destaque</strong> indica os casos com pelo menos uma "
         "{falha}. Na prática clínica é observada uma única resposta; uma falha crítica é "
@@ -519,19 +508,110 @@ def _intro(
         nunca=_term("nunca correto", _t("nunca corretos")),
     )
     return f"""
-<section class="intro" aria-labelledby="sobre">
-  <h2 id="sobre" class="vh">{_t("Sobre este relatório")}</h2>
-  <p class="lead">{_t("O <strong>Aferidor</strong> avalia a exatidão de modelos de linguagem em perguntas clínicas em português europeu e classifica os erros pelo risco clínico.")}</p>
-  <p class="repo">{_repo_link()}</p>
-  <p class="triagem">{_t("Os veredictos são a triagem automática do corretor; a validação por um especialista faz-se à parte, numa folha cega ({comando}).", comando="<code>aferidor revisao</code>")}</p>
-  <ul class="factos">{fact_items}</ul>
-  <details class="recolhe ler">
-    <summary>{_t("Como interpretar este relatório")}</summary>
-    <p>{_t("Cada pergunta tem uma resposta de referência com fonte pública (normas da {dgs}, {infarmed}, diretrizes europeias) e critérios de aceitação definidos antes do ensaio. Cada pergunta é colocada várias vezes a cada modelo, uma vez que as respostas variam; cada resposta constitui uma {amostra}. A correção é automática e determinista. Como a média de respostas corretas oculta os erros relevantes, o relatório apresenta primeiro as falhas críticas.", dgs=_term("DGS"), infarmed=_term("Infarmed"), amostra=_term("amostra"))}</p>
-    <ol class="como-ler">{reading}</ol>
-    {how_counted}
-  </details>
-</section>"""
+<details class="recolhe ler" id="como-ler">
+  <summary>{_t("Como interpretar este relatório")}</summary>
+  <p>{_t("Cada pergunta tem uma resposta de referência com fonte pública (normas da {dgs}, {infarmed}, diretrizes europeias) e critérios de aceitação definidos antes do ensaio. Cada pergunta é colocada várias vezes a cada modelo, uma vez que as respostas variam; cada resposta constitui uma {amostra}. A correção é automática e determinista. Como a média de respostas corretas oculta os erros relevantes, o relatório apresenta primeiro as falhas críticas.", dgs=_term("DGS"), infarmed=_term("Infarmed"), amostra=_term("amostra"))}</p>
+  <ol class="como-ler">{reading}</ol>
+  {how_counted}
+</details>"""
+
+
+def _percent(value: float) -> str:
+    """A share as the protocol wrote it (0.95 reads 95%), in the page's decimal notation."""
+    return decimal(f"{value * 100:g}", _LANG.get()) + "%"
+
+
+def _protocol_criteria(protocol: Protocol) -> str:
+    """The four conditions `protocolo.evaluate` applies, in the words of this protocol's own limits.
+
+    A list that looks complete and is not would be worse than none, so all four are named: every
+    case answered in every sample, the most cases with a critical failure, the most partly correct
+    cases, and the least share of correct samples. A limit of zero reads "no case", any other
+    "at most N".
+    """
+    failure = _term("falha crítica", _t("falha crítica", form="sem artigo"))
+    critical = (
+        _t("nenhum caso com {falha}", falha=failure) if protocol.max_critical_cases == 0
+        else _t("no máximo {n} casos com {falha}", n=protocol.max_critical_cases, falha=failure)
+    )
+    unstable = (
+        _t("nenhum parcialmente correto") if protocol.max_unstable_cases == 0
+        else _t("no máximo {n} parcialmente corretos", n=protocol.max_unstable_cases)
+    )
+    rate = _t("pelo menos {p} de amostras corretas", p=_percent(protocol.min_sample_accuracy))
+    return ", ".join((_t("todos os casos e amostras respondidos"), critical, unstable, rate))
+
+
+def _start_page(
+    cases: list[Case], models: list[str], answers: list[Answer],
+    summaries: dict[str, ConsistencySummary] | None,
+    protocol: Protocol | None = None, protocol_outcomes: list | None = None,
+    protocol_warnings: list[str] | None = None,
+) -> list[tuple[str, str]]:
+    """The first page, as named elements in reading order: what the report is, why it exists, what it
+    aims at, the numbers, what was found, and what the verdicts are not.
+
+    Every sentence comes from the README and the presentation, or from a count the report already
+    makes. Nothing here is a finding of its own: the result is the one `grading` and `protocolo`
+    computed, and the sentence about the review stays true while `report.CLINICAL_REVIEW_DONE` is False.
+    """
+    samples = max(expected_samples(answers).values(), default=0)
+    facts = [
+        _plural(len(cases), "caso clínico", "casos clínicos"),
+        _plural(len(models), "modelo", "modelos"),
+    ]
+    if samples:
+        facts.append(_plural(samples, "amostra por caso", "amostras por caso"))
+    elements: list[tuple[str, str]] = [
+        ("titulo", f'<h1 id="titulo-relatorio">{_t("Relatório do Aferidor")}</h1>'),
+        ("subtitulo", f'<p class="subtitulo">{_t("Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública.")}</p>'),
+        ("porque", f'<p class="porque">{_t("Um assistente que responde a um médico sobre dose, interação ou contraindicação participa numa decisão terapêutica. Uma média de respostas corretas pode esconder o que importa, como erros em doses pediátricas.")}</p>'),
+        ("objetivos",
+         f'<div class="objetivos"><p class="objetivos-titulo"><strong>{_t("Objetivos.")}</strong></p><ul>'
+         f'<li>{_t("Medir, sem aconselhar.")}</li>'
+         f'<li>{_t("Mostrar primeiro as falhas críticas, e não a média.")}</li>'
+         f'<li>{_t("Preparar a validação por um especialista.")}</li></ul></div>'),
+        ("numeros", '<ul class="factos">' + "".join(f"<li>{_esc(f)}</li>" for f in facts) + "</ul>"),
+    ]
+    if summaries:
+        failure = _term("falha crítica", _t("falha crítica", form="sem artigo"))
+        if protocol is not None and protocol_outcomes is not None:
+            approved = sum(1 for o in protocol_outcomes if o.approved)
+            result = _t(
+                "Modelos aprovados pelo protocolo ({criterios}): {k} de {n}.",
+                criterios=_protocol_criteria(protocol), k=approved, n=len(summaries),
+            )
+            best = ""
+        else:
+            meeting = sum(1 for s in summaries.values() if s.critical_cases <= REFERENCE_CRITICAL_LIMIT)
+            result = _t(
+                "Modelos que cumprem o limiar de referência (nenhum caso com {falha}): {k} de {n}.",
+                falha=failure, k=meeting, n=len(summaries),
+            )
+            best = ""
+            rows = compare_critical(summaries).rows  # fewest critical cases first
+            if meeting == 0 and rows:
+                _, critical, cases_n, _, _ = rows[0]
+                best = " " + _t(
+                    "Melhor resultado: {a} de {b} casos com {falha}.",
+                    a=critical, b=cases_n, falha=_term("falha crítica"),
+                )
+        elements.append(("resultado", f'<p class="resultado"><strong>{result}</strong>{best}</p>'))
+        if protocol_warnings:
+            elements.append((
+                "remate",
+                '<p class="remate">' + _t(
+                    "O protocolo tem avisos (ver {metodo}).",
+                    metodo=f'<a href="#criterio">{_esc(_t("Método"))}</a>',
+                ) + "</p>",
+            ))
+    triage = (
+        _t("Os veredictos são triagem automática; a validação por especialista faz-se à parte, numa folha cega.")
+        if _report.CLINICAL_REVIEW_DONE else
+        _t("Os veredictos são triagem automática, ainda sem validação por especialista: a folha cega está pronta, mas ainda não há revisor.")
+    )
+    elements.append(("triagem", f'<p class="triagem">{triage}</p>'))
+    return elements
 
 
 def _notices(
@@ -656,26 +736,15 @@ def _how_counted(samples: int, rule: str) -> str:
 </div>"""
 
 
-def _reference_verdict(summaries: dict[str, ConsistencySummary]) -> str:
-    """What a report without a protocol can still say: whether any model reached the reference
-    threshold. It is not an approval, and the text says so."""
-    meeting = sum(1 for s in summaries.values() if s.critical_cases <= REFERENCE_CRITICAL_LIMIT)
-    line = _t("Modelos que cumprem o limiar de referência: {k} de {n}.", k=meeting, n=len(summaries))
-    best = ""
-    if meeting == 0:
-        rows = compare_critical(summaries).rows  # fewest critical cases first
-        if rows:
-            _, critical, cases_n, _, _ = rows[0]
-            best = " " + _t(
-                "Melhor resultado: {a} de {b} casos com {falha}.",
-                a=critical, b=cases_n, falha=_term("falha crítica"),
-            )
+def _reference_note() -> str:
+    """The caveat that goes with the reference threshold: it is not a protocol written before the
+    trial. Shown next to the seals of the cards, only when there is no protocol."""
     why = _t(
         "Limiar de referência: nenhum caso com {falha}, o limiar usado nos protocolos do projeto. "
         "Não é um protocolo escrito antes do ensaio.",
         falha=_term("falha crítica"),
     )
-    return f'<p class="veredicto"><strong>{line}</strong>{best}</p><p class="seccao-intro">{why}</p>'
+    return f'<p class="seccao-intro" id="limiar-referencia">{why}</p>'
 
 
 def _model_card(
@@ -1299,18 +1368,25 @@ def _build(
     samples_n = max(expected_samples(answers).values(), default=0)
     early, late = _notices(cases, answers, missing, reasons, sources_verified)
 
-    # Início: what the report is, and how to read it.
+    # What the first page states is computed first: it needs the summaries and, with a protocol,
+    # its outcomes and warnings. Nothing is decided here that `grading` and `protocolo` did not decide.
+    summaries = consistency_by_model(consistency) if models else None
+    protocol_outcomes = protocol_warnings = None
+    if protocol is not None and models:
+        protocol_warnings, protocol_outcomes = protocol_findings(
+            protocol, answers, summaries, cases_source, [c.case_id for c in cases], _LANG.get()
+        )
+
+    # Início: what the report is, why it exists, what it aims at, and what it found.
+    start = _start_page(
+        cases, models, answers, summaries, protocol, protocol_outcomes, protocol_warnings
+    )
+    heading = [html for name, html in start if name in ("titulo", "subtitulo")]
+    body = [html for name, html in start if name not in ("titulo", "subtitulo")]
     out.append(
         '<section class="painel" id="inicio" aria-labelledby="titulo-relatorio">'
-        f'{_translation_notice()}<div class="titulo-inicio"><div class="marca">{_t("Aferidor · banco de ensaio clínico")}</div>'
-        f'<h1 id="titulo-relatorio">{title}</h1>'
-        f'<p class="subtitulo">{_t("Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública.")}</p>'
-        f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(written))}</p></div>'
-        + _intro(
-            cases, models, answers, _how_counted(samples_n, rule) if models else "",
-            sources_pending=not sources_verified,
-        )
-        + "</section>"
+        f'{_translation_notice()}<div class="titulo-inicio">{"".join(heading)}</div>'
+        f'<div class="inicio-corpo">{"".join(body)}</div></section>'
     )
 
     # Fontes: where the cases come from, and what is still to be confirmed.
@@ -1325,7 +1401,6 @@ def _build(
             f"<p>{_t('Não há veredictos para relatar.')}</p>",
         ))
     else:
-        summaries = consistency_by_model(consistency)
         states = states_by_model(consistency)
         languages = language_by_model(in_bank(cases, answers))
         expected = expected_samples(answers)
@@ -1354,7 +1429,7 @@ def _build(
         cards.append("</div>")
         out.append(_panel(
             "resultados", _t("Resultados"), *early,
-            _reference_verdict(summaries) if protocol is None else "",
+            _reference_note() if protocol is None else "",
             _comparison(summaries, consistency), *cards,
         ))
 
@@ -1398,7 +1473,7 @@ def _build(
         ))
 
     # Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
-    method: list[str] = []
+    method: list[str] = [f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(samples_n, rule) if models else "")]
     if models:
         method.append(protocol_html)
         method.append(
@@ -1449,7 +1524,9 @@ def _build(
     out.append(_panel("metodo", _t("Método e detalhes técnicos"), *method, *technical))
     out.append("</main>")
     out.append(
-        f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p>{_translation_notice()}<p class="repo">{_repo_link()}</p></footer>'
+        f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p>{_translation_notice()}<p class="repo">{_repo_link()}</p>'
+        f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(written))}</p>'
+        f'<p class="marca">{_t("Aferidor · banco de ensaio clínico")}</p></footer>'
     )
     out.append("</body></html>")
     return "".join(out)

@@ -138,6 +138,19 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); }
   main > .painel { display: none; }
   main:not(:has(:target)) > #inicio, main > .painel:target, main > .painel:has(:target) { display: block; }
 }
+.inicio-corpo { max-width: 46rem; }
+.porque { font-size: 1.12rem; margin-bottom: 1.1rem; }
+.objetivos { margin: 0 0 1.1rem; }
+.objetivos-titulo { margin: 0 0 0.25rem; }
+.objetivos ul { margin: 0; padding-left: 1.25rem; color: var(--ink-2); }
+.inicio-corpo .factos { margin: 0 0 1.25rem; }
+.resultado { margin: 0 0 0.6rem; padding: 1rem 1.25rem; font-size: 1.3rem; line-height: 1.4; background: var(--surface);
+  border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 12px; }
+.resultado strong { font-weight: 650; }
+.remate { margin: 0 0 0.6rem; font-size: 0.95rem; color: var(--ink-2); }
+.inicio-corpo .triagem { margin: 0.9rem 0 0; font-size: 0.95rem; color: var(--ink-2); }
+footer.rodape .data, footer.rodape .marca { margin: 0.2rem 0 0; font-size: 0.82rem; color: var(--muted); }
+footer.rodape .marca { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
 .traducao { margin: 0 0 0.9rem; padding: 0.4rem 0.7rem; font-size: 0.82rem; color: var(--ink-2); background: var(--warning-bg);
   border-left: 3px solid var(--warning); border-radius: 6px; }
 footer.rodape .traducao { margin-top: 0.9rem; }
