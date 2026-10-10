@@ -1706,3 +1706,58 @@ class TestConclusionsTiesAndThresholds(unittest.TestCase):
     def test_the_intervals_are_rounded_to_the_nearest_whole_number_as_in_the_rest_of_the_report(self):
         self.assertIn("compatível com 16% a 48%", self.lines(("a", 8, 27), ("b", 16, 27))["intervalo"])
         self.assertIn("compatível com 0% a 12%", self.lines(("a", 0, 27), ("b", 16, 27))["intervalo"])
+
+
+def _tokens(block: str) -> dict[str, str]:
+    return dict(re.findall(r"--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\b", block))
+
+
+def _luminance(colour: str) -> float:
+    channels = [int(colour[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+    r, g, b = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in channels]
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def contrast(first: str, second: str) -> float:
+    light, dark = sorted((_luminance(first), _luminance(second)), reverse=True)
+    return (light + 0.05) / (dark + 0.05)
+
+
+class TestPaletteContrast(unittest.TestCase):
+    """The petrol palette, in both themes: text 4.5:1, what is not text 3:1, the clinical colours untouched."""
+
+    THEMES = {"claro": html_estilo.LIGHT_TOKENS, "escuro": html_estilo.DARK_TOKENS}
+    GROUNDS = ("page", "surface", "surface-2", "highlight")
+    TEXT = ("ink", "ink-2", "muted", "accent")
+
+    def test_every_text_colour_reads_on_every_ground_at_4_5_to_1(self):
+        for theme, block in self.THEMES.items():
+            tokens = _tokens(block)
+            for fg in self.TEXT:
+                for bg in self.GROUNDS:
+                    with self.subTest(tema=theme, texto=fg, fundo=bg):
+                        self.assertGreaterEqual(contrast(tokens[fg], tokens[bg]), 4.5)
+
+    def test_what_is_not_text_stands_out_at_3_to_1(self):
+        """The accent draws the border of the result and the underline of the current page."""
+        for theme, block in self.THEMES.items():
+            tokens = _tokens(block)
+            for bg in self.GROUNDS:
+                with self.subTest(tema=theme, fundo=bg):
+                    self.assertGreaterEqual(contrast(tokens["accent"], tokens[bg]), 3.0)
+
+    def test_the_clinical_colours_did_not_change_with_the_palette(self):
+        for block in self.THEMES.values():
+            tokens = _tokens(block)
+            self.assertEqual(
+                (tokens["good"], tokens["warning"], tokens["serious"], tokens["critical"]),
+                ("#0ca30c", "#fab219", "#ec835a", "#d03b3b"),
+            )
+        self.assertEqual(_tokens(html_estilo.LIGHT_TOKENS)["critical-text"], "#b42a2a")
+        self.assertEqual(_tokens(html_estilo.DARK_TOKENS)["critical-text"], "#ff8f86")
+
+    def test_the_bar_background_and_the_scroll_shadow_cover_use_the_same_token(self):
+        css = html_estilo.STYLE
+        bar = re.search(r"\.topo \{[^}]*background: var\(--([a-z0-9-]+)\)", css).group(1)
+        self.assertIn(f"linear-gradient(to right, var(--{bar}) 35%, transparent) left center", css)
+        self.assertIn(f"linear-gradient(to left, var(--{bar}) 35%, transparent) right center", css)

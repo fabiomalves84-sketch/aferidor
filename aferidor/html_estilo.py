@@ -7,10 +7,10 @@ the system preference, the header switch, and print (always light).
 from __future__ import annotations
 
 LIGHT_TOKENS = """
-  --page: #f9f9f7; --surface: #ffffff; --surface-2: #f3f2ee;
-  --ink: #0b0b0b; --ink-2: #52514e; --muted: #6f6d68;
-  --grid: #e1e0d9; --border: rgba(11,11,11,0.10);
-  --accent: #1f5fbf;
+  --page: #f3f7f7; --surface: #ffffff; --surface-2: #e3eeee; --highlight: #d6ecee;
+  --ink: #0c1f24; --ink-2: #435a60; --muted: #506b70;
+  --grid: #cfe0e1; --border: rgba(12,31,36,0.10);
+  --accent: #0e6b78;
   --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b; --neutral: #a9a79f;
   --good-bg: rgba(12,163,12,0.12); --warning-bg: rgba(250,178,25,0.18);
   --critical-bg: rgba(208,59,59,0.12); --neutral-bg: rgba(137,135,129,0.14);
@@ -18,10 +18,10 @@ LIGHT_TOKENS = """
   --tooltip-shadow: rgba(0,0,0,0.18); --scroll-shadow: rgba(0,0,0,0.3);
 """
 DARK_TOKENS = """
-  --page: #121211; --surface: #1c1c1a; --surface-2: #272724;
-  --ink: #f2f1ec; --ink-2: #cbc9bf; --muted: #a5a399;
-  --grid: #34332f; --border: rgba(242,241,236,0.12);
-  --accent: #8db4f5;
+  --page: #0e191b; --surface: #152225; --surface-2: #1c2e32; --highlight: #1d3b41;
+  --ink: #e9f2f2; --ink-2: #b7cacc; --muted: #93a9ac;
+  --grid: #2a4045; --border: rgba(233,242,242,0.12);
+  --accent: #5cc1d0;
   --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b; --neutral: #6c6a64;
   --good-bg: rgba(12,163,12,0.20); --warning-bg: rgba(250,178,25,0.16);
   --critical-bg: rgba(208,59,59,0.24); --neutral-bg: rgba(137,135,129,0.18);
@@ -109,7 +109,7 @@ section { margin-top: 2.5rem; }
 }
 .marca { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .titulo-inicio { padding: 0.5rem 0 0; margin-bottom: 1.25rem; }
-.titulo-inicio h1 { font-size: 2rem; margin: 0 0 0.4rem; }
+.titulo-inicio h1 { font-size: 2rem; margin: 0 0 0.4rem; color: var(--accent); }
 .subtitulo { color: var(--ink-2); margin: 0; }
 .data { color: var(--muted); font-size: 0.9rem; margin: 0.35rem 0 0; }
 nav.indice { min-width: 0; flex: 1 1 auto; }
@@ -146,10 +146,10 @@ ul.conclusoes li { margin: 0 0 0.45rem; }
 .inicio-corpo { max-width: 46rem; }
 .porque { font-size: 1.12rem; margin-bottom: 1.1rem; }
 .objetivos { margin: 0 0 1.1rem; }
-.objetivos-titulo { margin: 0 0 0.25rem; }
+.objetivos-titulo { margin: 0 0 0.25rem; color: var(--accent); }
 .objetivos ul { margin: 0; padding-left: 1.25rem; color: var(--ink-2); }
 .inicio-corpo .factos { margin: 0 0 1.25rem; }
-.resultado { margin: 0 0 0.6rem; padding: 1rem 1.25rem; font-size: 1.3rem; line-height: 1.4; background: var(--surface);
+.resultado { margin: 0 0 0.6rem; padding: 1rem 1.25rem; font-size: 1.3rem; line-height: 1.4; background: var(--highlight);
   border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 12px; }
 .resultado strong { font-weight: 650; }
 .remate { margin: 0 0 0.6rem; font-size: 0.95rem; color: var(--ink-2); }
@@ -168,7 +168,7 @@ footer.rodape .traducao { margin-top: 0.9rem; }
 .lead { font-size: 1.12rem; }
 .triagem { color: var(--ink-2); font-size: 0.9rem; margin-top: -0.25rem; }
 .factos { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.factos li { background: var(--surface-2); border-radius: 999px; padding: 0.2rem 0.75rem; font-size: 0.88rem; color: var(--ink-2); }
+.factos li { background: var(--highlight); border-radius: 999px; padding: 0.2rem 0.75rem; font-size: 0.88rem; color: var(--ink-2); }
 .como-ler { margin: 0; padding-left: 1.3rem; color: var(--ink-2); font-size: 0.95rem; }
 .como-ler li { margin-bottom: 0.6rem; }
 .como-ler strong { color: var(--ink); }
