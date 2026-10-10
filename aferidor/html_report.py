@@ -522,7 +522,7 @@ def _how_to_read(how_counted: str) -> str:
 </details>"""
 
 
-def _percent(value: float) -> str:
+def _protocol_share(value: float) -> str:
     """A share as the protocol wrote it (0.95 reads 95%), in the page's decimal notation."""
     return decimal(f"{value * 100:g}", _LANG.get()) + "%"
 
@@ -544,7 +544,7 @@ def _protocol_criteria(protocol: Protocol) -> str:
         _t("nenhum parcialmente correto") if protocol.max_unstable_cases == 0
         else _t("no máximo {n} parcialmente corretos", n=protocol.max_unstable_cases)
     )
-    rate = _t("pelo menos {p} de amostras corretas", p=_percent(protocol.min_sample_accuracy))
+    rate = _t("pelo menos {p} de amostras corretas", p=_protocol_share(protocol.min_sample_accuracy))
     return ", ".join((_t("todos os casos e amostras respondidos"), critical, unstable, rate))
 
 
