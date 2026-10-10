@@ -351,9 +351,9 @@ class TestPreviewAndRepositoryLink(unittest.TestCase):
         text = self.page()
         link = f'<a href="{html_report.REPO_URL}" rel="noopener">{self.LINK_TEXT}</a>'
         self.assertEqual(text.count(link), 2)
-        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="sobre"')]
+        first = panel_html(text, "inicio")
         self.assertNotIn(link, first)
-        method = text[text.index('<section class="painel" id="metodo"'):text.index("</main>")]
+        method = panel_html(text, "metodo")
         self.assertIn(link, method)
         self.assertIn(link, text[text.index('<footer class="rodape">'):])
 
@@ -418,7 +418,7 @@ class TestReferenceThresholdWithoutProtocol(unittest.TestCase):
         self.assertIn("Não é um protocolo escrito antes do ensaio.", visible(text))
         # the result opens the report; the caveat sits next to the seals of the cards, in Resultados
         self.assertLess(text.index('class="resultado"'), text.index('class="cartoes"'))
-        results = text[text.index('<section class="painel" id="resultados"'):text.index('<section class="painel" id="areas"')]
+        results = panel_html(text, "resultados")
         self.assertIn('id="limiar-referencia"', results)
 
     def test_with_a_protocol_nothing_about_the_reference_appears(self):
@@ -473,7 +473,7 @@ class TestEachNoticeLivesInItsPage(unittest.TestCase):
 
     def test_the_first_page_does_not_repeat_the_pointer_the_bar_already_carries(self):
         text = self.page()
-        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="sobre"')]
+        first = panel_html(text, "inicio")
         self.assertNotIn("aviso-fontes", first)
         self.assertNotIn("fontes por confirmar", first)
         self.assertIn('<a href="#fontes">Fontes por confirmar.</a>', text[:text.index("<main>")])
@@ -547,8 +547,7 @@ class TestEightPages(unittest.TestCase):
         for lang in LANGS:
             page = _Example.page(lingua=lang)
             for ident, wanted in markers.items():
-                section = page[page.index(f'<section class="painel" id="{ident}"'):]
-                section = section[:section.index("</section>")] if ident != "sobre" else section[:section.index('<section class="painel" id="fontes"')]
+                section = panel_html(page, ident)
                 for marker in wanted:
                     with self.subTest(lingua=lang, pagina=ident, marca=marker):
                         self.assertIn(marker, section)
@@ -844,7 +843,7 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_it_opens_by_saying_what_the_aferidor_is_why_it_exists_and_what_it_aims_at(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        first = visible(text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="sobre"')])
+        first = visible(panel_html(text, "inicio"))
         self.assertIn("Um médico pode perguntar a um destes assistentes", first)
         self.assertIn('<a href="#sobre">Saber mais sobre o Aferidor.</a>', text)
         self.assertNotIn("Objetivos.", first)  # the aims moved to the About page
@@ -854,7 +853,7 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_how_to_read_it_is_in_the_method_page_closed(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        method = text[text.index('<section class="painel" id="metodo"'):text.index("</main>")]
+        method = panel_html(text, "metodo")
         self.assertRegex(method, r'<details class="recolhe ler" id="como-ler">\s*<summary>Como interpretar este relatório</summary>')
         self.assertNotIn("Como interpretar este relatório", text[:text.index('<section class="painel" id="metodo"')])
 
@@ -871,7 +870,7 @@ class TestReadableByAnOutsider(unittest.TestCase):
 
     def test_the_first_screen_says_the_verdicts_are_triage_for_a_specialist(self):
         text = build([a_case()], [an_answer("1 g")])
-        first = text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="sobre"')]
+        first = panel_html(text, "inicio")
         self.assertIn("Os veredictos são triagem automática, ainda sem validação por especialista", visible(first))
         self.assertIn("triagem automática do corretor", visible(text[:text.index("<main>")]))  # and the bar says it too
 
@@ -1190,17 +1189,22 @@ class _PanelText(_HTMLParser):
         self.parts.append(data)
 
 
-def panel_text(page: str, ident: str) -> str:
+def panel_html(page: str, ident: str) -> str:
+    """The HTML of one page of the report: from its section to the next one, or to the end of <main>."""
     start = page.index(f'<section class="painel" id="{ident}"')
     following = [i for i in (page.find('<section class="painel" id="', start + 10), page.find("</main>", start)) if i > 0]
+    return page[start:min(following)]
+
+
+def panel_text(page: str, ident: str) -> str:
     parser = _PanelText()
-    parser.feed(page[start:min(following)])
+    parser.feed(panel_html(page, ident))
     return " ".join(" ".join(parser.parts).split())
 
 
 def element_text(page: str, css_class: str) -> str:
     """The visible text of the element with this class, on the first page."""
-    first = page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="sobre"')]
+    first = panel_html(page, "inicio")
     at = first.index(f'class="{css_class}"')
     start = first.rindex("<", 0, at)
     tag = re.match(r"<(\w+)", first[start:]).group(1)
@@ -1344,7 +1348,7 @@ class TestFirstPageWordBudget(unittest.TestCase):
 
     def test_every_element_of_the_first_page_is_there_in_reading_order(self):
         page = _Example.page()
-        first = page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="sobre"')]
+        first = panel_html(page, "inicio")
         order = [first.index(f'class="{c}"') for c in ("porque", "saber-mais", "factos", "resultado", "triagem")]
         self.assertEqual(order, sorted(order))
         self.assertLess(first.index("<h1"), order[0])
@@ -1401,7 +1405,7 @@ class TestFirstPageVariants(unittest.TestCase):
 
     def test_a_protocol_with_warnings_points_at_the_method_page_and_one_without_says_nothing(self):
         with_warnings = _Example.page(protocol=_Example.protocol())
-        first = with_warnings[with_warnings.index('<section class="painel" id="inicio"'):with_warnings.index('<section class="painel" id="sobre"')]
+        first = panel_html(with_warnings, "inicio")
         self.assertIn('<p class="remate">O protocolo tem avisos (ver <a href="#criterio">Método</a>).</p>', first)
         self.assertIn('id="criterio"', with_warnings[with_warnings.index('<section class="painel" id="metodo"'):])
         without = _Example.page(protocol=_Example.protocol(date(2020, 1, 1)))
@@ -1485,7 +1489,7 @@ class TestSourcesPage(unittest.TestCase):
 
     def test_the_full_list_is_in_the_method_page_closed_and_the_link_reaches_it(self):
         page = _ConsultationExample.page()
-        method = page[page.index('<section class="painel" id="metodo"'):page.index("</main>")]
+        method = panel_html(page, "metodo")
         self.assertEqual(page.count('id="fontes-por-organismo"'), 1)
         self.assertIn('id="fontes-por-organismo"', method)
         at = method.index('id="fontes-por-organismo"')
@@ -1520,14 +1524,14 @@ class TestSourcesPage(unittest.TestCase):
 
     def test_the_notice_and_the_bar_link_point_at_this_page(self):
         page = _Example.page()
-        sources = page[page.index('<section class="painel" id="fontes"'):page.index('<section class="painel" id="resultados"')]
+        sources = panel_html(page, "fontes")
         self.assertIn('id="aviso-fontes"', sources)
         self.assertEqual(page.count('id="aviso-fontes"'), 1)
         self.assertIn('<a href="#fontes">Fontes por confirmar.</a>', page[:page.index("<main>")])
 
     def test_the_state_carries_the_date_the_report_was_made(self):
         page = _Example.page()
-        sources = page[page.index('<section class="painel" id="fontes"'):page.index('<section class="painel" id="resultados"')]
+        sources = panel_html(page, "fontes")
         self.assertIn("em 2026-10-10:", visible(sources))
 
 CONCLUSIONS_WORDS = 140
@@ -1759,7 +1763,7 @@ class TestAboutPage(unittest.TestCase):
     """What the instrument is, what it is for and how it is run: only what is true of every report."""
 
     def about(self, page: str) -> str:
-        return visible(page[page.index('<section class="painel" id="sobre"'):page.index('<section class="painel" id="fontes"')])
+        return visible(panel_html(page, "sobre"))
 
     def test_the_page_says_what_it_is_what_it_is_for_and_how_it_is_run(self):
         text = self.about(_Example.page())
@@ -1795,7 +1799,7 @@ class TestAboutPage(unittest.TestCase):
 
     def test_the_method_page_has_the_closed_block_the_link_points_to(self):
         page = _Example.page()
-        method = page[page.index('<section class="painel" id="metodo"'):page.index("</main>")]
+        method = panel_html(page, "metodo")
         block = re.search(r'<details class="recolhe" id="verificacao-corretor"><summary>(.*?)</summary>(.*?)</details>', method, flags=re.S)
         self.assertIsNotNone(block)
         self.assertEqual(block.group(1), "Como se verifica e se afina o corretor")
@@ -1818,7 +1822,7 @@ class TestAboutPage(unittest.TestCase):
     def test_the_definition_of_a_critical_failure_is_on_the_first_page_and_only_there(self):
         page = _Example.page()
         sentence = "Falha crítica: erro que pode fazer mal a um doente, como uma dose errada ou um medicamento dado a um alérgico."
-        first = visible(page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="sobre"')])
+        first = visible(panel_html(page, "inicio"))
         self.assertIn(sentence, first)
         self.assertGreater(first.index(sentence), first.index("Modelos que cumprem"))  # next to the result
         self.assertNotIn(sentence, self.about(page))
