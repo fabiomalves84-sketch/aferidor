@@ -147,6 +147,34 @@ class TestTheListOfTenIsHeldAgainstTheFile(unittest.TestCase):
         self.assertIn("FMT-CIST-017 está na lista mas não no parágrafo de 27/09", fontes.divergences(path))
 
 
+class TestTheDocumentsSayWhatTheTableSays(unittest.TestCase):
+    """README, APRESENTACAO and METODO write how far the sources of the 58 cases are confirmed: one by one,
+    in a group, still to confirm. The table of VERIFICACAO.md is what counts, and nothing here changes it."""
+
+    PATTERNS = {
+        "README.md": r"Fontes: (\d+) de (\d+) confirmadas por uma pessoa, caso a caso.*?; (\d+) declaradas confirmadas em grupo.*?as (\d+) restantes",
+        "docs/APRESENTACAO.md": r"(\d+) casos confirmados nos PDF da DGS, um a um; (\d+) declarados confirmados em grupo; os (\d+) restantes",
+        "docs/METODO.md": r"(dez|\d+) casos de infeção confirmados nos PDF das normas da DGS, um a um; (\d+) declarados confirmados em grupo.*?Os (\d+) restantes",
+    }
+
+    def test_the_counts_written_in_the_documents_are_the_ones_of_the_table(self):
+        import re
+
+        table = fontes.read_table(VERIFICATION)
+        project = fontes.count(list(table), table)
+        expected = [project.one_by_one, project.in_group, project.pending]
+        for name, pattern in self.PATTERNS.items():
+            text = " ".join((ROOT / name).read_text(encoding="utf-8").split())
+            found = re.search(pattern, text)
+            with self.subTest(documento=name):
+                self.assertIsNotNone(found, f"{name} já não diz quantas fontes estão confirmadas, em grupo e por confirmar")
+                numbers = [10 if n == "dez" else int(n) for n in found.groups()]
+                if name == "README.md":
+                    self.assertEqual(numbers[1], project.total)
+                    numbers = [numbers[0], *numbers[2:]]
+                self.assertEqual(numbers, expected, f"a tabela de {VERIFICATION.name} diz {expected}: atualizar {name}")
+
+
 class TestSourcesCited(unittest.TestCase):
     def test_the_main_bank_cites_five_sources_in_this_order(self):
         cases = read_cases(ROOT / "casos" / "casos.json")
