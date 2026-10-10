@@ -35,9 +35,9 @@ não pertence ao projeto.
 ## 3. Modelos disponíveis
 
 ```
-python -m aferidor modelos --fornecedor openai
-python -m aferidor modelos --fornecedor anthropic
-python -m aferidor modelos --fornecedor gemini
+python3 -m aferidor modelos --fornecedor openai
+python3 -m aferidor modelos --fornecedor anthropic
+python3 -m aferidor modelos --fornecedor gemini
 ```
 
 A lista é obtida do fornecedor e não é mantida no projeto, porque os nomes de
@@ -50,8 +50,8 @@ dose) é o banco por omissão. `casos/consulta.json` (31 casos de consulta de
 adulto, criança e cessação tabágica) seleciona-se com `--casos`:
 
 ```
-python -m aferidor verificar --casos casos/consulta.json
-python -m aferidor ensaio --fornecedor <fornecedor> --modelo <nome> --casos casos/consulta.json --limite 3
+python3 -m aferidor verificar --casos casos/consulta.json
+python3 -m aferidor ensaio --fornecedor <fornecedor> --modelo <nome> --casos casos/consulta.json --limite 3
 ```
 
 Recomenda-se usar ficheiros de saída próprios (`--saida`, `--vereditos`,
@@ -62,7 +62,7 @@ Recomenda-se usar ficheiros de saída próprios (`--saida`, `--vereditos`,
 O critério de aprovação, opcional, define-se antes de ver qualquer resposta:
 
 ```
-python -m aferidor protocolo --nome "<nome do ensaio>" --saida protocolos/<nome>.json
+python3 -m aferidor protocolo --nome "<nome do ensaio>" --saida protocolos/<nome>.json
 ```
 
 Os limites em `criterios_de_aprovacao` começam no valor mais exigente (zero
@@ -79,8 +79,8 @@ passar despercebido.
 ## 6. Execução
 
 ```
-python -m aferidor ensaio --fornecedor openai --modelo <nome>
-python -m aferidor ensaio --fornecedor openai --modelo <nome> --limite 3   # teste curto
+python3 -m aferidor ensaio --fornecedor openai --modelo <nome>
+python3 -m aferidor ensaio --fornecedor openai --modelo <nome> --limite 3   # teste curto
 ```
 
 O comando executa, corrige e escreve o relatório. Antes do primeiro pedido,
@@ -99,7 +99,7 @@ Com respostas reais (parágrafos, listas, tabelas, avisos), é normal que alguns
 critérios reprovem respostas corretas. A afinação não tem custo:
 
 ```
-python -m aferidor classificar
+python3 -m aferidor classificar
 ```
 
 O comando volta a corrigir as respostas já guardadas com os critérios atuais,
@@ -107,7 +107,7 @@ sem novos pedidos. Para ver exatamente que veredictos uma alteração muda,
 resposta a resposta, antes de a commitar:
 
 ```
-python -m aferidor comparar-vereditos --casos <casos.json> --respostas <respostas.jsonl> --vereditos <vereditos.json>
+python3 -m aferidor comparar-vereditos --casos <casos.json> --respostas <respostas.jsonl> --vereditos <vereditos.json>
 ```
 
 O resumo (quantos passam a passar, quantos passam a falhar) entra na mensagem
@@ -120,7 +120,7 @@ um critério é registada no commit com a justificação.
 ## 8. Amostras repetidas
 
 ```
-python -m aferidor ensaio --fornecedor openai --modelo <nome> --repeticoes 5 --temperatura 1.0
+python3 -m aferidor ensaio --fornecedor openai --modelo <nome> --repeticoes 5 --temperatura 1.0
 ```
 
 Um modelo que acerta a dose em 4 de 5 amostras erra a dose na prática: o
@@ -134,8 +134,8 @@ os produtos reais raramente usam temperatura 0.
 ## 9. Comparação de modelos
 
 ```
-python -m aferidor ensaio --fornecedor openai --modelo <nome>
-python -m aferidor ensaio --fornecedor anthropic --modelo <nome>
+python3 -m aferidor ensaio --fornecedor openai --modelo <nome>
+python3 -m aferidor ensaio --fornecedor anthropic --modelo <nome>
 ```
 
 As respostas dos vários modelos coexistem no mesmo ficheiro e o relatório
@@ -154,7 +154,7 @@ truncadas (ver `ensaios/2026-09-16-comparacao-local-invalida/README.md`).
 Para estes modelos, recomenda-se:
 
 ```
-python -m aferidor ensaio --fornecedor local --modelo qwen3:8b --tokens-max 8192
+python3 -m aferidor ensaio --fornecedor local --modelo qwen3:8b --tokens-max 8192
 ```
 
 Uma resposta truncada fica por responder e não é repetida automaticamente com
@@ -176,10 +176,10 @@ exterior). Após instalar o Ollama (ollama.com) e descarregar os modelos
 (`ollama list` confirma que está ativo):
 
 ```
-python -m aferidor ensaio --fornecedor local --modelo <nome-a> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
-python -m aferidor ensaio --fornecedor local --modelo <nome-b> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
-python -m aferidor ensaio --fornecedor local --modelo <nome-c> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
-python -m aferidor relatorio --formato html
+python3 -m aferidor ensaio --fornecedor local --modelo <nome-a> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
+python3 -m aferidor ensaio --fornecedor local --modelo <nome-b> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
+python3 -m aferidor ensaio --fornecedor local --modelo <nome-c> --repeticoes 5 --temperatura 1.0 --tokens-max 8192
+python3 -m aferidor relatorio --formato html
 ```
 
 São 405 pedidos (27 × 5 × 3). Num portátil, a duração depende do hardware e do
@@ -199,14 +199,14 @@ Antes de apresentar resultados, um clínico deve julgar uma amostra das
 respostas:
 
 ```
-python -m aferidor revisao --respostas data/respostas.jsonl --n 60
+python3 -m aferidor revisao --respostas data/respostas.jsonl --n 60
 ```
 
 Enviar `relatorios/revisao.csv`, **nunca** `revisao-chave.json`, que contém as
 decisões do corretor. Com a coluna `juizo` preenchida:
 
 ```
-python -m aferidor concordancia --revisao relatorios/revisao.csv
+python3 -m aferidor concordancia --revisao relatorios/revisao.csv
 ```
 
 O primeiro valor apresentado é o mais relevante: o número de respostas erradas
@@ -216,7 +216,7 @@ modelo.
 ## 13. Recomeçar do zero
 
 ```
-python -m aferidor ensaio --fornecedor openai --modelo <nome> --recomecar
+python3 -m aferidor ensaio --fornecedor openai --modelo <nome> --recomecar
 ```
 
 Descarta as respostas anteriores do modelo e repete todos os pedidos, com o
@@ -233,7 +233,7 @@ quando o corretor muda e o exemplo tem de ser regenerado, não editado.
 cat ensaios/2026-09-29-gemma4-31b-casos/respostas.jsonl \
     ensaios/2026-09-28-gemini-flash/respostas.jsonl \
     ensaios/2026-09-27-locais-12-14b/respostas.jsonl > /tmp/exemplo-respostas.jsonl
-python -m aferidor relatorio --formato html --linguas pt,en,es,fr,de \
+python3 -m aferidor relatorio --formato html --linguas pt,en,es,fr,de \
   --casos casos/casos.json --respostas /tmp/exemplo-respostas.jsonl \
   --saida docs/exemplo/index.html
 ```

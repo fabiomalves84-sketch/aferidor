@@ -122,11 +122,11 @@ não nos casos.
 ## Demonstração
 
 ```
-python -m unittest discover -s tests   # 656 testes
-python -m aferidor verificar           # 27/27 casos, 319/319 controlos negativos
-python -m aferidor verificar --casos casos/consulta.json   # 31/31, 140/140
-python -m aferidor executar --fornecedor falso
-python -m aferidor relatorio           # escreve relatorios/relatorio.md
+python3 -m unittest discover -s tests   # 656 testes
+python3 -m aferidor verificar           # 27/27 casos, 319/319 controlos negativos
+python3 -m aferidor verificar --casos casos/consulta.json   # 31/31, 140/140
+python3 -m aferidor executar --fornecedor falso
+python3 -m aferidor relatorio           # escreve relatorios/relatorio.md
 ```
 
 Nenhum destes comandos requer chave de API nem ligação à internet.

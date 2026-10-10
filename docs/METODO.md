@@ -53,7 +53,7 @@ ATB-DPOC-002, "não 1000 mg" é um critério comum por esse motivo.
 contrário, `5` seria encontrado em `500 mg` e uma dose errada passaria por uma
 duração correta.
 
-**Verificação do corretor.** `python -m aferidor verificar` avalia a resposta
+**Verificação do corretor.** `python3 -m aferidor verificar` avalia a resposta
 de referência de cada caso contra os seus próprios critérios. Um caso cuja
 referência não passa está defeituoso no sentido mais grave: classifica como
 errado um modelo que acertou. O mesmo comando verifica o sentido inverso: para
@@ -89,9 +89,9 @@ Os critérios de cada caso determinam se uma resposta é correta, não se um
 modelo é aceitável. Essa decisão é definida num protocolo, antes do ensaio:
 
 ```
-python -m aferidor protocolo --nome "ensaio de outubro" --saida protocolos/outubro.json
+python3 -m aferidor protocolo --nome "ensaio de outubro" --saida protocolos/outubro.json
 git add protocolos/outubro.json && git commit    # antes de correr
-python -m aferidor ensaio ... --protocolo protocolos/outubro.json
+python3 -m aferidor ensaio ... --protocolo protocolos/outubro.json
 ```
 
 O protocolo fixa o máximo de casos com falha crítica, o máximo de casos
@@ -114,8 +114,8 @@ uma resposta errada construída. Não mede a concordância do corretor com um
 clínico em respostas reais.
 
 ```
-python -m aferidor revisao --respostas <ficheiro> --n 60   # folha para julgar
-python -m aferidor concordancia --revisao relatorios/revisao.csv
+python3 -m aferidor revisao --respostas <ficheiro> --n 60   # folha para julgar
+python3 -m aferidor concordancia --revisao relatorios/revisao.csv
 ```
 
 O primeiro comando seleciona uma amostra reprodutível (metade aprovada e
@@ -144,7 +144,7 @@ utiliza. Subestima a frequência real.
 
 ## Relatório
 
-`python -m aferidor relatorio` produz um documento em Markdown ou HTML. As
+`python3 -m aferidor relatorio` produz um documento em Markdown ou HTML. As
 falhas críticas surgem antes da percentagem de respostas corretas, porque a
 percentagem isolada oculta o que importa.
 
