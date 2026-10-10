@@ -19,5 +19,8 @@ demo.py
 # definições do editor; pessoais, não do projeto
 .vscode/
 
+# definições locais do Claude Code; pessoais
+.claude/settings.local.json
+
 # ficheiros do Finder do macOS
 .DS_Store
