@@ -1213,7 +1213,12 @@ class _Example:
 
     @classmethod
     def page(cls, **kwargs) -> str:
+        from aferidor import fontes
+
         d = cls.data()
+        kwargs.setdefault(
+            "confirmation", fontes.read_confirmation(ROOT / "casos" / "casos.json", [c.case_id for c in d["cases"]])
+        )
         return html_report.build(
             d["cases"], d["answers"], d["verdicts"], missing=d["missing"], today=date(2026, 10, 10),
             cases_source=("casos/casos.json", cls.bank_sha256()), **kwargs,
@@ -1229,6 +1234,33 @@ class _Example:
             path = Path(folder) / "p.json"
             path.write_text(_json.dumps(_template("x", ROOT / "casos" / "casos.json", today=written_on)), encoding="utf-8")
             return _read_protocol(path)
+
+
+class _ConsultationExample:
+    """The consultation bank with the answers of the trial that asked it, for the page with ten sources."""
+
+    _cache: dict = {}
+
+    @classmethod
+    def page(cls, **kwargs) -> str:
+        from aferidor import fontes
+
+        if not cls._cache:
+            cases = _read_cases(ROOT / "casos" / "consulta.json")
+            answers = _read_answers(ROOT / "ensaios" / "2026-09-29-gemini-consulta" / "respostas.jsonl")
+            verdicts, missing = grade_all(cases, answers)
+            cls._cache.update(cases=cases, answers=answers, verdicts=verdicts, missing=missing)
+        d = cls._cache
+        kwargs.setdefault(
+            "confirmation", fontes.read_confirmation(ROOT / "casos" / "consulta.json", [c.case_id for c in d["cases"]])
+        )
+        return html_report.build(
+            d["cases"], d["answers"], d["verdicts"], missing=d["missing"], today=date(2026, 10, 10),
+            cases_source=("casos/consulta.json", ""), **kwargs,
+        )
+
+
+SOURCES_PAGE_WORDS = 100
 
 
 class TestFirstPageWordBudget(unittest.TestCase):
@@ -1372,3 +1404,89 @@ class TestClinicalReviewFlagIsRecorded(unittest.TestCase):
             "Falta no BRIEFING.md, nas decisões em aberto, uma linha a registar CLINICAL_REVIEW_DONE "
             "(aferidor/report.py): quando houver revisor, muda a constante e o relatório precisa de saber de que revisão se trata.",
         )
+
+
+class TestSourcesPage(unittest.TestCase):
+    """Which sources the cases cite, and how far they are confirmed, read from VERIFICACAO.md by id."""
+
+    def text(self, page: str) -> str:
+        return visible(panel_text(page, "fontes"))
+
+    def test_the_main_bank_says_which_sources_and_the_three_counts(self):
+        text = self.text(_Example.page())
+        self.assertIn("Casos que citam cada fonte: DGS 16, RCM 8, APMGF 5, Infarmed 4, EMA 3.", text)
+        self.assertIn("Estado da confirmação segundo em 2026-10-10:", text.replace("casos/VERIFICACAO.md ", ""))
+        self.assertIn(
+            "Neste banco (27 casos), confirmadas por uma pessoa, uma a uma, nos documentos: 9; "
+            "declaradas confirmadas em grupo, sem registo de página: 11; por confirmar: 7.", text,
+        )
+        self.assertIn("No projeto (58 casos), pela mesma ordem: 10, 24 e 24.", text)
+
+    def test_the_consultation_bank_has_its_own_numbers_and_the_project_the_same_ones(self):
+        text = self.text(_ConsultationExample.page())
+        self.assertIn("Neste banco (31 casos)", text)
+        self.assertIn("uma a uma, nos documentos: 1; declaradas confirmadas em grupo, sem registo de página: 13; por confirmar: 17.", text)
+        self.assertIn("No projeto (58 casos), pela mesma ordem: 10, 24 e 24.", text)
+
+    def test_more_than_five_sources_name_the_first_five_and_say_how_many_and_how_many_cases_are_left_out(self):
+        text = self.text(_ConsultationExample.page())
+        self.assertIn("DGS 9, ESC 7, Infarmed 7, RCM 7, NICE 5; outras fontes: 5 (lista completa no Método); "
+                      "casos que não citam nenhuma destas: 6.", text)
+        self.assertNotIn("ADA 3", text)
+
+    def test_the_full_list_is_in_the_method_page_closed_and_the_link_reaches_it(self):
+        page = _ConsultationExample.page()
+        method = page[page.index('<section class="painel" id="metodo"'):page.index("</main>")]
+        self.assertEqual(page.count('id="fontes-por-organismo"'), 1)
+        self.assertIn('id="fontes-por-organismo"', method)
+        at = method.index('id="fontes-por-organismo"')
+        opened = method.rfind("<details", 0, at)
+        self.assertGreater(opened, method.rfind("</details>", 0, at))  # the target sits inside a <details>
+        self.assertIn("<summary>Fontes por organismo</summary>", method[opened:at])
+        self.assertNotIn(" open", method[opened:at])  # closed
+        for body in ("ADA", "EMA", "FDA", "PNV", "SNS"):
+            with self.subTest(fonte=body):
+                self.assertRegex(method[at:], rf">{body}</abbr> \d+</li>")
+        self.assertIn('<a href="#fontes-por-organismo">Método</a>', page)
+
+    def test_the_page_fits_its_budget_for_either_bank(self):
+        for label, page in (("principal", _Example.page()), ("consulta", _ConsultationExample.page())):
+            with self.subTest(banco=label):
+                self.assertLessEqual(words(panel_text(page, "fontes")), SOURCES_PAGE_WORDS)
+
+    def test_without_the_verification_file_beside_the_cases_no_number_is_shown(self):
+        page = _Example.page(confirmation=None)
+        text = self.text(page)
+        self.assertNotIn("Estado da confirmação", text)
+        self.assertNotIn("Neste banco", text)
+        self.assertNotIn("No projeto", text)
+        self.assertIn("Nem todas as fontes destes casos foram confirmadas por uma pessoa.", text)
+        self.assertIn('id="aviso-fontes"', page)
+
+    def test_when_the_person_says_every_source_is_confirmed_no_state_is_shown(self):
+        text = self.text(_Example.page(sources_verified=True))
+        self.assertIn("Todas as fontes destes casos foram confirmadas por uma pessoa.", text)
+        self.assertNotIn("Estado da confirmação", text)
+        self.assertNotIn("Nem todas as fontes", text)
+
+    def test_the_notice_and_the_bar_link_point_at_this_page(self):
+        page = _Example.page()
+        sources = page[page.index('<section class="painel" id="fontes"'):page.index('<section class="painel" id="resultados"')]
+        self.assertIn('id="aviso-fontes"', sources)
+        self.assertEqual(page.count('id="aviso-fontes"'), 1)
+        self.assertIn('<a href="#fontes">Fontes por confirmar.</a>', page[:page.index("<main>")])
+
+    def test_the_state_carries_the_date_the_report_was_made(self):
+        page = _Example.page()
+        sources = page[page.index('<section class="painel" id="fontes"'):page.index('<section class="painel" id="resultados"')]
+        self.assertIn("em 2026-10-10:", visible(sources))
+
+    def test_the_page_is_there_in_every_language_with_its_counts(self):
+        from aferidor.traducao import LANGS
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                page = _Example.page(lingua=lang)
+                sources = page[page.index('<section class="painel" id="fontes"'):page.index('<section class="painel" id="resultados"')]
+                self.assertIn('class="estado-contagens"', sources)
+                self.assertIn(">DGS</abbr> 16", sources)

@@ -48,6 +48,7 @@ from .grading import (
     wilson_interval,
     worst_examples,
 )
+from . import fontes as _fontes
 from . import report as _report
 from .html_estilo import STYLE
 from .lingua import LanguageSummary, language_by_model, language_line
@@ -1256,6 +1257,7 @@ def build(
     protocol: Protocol | None = None,
     lingua: str = "pt",
     alternates: dict[str, str] | None = None,
+    confirmation: "_fontes.Confirmation | None" = None,
 ) -> str:
     """Write the whole report as one self contained HTML file.
 
@@ -1271,7 +1273,7 @@ def build(
     try:
         return _build(
             cases, answers, verdicts, missing, reasons, sources_verified, today,
-            cases_source, protocol, alternates,
+            cases_source, protocol, alternates, confirmation,
         )
     finally:
         _SHORT.reset(names)
@@ -1323,9 +1325,83 @@ def _strip(sources_pending: bool) -> str:
     return f'<p class="faixa" role="note">{" ".join(parts)}</p>'
 
 
+def _source_list(pairs: list[tuple[str, int]]) -> str:
+    return ", ".join(f"{_term(body)} {n}" for body, n in pairs)
+
+
+def _sources_page(
+    cases: list[Case], confirmation: "_fontes.Confirmation | None", sources_verified: bool,
+    notices: list[str], written: str,
+) -> list[str]:
+    """What the Sources page says: which sources the cases cite, and how far they are confirmed.
+
+    The count of cases comes from the cases of the report; the state of confirmation was read from
+    `casos/VERIFICACAO.md` by `fontes`, case by case. Without that file there is no number to show, and
+    none is made up: the page keeps the notice it always had. With `sources_verified` the person who
+    runs the report says every source was confirmed, and that is all the page says about it.
+    """
+    pairs = _fontes.by_source(cases)
+    shown, rest = pairs[:_fontes.SHOWN], pairs[_fontes.SHOWN:]
+    out: list[str] = []
+    if shown:
+        if rest:
+            line = _t(
+                "Casos que citam cada fonte: {lista}; outras fontes: {n} (lista completa no {metodo}); "
+                "casos que não citam nenhuma destas: {m}.",
+                lista=_source_list(shown), n=len(rest),
+                metodo=f'<a href="#fontes-por-organismo">{_esc(_t("Método"))}</a>',
+                m=_fontes.left_out(cases, [body for body, _ in shown]),
+            )
+        else:
+            line = _t("Casos que citam cada fonte: {lista}.", lista=_source_list(shown))
+        out.append(f'<p class="origem">{line}</p>')
+    if sources_verified:
+        out.append(f'<p class="seccao-intro">{_t("Todas as fontes destes casos foram confirmadas por uma pessoa.")}</p>')
+        return out + notices
+    if confirmation is not None:
+        bank, project = confirmation.bank, confirmation.project
+        out.append(
+            '<p class="estado">' + _t(
+                "Estado da confirmação segundo {ficheiro} em {data}:",
+                ficheiro="<code>casos/VERIFICACAO.md</code>", data=_esc(written),
+            ) + "</p>"
+            '<ul class="estado-contagens"><li>' + _t(
+                "Neste banco ({casos}), confirmadas por uma pessoa, uma a uma, nos documentos: {a}; "
+                "declaradas confirmadas em grupo, sem registo de página: {b}; por confirmar: {c}.",
+                casos=_esc(_plural(bank.total, "caso", "casos")), a=bank.one_by_one, b=bank.in_group, c=bank.pending,
+            ) + "</li><li>" + _t(
+                "No projeto ({casos}), pela mesma ordem: {a}, {b} e {c}.",
+                casos=_esc(_plural(project.total, "caso", "casos")),
+                a=project.one_by_one, b=project.in_group, c=project.pending,
+            ) + "</li></ul>"
+        )
+        if bank.without_row:
+            out.append(
+                '<p class="estado-sem-linha">' + _t(
+                    "Sem linha na tabela: {ids}.", ids=_esc(", ".join(bank.without_row)),
+                ) + "</p>"
+            )
+    return out + notices
+
+
+def _sources_by_body(cases: list[Case]) -> str:
+    """Every source the cases cite, closed, in the Method page: the Sources page names only the first few."""
+    pairs = _fontes.by_source(cases)
+    if not pairs:
+        return ""
+    items = "".join(f"<li>{_term(body)} {n}</li>" for body, n in pairs)
+    return (
+        # The id is on the list, inside the <details>: a link to the element that holds the <details> would
+        # land on it closed, and a link to something inside it makes the browser open it.
+        f'<details class="recolhe"><summary>{_t("Fontes por organismo")}</summary>'
+        f'<p class="seccao-intro">{_t("Um caso que cita mais de uma fonte conta em cada uma.")}</p>'
+        f'<ul class="lista-fontes" id="fontes-por-organismo">{items}</ul></details>'
+    )
+
+
 def _build(
     cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
-    protocol, alternates,
+    protocol, alternates, confirmation=None,
 ) -> str:
     per_model = tally_by_model(verdicts)
     models = list(per_model)
@@ -1390,10 +1466,7 @@ def _build(
     )
 
     # Fontes: where the cases come from, and what is still to be confirmed.
-    sources = list(late)
-    if sources_verified:
-        sources.append(f'<p class="seccao-intro">{_t("Todas as fontes destes casos foram confirmadas por uma pessoa.")}</p>')
-    out.append(_panel("fontes", _t("Fontes"), *sources))
+    out.append(_panel("fontes", _t("Fontes"), *_sources_page(cases, confirmation, sources_verified, late, written)))
 
     if not models:
         out.append(_panel(
@@ -1473,7 +1546,10 @@ def _build(
         ))
 
     # Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
-    method: list[str] = [f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(samples_n, rule) if models else "")]
+    method: list[str] = [
+        f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(samples_n, rule) if models else ""),
+        _sources_by_body(cases),
+    ]
     if models:
         method.append(protocol_html)
         method.append(

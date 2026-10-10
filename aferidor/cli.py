@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import build_id, html_report, manifesto, protocolo, report, revisao
+from . import build_id, fontes, html_report, manifesto, protocolo, report, revisao
 from .grading import (
     grade_all,
     met_by_the_question,
@@ -484,7 +484,8 @@ def comando_relatorio(
     alternates = {lang: path.name for lang, path in paths.items()} if len(langs) > 1 else None
     for lang, path in paths.items():
         text = html_report.build(
-            cases, answers, verdicts, lingua=lang, alternates=alternates, **common
+            cases, answers, verdicts, lingua=lang, alternates=alternates,
+            confirmation=fontes.read_confirmation(args.casos, [c.case_id for c in cases]), **common
         )
         path.write_text(text, encoding="utf-8")
         print(f"relatório em {path} ({len(text.splitlines())} linhas)")
