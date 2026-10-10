@@ -1775,28 +1775,19 @@ def _prepare(
     )
 
 
-def _build(
-    cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
-    protocol, alternates, confirmation=None,
-) -> str:
-    data = _prepare(
-        cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
-        protocol, alternates, confirmation,
-    )
+def _head_html(data: _ReportData) -> str:
+    """From the doctype to the opening of <main>: the head, and the fixed bar with the pages, the
+    language menu, the theme switch and the notice every page carries."""
     title = _t("Relatório do Aferidor")
-
-    out: list[str] = [
-        "<!DOCTYPE html>",
-        f'<html lang="{HTML_LANG[_LANG.get()]}"><head><meta charset="utf-8">',
-        '<meta name="viewport" content="width=device-width, initial-scale=1">',
-        f"<title>{title}</title>{_preview_meta(title)}<style>{STYLE}</style></head><body>",
-    ]
     menu = _language_menu(data.alternates) if data.alternates else ""
     # Without verdicts there is nothing to break down, so those pages do not exist.
     without_verdicts = ("areas", "casos", "conclusoes")
     present = [(a, label) for a, label in PANELS if data.models or a not in without_verdicts]
-    # The fixed bar: the pages and the controls on one line, and the notice that stays on every page.
-    out.append(
+    return (
+        "<!DOCTYPE html>"
+        f'<html lang="{HTML_LANG[_LANG.get()]}"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        f"<title>{title}</title>{_preview_meta(title)}<style>{STYLE}</style></head><body>"
         '<header class="topo"><div class="topo-linha">'
         f'<nav class="indice" aria-label="{_esc(_t("Secções"))}"><ul>'
         + "".join(f'<li><a href="#{anchor}">{_esc(_t(label))}</a></li>' for anchor, label in present)
@@ -1809,12 +1800,14 @@ def _build(
         f'<span aria-hidden="true">☾</span> {_t("Escuro")}</label></div></div></div>'
         + _strip(not data.sources_verified)
         + "</header>"
+        # The content sits in one <main> landmark, between the bar and the footer, so a screen
+        # reader can jump straight to it. The header, the navigation and the footer stay outside.
+        "<main>"
     )
-    # The content sits in one <main> landmark, between the bar and the footer, so a screen
-    # reader can jump straight to it. The header, the navigation and the footer stay outside.
-    out.append("<main>")
 
-    # Início: what the report is, why it exists, what it aims at, and what it found.
+
+def _start_panel(data: _ReportData) -> str:
+    """Início: what the report is, why it exists, what it aims at, and what it found."""
     start = _start_page(
         data.cases, data.models, data.answers, data.summaries, data.protocol,
         data.protocol_outcomes, data.protocol_warnings,
@@ -1822,23 +1815,43 @@ def _build(
     heading = [html for name, html in start if name in ("titulo", "subtitulo")]
     reading = [html for name, html in start if name in ("porque", "sobre")]
     side = [html for name, html in start if name not in ("titulo", "subtitulo", "porque", "sobre")]
-    out.append(
+    return (
         '<section class="painel" id="inicio" aria-labelledby="titulo-relatorio">'
         f'{_translation_notice()}<div class="titulo-inicio">{"".join(heading)}</div>'
         f'<div class="inicio-corpo"><div class="inicio-texto">{"".join(reading)}</div>'
         f'<div class="inicio-lateral">{"".join(side)}</div></div></section>'
     )
 
-    # Sobre: what the instrument is, what it is for and how it is run.
-    out.append(_panel(
+
+def _about_panel(data: _ReportData) -> str:
+    """Sobre: what the instrument is, what it is for and how it is run."""
+    return _panel(
         "sobre", _t("Sobre o Aferidor"),
         '<div class="sobre">' + "".join(_about_page(data.protocol, data.cases)) + "</div>",
+    )
+
+
+def _sources_panel(data: _ReportData) -> str:
+    """Fontes: where the cases come from, and what is still to be confirmed."""
+    return _panel("fontes", _t("Fontes"), *_sources_page(
+        data.cases, data.confirmation, data.sources_verified, data.late, data.written,
     ))
 
-    # Fontes: where the cases come from, and what is still to be confirmed.
-    out.append(_panel("fontes", _t("Fontes"), *_sources_page(
-        data.cases, data.confirmation, data.sources_verified, data.late, data.written,
-    )))
+
+def _build(
+    cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
+    protocol, alternates, confirmation=None,
+) -> str:
+    data = _prepare(
+        cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
+        protocol, alternates, confirmation,
+    )
+    out: list[str] = [
+        _head_html(data),
+        _start_panel(data),
+        _about_panel(data),
+        _sources_panel(data),
+    ]
 
     if not data.models:
         out.append(_panel(
