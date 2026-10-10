@@ -563,11 +563,13 @@ def _start_page(
         _plural(len(models), "modelo", "modelos"),
     ]
     if samples:
-        facts.append(_plural(samples, "amostra por caso", "amostras por caso"))
+        facts.append(
+            _t("cada caso repetido {n} vez", n=samples) if samples == 1 else _t("cada caso repetido {n} vezes", n=samples)
+        )
     elements: list[tuple[str, str]] = [
         ("titulo", f'<h1 id="titulo-relatorio">{_t("Relatório do Aferidor")}</h1>'),
-        ("subtitulo", f'<p class="subtitulo">{_t("Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública.")}</p>'),
-        ("porque", f'<p class="porque">{_t("Um assistente que responde a um médico sobre dose, interação ou contraindicação participa numa decisão terapêutica. Uma média de respostas corretas pode esconder o que importa, como erros em doses pediátricas.")}</p>'),
+        ("subtitulo", f'<p class="subtitulo">{_t("Faz perguntas clínicas a assistentes de inteligência artificial (os modelos) e compara as respostas com documentos clínicos públicos.")}</p>'),
+        ("porque", f'<p class="porque">{_t("Um médico pode perguntar a um destes assistentes que antibiótico dar, ou se pode dar um medicamento a um doente alérgico. Uma resposta errada pode fazer mal, e uma média de respostas certas esconde esses erros. O Aferidor só mede: não aconselha nem diz que assistente usar.")}</p>'),
         ("sobre", f'<p class="saber-mais"><a href="#sobre">{_t("Saber mais sobre o Aferidor.")}</a></p>'),
         ("numeros", '<ul class="factos">' + "".join(f"<li>{_esc(f)}</li>" for f in facts) + "</ul>"),
     ]
@@ -603,6 +605,12 @@ def _start_page(
                     metodo=f'<a href="#criterio">{_esc(_t("Método"))}</a>',
                 ) + "</p>",
             ))
+        elements.append((
+            "definicao",
+            '<p class="definicao">' + _t(
+                "Falha crítica: erro que pode fazer mal a um doente, como uma dose errada ou um medicamento dado a um alérgico."
+            ) + "</p>",
+        ))
     triage = (
         _t("Os veredictos são triagem automática; a validação por especialista faz-se à parte, numa folha cega.")
         if _report.CLINICAL_REVIEW_DONE else
@@ -622,52 +630,118 @@ ABOUT_COMMANDS = (
 )
 
 
-def _about_page(protocol: Protocol | None) -> list[tuple[str, str]]:
-    """The About page, as named elements in reading order. Every sentence is true of every report:
-    it says what the instrument is, what it does and how it is run, from the README, the method and
-    the running guide, and only what holds whether or not a protocol was written first."""
+# The real case shown on the About page. It is read from the report's own bank, so nothing about it
+# is written here: if the case is not in the bank the block does not appear, and a test holds the
+# choice against `casos/VERIFICACAO.md` (the source of this case must be marked as confirmed).
+EXAMPLE_CASE_ID = "PED-OMA-021"
+VERIFICATION_ANCHOR = "como-se-verifica-o-corretor"
+
+
+def _or_list(terms: tuple[str, ...]) -> str:
+    """"a", "a ou b", "a, b ou c"."""
+    if len(terms) == 1:
+        return _esc(terms[0])
+    return _t("{a} ou {b}", a=_esc(", ".join(terms[:-1])), b=_esc(terms[-1]))
+
+
+def _short_source(case: Case) -> str:
+    """The name and the document of a source, without the page and the point: "DGS, Norma n.º 007/2012"."""
+    found = re.match(r"Norma n\.º \d+/\d{4}", case.source.reference)
+    return f"{case.source.name}, {found.group(0) if found else case.source.reference.split(',')[0]}"
+
+
+def _example_case(cases: list[Case]) -> str:
+    """A real case of the bank, with the question, the source and what a serious error would be.
+    The error is read from the case's own criterion that forbids a drug, if that failure is critical."""
+    case = next((c for c in cases if c.case_id == EXAMPLE_CASE_ID), None)
+    forbidden = next(
+        (c.terms for c in (case.criteria if case else ()) if c.kind == "nao_prescreve" and c.failure.risk is Risk.CRITICO),
+        None,
+    )
+    if case is None or forbidden is None:
+        return ""
+    return (
+        f'<div class="exemplo"><h3>{_t("Um caso, como exemplo")}</h3>'
+        f'<p><strong>{_t("Pergunta.")}</strong> <span lang="pt-PT">{_gloss(_esc(case.question))}</span></p>'
+        "<p>" + _t("Um erro grave seria propor {termos}: seria uma falha crítica.", termos=_or_list(forbidden)) + "</p>"
+        f'<p><strong>{_t("Fonte.")}</strong> <span lang="pt-PT">{_esc(_short_source(case))}</span></p>'
+        f'<details class="recolhe"><summary>{_t("Ver a referência e a fonte completa")}</summary>'
+        f'<p><strong>{_t("Resposta de referência.")}</strong> <span lang="pt-PT">{_gloss(_esc(case.reference))}</span></p>'
+        f'<p class="fonte"><strong>{_t("Fonte.")}</strong> <span lang="pt-PT">{_gloss(_esc(case.source.name))}, '
+        f"{_esc(case.source.reference)}</span></p></details></div>"
+    )
+
+
+def _verification_block() -> str:
+    """How the grader is checked and tuned, closed in the Method page. The About page points here."""
+    return (
+        f'<details class="recolhe" id="verificacao-corretor"><summary>{_t("Como se verifica e se afina o corretor")}</summary>'
+        f'<p id="{VERIFICATION_ANCHOR}">' + _t(
+            "Os critérios de cada caso e o corretor estão em código, com histórico de alterações."
+        ) + "</p><p>" + _t(
+            "Antes de cada ensaio, uma corrida de perguntas a um modelo, cada critério tem de aceitar a "
+            "resposta de referência e rejeitar uma resposta errada construída para o efeito."
+        ) + "</p><p>" + _t(
+            "O corretor foi afinado depois de alguns ensaios, com cada afinação registada e a razão "
+            "escrita; por isso os números dependem da versão do corretor."
+        ) + "</p></details>"
+    )
+
+
+def _about_page(protocol: Protocol | None, cases: list[Case]) -> list[tuple[str, str]]:
+    """The About page, as named elements in reading order, for someone who has never heard of the
+    project. Every sentence is true of every report: it says what the instrument is, what it is for
+    and how it is run, from the README, the method and the running guide, and nothing that holds only
+    when a protocol was written first."""
     start = _link("inicio", "Início")
     if protocol is None:
         protocols = _t(
-            "Os protocolos de aprovação, escritos antes do ensaio, são opcionais. Este relatório não tem "
-            "nenhum: usa o limiar de referência, que não é um protocolo prévio."
+            "Pode haver um protocolo de aprovação, escrito antes do ensaio (uma corrida de perguntas a um "
+            "modelo), mas é opcional. Este relatório não tem nenhum: usa o limiar de referência (nenhum "
+            "caso com falha crítica), que não é um protocolo prévio."
         )
     else:
         protocols = _t(
-            "Os protocolos de aprovação, escritos antes do ensaio, são opcionais. Este relatório tem um "
-            "protocolo de aprovação; os critérios estão no {inicio}.", inicio=start,
+            "Pode haver um protocolo de aprovação, escrito antes do ensaio (uma corrida de perguntas a um "
+            "modelo), mas é opcional. Este relatório tem um; os critérios estão no {inicio}.", inicio=start,
         )
     guide = f'<a href="{COMO_CORRER_URL}" rel="noopener"><code>COMO_CORRER.md</code></a>'
-    return [
-        ("o-que-e", f'<h3>{_t("O que é")}</h3>'),
+    elements = [
+        ("o-que-e", f'<h3>{_t("O que é esta ferramenta")}</h3>'),
         ("definicao", "<p>" + _t(
-            "O Aferidor é um banco de ensaio que mede respostas clínicas de modelos de linguagem em "
-            "português europeu, contra casos de referência com fonte pública.") + "</p>"),
+            "O Aferidor faz perguntas clínicas a assistentes de inteligência artificial, programas que "
+            "escrevem as respostas (os modelos de linguagem), e compara cada resposta com documentos "
+            "clínicos públicos, como as normas da Direção-Geral da Saúde e os resumos das características "
+            "dos medicamentos.") + "</p>"),
+        ("caso", "<p>" + _t("Cada pergunta, com a resposta de referência e a fonte, chama-se caso.") + "</p>"),
         ("ambito", "<p>" + _t("Mede, não aconselha. Não é um dispositivo médico e não contém dados de doentes.") + "</p>"),
         ("para-que-serve", f'<h3>{_t("Para que serve")}</h3>'),
+        ("serve", "<p>" + _t("Serve para ver como um assistente responde a perguntas clínicas e que erros comete.") + "</p>"),
         ("objetivos",
          f'<p class="objetivos-titulo"><strong>{_t("Objetivos.")}</strong></p><ul class="objetivos">'
          f'<li>{_t("Medir, sem aconselhar.")}</li>'
          f'<li>{_t("Mostrar primeiro as falhas críticas, e não a média.")}</li>'
          f'<li>{_t("Preparar a validação por um especialista.")}</li></ul>'),
-        ("criterios", "<p>" + _t(
-            "Cada resposta é corrigida contra os critérios do caso, de forma textual e determinista. "
-            "Os critérios e o corretor estão em código, versionados.") + "</p>"),
-        ("controlos", "<p>" + _t(
-            "Antes de um ensaio, cada critério tem de aceitar a resposta de referência e rejeitar uma "
-            "resposta errada construída para o efeito.") + "</p>"),
-        ("afinacao", "<p>" + _t(
-            "O corretor foi afinado depois de alguns ensaios, com cada afinação registada e a razão "
-            "escrita no commit; por isso os números dependem da versão do corretor.") + "</p>"),
+        ("corretor", "<p>" + _t(
+            "Quem corrige as respostas é um programa, o corretor: procura no texto o que o caso exige e o "
+            "que não pode aparecer, e dá sempre o mesmo resultado para a mesma resposta. É automático e "
+            "imperfeito, com falsos alarmes e erros que passam (ver {metodo}).",
+            metodo=_link(VERIFICATION_ANCHOR, "Método")) + "</p>"),
         ("protocolos", f"<p>{protocols}</p>"),
-        ("como-se-usa", f'<h3>{_t("Como se usa")}</h3>'),
+    ]
+    example = _example_case(cases)
+    if example:
+        elements.append(("exemplo", example))
+    elements += [
+        ("como-se-usa", f'<h3>{_t("Como usar esta ferramenta")}</h3>'),
         ("experimentar", "<p>" + _t("Para experimentar não é preciso chave nem custo:") + "</p>"),
         ("comandos", f"<pre><code>{_esc(ABOUT_COMMANDS)}</code></pre>"),
         ("modelo-real", "<p>" + _t(
-            "A execução contra um modelo real (OpenAI, Anthropic, Google Gemini ou local através do "
-            "Ollama), as chaves de API, o protocolo e a afinação de critérios estão em {ficheiro}. "
-            "As chaves de API são lidas do ambiente e nunca do repositório.", ficheiro=guide) + "</p>"),
+            "A execução contra um modelo real, as chaves de API, o protocolo e a afinação de critérios "
+            "estão em {ficheiro}. As chaves de API são lidas do ambiente e nunca do repositório.",
+            ficheiro=guide) + "</p>"),
     ]
+    return elements
 
 
 def _notices(
@@ -1650,7 +1724,7 @@ def _build(
     # Sobre: what the instrument is, what it is for and how it is run.
     out.append(_panel(
         "sobre", _t("Sobre o Aferidor"),
-        '<div class="sobre">' + "".join(html for _, html in _about_page(protocol)) + "</div>",
+        '<div class="sobre">' + "".join(html for _, html in _about_page(protocol, cases)) + "</div>",
     ))
 
     # Fontes: where the cases come from, and what is still to be confirmed.
@@ -1738,7 +1812,7 @@ def _build(
     # Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
     method: list[str] = [
         f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(samples_n, rule) if models else ""),
-        _sources_by_body(cases),
+        _verification_block(), _sources_by_body(cases),
     ]
     if models:
         method.append(protocol_html)

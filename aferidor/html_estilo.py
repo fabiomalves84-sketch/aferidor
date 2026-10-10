@@ -149,9 +149,15 @@ ul.conclusoes li { margin: 0 0 0.45rem; }
   .inicio-corpo { display: grid; grid-template-columns: 38rem 18rem; column-gap: 1.5rem; align-items: start; }
 }
 .saber-mais { margin: 0 0 1.1rem; font-weight: 600; }
+.definicao { margin: 0.7rem 0 0; font-size: 0.92rem; color: var(--ink-2); }
+.sobre .exemplo { margin: 1.1rem 0 1.25rem; padding: 0.9rem 1.1rem; background: var(--surface-2); border-radius: 10px; }
+.sobre .exemplo h3 { margin-top: 0; }
+.sobre .exemplo p:last-child, .sobre .exemplo details { margin-bottom: 0; }
 .sobre pre { background: var(--surface-2); border-radius: 8px; padding: 0.75rem 0.9rem; overflow-x: auto; margin: 0 0 1rem; }
 .sobre pre code { background: none; padding: 0; font-size: 0.85rem; }
 .sobre h3 { margin: 1.4rem 0 0.5rem; font-size: 1.1rem; }
+/* The link of the About page lands inside a closed block that opens on arrival; Firefox settles 4 px short. */
+#como-se-verifica-o-corretor { scroll-margin-top: 0.5rem; }
 .sobre ul.objetivos { margin: 0 0 0.9rem; padding-left: 1.25rem; color: var(--ink-2); }
 .porque { font-size: 1.12rem; margin-bottom: 1.1rem; }
 .objetivos-titulo { margin: 0 0 0.25rem; color: var(--accent); }

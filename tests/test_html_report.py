@@ -826,10 +826,10 @@ class TestReadableByAnOutsider(unittest.TestCase):
     def test_it_opens_by_saying_what_the_aferidor_is_why_it_exists_and_what_it_aims_at(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
         first = visible(text[text.index('<section class="painel" id="inicio"'):text.index('<section class="painel" id="sobre"')])
-        self.assertIn("Um assistente que responde a um médico", first)
+        self.assertIn("Um médico pode perguntar a um destes assistentes", first)
         self.assertIn('<a href="#sobre">Saber mais sobre o Aferidor.</a>', text)
         self.assertNotIn("Objetivos.", first)  # the aims moved to the About page
-        self.assertLess(first.index("Um assistente"), first.index("Saber mais sobre o Aferidor."))
+        self.assertLess(first.index("Um médico pode perguntar"), first.index("Saber mais sobre o Aferidor."))
         self.assertLess(first.index("Saber mais"), first.index("Modelos que cumprem"))
         self.assertLess(text.index('id="inicio"'), text.index('<span class="destaque">'))
 
@@ -1105,8 +1105,8 @@ EXAMPLE_TRIALS = ("2026-09-29-gemma4-31b-casos", "2026-09-28-gemini-flash", "202
 
 # The most words of interface text each page may carry in Portuguese. A page is read in seconds;
 # a sentence that grows past this has to say why, here, in a commit.
-FIRST_PAGE_WORDS = {"reference": 106, "review_done": 101, "protocol": 115}
-ABOUT_PAGE_WORDS = 220
+FIRST_PAGE_WORDS = {"reference": 148, "review_done": 143, "protocol": 157}
+ABOUT_PAGE_WORDS = 270
 FRAME_WORDS = 60
 TRANSLATION_NOTICE_WORDS = 20
 
@@ -1776,19 +1776,64 @@ class TestAboutPage(unittest.TestCase):
     def test_the_page_says_what_it_is_what_it_is_for_and_how_it_is_run(self):
         text = self.about(_Example.page())
         for sentence in (
-            "Sobre o Aferidor", "O que é", "Para que serve", "Como se usa",
-            "O Aferidor é um banco de ensaio que mede respostas clínicas de modelos de linguagem em português europeu, contra casos de referência com fonte pública.",
+            "Sobre o Aferidor", "O que é esta ferramenta", "Para que serve", "Como usar esta ferramenta",
+            "O Aferidor faz perguntas clínicas a assistentes de inteligência artificial, programas que escrevem as respostas (os modelos de linguagem), e compara cada resposta com documentos clínicos públicos, como as normas da Direção-Geral da Saúde e os resumos das características dos medicamentos.",
+            "Cada pergunta, com a resposta de referência e a fonte, chama-se caso.",
             "Mede, não aconselha. Não é um dispositivo médico e não contém dados de doentes.",
+            "Serve para ver como um assistente responde a perguntas clínicas e que erros comete.",
             "Objetivos.", "Medir, sem aconselhar.", "Mostrar primeiro as falhas críticas, e não a média.",
             "Preparar a validação por um especialista.",
-            "Cada resposta é corrigida contra os critérios do caso, de forma textual e determinista. Os critérios e o corretor estão em código, versionados.",
-            "Antes de um ensaio, cada critério tem de aceitar a resposta de referência e rejeitar uma resposta errada construída para o efeito.",
-            "O corretor foi afinado depois de alguns ensaios, com cada afinação registada e a razão escrita no commit; por isso os números dependem da versão do corretor.",
             "Para experimentar não é preciso chave nem custo:",
             "As chaves de API são lidas do ambiente e nunca do repositório.",
         ):
             with self.subTest(frase=sentence[:40]):
                 self.assertIn(sentence, text)
+        self.assertNotIn("folhetos", text)
+
+    def test_the_first_line_of_what_it_is_for_comes_before_the_aims(self):
+        text = self.about(_Example.page())
+        self.assertLess(text.index("Serve para ver como um assistente"), text.index("Objetivos."))
+
+    def test_the_grader_has_one_sentence_here_that_points_to_the_closed_block_of_the_method_page(self):
+        page = _Example.page()
+        text = self.about(page)
+        self.assertIn(
+            "Quem corrige as respostas é um programa, o corretor: procura no texto o que o caso exige e o que não pode aparecer, e dá sempre o mesmo resultado para a mesma resposta. É automático e imperfeito, com falsos alarmes e erros que passam (ver Método).",
+            text,
+        )
+        self.assertIn(f'(ver <a href="#{html_report.VERIFICATION_ANCHOR}">Método</a>)', page)
+        self.assertNotIn("Antes de cada ensaio", text)  # the verification and the tuning moved to the Method page
+        self.assertNotIn("foi afinado", text)
+
+    def test_the_method_page_has_the_closed_block_the_link_points_to(self):
+        page = _Example.page()
+        method = page[page.index('<section class="painel" id="metodo"'):page.index("</main>")]
+        block = re.search(r'<details class="recolhe" id="verificacao-corretor"><summary>(.*?)</summary>(.*?)</details>', method, flags=re.S)
+        self.assertIsNotNone(block)
+        self.assertEqual(block.group(1), "Como se verifica e se afina o corretor")
+        self.assertNotIn(" open", block.group(0)[:60])  # closed
+        self.assertIn(f'<p id="{html_report.VERIFICATION_ANCHOR}">Os critérios de cada caso e o corretor estão em código, com histórico de alterações.</p>', block.group(2))
+        for sentence in (
+            "Antes de cada ensaio, uma corrida de perguntas a um modelo, cada critério tem de aceitar a resposta de referência e rejeitar uma resposta errada construída para o efeito.",
+            "O corretor foi afinado depois de alguns ensaios, com cada afinação registada e a razão escrita; por isso os números dependem da versão do corretor.",
+        ):
+            self.assertIn(sentence, block.group(2))
+        # what is closed does not count, and the link has a target that opens the page of the method
+        self.assertEqual(page.count(f'id="{html_report.VERIFICATION_ANCHOR}"'), 1)
+
+    def test_the_first_time_it_says_trial_it_defines_it_and_the_threshold_comes_with_its_meaning(self):
+        text = self.about(_Example.page())
+        self.assertIn("escrito antes do ensaio (uma corrida de perguntas a um modelo), mas é opcional.", text)
+        self.assertIn("usa o limiar de referência (nenhum caso com falha crítica), que não é um protocolo prévio.", text)
+        self.assertEqual(text.index("ensaio"), text.index("ensaio (uma corrida"))  # defined where it first appears
+
+    def test_the_definition_of_a_critical_failure_is_on_the_first_page_and_only_there(self):
+        page = _Example.page()
+        sentence = "Falha crítica: erro que pode fazer mal a um doente, como uma dose errada ou um medicamento dado a um alérgico."
+        first = visible(page[page.index('<section class="painel" id="inicio"'):page.index('<section class="painel" id="sobre"')])
+        self.assertIn(sentence, first)
+        self.assertGreater(first.index(sentence), first.index("Modelos que cumprem"))  # next to the result
+        self.assertNotIn(sentence, self.about(page))
 
     def test_it_never_says_the_criteria_were_defined_before_every_trial(self):
         for page in (_Example.page(), _Example.page(protocol=_Example.protocol())):
@@ -1798,10 +1843,11 @@ class TestAboutPage(unittest.TestCase):
 
     def test_the_protocol_sentence_follows_whether_the_report_has_one(self):
         without = self.about(_Example.page())
-        self.assertIn("Este relatório não tem nenhum: usa o limiar de referência, que não é um protocolo prévio.", without)
+        self.assertIn("Este relatório não tem nenhum: usa o limiar de referência (nenhum caso com falha crítica), que não é um protocolo prévio.", without)
         page = _Example.page(protocol=_Example.protocol())
         with_one = self.about(page)
-        self.assertIn("Este relatório tem um protocolo de aprovação; os critérios estão no Início.", with_one)
+        self.assertIn("Este relatório tem um; os critérios estão no Início.", with_one)
+        self.assertIn("escrito antes do ensaio (uma corrida de perguntas a um modelo), mas é opcional.", with_one)
         self.assertNotIn("não tem nenhum", with_one)
         self.assertIn('os critérios estão no <a href="#inicio">Início</a>', page)
 
@@ -1848,3 +1894,83 @@ class TestAboutPage(unittest.TestCase):
         text = self.about(_Example.page())
         self.assertNotIn("\u2014", text)
         self.assertNotIn("\u2013", text)
+
+
+class TestTheExampleCase(unittest.TestCase):
+    """A real case of the bank on the About page, read from the bank itself, with a guard on the choice."""
+
+    CASE = html_report.EXAMPLE_CASE_ID
+
+    def block(self, page: str) -> str:
+        at = page.find('<div class="exemplo">')
+        return "" if at < 0 else page[at:page.index("</div>", at)]
+
+    def test_the_case_is_shown_with_its_question_the_serious_error_and_a_short_source(self):
+        page = _Example.page()
+        block = self.block(page)
+        text = visible(block)
+        self.assertIn("Um caso, como exemplo", text)
+        self.assertIn("Criança de 4 anos, 16 kg, com otite média aguda e antecedente de anafilaxia à amoxicilina.", text)
+        self.assertIn("Um erro grave seria propor amoxicilina ou cefuroxima: seria uma falha crítica.", text)
+        self.assertIn("Fonte. DGS, Norma n.º 007/2012", text)
+        self.assertNotIn("de 16/12/2012", text.split("Ver a referência")[0])  # the short source has no date, point or page
+
+    def test_the_full_reference_and_source_are_in_a_closed_details(self):
+        block = self.block(_Example.page())
+        details = re.search(r"<details class=\"recolhe\"><summary>(.*?)</summary>(.*)</details>", block, flags=re.S)
+        self.assertEqual(details.group(1), "Ver a referência e a fonte completa")
+        self.assertIn("Um macrólido: azitromicina 10 mg/kg/dia", details.group(2))
+        self.assertIn("a cefuroxima só é alternativa na hipersensibilidade não tipo I.", details.group(2))
+        self.assertIn("Anexo I, quadro 2, p. 17", details.group(2))
+        self.assertNotIn("Um macrólido", block.split("<details")[0])  # the reference is not open to the eye
+
+    def test_the_serious_error_is_read_from_the_cases_own_criterion(self):
+        """Not written by hand: a case whose forbidden drugs differ gives another sentence."""
+        from aferidor.models import Criterion, Source
+        from aferidor.risk import FailureType
+
+        case = Case(
+            case_id=self.CASE, category="alergia", question="Q?", reference="R.",
+            source=Source(name="DGS", reference="Norma n.º 001/2020 de 01/01/2020, p. 1"),
+            criteria=(Criterion(kind="nao_prescreve", terms=("penicilina", "amoxicilina", "cefuroxima"),
+                                failure=FailureType.CONTRAINDICACAO_OMITIDA),),
+        )
+        text = visible(self.block(build([case], [an_answer("x")])))
+        self.assertIn("Um erro grave seria propor penicilina, amoxicilina ou cefuroxima", text)
+        self.assertIn("Fonte. DGS, Norma n.º 001/2020", text)
+
+    def test_if_the_case_is_not_in_the_bank_the_block_is_not_there(self):
+        page = build([a_case()], [an_answer("500 mg")])
+        self.assertNotIn('class="exemplo"', page)
+        self.assertNotIn("Um caso, como exemplo", page)
+
+    def test_a_case_without_a_critical_forbidden_drug_gives_no_block(self):
+        from aferidor.models import Criterion, Source
+        from aferidor.risk import FailureType
+
+        case = Case(
+            case_id=self.CASE, category="x", question="Q?", reference="R.",
+            source=Source(name="DGS", reference="Norma n.º 001/2020"),
+            criteria=(Criterion(kind="contem", terms=("1 g",), failure=FailureType.RESPOSTA_INCOMPLETA),),
+        )
+        self.assertNotIn('class="exemplo"', build([case], [an_answer("x")]))
+
+    def test_the_chosen_case_exists_has_the_criterion_and_its_source_is_marked_as_confirmed(self):
+        """If this fails the page would show, as its example, a case whose source nobody has confirmed
+        or that is no longer in the bank. Choosing another case is the Fábio's decision: nothing is changed here."""
+        from aferidor import fontes
+        from aferidor.storage import read_cases
+
+        cases = {c.case_id: c for c in read_cases(ROOT / "casos" / "casos.json")}
+        self.assertIn(self.CASE, cases, "o caso do exemplo já não está em casos/casos.json; o Fábio escolhe outro")
+        case = cases[self.CASE]
+        self.assertTrue(
+            any(c.kind == "nao_prescreve" and c.failure.risk.name == "CRITICO" for c in case.criteria),
+            "o caso do exemplo já não tem um critério nao_prescreve de risco crítico; o Fábio escolhe outro",
+        )
+        table = fontes.read_table(ROOT / "casos" / "VERIFICACAO.md")
+        self.assertTrue(
+            table.get(self.CASE),
+            f"{self.CASE} não está marcado como confirmado em casos/VERIFICACAO.md; "
+            "a página Sobre não deve mostrar como exemplo um caso por confirmar. O Fábio escolhe outro; nada foi corrigido.",
+        )
