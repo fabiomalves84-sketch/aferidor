@@ -19,6 +19,7 @@ flowchart LR
 
 | Ficheiro | Responsabilidade |
 |---|---|
+| `__init__.py` | A versão do pacote e os dois identificadores de código: `build_id` (todos os `.py`) e `grader_id` (só os seis ficheiros que decidem a correção e a aprovação) |
 | `risk.py` | A taxonomia de falhas e o risco clínico de cada uma |
 | `models.py` | Caso, fonte, critério, resposta (com amostra e condições de obtenção), veredicto |
 | `storage.py` | Leitura e escrita destes objetos em JSON legível |
@@ -64,6 +65,8 @@ foi afinado depois de alguns ensaios, e cada afinação tem a razão no commit.
 **As respostas são gravadas à medida que chegam.** Uma execução interrompida
 é retomada, não repetida. Repetir teria custo e alteraria a amostra: uma nova
 resposta à mesma pergunta é diferente da anterior.
+
+**Duas versões, para dois fins.** O `build_id` identifica o pacote inteiro e fica gravado em cada resposta. O `grader_id` identifica só os seis ficheiros de `GRADER_FILES` (`checks`, `grading`, `models`, `risk`, `storage` e `protocolo`) e é o que um protocolo fixa com `--congelar-correcao`: não muda com o relatório, a interface ou as traduções. Um teste cobre os seis ficheiros: o que importam tem de estar na lista, com uma única exceção declarada, `protocolo.py`, que pode importar `__init__` (para o `build_id`) e `traducao` (para redigir mensagens), porque nenhum dos dois entra na regra de aprovação. O que o `grader_id` não cobre: os critérios (dados, cobertos pelo `banco_sha256` do protocolo) e o texto do pedido (coberto pelo `prompt_sha256` de cada resposta).
 
 **A retoma só continua a mesma medição.** Antes de qualquer pedido, o
 `runner` compara as condições das respostas existentes deste modelo com as da

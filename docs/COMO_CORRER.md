@@ -70,11 +70,17 @@ casos com falha crítica); qualquer alívio deve ser uma decisão explícita. O
 protocolo deve ser commitado **antes** do ensaio e passado ao comando com
 `--protocolo`.
 
-Com `--congelar-corretor`, o protocolo fixa também a versão do corretor
-(`versao_corretor`). O código deve estar commitado antes de escrever o
-protocolo. O relatório assinala qualquer resposta obtida, ou correção feita,
-com outra versão: um corretor afinado depois de ver as respostas deixa de
-passar despercebido.
+Com `--congelar-correcao`, o protocolo fixa também a versão só dos ficheiros que
+decidem a correção (`corretor_id`: `checks`, `grading`, `models`, `risk`, `storage`
+e `protocolo`); editar o relatório, a interface ou as traduções não a muda. É a
+opção recomendada. Com `--congelar-corretor`, fixa a versão do pacote inteiro
+(`versao_corretor`), que muda com qualquer edição ao código; as duas não se usam
+juntas. O código deve estar commitado antes de escrever o protocolo. O relatório
+assinala qualquer resposta obtida, ou correção feita, com outra versão: um
+corretor afinado depois de ver as respostas deixa de passar despercebido. Com
+`corretor_id`, as respostas registadas antes de o campo existir avisam que não
+há registo da versão, e o `ensaio` recusa-se a correr se mudou um dos seis
+ficheiros.
 
 ## 6. Execução
 

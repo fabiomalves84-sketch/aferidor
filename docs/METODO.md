@@ -273,17 +273,9 @@ acrescentam "Iniciar X" à referência (e variantes com recusa e com "não está
 contraindicado"), nunca uma prescrição com "evitar" na mesma frase, por isso este
 limite passa nos controlos todos. Não se propõe aqui nenhuma alteração ao corretor.
 
-**O `build_id` muda com qualquer edição ao pacote.** O `build_id` é a versão
-mais os primeiros 12 caracteres do SHA-256 de todos os `aferidor/*.py`, por ordem
-de nome (`code_digest`, em `aferidor/__init__.py`). Está escrito em cada resposta
-e é o que um protocolo com `--congelar-corretor` fixa em `versao_corretor`. Por
-isso muda com qualquer edição a qualquer módulo, incluindo o relatório HTML, a
-folha de estilo e as traduções, e não só com uma alteração a `checks.py`, a
-`grading.py` ou aos critérios. Um protocolo com o corretor congelado diz "o
-corretor mudou depois do protocolo" mesmo quando só mudou a apresentação: os dois
-protocolos do Gemma 4 26B A4B já o dizem desde as afinações de 09/10, e continuam
-a dizê-lo com outro número de versão. O âmbito do `build_id` é uma decisão
-registada que fica por rever à parte; aqui fica só escrito o que ele faz.
+**Dois identificadores da versão: o `build_id` e o `grader_id`.** O `build_id` é a versão mais os primeiros 12 caracteres do SHA-256 de todos os `aferidor/*.py` (`code_digest`, em `aferidor/__init__.py`). Está gravado em cada resposta (campo `versao`) e é o que um protocolo com `--congelar-corretor` fixa em `versao_corretor`. Muda com qualquer edição a qualquer módulo, incluindo o relatório HTML, a folha de estilo e as traduções: um protocolo congelado assim diz "o corretor mudou depois do protocolo" mesmo quando só mudou a apresentação, e recusa um `ensaio` novo. Os dois protocolos do Gemma 4 26B A4B fixaram o `build_id` e continuam a dizê-lo. O `grader_id` (`0.1.0+corretor.` seguido de 12 caracteres) é o SHA-256 de seis ficheiros apenas: `checks.py`, `grading.py`, `models.py`, `risk.py`, `storage.py` e `protocolo.py` (a lista `GRADER_FILES`, em `aferidor/__init__.py`). Um teste cobre os seis ficheiros de `GRADER_FILES`: o que importam, direta ou indiretamente, tem de estar na lista, com uma única exceção declarada, `protocolo.py`, que pode importar `__init__` (para o `build_id`) e `traducao` (para redigir mensagens), porque nenhum dos dois entra na regra de aprovação. Cada resposta nova grava-o também (campo `corretor`), e `--congelar-correcao` fixa-o no protocolo (`corretor_id`). **Recomenda-se `--congelar-correcao`: só muda quando muda um destes seis ficheiros, por isso um aviso «o corretor mudou» deixa de ser provocado por edições ao relatório, à interface ou às traduções.** O que o `grader_id` **não** cobre: os critérios, que são dados (`casos/*.json`) e ficam cobertos pelo `banco_sha256` do protocolo; e o texto do pedido, que fica coberto pelo `prompt_sha256` de cada resposta. Também muda com edições a esses seis ficheiros que não afetam a correção (a estatística de `grading.py`, a leitura e a escrita de respostas em `storage.py`, os avisos de `protocolo.py`): prefere-se avisar a mais do que a menos. O `build_id` inteiro continua gravado em cada resposta, por isso continua a ser possível saber se o pacote mudou.
+
+Um protocolo com `corretor_id`, aplicado a respostas registadas antes de este campo existir (sem `corretor`), avisa uma vez por cada modelo com essas respostas: não dizem com que versão do corretor foram obtidas, e por isso não se pode confirmar nem desmentir que o corretor fixado é o que estava em vigor. O aviso diz que não há registo, e não que o corretor mudou. É só aviso: não altera quem fica aprovado.
 
 **Protocolo escrito no mesmo dia da primeira resposta.** `protocolo.warnings` só
 acusa um protocolo posterior se a data for estritamente posterior à da primeira
