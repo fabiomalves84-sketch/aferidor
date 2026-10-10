@@ -1995,7 +1995,7 @@ def _foot_html(data: _ReportData) -> str:
     return (
         f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p>{_translation_notice()}<p class="repo">{_repo_link()}</p>'
         f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(data.written))}</p>'
-        f'<p class="marca">{_t("Aferidor · banco de ensaio clínico")}</p></footer>'
+        f'<p class="marca">{_t("Aferidor · banco de ensaio para respostas clínicas")}</p></footer>'
     )
 
 
