@@ -21,7 +21,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
-from . import build_id
+from . import build_id, grader_id
 from .models import Answer, Case
 from .providers import Provider, ProviderError, Reply
 from .storage import append_answer, discard_truncated_tail, read_answers
@@ -225,6 +225,7 @@ def run(
     _check_same_conditions(path, provider, cases, temperature, max_tokens)
     done = _answered_already(path, provider.name)
     build = build_id()
+    grader = grader_id()
 
     for case in cases:
         prompt = build_prompt(case)  # the same for every sample of the case
@@ -258,6 +259,7 @@ def run(
                 prompt_sha256=prompt_digest(prompt),
                 max_tokens=max_tokens,
                 build=build,
+                grader=grader,
             )
             if path is not None:
                 append_answer(answer, path)

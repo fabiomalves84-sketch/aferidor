@@ -156,12 +156,13 @@ class Answer:
     never reaches here at all (the runner treats it as an execution error,
     not an answer), so in practice this is almost always "stop".
 
-    The last three fields say under what conditions the answer was obtained,
+    The last four fields say under what conditions the answer was obtained,
     so two answers in one file can be shown to belong to the same
     measurement: `prompt_sha256` is the hash of the exact text sent (the
     instruction and the question), `max_tokens` the limit the provider was
-    given, and `build` the Aferidor version and code hash (`build_id`). They
-    are empty on answers written before they existed.
+    given, `build` the Aferidor version and code hash (`build_id`) and `grader` the
+    version of the files that decide the correction (`grader_id`). They are empty
+    on answers written before they existed.
     """
 
     case_id: str
@@ -176,6 +177,7 @@ class Answer:
     prompt_sha256: str = ""
     max_tokens: int | None = None
     build: str = ""
+    grader: str = ""
 
     def __post_init__(self) -> None:
         if self.latency_ms < 0:

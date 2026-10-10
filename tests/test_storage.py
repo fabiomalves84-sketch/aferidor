@@ -183,6 +183,46 @@ class TestAnswerConditions(unittest.TestCase):
         self.assertEqual(recovered.build, "")
 
 
+class TestGraderOnAnswers(unittest.TestCase):
+    def answer(self, grader: str = "") -> Answer:
+        return Answer(
+            case_id="C1", model="m", text="t", asked_at=datetime(2026, 10, 11, 10, 0), sample=1,
+            build="0.1.0+abcdef012345", grader=grader,
+        )
+
+    def test_an_answer_with_the_grader_keeps_it_through_a_write_and_a_read(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "r.jsonl"
+            write_answers([self.answer("0.1.0+corretor.0123456789ab")], path)
+            self.assertEqual(json.loads(path.read_text(encoding="utf-8"))["corretor"], "0.1.0+corretor.0123456789ab")
+            self.assertEqual(read_answers(path)[0].grader, "0.1.0+corretor.0123456789ab")
+
+    def test_an_answer_without_it_is_written_as_it_always_was_and_reads_back_empty(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "r.jsonl"
+            write_answers([self.answer()], path)
+            self.assertNotIn("corretor", json.loads(path.read_text(encoding="utf-8")))
+            self.assertEqual(read_answers(path)[0].grader, "")
+
+
+class TestRegisteredTrialsStillRead(unittest.TestCase):
+    """The trials in ensaios/ are evidence: they are read, never written. None has the new field."""
+
+    TRIALS = sorted((Path(__file__).resolve().parent.parent / "ensaios").glob("*/respostas.jsonl"))
+
+    def test_every_registered_file_is_still_read_unchanged_and_without_a_grader(self):
+        import hashlib
+
+        self.assertTrue(self.TRIALS)
+        for path in self.TRIALS:
+            with self.subTest(ensaio=path.parent.name):
+                before = hashlib.sha256(path.read_bytes()).hexdigest()
+                answers = read_answers(path)
+                self.assertTrue(answers)
+                self.assertEqual({a.grader for a in answers}, {""})
+                self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), before)
+
+
 class TestAlternativesOnDisk(unittest.TestCase):
     def test_a_case_with_alternatives_survives_a_write_and_a_read(self):
 

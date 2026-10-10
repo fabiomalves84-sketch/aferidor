@@ -207,7 +207,7 @@ def read_cases(path: Path) -> list[Case]:
 
 
 def answer_to_dict(answer: Answer) -> dict:
-    return {
+    data = {
         "caso": answer.case_id,
         "modelo": answer.model,
         "texto": answer.text,
@@ -221,6 +221,9 @@ def answer_to_dict(answer: Answer) -> dict:
         "tokens_max": answer.max_tokens,
         "versao": answer.build,
     }
+    if answer.grader:  # an answer without it is written as it always was
+        data["corretor"] = answer.grader
+    return data
 
 
 def answer_from_dict(data: dict, where: str) -> Answer:
@@ -237,6 +240,7 @@ def answer_from_dict(data: dict, where: str) -> Answer:
         prompt_sha256=str(data.get("prompt_sha256", "")),
         max_tokens=int(data["tokens_max"]) if data.get("tokens_max") is not None else None,
         build=str(data.get("versao", "")),
+        grader=str(data.get("corretor", "")),
     )
 
 

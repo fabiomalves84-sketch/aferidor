@@ -357,6 +357,16 @@ class TestConditions(unittest.TestCase):
         self.assertRegex(build, r"^\d+\.\d+\.\d+\+[0-9a-f]{12}$")
 
 
+class TestGraderIdRecorded(unittest.TestCase):
+    def test_the_version_of_what_corrects_is_recorded_next_to_the_build(self):
+        from aferidor import grader_id
+
+        answer = run([a_case()], FakeProvider()).answers[0]
+        self.assertEqual(answer.grader, grader_id())
+        self.assertRegex(answer.grader, r"^\d+\.\d+\.\d+\+corretor\.[0-9a-f]{12}$")
+        self.assertEqual(answer.build, build_id())
+
+
 class TestResumeUnderSameConditions(unittest.TestCase):
     """Resuming is only safe while it is still the same measurement."""
 
