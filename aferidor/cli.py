@@ -41,6 +41,11 @@ DEFAULT_VERDICTS = Path("data/vereditos.json")
 DEFAULT_REPORT = Path("relatorios/relatorio.md")
 DEFAULT_REPORT_HTML = Path("relatorios/relatorio.html")
 DEFAULT_TOKENS_MAX = 4096
+# The program does not check when a protocol was written, so the text does not claim it was early.
+PROTOCOL_HELP = (
+    "protocolo com o critério de aprovação, que deve ser escrito antes do ensaio; "
+    "um protocolo avalia o banco inteiro, por isso não se combina com --limite"
+)
 
 
 def build_provider(
@@ -128,8 +133,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ensaio.add_argument(
         "--protocolo", type=Path, default=None,
-        help="protocolo com o critério de aprovação, que deve ser escrito antes do ensaio; "
-        "um protocolo avalia o banco inteiro, por isso não se combina com --limite",
+        help=PROTOCOL_HELP,
     )
     ensaio.add_argument(
         "--fontes-confirmadas", action="store_true",
@@ -201,7 +205,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     relatorio.add_argument(
         "--protocolo", type=Path, default=None,
-        help="protocolo com o critério de aprovação, escrito antes do ensaio",
+        help=PROTOCOL_HELP,
     )
     relatorio.add_argument(
         "--fontes-confirmadas",
