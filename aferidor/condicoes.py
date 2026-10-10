@@ -7,7 +7,7 @@ identify the run and judge it against the protocol the same way. Nothing here fo
 
 from __future__ import annotations
 
-from . import build_id
+from . import build_id, grader_id
 from .grading import expected_samples, run_conditions
 from .models import Answer, Case
 from .protocolo import Outcome, Protocol, evaluate, warnings as protocol_warnings
@@ -64,6 +64,15 @@ def in_bank(cases: list[Case], answers: list[Answer]) -> list[Answer]:
     return [answer for answer in answers if answer.case_id in ids]
 
 
+def graders_by_model(answers: list[Answer]) -> dict[str, tuple[str, ...]]:
+    """The versions of the correction code the answers were asked under, per model; an answer recorded
+    before the field existed counts as "" (no record)."""
+    found: dict[str, set[str]] = {}
+    for answer in answers:
+        found.setdefault(answer.model, set()).add(answer.grader)
+    return {model: tuple(sorted(graders)) for model, graders in found.items()}
+
+
 def conditions_rows(
     answers: list[Answer], cases_source: tuple[str, str] | None = None, lang: str = "pt"
 ) -> list[tuple[str, str]]:
@@ -81,6 +90,7 @@ def conditions_rows(
     if cases_source:
         path, digest = cases_source
         rows.append(("Banco de casos", f"{path} (SHA-256 {digest[:12]})"))
+    graders = graders_by_model(answers)
     for model, found in run_conditions(answers).items():
         period = found.first_asked.strftime("%Y-%m-%d %H:%M")
         if found.last_asked.date() == found.first_asked.date():
@@ -90,15 +100,16 @@ def conditions_rows(
         temperatures = ", ".join(decimal(f"{v:.1f}", lang) for v in found.temperatures)
         tokens = ", ".join(t("não registado", lang) if v is None else str(v) for v in found.max_tokens)
         builds = ", ".join(b or t("não registada", lang) for b in found.builds)
-        rows.append((
-            model,
-            t(
-                "{n} respostas, recolhidas {periodo}; temperatura {temperatura}; tokens_max "
-                "{tokens}; versão {versao}",
-                lang, n=found.answers, periodo=period, temperatura=temperatures,
-                tokens=tokens, versao=builds,
-            ),
-        ))
+        row = t(
+            "{n} respostas, recolhidas {periodo}; temperatura {temperatura}; tokens_max "
+            "{tokens}; versão {versao}",
+            lang, n=found.answers, periodo=period, temperatura=temperatures,
+            tokens=tokens, versao=builds,
+        )
+        recorded = [g for g in graders.get(model, ()) if g]
+        if recorded:  # only the versions that are known; the warning says when some answers have none
+            row += t("; corretor {corretor}", lang, corretor=", ".join(recorded))
+        rows.append((model, row))
     return rows
 
 
@@ -137,6 +148,8 @@ def protocol_findings(
         lang,
         {model: c.builds for model, c in found.items()},
         build_id(),
+        graders_by_model(answers),
+        grader_id(),
     )
     if case_ids is None:
         return found_warnings, [evaluate(protocol, summaries[m], lang=lang) for m in sorted(summaries)]
@@ -153,6 +166,7 @@ __all__ = [
     "conditions_rows",
     "format_missing",
     "format_missing_samples",
+    "graders_by_model",
     "in_bank",
     "protocol_findings",
 ]

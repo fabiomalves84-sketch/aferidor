@@ -265,6 +265,13 @@ _ROWS: tuple[tuple[str, str, str, str, str], ...] = (
     ("Este relatório não recomenda nenhum modelo: mede, não aconselha.", "This report recommends no model: it measures, it does not advise.",
      "Este informe no recomienda ningún modelo: mide, no aconseja.", "Ce rapport ne recommande aucun modèle : il mesure, il ne conseille pas.",
      "Dieser Bericht empfiehlt kein Modell: er misst, er berät nicht."),
+    # ---- the grader version recorded on answers, and the protocol that freezes the correction
+    ("{modelo} respondeu sem registo da versão do corretor; o protocolo fixou o corretor na versão {previsto}",
+     "{modelo} answered with no record of the grader version; the protocol froze the grader at version {previsto}",
+     "{modelo} respondió sin registro de la versión del corrector; el protocolo fijó el corrector en la versión {previsto}",
+     "{modelo} a répondu sans enregistrement de la version du correcteur ; le protocole a figé le correcteur à la version {previsto}",
+     "{modelo} antwortete ohne Eintrag der Version des Bewerters; das Protokoll hat den Bewerter auf Version {previsto} festgelegt"),
+    ("; corretor {corretor}", "; grader {corretor}", "; corrector {corretor}", " ; correcteur {corretor}", "; Bewerter {corretor}"),
     # ---- the Sources page: which sources the cases cite, and how far they are confirmed
     ("Casos que citam cada fonte: {lista}.", "Cases citing each source: {lista}.", "Casos que citan cada fuente: {lista}.",
      "Cas citant chaque source : {lista}.", "Fälle, die die jeweilige Quelle zitieren: {lista}."),

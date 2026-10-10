@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 
-from . import build_id
+from . import build_id, grader_id
 from .grading import CASE_RULES, DEFAULT_CASE_RULE, ConsistencySummary
 from .traducao import t
 
@@ -57,6 +57,7 @@ class Protocol:
     min_sample_accuracy: float
     case_rule: str = DEFAULT_CASE_RULE
     grader_build: str = ""
+    grader_id: str = ""
     path: str = ""
     sha256: str = ""
 
@@ -88,6 +89,7 @@ def read_protocol(path: Path) -> Protocol:
         min_sample_accuracy=float(limits["taxa_de_amostras_corretas_min"]),
         case_rule=str(data.get("regra_do_caso", DEFAULT_CASE_RULE)),
         grader_build=str(data.get("versao_corretor", "")),
+        grader_id=str(data.get("corretor_id", "")),
         path=str(path),
         sha256=hashlib.sha256(raw_bytes).hexdigest(),
     )
@@ -106,7 +108,8 @@ def read_protocol(path: Path) -> Protocol:
 
 
 def template(
-    name: str, cases_path: Path, today: date | None = None, freeze_grader: bool = False
+    name: str, cases_path: Path, today: date | None = None, freeze_grader: bool = False,
+    freeze_correction: bool = False,
 ) -> dict:
     """A protocol to fill in, with the date and the case file's hash already set.
 
@@ -115,7 +118,9 @@ def template(
     decision is the person's, and the template makes them change it on
     purpose rather than inherit it.
 
-    With `freeze_grader`, the current build is written as `versao_corretor`.
+    With `freeze_grader`, the current build is written as `versao_corretor`: the whole package.
+    With `freeze_correction`, the current `grader_id` is written as `corretor_id`: only the files that
+    decide the correction and the approval.
     """
     data = {
         "nome": name,
@@ -133,6 +138,8 @@ def template(
     }
     if freeze_grader:
         data["versao_corretor"] = build_id()
+    if freeze_correction:
+        data["corretor_id"] = grader_id()
     return data
 
 
@@ -215,6 +222,8 @@ def warnings(
     lang: str = "pt",
     builds_by_model: dict[str, tuple[str, ...]] | None = None,
     grading_build: str | None = None,
+    graders_by_model: dict[str, tuple[str, ...]] | None = None,
+    grading_grader: str | None = None,
 ) -> list[str]:
     """Every reason the protocol might not be the criterion it claims to be."""
     found: list[str] = []
@@ -256,6 +265,28 @@ def warnings(
                 "esta correção foi feita com a versão {versao}; o protocolo fixou o corretor "
                 "na versão {previsto}: o corretor mudou depois do protocolo",
                 lang, versao=grading_build, previsto=protocol.grader_build,
+            ))
+    if protocol.grader_id:
+        for model, graders in sorted((graders_by_model or {}).items()):
+            known = tuple(g for g in graders if g)
+            if "" in graders:
+                # Answers recorded before the field existed: it can be neither confirmed nor denied.
+                found.append(t(
+                    "{modelo} respondeu sem registo da versão do corretor; o protocolo fixou o "
+                    "corretor na versão {previsto}",
+                    lang, modelo=model, previsto=protocol.grader_id,
+                ))
+            if known and known != (protocol.grader_id,):
+                found.append(t(
+                    "{modelo} respondeu com a versão {versao}; o protocolo fixou o corretor "
+                    "na versão {previsto}",
+                    lang, modelo=model, versao=", ".join(known), previsto=protocol.grader_id,
+                ))
+        if grading_grader is not None and grading_grader != protocol.grader_id:
+            found.append(t(
+                "esta correção foi feita com a versão {versao}; o protocolo fixou o corretor "
+                "na versão {previsto}: o corretor mudou depois do protocolo",
+                lang, versao=grading_grader, previsto=protocol.grader_id,
             ))
     return found
 

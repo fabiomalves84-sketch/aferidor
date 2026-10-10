@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import build_id, fontes, html_report, manifesto, protocolo, report, revisao
+from . import build_id, fontes, grader_id, html_report, manifesto, protocolo, report, revisao
 from .grading import (
     grade_all,
     met_by_the_question,
@@ -152,9 +152,18 @@ def build_parser() -> argparse.ArgumentParser:
     prot.add_argument("--nome", required=True)
     prot.add_argument("--casos", type=Path, default=DEFAULT_CASES)
     prot.add_argument("--saida", type=Path, required=True)
-    prot.add_argument(
+    freeze = prot.add_mutually_exclusive_group()
+    freeze.add_argument(
         "--congelar-corretor", action="store_true",
-        help="fixar no protocolo a versão atual do corretor; o relatório assinala qualquer outra",
+        help="fixar no protocolo a versão do pacote inteiro (qualquer edição ao código a muda, incluindo "
+        "o relatório e as traduções); o relatório assinala qualquer alteração. Para fixar só o que "
+        "decide a correção, usar --congelar-correcao",
+    )
+    freeze.add_argument(
+        "--congelar-correcao", action="store_true",
+        help="fixar no protocolo a versão só dos ficheiros que decidem a correção (checks, grading, "
+        "models, risk, storage e protocolo); editar o relatório, a interface ou as traduções não a "
+        "muda. Não se usa com --congelar-corretor",
     )
 
     rev = sub.add_parser(
@@ -445,6 +454,11 @@ def _protocol_mismatches(path: Path, repeticoes: int, temperatura: float, casos:
             f"o protocolo fixou o corretor na versão {protocol.grader_build}, "
             f"mas esta é a {build_id()}"
         )
+    if protocol.grader_id and protocol.grader_id != grader_id():
+        found.append(
+            f"o protocolo fixou o corretor na versão {protocol.grader_id}, mas esta é a {grader_id()} "
+            "(mudou um dos seis ficheiros que decidem a correção ou a aprovação; ver docs/METODO.md)"
+        )
     return found
 
 
@@ -532,12 +546,17 @@ def comando_protocolo(args: argparse.Namespace) -> int:
         print(f"erro: {args.saida} já existe; um protocolo não se reescreve depois de escrito",
               file=sys.stderr)
         return 2
-    data = protocolo.template(args.nome, args.casos, freeze_grader=args.congelar_corretor)
+    data = protocolo.template(
+        args.nome, args.casos, freeze_grader=args.congelar_corretor,
+        freeze_correction=args.congelar_correcao,
+    )
     args.saida.parent.mkdir(parents=True, exist_ok=True)
     args.saida.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"protocolo em {args.saida}, para {args.casos} (SHA-256 {data['banco_sha256'][:12]})")
     if "versao_corretor" in data:
         print(f"corretor fixado na versão {data['versao_corretor']}")
+    if "corretor_id" in data:
+        print(f"correção fixada na versão {data['corretor_id']}")
     print("rever os limites em criterios_de_aprovacao e fazer commit antes de correr o ensaio:")
     print("é o commit, e não a data escrita no ficheiro, que prova que o critério veio antes")
     return 0
