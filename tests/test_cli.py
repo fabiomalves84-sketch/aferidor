@@ -514,5 +514,18 @@ class TestBrokenFiles(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("erro:", err)
 
+class TestEverySubcommandHasACommand(unittest.TestCase):
+    """`main` looks the command up without a fallback: the parser requires a sub-command, so each
+    one it accepts has to be in the table."""
+
+    def test_the_parser_and_the_command_table_agree(self):
+        import argparse
+
+        from aferidor import cli
+
+        (action,) = [a for a in cli.build_parser()._actions if isinstance(a, argparse._SubParsersAction)]
+        self.assertEqual(set(action.choices), set(cli._COMMANDS))
+
+
 if __name__ == "__main__":
     unittest.main()

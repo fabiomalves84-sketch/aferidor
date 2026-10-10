@@ -63,6 +63,10 @@ def build_provider(
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
+    return build_parser().parse_args(argv)
+
+
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="aferidor", description="Banco de ensaio clínico")
     sub = parser.add_subparsers(dest="comando", required=True)
 
@@ -208,7 +212,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="omitir o aviso de fontes por confirmar (apenas depois de confirmadas)",
     )
 
-    return parser.parse_args(argv)
+    return parser
 
 
 def comando_executar(args: argparse.Namespace) -> int:
@@ -668,26 +672,24 @@ def comando_ensaio(args: argparse.Namespace) -> int:
 
 
 _COMMANDS = {
-    "executar": lambda a: comando_executar(a),
-    "verificar": lambda a: comando_verificar(a),
-    "classificar": lambda a: comando_classificar(a),
-    "relatorio": lambda a: comando_relatorio(a),
-    "ensaio": lambda a: comando_ensaio(a),
-    "modelos": lambda a: comando_modelos(a),
-    "protocolo": lambda a: comando_protocolo(a),
-    "revisao": lambda a: comando_revisao(a),
-    "concordancia": lambda a: comando_concordancia(a),
-    "manifesto": lambda a: comando_manifesto(a),
-    "comparar-vereditos": lambda a: comando_comparar(a),
+    "executar": comando_executar,
+    "verificar": comando_verificar,
+    "classificar": comando_classificar,
+    "relatorio": comando_relatorio,
+    "ensaio": comando_ensaio,
+    "modelos": comando_modelos,
+    "protocolo": comando_protocolo,
+    "revisao": comando_revisao,
+    "concordancia": comando_concordancia,
+    "manifesto": comando_manifesto,
+    "comparar-vereditos": comando_comparar,
 }
 
 
 def main(argv: list[str] | None = None) -> int:
     """Run one command; a missing or malformed file ends in a message, not a traceback."""
     args = parse_args(list(sys.argv[1:] if argv is None else argv))
-    command = _COMMANDS.get(args.comando)
-    if command is None:
-        return 2
+    command = _COMMANDS[args.comando]  # the sub-command is required, so it is always one of these
     try:
         return command(args)
     except json.JSONDecodeError as error:
@@ -697,4 +699,4 @@ def main(argv: list[str] | None = None) -> int:
         print(f"erro: {error}", file=sys.stderr)
         return 2
 
-__all__ = ["main", "build_provider", "parse_args"]
+__all__ = ["main", "build_parser", "build_provider", "parse_args"]
