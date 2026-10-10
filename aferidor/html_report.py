@@ -691,8 +691,8 @@ def _verification_block() -> str:
     )
 
 
-def _about_page(protocol: Protocol | None, cases: list[Case]) -> list[tuple[str, str]]:
-    """The About page, as named elements in reading order, for someone who has never heard of the
+def _about_page(protocol: Protocol | None, cases: list[Case]) -> list[str]:
+    """The About page, as pieces of HTML in reading order, for someone who has never heard of the
     project. Every sentence is true of every report: it says what the instrument is, what it is for
     and how it is run, from the README, the method and the running guide, and nothing that holds only
     when a protocol was written first."""
@@ -710,39 +710,38 @@ def _about_page(protocol: Protocol | None, cases: list[Case]) -> list[tuple[str,
         )
     guide = f'<a href="{COMO_CORRER_URL}" rel="noopener"><code>COMO_CORRER.md</code></a>'
     elements = [
-        ("o-que-e", f'<h3>{_t("O que é esta ferramenta")}</h3>'),
-        ("definicao", "<p>" + _t(
+        f'<h3>{_t("O que é esta ferramenta")}</h3>',
+        "<p>" + _t(
             "O Aferidor faz perguntas clínicas a assistentes de inteligência artificial, programas que "
             "escrevem as respostas (os modelos de linguagem), e compara cada resposta com documentos "
             "clínicos públicos, como as normas da Direção-Geral da Saúde e os resumos das características "
-            "dos medicamentos.") + "</p>"),
-        ("caso", "<p>" + _t("Cada pergunta, com a resposta de referência e a fonte, chama-se caso.") + "</p>"),
-        ("ambito", "<p>" + _t("Mede, não aconselha. Não é um dispositivo médico e não contém dados de doentes.") + "</p>"),
-        ("para-que-serve", f'<h3>{_t("Para que serve")}</h3>'),
-        ("serve", "<p>" + _t("Serve para ver como um assistente responde a perguntas clínicas e que erros comete.") + "</p>"),
-        ("objetivos",
-         f'<p class="objetivos-titulo"><strong>{_t("Objetivos.")}</strong></p><ul class="objetivos">'
-         f'<li>{_t("Medir, sem aconselhar.")}</li>'
-         f'<li>{_t("Mostrar primeiro as falhas críticas, e não a média.")}</li>'
-         f'<li>{_t("Preparar a validação por um especialista.")}</li></ul>'),
-        ("corretor", "<p>" + _t(
+            "dos medicamentos.") + "</p>",
+        "<p>" + _t("Cada pergunta, com a resposta de referência e a fonte, chama-se caso.") + "</p>",
+        "<p>" + _t("Mede, não aconselha. Não é um dispositivo médico e não contém dados de doentes.") + "</p>",
+        f'<h3>{_t("Para que serve")}</h3>',
+        "<p>" + _t("Serve para ver como um assistente responde a perguntas clínicas e que erros comete.") + "</p>",
+        f'<p class="objetivos-titulo"><strong>{_t("Objetivos.")}</strong></p><ul class="objetivos">'
+        f'<li>{_t("Medir, sem aconselhar.")}</li>'
+        f'<li>{_t("Mostrar primeiro as falhas críticas, e não a média.")}</li>'
+        f'<li>{_t("Preparar a validação por um especialista.")}</li></ul>',
+        "<p>" + _t(
             "Quem corrige as respostas é um programa, o corretor: procura no texto o que o caso exige e o "
             "que não pode aparecer, e dá sempre o mesmo resultado para a mesma resposta. É automático e "
             "imperfeito, com falsos alarmes e erros que passam (ver {metodo}).",
-            metodo=_link(VERIFICATION_ANCHOR, "Método")) + "</p>"),
-        ("protocolos", f"<p>{protocols}</p>"),
+            metodo=_link(VERIFICATION_ANCHOR, "Método")) + "</p>",
+        f"<p>{protocols}</p>",
     ]
     example = _example_case(cases)
     if example:
-        elements.append(("exemplo", example))
+        elements.append(example)
     elements += [
-        ("como-se-usa", f'<h3>{_t("Como usar esta ferramenta")}</h3>'),
-        ("experimentar", "<p>" + _t("Para experimentar não é preciso chave nem custo:") + "</p>"),
-        ("comandos", f"<pre><code>{_esc(ABOUT_COMMANDS)}</code></pre>"),
-        ("modelo-real", "<p>" + _t(
+        f'<h3>{_t("Como usar esta ferramenta")}</h3>',
+        "<p>" + _t("Para experimentar não é preciso chave nem custo:") + "</p>",
+        f"<pre><code>{_esc(ABOUT_COMMANDS)}</code></pre>",
+        "<p>" + _t(
             "A execução contra um modelo real, as chaves de API, o protocolo e a afinação de critérios "
             "estão em {ficheiro}. As chaves de API são lidas do ambiente e nunca do repositório.",
-            ficheiro=guide) + "</p>"),
+            ficheiro=guide) + "</p>",
     ]
     return elements
 
@@ -1726,7 +1725,7 @@ def _build(
     # Sobre: what the instrument is, what it is for and how it is run.
     out.append(_panel(
         "sobre", _t("Sobre o Aferidor"),
-        '<div class="sobre">' + "".join(html for _, html in _about_page(protocol, cases)) + "</div>",
+        '<div class="sobre">' + "".join(_about_page(protocol, cases)) + "</div>",
     ))
 
     # Fontes: where the cases come from, and what is still to be confirmed.
