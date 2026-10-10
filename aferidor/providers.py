@@ -170,8 +170,9 @@ def _request_json(
         raise ProviderError(f"{url} devolveu uma resposta que não é JSON", retryable=True) from None
 
 
-def _post_json(url: str, headers: dict[str, str], payload: dict, timeout: float) -> dict:
-    return _request_json(url, headers, payload, timeout)
+def _sorted_names(items: list, field: str, strip: str = "") -> list[str]:
+    """The `field` of each listed model that has one, sorted; `strip` is a prefix the API adds."""
+    return sorted(str(m.get(field, "")).removeprefix(strip) for m in items if m.get(field))
 
 
 def _key_from_env(variable: str, given: str | None) -> str:
@@ -207,7 +208,7 @@ def _chat_completion(
     understands `max_tokens`. The caller picks the right one; this function
     does not guess.
     """
-    data = _post_json(
+    data = _request_json(
         endpoint,
         headers,
         {
@@ -267,7 +268,7 @@ class OpenAIProvider(Provider):
             None,
             self.timeout,
         )
-        return sorted(str(m.get("id", "")) for m in data.get("data", []) if m.get("id"))
+        return _sorted_names(data.get("data", []), "id")
 
 
 class AnthropicProvider(Provider):
@@ -293,7 +294,7 @@ class AnthropicProvider(Provider):
         self.timeout = timeout
 
     def ask(self, prompt: str) -> Reply:
-        data = _post_json(
+        data = _request_json(
             self.ENDPOINT,
             {"x-api-key": self.api_key, "anthropic-version": self.VERSION},
             {
@@ -318,7 +319,7 @@ class AnthropicProvider(Provider):
             None,
             self.timeout,
         )
-        return sorted(str(m.get("id", "")) for m in data.get("data", []) if m.get("id"))
+        return _sorted_names(data.get("data", []), "id")
 
 
 class GeminiProvider(Provider):
@@ -389,9 +390,7 @@ class GeminiProvider(Provider):
         data = _request_json(
             f"{self.BASE}/models", {"authorization": f"Bearer {self.api_key}"}, None, self.timeout
         )
-        return sorted(
-            str(m.get("id", "")).removeprefix("models/") for m in data.get("data", []) if m.get("id")
-        )
+        return _sorted_names(data.get("data", []), "id", "models/")
 
 
 _THOUGHT = re.compile(r"<thought>.*?(?:</thought>|\Z)", re.S)
@@ -482,7 +481,7 @@ class LocalProvider(Provider):
             if _unreachable(self.base_url, error):
                 raise self._not_running() from None
             raise
-        return sorted(str(m.get("name", "")) for m in data.get("models", []) if m.get("name"))
+        return _sorted_names(data.get("models", []), "name")
 
 
 __all__ = [
