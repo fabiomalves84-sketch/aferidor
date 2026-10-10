@@ -194,7 +194,7 @@ def model_label(model_id: str) -> tuple[str, str]:
     return name, " · ".join(details)
 
 
-def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo", show_id: bool = True) -> str:
+def _model_heading(model_id: str, show_id: bool = True) -> str:
     _, description = model_label(model_id)
     name = _model_short(model_id)
     sub = (
@@ -202,7 +202,7 @@ def _model_heading(model_id: str, tag: str = "h3", css: str = "modelo", show_id:
         if description else ""
     )
     return (
-        f'<div class="{css}"><{tag} class="modelo-nome">{_esc(name)}</{tag}>{sub}'
+        f'<div class="modelo"><h3 class="modelo-nome">{_esc(name)}</h3>{sub}'
         + (f'<code class="modelo-id">{_esc(model_id)}</code>' if show_id else "")
         + "</div>"
     )
