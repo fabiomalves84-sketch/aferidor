@@ -17,11 +17,13 @@ with a verdict has to be able to see what the grader saw and say so.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import date
 
 from . import build_id
 from .comparacao import Ranking, is_significant, percent, ranking, top_tie
 from .grading import (
+    ConsistencySummary,
     Tally,
     consistency_by_case,
     consistency_by_model,
@@ -321,6 +323,186 @@ def _case_detail(pairs: list[tuple[Answer, Verdict]], cases: dict[str, Case]) ->
     return lines
 
 
+@dataclass(frozen=True)
+class _Counts:
+    """What the sections of the report share: the data and the counts made from it, once."""
+
+    cases: list[Case]
+    answers: list[Answer]
+    by_case: dict[str, Case]
+    pairs: list[tuple[Answer, Verdict]]
+    per_model: dict[str, Tally]
+    consistency: dict
+    summaries: dict[str, ConsistencySummary]
+
+
+def _head_md(today: date | None) -> list[str]:
+    return [
+        "# Relatório do Aferidor", "",
+        f"Relatório escrito em {(today or date.today()).isoformat()}.", "",
+        HEADER_NOTE, "",
+        TRIAGE_NOTE, "",
+    ]
+
+
+def _conditions_md(cases: list[Case], answers: list[Answer], cases_source: tuple[str, str] | None) -> list[str]:
+    rows = conditions_rows(in_bank(cases, answers), cases_source)
+    if not rows:
+        return []
+    return ["## Condições do ensaio", "", *[f"- **{label}**: {value}" for label, value in rows], ""]
+
+
+def _notices_md(
+    cases: list[Case], answers: list[Answer], missing: list[str] | None,
+    reasons: dict[str, str] | None, sources_verified: bool,
+) -> list[str]:
+    out: list[str] = []
+    if not sources_verified:
+        out.append(
+            "> **Aviso.** Nem todas as fontes destes casos foram confirmadas por uma pessoa. "
+            "Até essa confirmação, os resultados medem o modelo contra valores transcritos "
+            "automaticamente, e um valor de referência errado surge como erro do modelo. "
+            "Ver `casos/VERIFICACAO.md`."
+        )
+        out.append("")
+    if missing:
+        out.append(
+            "> **Casos sem resposta.** "
+            + format_missing(missing, reasons)
+            + ". Não entram em nenhuma contagem deste relatório."
+        )
+        out.append("")
+    gaps = missing_samples(cases, answers)
+    if gaps:
+        out.append(
+            "> **Amostras em falta.** "
+            + format_missing_samples(gaps, expected_samples(answers))
+            + ". Não muda nenhuma contagem abaixo; só nomeia o que já era invisível "
+            "nelas."
+        )
+        out.append("")
+    return out
+
+
+def _protocol_md(
+    protocol: Protocol, answers: list[Answer], counts: _Counts, cases_source: tuple[str, str] | None,
+) -> list[str]:
+    found_warnings, outcomes = protocol_findings(
+        protocol, answers, counts.summaries, cases_source, [case.case_id for case in counts.cases],
+    )
+    out = ["## Critério de aprovação", ""]
+    out.append(
+        f"Protocolo **{protocol.name}**, escrito a {protocol.written_on.isoformat()} "
+        f"(`{protocol.path}`, SHA-256 {protocol.sha256[:12]})."
+    )
+    out.append("")
+    for warning in found_warnings:
+        out.append(f"> **Aviso.** {warning[0].upper() + warning[1:]}.")
+        out.append("")
+    out.append("| Modelo | Resultado | " + " | ".join(c.label for c in outcomes[0].checks) + " |")
+    out.append("|---|---|" + "---|" * len(outcomes[0].checks))
+    for outcome in outcomes:
+        cells = [
+            f"{c.observed} ({c.limit}){'' if c.met else ', **não cumpre**'}"
+            for c in outcome.checks
+        ]
+        result = "aprovado" if outcome.approved else "**reprovado**"
+        out.append(f"| `{outcome.model}` | {result} | " + " | ".join(cells) + " |")
+    out.append("")
+    return out
+
+
+def _comparison_md(counts: _Counts, right: dict[str, tuple[int, int]]) -> list[str]:
+    out = ["## Comparação", ""]
+    out.append(
+        "| Modelo | Casos com falha crítica em alguma amostra | Casos corretos | "
+        "Casos parcialmente corretos | Amostras corretas |"
+    )
+    out.append("|---|---|---|---|---|")
+    for model in counts.per_model:
+        summary = counts.summaries[model]
+        tally = counts.per_model[model]
+        ok, total = right[model]
+        out.append(
+            f"| `{model}` | {summary.critical_cases} de {summary.cases} "
+            f"({interval_text(summary.critical_cases, summary.cases)}) | "
+            f"{ok} de {total} ({interval_text(ok, total)}) | "
+            f"{summary.unstable_cases} de {summary.cases} | "
+            f"{tally.passed} de {tally.total} ({interval_text(tally.passed, tally.total)}) |"
+        )
+    out.append("")
+    out.append(
+        "As três primeiras colunas contam casos; a última conta amostras (casos × "
+        "amostras por caso). Uma taxa elevada de amostras corretas pode ocultar casos "
+        "nunca corretos ou casos cujo resultado depende da amostra. Intervalos de Wilson a "
+        "95%; o intervalo das amostras assume independência entre amostras, que não se "
+        "verifica, pelo que é mais estreito do que deveria."
+    )
+    out.append("")
+    comparison = _comparison_text(ranking(counts.summaries, counts.consistency))
+    if comparison is not None:
+        out.append(comparison)
+        out.append("")
+    return out
+
+
+def _model_md(
+    model: str, counts: _Counts, rule: str, right: dict[str, tuple[int, int]], languages: dict,
+) -> list[str]:
+    tally = counts.per_model[model]
+    summary = counts.summaries[model]
+    out = [f"## {model}", ""]
+    out.append(_risk_line(summary.critical_cases, summary.cases))
+    out.append("")
+    ok, total = right[model]
+    out.append(
+        f"**Casos corretos: {ok} de {total}** ({interval_text(ok, total)}), pela regra: "
+        f"{CASE_RULES[rule]}."
+    )
+    out.append("")
+    out.append(
+        f"{tally.passed} de {tally.total} amostras cumprem todos os critérios "
+        f"({percent(tally.accuracy)}, {interval_text(tally.passed, tally.total)})."
+    )
+    if summary.unstable_cases:
+        out.append("")
+        out.append(
+            f"{summary.unstable_cases} de {summary.cases} casos parcialmente corretos: o "
+            "resultado variou entre amostras."
+        )
+    out.append("")
+    out.append("### Falhas por tipo")
+    out.append("")
+    out.extend(_failure_table(tally))
+    out.append("")
+    out.append("### Português europeu")
+    out.append("")
+    out.append(language_line(languages[model]))
+    out.append("")
+    out.append(
+        "Indicador independente, baseado numa lista curta de formas alheias ao português "
+        "europeu atual. Não entra na contagem de falhas e subestima a frequência real."
+    )
+    out.append("")
+    out.append("### Respostas que falharam")
+    out.append("")
+    model_pairs = [(a, v) for a, v in counts.pairs if v.model == model]
+    out.extend(_case_detail(model_pairs, counts.by_case))
+    out.append("")
+    return out
+
+
+def _interpretation_md() -> list[str]:
+    return [
+        "## Interpretação", "",
+        "A taxa de respostas corretas, isolada, é insuficiente: um sistema que erra 5% das "
+        "doses e outro que erra 5% do formato têm a mesma taxa e riscos muito diferentes. "
+        "Cada falha é por isso classificada por tipo e por risco clínico, e a leitura começa "
+        "pelas falhas críticas.",
+        "",
+    ]
+
+
 def build(
     cases: list[Case],
     answers: list[Answer],
@@ -336,86 +518,25 @@ def build(
 
     `cases_source` is the case file's path and SHA-256, when known.
     """
-    by_case = {c.case_id: c for c in cases}
-    pairs = match_answers(cases, answers, verdicts)
-    per_model = tally_by_model(verdicts)
     consistency = consistency_by_case(cases, answers, verdicts)
-    consistency_per_model = consistency_by_model(consistency)
+    counts = _Counts(
+        cases=cases, answers=answers, by_case={c.case_id: c for c in cases},
+        pairs=match_answers(cases, answers, verdicts), per_model=tally_by_model(verdicts),
+        consistency=consistency, summaries=consistency_by_model(consistency),
+    )
 
-    out: list[str] = []
-    out.append("# Relatório do Aferidor")
-    out.append("")
-    out.append(f"Relatório escrito em {(today or date.today()).isoformat()}.")
-    out.append("")
-    out.append(HEADER_NOTE)
-    out.append("")
-    out.append(TRIAGE_NOTE)
-    out.append("")
-    rows = conditions_rows(in_bank(cases, answers), cases_source)
-    if rows:
-        out.append("## Condições do ensaio")
-        out.append("")
-        for label, value in rows:
-            out.append(f"- **{label}**: {value}")
-        out.append("")
-
-    if not sources_verified:
-        out.append(
-            "> **Aviso.** Nem todas as fontes destes casos foram confirmadas por uma pessoa. "
-            "Até essa confirmação, os resultados medem o modelo contra valores transcritos "
-            "automaticamente, e um valor de referência errado surge como erro do modelo. "
-            "Ver `casos/VERIFICACAO.md`."
-        )
-        out.append("")
-
-    if missing:
-        out.append(
-            "> **Casos sem resposta.** "
-            + format_missing(missing, reasons)
-            + ". Não entram em nenhuma contagem deste relatório."
-        )
-        out.append("")
-
-    gaps = missing_samples(cases, answers)
-    if gaps:
-        out.append(
-            "> **Amostras em falta.** "
-            + format_missing_samples(gaps, expected_samples(answers))
-            + ". Não muda nenhuma contagem abaixo; só nomeia o que já era invisível "
-            "nelas."
-        )
-        out.append("")
-
-    if not per_model:
+    out: list[str] = [
+        *_head_md(today),
+        *_conditions_md(cases, answers, cases_source),
+        *_notices_md(cases, answers, missing, reasons, sources_verified),
+    ]
+    if not counts.per_model:
         out.append("Não há veredictos para relatar.")
         out.append("")
         return "\n".join(out)
 
     if protocol is not None:
-        found_warnings, outcomes = protocol_findings(
-            protocol, answers, consistency_per_model, cases_source,
-            [case.case_id for case in cases],
-        )
-        out.append("## Critério de aprovação")
-        out.append("")
-        out.append(
-            f"Protocolo **{protocol.name}**, escrito a {protocol.written_on.isoformat()} "
-            f"(`{protocol.path}`, SHA-256 {protocol.sha256[:12]})."
-        )
-        out.append("")
-        for warning in found_warnings:
-            out.append(f"> **Aviso.** {warning[0].upper() + warning[1:]}.")
-            out.append("")
-        out.append("| Modelo | Resultado | " + " | ".join(c.label for c in outcomes[0].checks) + " |")
-        out.append("|---|---|" + "---|" * len(outcomes[0].checks))
-        for outcome in outcomes:
-            cells = [
-                f"{c.observed} ({c.limit}){'' if c.met else ', **não cumpre**'}"
-                for c in outcome.checks
-            ]
-            result = "aprovado" if outcome.approved else "**reprovado**"
-            out.append(f"| `{outcome.model}` | {result} | " + " | ".join(cells) + " |")
-        out.append("")
+        out.extend(_protocol_md(protocol, answers, counts, cases_source))
 
     rule = protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE
     right = right_cases_by_model(consistency, rule)
@@ -424,91 +545,14 @@ def build(
     out.append(how_counted(max(expected_samples(answers).values(), default=0), rule))
     out.append("")
 
-    if len(per_model) > 1:
-        out.append("## Comparação")
-        out.append("")
-        out.append(
-            "| Modelo | Casos com falha crítica em alguma amostra | Casos corretos | "
-            "Casos parcialmente corretos | Amostras corretas |"
-        )
-        out.append("|---|---|---|---|---|")
-        for model in per_model:
-            summary = consistency_per_model[model]
-            counts = per_model[model]
-            ok, total = right[model]
-            out.append(
-                f"| `{model}` | {summary.critical_cases} de {summary.cases} "
-                f"({interval_text(summary.critical_cases, summary.cases)}) | "
-                f"{ok} de {total} ({interval_text(ok, total)}) | "
-                f"{summary.unstable_cases} de {summary.cases} | "
-                f"{counts.passed} de {counts.total} ({interval_text(counts.passed, counts.total)}) |"
-            )
-        out.append("")
-        out.append(
-            "As três primeiras colunas contam casos; a última conta amostras (casos × "
-            "amostras por caso). Uma taxa elevada de amostras corretas pode ocultar casos "
-            "nunca corretos ou casos cujo resultado depende da amostra. Intervalos de Wilson a "
-            "95%; o intervalo das amostras assume independência entre amostras, que não se "
-            "verifica, pelo que é mais estreito do que deveria."
-        )
-        out.append("")
-        comparison = _comparison_text(ranking(consistency_per_model, consistency))
-        if comparison is not None:
-            out.append(comparison)
-            out.append("")
+    if len(counts.per_model) > 1:
+        out.extend(_comparison_md(counts, right))
 
     languages = language_by_model(in_bank(cases, answers))
-    for model, counts in per_model.items():
-        summary = consistency_per_model[model]
-        out.append(f"## {model}")
-        out.append("")
-        out.append(_risk_line(summary.critical_cases, summary.cases))
-        out.append("")
-        ok, total = right[model]
-        out.append(
-            f"**Casos corretos: {ok} de {total}** ({interval_text(ok, total)}), pela regra: "
-            f"{CASE_RULES[rule]}."
-        )
-        out.append("")
-        out.append(
-            f"{counts.passed} de {counts.total} amostras cumprem todos os critérios "
-            f"({percent(counts.accuracy)}, {interval_text(counts.passed, counts.total)})."
-        )
-        if summary.unstable_cases:
-            out.append("")
-            out.append(
-                f"{summary.unstable_cases} de {summary.cases} casos parcialmente corretos: o "
-                "resultado variou entre amostras."
-            )
-        out.append("")
-        out.append("### Falhas por tipo")
-        out.append("")
-        out.extend(_failure_table(counts))
-        out.append("")
-        out.append("### Português europeu")
-        out.append("")
-        out.append(language_line(languages[model]))
-        out.append("")
-        out.append(
-            "Indicador independente, baseado numa lista curta de formas alheias ao português "
-            "europeu atual. Não entra na contagem de falhas e subestima a frequência real."
-        )
-        out.append("")
-        out.append("### Respostas que falharam")
-        out.append("")
-        model_pairs = [(a, v) for a, v in pairs if v.model == model]
-        out.extend(_case_detail(model_pairs, by_case))
-        out.append("")
+    for model in counts.per_model:
+        out.extend(_model_md(model, counts, rule, right, languages))
 
-    out.append("## Interpretação")
-    out.append("")
-    out.append(
-        "A taxa de respostas corretas, isolada, é insuficiente: um sistema que erra 5% das "
-        "doses e outro que erra 5% do formato têm a mesma taxa e riscos muito diferentes. "
-        "Cada falha é por isso classificada por tipo e por risco clínico, e a leitura começa "
-        "pelas falhas críticas."
-    )
-    out.append("")
+    out.extend(_interpretation_md())
     return "\n".join(out)
 
 
