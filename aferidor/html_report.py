@@ -50,11 +50,11 @@ from .grading import (
 )
 from . import fontes as _fontes
 from . import report as _report
-from .comparacao import is_significant, percent
+from .comparacao import is_significant, meets_reference, models_meeting_reference, percent
 from .html_estilo import STYLE
 from .lingua import language_by_model, language_line
 from .models import Answer, Case, Verdict
-from .protocolo import REFERENCE_CRITICAL_LIMIT, Protocol
+from .protocolo import Protocol
 from .report import (
     HEADER_NOTE,
     conditions_rows,
@@ -579,7 +579,7 @@ def _start_page(
             )
             best = ""
         else:
-            meeting = sum(1 for s in summaries.values() if s.critical_cases <= REFERENCE_CRITICAL_LIMIT)
+            meeting = len(models_meeting_reference(summaries))
             result = _t(
                 "Modelos que cumprem o limiar de referência (nenhum caso com {falha}): {k} de {n}.",
                 falha=failure, k=meeting, n=len(summaries),
@@ -976,7 +976,7 @@ def _conclusions_page(
                 "O protocolo tem avisos (ver {metodo}).", metodo=_link("criterio", "Método"),
             ) + "</li>"))
     else:
-        meeting = sum(1 for s in summaries.values() if s.critical_cases <= REFERENCE_CRITICAL_LIMIT)
+        meeting = len(models_meeting_reference(summaries))
         count = (best[1], best[2])
         if n == 1 and meeting == 0:
             text = _t("O modelo não cumpre o limiar de referência (que não é um protocolo prévio).") + " " \
@@ -1744,7 +1744,7 @@ def _build(
             )
 
         reference = (
-            {m: summaries[m].critical_cases <= REFERENCE_CRITICAL_LIMIT for m in models}
+            {m: meets_reference(summaries[m]) for m in models}
             if protocol is None else {}
         )
 
