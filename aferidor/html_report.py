@@ -26,6 +26,7 @@ from __future__ import annotations
 import contextvars
 import html as _html
 import re
+from dataclasses import dataclass
 from datetime import date
 
 from .grading import (
@@ -50,6 +51,8 @@ from .grading import (
 from . import fontes as _fontes
 from . import report as _report
 from .comparacao import (
+    Ranking,
+    Row,
     is_significant,
     meets_reference,
     models_meeting_reference,
@@ -947,6 +950,130 @@ def _tied_line(group: int, models: int, count: str | None) -> str:
     return _t("Os {t} melhores têm {a} de {b} casos com falha crítica.", t=group, a=a, b=b)
 
 
+@dataclass(frozen=True)
+class _Standing:
+    """Where the models stand against each other, worked out once for every line of the Conclusions."""
+
+    n: int
+    comparison: Ranking
+    best: Row                     # fewest cases with a critical failure
+    tied: tuple[Row, ...]         # the models with the same proportion as the best
+    same_counts: bool             # whether those also have the same counts, and not only the proportion
+
+    @property
+    def tie(self) -> bool:
+        return len(self.tied) > 1
+
+
+def _standing(summaries: dict[str, ConsistencySummary], consistency) -> _Standing:
+    comparison = ranking(summaries, consistency)
+    tied = top_tie(comparison.rows)
+    return _Standing(len(summaries), comparison, comparison.rows[0], tied, same_numbers(tied))
+
+
+def _first_line(
+    standing: _Standing, summaries: dict[str, ConsistencySummary], protocol: Protocol | None,
+    protocol_outcomes: list | None, protocol_warnings: list[str] | None,
+) -> tuple[list[tuple[str, str]], bool]:
+    """The result against the protocol, or against the reference threshold; and whether the line already
+    said how many cases the best model had (the interval line then does not repeat who it is)."""
+    n, best = standing.n, standing.best
+    if protocol is not None and protocol_outcomes is not None:
+        approved = sum(1 for o in protocol_outcomes if o.approved)
+        elements = [("limiar", "<li>" + _t(
+            "{k} de {n} modelos aprovados pelo protocolo (critérios completos no {inicio}).",
+            k=approved, n=n, inicio=_link("inicio", "Início"),
+        ) + "</li>")]
+        if protocol_warnings:
+            elements.append(("remate", "<li>" + _t(
+                "O protocolo tem avisos (ver {metodo}).", metodo=_link("criterio", "Método"),
+            ) + "</li>"))
+        return elements, False
+    meeting = len(models_meeting_reference(summaries))
+    count = (best.critical, best.cases)
+    said_best = False
+    if n == 1 and meeting == 0:
+        text = _t("O modelo não cumpre o limiar de referência (que não é um protocolo prévio).") + " " \
+            + _t("Tem {a} de {b} casos com falha crítica.", a=count[0], b=count[1])
+        said_best = True
+    elif n == 1:
+        text = _t("O modelo cumpre o limiar de referência (que não é um protocolo prévio).")
+    elif meeting == 0:
+        text = _t("Nenhum dos {n} modelos cumpre o limiar de referência (que não é um protocolo prévio).", n=n) + " "
+        text += _tied_line(len(standing.tied), n, count if standing.same_counts else None) if standing.tie else \
+            _t("O melhor tem {a} de {b} casos com falha crítica.", a=count[0], b=count[1])
+        said_best = True
+    else:
+        text = _t(
+            "Modelos que cumprem o limiar de referência (que não é um protocolo prévio): {k} de {n}.",
+            k=meeting, n=n,
+        )
+    return [("limiar", f"<li>{text}</li>")], said_best
+
+
+def _mcnemar_line(standing: _Standing) -> list[tuple[str, str]]:
+    """The two best, when there are two and they do not share the top."""
+    p_value = standing.comparison.p_value
+    if standing.n < 2 or standing.tie or p_value is None:
+        return []
+    return [("comparacao", "<li>" + _t(
+        "Entre os dois melhores, a diferença é estatisticamente significativa (McNemar exato, {p})."
+        if is_significant(p_value) else
+        "Entre os dois melhores, a diferença pode ser acaso (McNemar exato, {p}).",
+        p=_p_value(p_value),
+    ) + "</li>")]
+
+
+def _interval_line(standing: _Standing, said_best: bool) -> str:
+    best = standing.best
+    if standing.tie and not standing.same_counts:
+        return _t("Nada de firme sobre outros casos: os intervalos são largos.")
+    low, high = wilson_interval(best.critical, best.cases)
+    who = (
+        _t("{a} de {n}", a=best.critical, n=best.cases) if said_best
+        else _t("os melhores, {a} de {n},", a=best.critical, n=best.cases) if standing.tie
+        else _t("o melhor, {a} de {n},", a=best.critical, n=best.cases)
+    )
+    return _t(
+        "Nada de firme sobre outros casos: com {n} casos os intervalos são largos ({quem} é compatível com {low} a {high}).",
+        n=best.cases, quem=who, low=percent(low), high=percent(high),
+    )
+
+
+def _sources_line(confirmation: "_fontes.Confirmation | None", sources_verified: bool) -> list[tuple[str, str]]:
+    if sources_verified:
+        return []
+    if confirmation is None:
+        return [("fontes", _t("Que as fontes estejam confirmadas: o estado da confirmação não foi lido neste relatório."))]
+    bank = confirmation.bank
+    return [("fontes", _t(
+        "Que as fontes estejam confirmadas: neste banco, uma a uma {a}, em grupo {b}, por confirmar {c} (ver {fontes}).",
+        a=bank.one_by_one, b=bank.in_group, c=bank.pending, fontes=_link("fontes", "Fontes"),
+    ))]
+
+
+def _cannot_lines(
+    standing: _Standing, models: list[str], said_best: bool,
+    confirmation: "_fontes.Confirmation | None", sources_verified: bool,
+) -> list[tuple[str, str]]:
+    """What the numbers do not allow saying, as (name, text)."""
+    cannot: list[tuple[str, str]] = []
+    if any(m.startswith("local:") for m in models):
+        cannot.append(("locais", _t("Que os modelos locais representem os comerciais.")))
+    cannot.append((
+        "revisao",
+        _t("Que um veredicto seja validação clínica: é triagem.") if _report.CLINICAL_REVIEW_DONE
+        else _t("Que um veredicto seja validação clínica: é triagem, sem revisão por especialista."),
+    ))
+    cannot.append(("heuristico", _t(
+        "Que uma falha crítica seja sempre um erro real do modelo: o corretor é heurístico, com falsos "
+        "passes e falsos falhanços conhecidos (ver {metodo}).", metodo=_link("metodo", "Método"),
+    )))
+    cannot.append(("intervalo", _interval_line(standing, said_best)))
+    cannot += _sources_line(confirmation, sources_verified)
+    return cannot
+
+
 def _conclusions_page(
     models: list[str], summaries: dict[str, ConsistencySummary], consistency,
     confirmation: "_fontes.Confirmation | None", sources_verified: bool,
@@ -960,96 +1087,17 @@ def _conclusions_page(
     other interval of the report, and the state of the sources is what `fontes` read. No sentence
     recommends a model. The line about the review follows `report.CLINICAL_REVIEW_DONE`.
     """
-    n = len(summaries)
-    comparison = ranking(summaries, consistency)
-    best = comparison.rows[0]                       # fewest cases with a critical failure
-    tied = top_tie(comparison.rows)                 # the same proportion as the first
-    tie = len(tied) > 1
-    same_counts = same_numbers(tied)
-    elements: list[tuple[str, str]] = [("pode", f'<h3>{_t("Pode concluir-se")}</h3>')]
-
-    # 1. the result against the threshold, or against the protocol
-    said_best = False
-    if protocol is not None and protocol_outcomes is not None:
-        approved = sum(1 for o in protocol_outcomes if o.approved)
-        elements.append(("limiar", "<li>" + _t(
-            "{k} de {n} modelos aprovados pelo protocolo (critérios completos no {inicio}).",
-            k=approved, n=n, inicio=_link("inicio", "Início"),
-        ) + "</li>"))
-        if protocol_warnings:
-            elements.append(("remate", "<li>" + _t(
-                "O protocolo tem avisos (ver {metodo}).", metodo=_link("criterio", "Método"),
-            ) + "</li>"))
-    else:
-        meeting = len(models_meeting_reference(summaries))
-        count = (best.critical, best.cases)
-        if n == 1 and meeting == 0:
-            text = _t("O modelo não cumpre o limiar de referência (que não é um protocolo prévio).") + " " \
-                + _t("Tem {a} de {b} casos com falha crítica.", a=count[0], b=count[1])
-            said_best = True
-        elif n == 1:
-            text = _t("O modelo cumpre o limiar de referência (que não é um protocolo prévio).")
-        elif meeting == 0:
-            text = _t("Nenhum dos {n} modelos cumpre o limiar de referência (que não é um protocolo prévio).", n=n) + " "
-            text += _tied_line(len(tied), n, count if same_counts else None) if tie else \
-                _t("O melhor tem {a} de {b} casos com falha crítica.", a=count[0], b=count[1])
-            said_best = True
-        else:
-            text = _t(
-                "Modelos que cumprem o limiar de referência (que não é um protocolo prévio): {k} de {n}.",
-                k=meeting, n=n,
-            )
-        elements.append(("limiar", f"<li>{text}</li>"))
-
-    # 2. the two best, when there are two and they do not share the top
-    if n >= 2 and not tie and comparison.p_value is not None:
-        elements.append(("comparacao", "<li>" + _t(
-            "Entre os dois melhores, a diferença é estatisticamente significativa (McNemar exato, {p})."
-            if is_significant(comparison.p_value) else
-            "Entre os dois melhores, a diferença pode ser acaso (McNemar exato, {p}).",
-            p=_p_value(comparison.p_value),
-        ) + "</li>"))
-
-    # what cannot be concluded
-    cannot: list[tuple[str, str]] = []
-    if any(m.startswith("local:") for m in models):
-        cannot.append(("locais", _t("Que os modelos locais representem os comerciais.")))
-    cannot.append((
-        "revisao",
-        _t("Que um veredicto seja validação clínica: é triagem.") if _report.CLINICAL_REVIEW_DONE
-        else _t("Que um veredicto seja validação clínica: é triagem, sem revisão por especialista."),
-    ))
-    cannot.append(("heuristico", _t(
-        "Que uma falha crítica seja sempre um erro real do modelo: o corretor é heurístico, com falsos "
-        "passes e falsos falhanços conhecidos (ver {metodo}).", metodo=_link("metodo", "Método"),
-    )))
-    if tie and not same_counts:
-        interval = _t("Nada de firme sobre outros casos: os intervalos são largos.")
-    else:
-        low, high = wilson_interval(best.critical, best.cases)
-        who = (
-            _t("{a} de {n}", a=best.critical, n=best.cases) if said_best
-            else _t("os melhores, {a} de {n},", a=best.critical, n=best.cases) if tie
-            else _t("o melhor, {a} de {n},", a=best.critical, n=best.cases)
-        )
-        interval = _t(
-            "Nada de firme sobre outros casos: com {n} casos os intervalos são largos ({quem} é compatível com {low} a {high}).",
-            n=best.cases, quem=who, low=percent(low), high=percent(high),
-        )
-    cannot.append(("intervalo", interval))
-    if not sources_verified:
-        if confirmation is None:
-            cannot.append(("fontes", _t("Que as fontes estejam confirmadas: o estado da confirmação não foi lido neste relatório.")))
-        else:
-            bank = confirmation.bank
-            cannot.append(("fontes", _t(
-                "Que as fontes estejam confirmadas: neste banco, uma a uma {a}, em grupo {b}, por confirmar {c} (ver {fontes}).",
-                a=bank.one_by_one, b=bank.in_group, c=bank.pending, fontes=_link("fontes", "Fontes"),
-            )))
-    elements.append(("nao", f'<h3>{_t("Não se pode concluir")}</h3>'))
-    elements += [(name, f"<li>{text}</li>") for name, text in cannot]
-    elements.append(("fecho", f'<p class="fecho">{_t("Este relatório não recomenda nenhum modelo: mede, não aconselha.")}</p>'))
-    return elements
+    standing = _standing(summaries, consistency)
+    first, said_best = _first_line(standing, summaries, protocol, protocol_outcomes, protocol_warnings)
+    cannot = _cannot_lines(standing, models, said_best, confirmation, sources_verified)
+    return [
+        ("pode", f'<h3>{_t("Pode concluir-se")}</h3>'),
+        *first,
+        *_mcnemar_line(standing),
+        ("nao", f'<h3>{_t("Não se pode concluir")}</h3>'),
+        *[(name, f"<li>{text}</li>") for name, text in cannot],
+        ("fecho", f'<p class="fecho">{_t("Este relatório não recomenda nenhum modelo: mede, não aconselha.")}</p>'),
+    ]
 
 
 def _conclusions_html(elements: list[tuple[str, str]]) -> str:
