@@ -121,7 +121,7 @@ _RISK_CLASS = {
 }
 _RISK_LABEL = {Risk.CRITICO: "crítico", Risk.ALTO: "alto", Risk.MEDIO: "médio", Risk.BAIXO: "baixo"}
 _FAILURE_LABEL = {
-    FailureType.DOSE_INCORRETA: "Dose incorreta",
+    FailureType.DOSE_INCORRETA: "Dose errada",
     FailureType.INTERACAO_OMITIDA: "Interação omitida",
     FailureType.CONTRAINDICACAO_OMITIDA: "Contraindicação omitida",
     FailureType.ALUCINACAO: "Facto ou fonte inventados",
@@ -318,7 +318,7 @@ GLOSSARY: dict[str, str] = {
     "SHA-256": "Impressão digital de um ficheiro: muda se o ficheiro mudar uma única vírgula. Serve para provar que nada foi alterado.",
     "Ollama": "Programa que corre modelos de linguagem abertos no próprio computador, sem enviar nada para fora.",
     "parâmetros": "Medida do tamanho de um modelo de linguagem. Mais parâmetros costuma querer dizer mais capacidade.",
-    "tokens_max": "Limite de tamanho da resposta que o modelo podia dar.",
+    "tokens": "Pedaços de texto (palavras ou partes de palavras) em que o modelo lê e escreve; o limite conta os da resposta.",
     "Acordo Ortográfico": "O Acordo Ortográfico de 1990, em vigor em Portugal: escreve-se infeção e não infecção.",
     "amostra": "Uma das respostas do modelo à mesma pergunta. Cada caso é perguntado várias vezes, porque o modelo não responde sempre igual.",
     "sempre correto": "Todas as amostras do caso cumpriram todos os critérios.",
@@ -336,7 +336,7 @@ _REPORT_TERMS = (
 # Clinical and source abbreviations marked automatically in case texts.
 _CASE_TERMS = tuple(
     k for k in GLOSSARY
-    if k not in ("IC 95%", "SHA-256", "Ollama", "parâmetros", "tokens_max", "Acordo Ortográfico")
+    if k not in ("IC 95%", "SHA-256", "Ollama", "parâmetros", "tokens", "Acordo Ortográfico")
     + _REPORT_TERMS
 )
 
@@ -1967,7 +1967,7 @@ def _method_panel(data: _ReportData, before: str) -> str:
             shown = _t(label) if label == "Banco de casos" else f"{_model_short(label)} ({label})"
             technical.append(
                 f"<dt>{_esc(shown)}</dt>"
-                f"<dd>{_gloss(_esc(value), ('SHA-256', 'tokens_max'))}</dd>"
+                f"<dd>{_gloss(_esc(value), ('SHA-256', 'tokens'))}</dd>"
             )
         technical.append("</dl>")
     else:

@@ -557,7 +557,7 @@ class TestWhatJumpsOut(unittest.TestCase):
         text = self.two_models()
         worst = text.split('id="erros"', 1)[1].split("</section>", 1)[0]
         self.assertIn("A referência diz", worst)
-        self.assertIn("Dose incorreta", worst)
+        self.assertIn("Dose errada", worst)
         self.assertIn('href="#corpo-C1"', worst)
         self.assertIn('id="corpo-C1"', text)
         self.assertIn('id="caso-C1"', text)  # the summary keeps its id, for links already shared

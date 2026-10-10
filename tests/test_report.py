@@ -40,8 +40,8 @@ class TestConditions(unittest.TestCase):
             [a_case()],
             [self.answer(temperature=1.0, max_tokens=8192, build="0.1.0+abcdef012345")],
         )
-        self.assertIn("temperatura 1,0", text)
-        self.assertIn("tokens_max 8192", text)
+        self.assertIn("temperatura (grau de aleatoriedade) 1,0", text)
+        self.assertIn("limite de tamanho da resposta: 8192 tokens", text)
         self.assertIn("versão 0.1.0+abcdef012345", text)
 
     def test_a_file_mixing_conditions_shows_every_value(self):
@@ -52,8 +52,8 @@ class TestConditions(unittest.TestCase):
                 self.answer(sample=2, temperature=1.0),
             ],
         )
-        self.assertIn("temperatura 0,0, 1,0", text)
-        self.assertIn("tokens_max 4096, não registado", text)
+        self.assertIn("temperatura (grau de aleatoriedade) 0,0, 1,0", text)
+        self.assertIn("limite de tamanho da resposta: 4096 tokens, não registado", text)
 
     def test_it_names_the_case_file_and_its_hash(self):
         text = build([a_case()], [self.answer()], cases_source=("casos/casos.json", "ab" * 32))

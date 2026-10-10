@@ -98,11 +98,13 @@ def conditions_rows(
         else:
             period += t(" a {fim}", lang, fim=found.last_asked.strftime("%Y-%m-%d %H:%M"))
         temperatures = ", ".join(decimal(f"{v:.1f}", lang) for v in found.temperatures)
-        tokens = ", ".join(t("não registado", lang) if v is None else str(v) for v in found.max_tokens)
+        tokens = ", ".join(
+            t("não registado", lang) if v is None else t("{n} tokens", lang, n=v) for v in found.max_tokens
+        )
         builds = ", ".join(b or t("não registada", lang) for b in found.builds)
         row = t(
-            "{n} respostas, recolhidas {periodo}; temperatura {temperatura}; tokens_max "
-            "{tokens}; versão {versao}",
+            "{n} respostas, recolhidas {periodo}; temperatura (grau de aleatoriedade) {temperatura}; "
+            "limite de tamanho da resposta: {tokens}; versão {versao}",
             lang, n=found.answers, periodo=period, temperatura=temperatures,
             tokens=tokens, versao=builds,
         )
