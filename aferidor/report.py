@@ -20,6 +20,7 @@ from __future__ import annotations
 from datetime import date
 
 from . import build_id
+from .comparacao import is_significant, percent
 from .grading import (
     Tally,
     consistency_by_case,
@@ -54,10 +55,6 @@ TRIAGE_NOTE = (
     "Os veredictos são a triagem automática do corretor; a validação por um "
     "especialista faz-se à parte, numa folha cega (`aferidor revisao`)."
 )
-
-
-def _percent(value: float) -> str:
-    return f"{value * 100:.0f}%"
 
 
 def format_missing(missing: list[str], reasons: dict[str, str] | None = None) -> str:
@@ -190,7 +187,7 @@ def protocol_findings(
 def interval_text(successes: int, total: int) -> str:
     """A 95% Wilson interval, written the way the report writes percentages."""
     low, high = wilson_interval(successes, total)
-    return f"IC 95% {_percent(low)} a {_percent(high)}"
+    return f"IC 95% {percent(low)} a {percent(high)}"
 
 
 def how_counted(samples: int, rule: str) -> str:
@@ -237,7 +234,7 @@ def _risk_line(critical_cases: int, total_cases: int) -> str:
     return (
         "**Nenhum caso com falha de risco crítico em nenhuma amostra.** Com "
         f"{total_cases} casos, o resultado é compatível com uma proporção real de casos com falha "
-        f"crítica até {_percent(high)} ({interval})."
+        f"crítica até {percent(high)} ({interval})."
     )
 
 
@@ -435,7 +432,7 @@ def build(
         if paired.p_value is not None:
             first, second = paired.rows[0][0], paired.rows[1][0]
             verdict = (
-                "a diferença é estatisticamente significativa" if paired.p_value < 0.05
+                "a diferença é estatisticamente significativa" if is_significant(paired.p_value)
                 else "a diferença pode dever-se ao acaso"
             )
             shown = "p < 0,001" if paired.p_value < 0.001 else f"p = {paired.p_value:.3f}".replace(".", ",")
@@ -462,7 +459,7 @@ def build(
         out.append("")
         out.append(
             f"{counts.passed} de {counts.total} amostras cumprem todos os critérios "
-            f"({_percent(counts.accuracy)}, {interval_text(counts.passed, counts.total)})."
+            f"({percent(counts.accuracy)}, {interval_text(counts.passed, counts.total)})."
         )
         if summary.unstable_cases:
             out.append("")

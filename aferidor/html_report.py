@@ -50,6 +50,7 @@ from .grading import (
 )
 from . import fontes as _fontes
 from . import report as _report
+from .comparacao import is_significant, percent
 from .html_estilo import STYLE
 from .lingua import language_by_model, language_line
 from .models import Answer, Case, Verdict
@@ -260,10 +261,6 @@ def _category(name: str) -> str:
     return _t(_CATEGORY_LABEL[name]) if name in _CATEGORY_LABEL else name[:1].upper() + name[1:]
 
 
-def _pct(value: float) -> str:
-    return f"{value * 100:.0f}%"
-
-
 # Terms a reader may not know, with a one-line definition. The report marks
 # them where they appear (a dotted underline; the definition shows on hover,
 # on keyboard focus and on tap), and lists the ones used at the end. Model
@@ -449,7 +446,7 @@ def _risk_text(risk: Risk) -> str:
 def _interval(successes: int, total: int) -> str:
     """The 95% Wilson interval, in the page's language, glossary term marked."""
     low, high = wilson_interval(successes, total)
-    text = _t("IC 95% {low} a {high}", low=_pct(low), high=_pct(high))
+    text = _t("IC 95% {low} a {high}", low=percent(low), high=percent(high))
     return _gloss(_esc(text), ("IC 95%",))
 
 
@@ -1003,7 +1000,7 @@ def _conclusions_page(
     if n >= 2 and not tie and comparison.p_value is not None:
         elements.append(("comparacao", "<li>" + _t(
             "Entre os dois melhores, a diferença é estatisticamente significativa (McNemar exato, {p})."
-            if comparison.p_value < 0.05 else
+            if is_significant(comparison.p_value) else
             "Entre os dois melhores, a diferença pode ser acaso (McNemar exato, {p}).",
             p=_p_value(comparison.p_value),
         ) + "</li>"))
@@ -1032,7 +1029,7 @@ def _conclusions_page(
         )
         interval = _t(
             "Nada de firme sobre outros casos: com {n} casos os intervalos são largos ({quem} é compatível com {low} a {high}).",
-            n=best[2], quem=who, low=_pct(low), high=_pct(high),
+            n=best[2], quem=who, low=percent(low), high=percent(high),
         )
     cannot.append(("intervalo", interval))
     if not sources_verified:
@@ -1098,7 +1095,7 @@ def _comparison(summaries: dict[str, ConsistencySummary], consistency=None) -> s
                 "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
                 "{outro}). Nos casos em que só um dos dois teve falha crítica ({x} contra {y}), a "
                 "diferença é estatisticamente significativa (teste de McNemar exato, {p})."
-                if result.p_value < 0.05 else
+                if is_significant(result.p_value) else
                 "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
                 "{outro}). Nos casos em que só um dos dois teve falha crítica ({x} contra {y}), a "
                 "diferença pode dever-se ao acaso (teste de McNemar exato, {p}).",
@@ -1119,14 +1116,14 @@ def _comparison(summaries: dict[str, ConsistencySummary], consistency=None) -> s
         share = critical / cases_n
         label = _t(
             "{modelo}: {a} de {n} casos com falha crítica, intervalo de {low} a {high}",
-            modelo=_model_short(model), a=critical, n=cases_n, low=_pct(low), high=_pct(high),
+            modelo=_model_short(model), a=critical, n=cases_n, low=percent(low), high=percent(high),
         )
         rows.append(
             f'<li><span class="comp-nome">{_esc(_model_short(model))}</span>'
             f'<span class="comp-pista" role="img" aria-label="{_esc(label)}">'
             f'<span class="comp-ic" style="left:{low * 100:.2f}%;width:{(high - low) * 100:.2f}%"></span>'
             f'<span class="comp-ponto" style="left:{share * 100:.2f}%"></span></span>'
-            f'<span class="comp-valor">{_esc(_t("{a} de {n}", a=critical, n=cases_n))} · {_pct(share)}</span></li>'
+            f'<span class="comp-valor">{_esc(_t("{a} de {n}", a=critical, n=cases_n))} · {percent(share)}</span></li>'
         )
     ticks = "".join(f'<span style="left:{v}%">{v}%</span>' for v in (0, 25, 50, 75, 100))
     note = _t(
