@@ -317,17 +317,26 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
 - *Eixo da comparação em telemóvel.* Em 390 px os cinco rótulos (0% a 100%)
   sobrepõem-se e leem-se como "0%25%50%75%100%" (regras `.comp-ticks` em
   `html_estilo.py`); as linhas dos intervalos ficam com cerca de 80 px.
-- *Barra fixa e páginas.* O relatório passou a ter sete páginas, mostradas uma
-  de cada vez só com CSS (`main > .painel` em `html_estilo.py`), e a barra fixa
-  (navegação, controlos e o aviso de triagem) é a variável `--barra`, que o
-  `scroll-padding-top` da página deixa livre: um separador ou uma âncora abre
-  logo por baixo dela. Medido a 10/10/2026, com cliques reais, em Chromium,
-  Firefox e WebKit, a 1280 e 390 px (`#corpo-<caso>` abre o painel Casos e o
-  `<details>` do caso). A barra mede 74 px a 1280 px e 132 px a 390 px; nas
-  línguas com o aviso de tradução automática, 91 px e 167 px (184 px em alemão).
-  **Em telemóvel a barra ocupa cerca de um sexto do ecrã** e fica por afinar.
-  A altura de `--barra` está escrita à mão em `html_estilo.py` (`BAR_HEIGHT`) e
-  tem de se remedir se o texto da barra mudar.
+- *Barra fixa e páginas.* O relatório são sete páginas, mostradas uma de cada
+  vez só com CSS (`main > .painel` em `html_estilo.py`). A barra fixa
+  (navegação, controlos e o aviso de triagem) tem a altura que declara
+  (`--barra`, em `BAR_HEIGHT`: 4,8rem, 7rem abaixo de 62rem, 8,6rem abaixo de
+  46rem e 9,4rem abaixo de 24rem), e o `scroll-padding-top` da página usa a mesma
+  variável, por isso um separador ou uma âncora abre logo por baixo dela, em
+  qualquer língua. Declarar em vez de medir foi uma correção: na primeira versão
+  as alturas estavam medidas à mão a 1280 e 390 px e a 768 px a navegação
+  quebrava em duas linhas, a barra crescia 26 a 43 px e o título de 4 das 6
+  páginas ficava por baixo dela. Agora a navegação não quebra (desloca-se para
+  o lado, com uma sombra na margem que ainda tem mais separadores).
+  Medido a 10/10/2026 em Chromium, com cliques reais em cada separador, a 14
+  larguras (320 a 1920 px) nas cinco línguas: nenhum título escondido e nenhum
+  texto da barra a transbordar; o mesmo, em Chromium, Firefox e WebKit, a 320,
+  390, 768 e 1024 px em português e alemão. A 1280 e 390 px, nos três motores,
+  `#corpo-<caso>` abre o painel Casos e o `<details>` do caso. **Em telemóvel a
+  barra mede 138 px** (cerca de um sexto do ecrã) e fica por afinar. A frase da
+  barra cabe numa linha a partir de 600 px (de 768 px em alemão); abaixo disso
+  ocupa duas linhas, e três em alemão a 320 e 360 px. As alturas declaradas já o
+  assumem, e se o texto da barra mudar tem de se remedir.
 - *Navegação sem `aria-current`.* A navegação é uma lista de ligações e não
   marca a página atual para tecnologias de apoio, porque sem script o estado
   não se mantém e marcar uma página que deixou de o ser diria uma coisa falsa.
@@ -335,10 +344,12 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   páginas ocultas saem da árvore de acessibilidade. A ligação atual só se
   distingue visualmente. Sem `:has()` (navegadores anteriores a 2022 a 2023) as
   sete páginas ficam visíveis em sequência.
-- *Tradução automática.* O espanhol, o francês e o alemão foram traduzidos por
-  uma máquina e nenhum falante nativo os reviu; dizem-no na barra de todas as
-  páginas (`UNREVIEWED` em `aferidor/traducao.py`). Rever uma língua é tirá-la
-  dessa lista.
+- *Tradução automática.* O inglês, o espanhol, o francês e o alemão foram
+  traduzidos por uma máquina e nenhum falante nativo os reviu; só o português é
+  a versão de referência. Dizem-no no cimo de cada página e no rodapé
+  (`UNREVIEWED` em `aferidor/traducao.py`), e não na barra fixa, para a barra
+  ter a mesma altura em todas as línguas. Rever uma língua é tirá-la dessa
+  lista.
 - *Blocos de resposta.* 382 dos 397 `<blockquote>` têm `max-height` e
   `overflow:auto` (regras `blockquote` e `.erro-par blockquote` em
   `html_estilo.py`): scroll dentro do scroll, e não são focáveis, por isso não

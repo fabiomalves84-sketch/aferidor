@@ -30,9 +30,10 @@ OG_LOCALE = {"pt": "pt_PT", "en": "en_US", "es": "es_ES", "fr": "fr_FR", "de": "
 
 MISSING: set[tuple[str, str]] = set()
 
-# Languages whose interface was translated by a machine and not yet read by a native speaker.
-# A report in one of them says so on every page. Reviewing a language is taking it off this list.
-UNREVIEWED = ("es", "fr", "de")
+# Languages whose interface was translated by a machine and not yet read by a native speaker. Only
+# Portuguese, the language the report is written in, is the reference. A report in any other says so
+# at the top of every page and in the footer. Reviewing a language is taking it off this list.
+UNREVIEWED = ("en", "es", "fr", "de")
 UNREVIEWED_NOTICE = "Tradução automática, não revista por um falante nativo; em caso de dúvida vale o português."
 
 # Grammatical forms of a term, for the languages whose word changes with the case. Keyed by the

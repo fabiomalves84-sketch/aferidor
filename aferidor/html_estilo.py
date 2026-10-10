@@ -15,7 +15,7 @@ LIGHT_TOKENS = """
   --good-bg: rgba(12,163,12,0.12); --warning-bg: rgba(250,178,25,0.18);
   --critical-bg: rgba(208,59,59,0.12); --neutral-bg: rgba(137,135,129,0.14);
   --success-text: #006300; --critical-text: #b42a2a;
-  --tooltip-shadow: rgba(0,0,0,0.18);
+  --tooltip-shadow: rgba(0,0,0,0.18); --scroll-shadow: rgba(0,0,0,0.3);
 """
 DARK_TOKENS = """
   --page: #121211; --surface: #1c1c1a; --surface-2: #272724;
@@ -26,7 +26,7 @@ DARK_TOKENS = """
   --good-bg: rgba(12,163,12,0.20); --warning-bg: rgba(250,178,25,0.16);
   --critical-bg: rgba(208,59,59,0.24); --neutral-bg: rgba(137,135,129,0.18);
   --success-text: #5fd35f; --critical-text: #ff8f86;
-  --tooltip-shadow: rgba(0,0,0,0.55);
+  --tooltip-shadow: rgba(0,0,0,0.55); --scroll-shadow: rgba(0,0,0,0.7);
 """
 # Only CSS decides the theme: no radio is checked, so the page follows the
 # system until the reader picks one; `:has()` lets the choice reach :root.
@@ -39,18 +39,17 @@ THEME_CSS = (
     "  :root, :root:has(#tema-escuro:checked) { color-scheme: light;" + LIGHT_TOKENS + "}\n}\n"
 )
 PANEL_IDS = ("inicio", "fontes", "resultados", "areas", "casos", "conclusoes", "metodo")
-# Height of the fixed bar, which the scroll padding leaves free so a page opens just below it. The
-# bar is taller where the notice about a machine translation adds a line, and on a narrow screen,
-# where the controls and the pages stack. Measured in a browser at 1280 and 390 px, plus half a
-# rem of slack for the differences between engines; the report of the work has the numbers.
+# Height of the fixed bar. It is declared, not measured: `.topo` has exactly this height and the
+# page's scroll padding leaves exactly this much free, so a page or an anchor opens just below the
+# bar in every language and at every width. What it holds has to fit: the pages never wrap (they
+# scroll sideways), and the notice sentence takes one line from 600 px up, two below, and three
+# in German under 24rem. Four values, one per width; checked in a browser at fourteen widths in the
+# five languages (see METODO.md).
 BAR_HEIGHT = (
-    "html { --barra: 5.2rem; }\n"
-    'html[lang="es"], html[lang="fr"], html[lang="de"] { --barra: 6.2rem; }\n'
-    "@media (max-width: 46rem) {\n"
-    "  html { --barra: 9rem; }\n"
-    '  html[lang="es"], html[lang="fr"] { --barra: 11rem; }\n'
-    '  html[lang="de"] { --barra: 12.2rem; }\n'
-    "}\n"
+    "html { --barra: 4.8rem; }\n"
+    "@media (max-width: 62rem) { html { --barra: 7rem; } }\n"
+    "@media (max-width: 46rem) { html { --barra: 8.6rem; } }\n"
+    "@media (max-width: 24rem) { html { --barra: 9.4rem; } }\n"
 )
 CURRENT_PAGE = "".join(
     f'body:has(main #{ident}:target) nav.indice a[href="#{ident}"], '
@@ -75,7 +74,8 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 section { margin-top: 2.5rem; }
 /* The fixed bar: brand and controls, the pages, and the notice every page carries. Its height
    is --barra, which the scroll padding uses so a page opens just below it. */
-.topo { position: sticky; top: 0; z-index: 5; background: var(--page); border-bottom: 1px solid var(--grid); padding-top: 0.4rem; }
+.topo { position: sticky; top: 0; z-index: 5; box-sizing: border-box; height: var(--barra); background: var(--page);
+  border-bottom: 1px solid var(--grid); padding-top: 0.4rem; }
 .topo-linha { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem 1rem; }
 .controlos { display: flex; gap: 0.5rem; align-items: flex-start; }
 .linguas { position: relative; }
@@ -112,9 +112,19 @@ section { margin-top: 2.5rem; }
 .titulo-inicio h1 { font-size: 2rem; margin: 0 0 0.4rem; }
 .subtitulo { color: var(--ink-2); margin: 0; }
 .data { color: var(--muted); font-size: 0.9rem; margin: 0.35rem 0 0; }
-nav.indice { min-width: 0; }
-nav.indice ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.1rem; }
-nav.indice a { display: inline-block; padding: 0.15rem 0; color: var(--ink-2); text-decoration: none; font-size: 0.95rem;
+nav.indice { min-width: 0; flex: 1 1 auto; }
+/* The pages never wrap: they scroll sideways where they do not fit, with a shadow at the edge that
+   still has more, so the bar keeps its declared height. Four backgrounds: two cover the edge when
+   there is nothing more that way, two draw the shadow. */
+nav.indice ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: nowrap; gap: 0.25rem 1.1rem;
+  overflow-x: auto; scrollbar-width: none;
+  background:
+    linear-gradient(to right, var(--page) 35%, transparent) left center / 1.6rem 100% no-repeat local,
+    linear-gradient(to left, var(--page) 35%, transparent) right center / 1.6rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--scroll-shadow), transparent) left center / 0.7rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--scroll-shadow), transparent) right center / 0.7rem 100% no-repeat scroll; }
+nav.indice ul::-webkit-scrollbar { display: none; }
+nav.indice a { display: inline-block; white-space: nowrap; padding: 0.15rem 0; color: var(--ink-2); text-decoration: none; font-size: 0.95rem;
   border-bottom: 2px solid transparent; }
 nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); }
 .faixa { margin: 0; padding: 0.25rem 0 0.4rem; font-size: 0.8rem; line-height: 1.35; color: var(--ink-2); }
@@ -122,13 +132,15 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); }
 @supports selector(:has(*)) {
   """ + CURRENT_PAGE + """ { color: var(--ink); font-weight: 650; border-bottom-color: var(--accent); }
 }
-.faixa .traducao { display: block; }
 /* One page at a time, by CSS alone: the page named in the address, or the first one when the
    address names none. Where :has() is not understood every page stays visible, in order. */
 @supports selector(:has(*)) {
   main > .painel { display: none; }
   main:not(:has(:target)) > #inicio, main > .painel:target, main > .painel:has(:target) { display: block; }
 }
+.traducao { margin: 0 0 0.9rem; padding: 0.4rem 0.7rem; font-size: 0.82rem; color: var(--ink-2); background: var(--warning-bg);
+  border-left: 3px solid var(--warning); border-radius: 6px; }
+footer.rodape .traducao { margin-top: 0.9rem; }
 .painel { margin-top: 0; padding-top: 1rem; }
 .painel > h2 { font-size: 1.6rem; margin: 0 0 1rem; }
 .painel > section:first-of-type, .painel > .cartoes:first-child { margin-top: 0; }
@@ -313,12 +325,13 @@ details.recolhe h3 { margin-top: 1.25rem; }
 .glossario dd { margin: 0 0 0.5rem; color: var(--ink-2); font-size: 0.86rem; }
 footer.rodape { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--grid); color: var(--ink-2); font-size: 0.88rem; }
 footer.rodape h2 { font-size: 1rem; color: var(--ink); }
-@media (max-width: 46rem) {
+@media (max-width: 62rem) {
   .topo-linha { flex-wrap: wrap; justify-content: flex-start; }
   .controlos { order: -1; }
   nav.indice { flex: 1 1 100%; }
-  nav.indice ul { flex-wrap: nowrap; overflow-x: auto; gap: 0.25rem 0.9rem; padding-bottom: 0.2rem; }
-  nav.indice a { white-space: nowrap; }
+}
+@media (max-width: 46rem) {
+  nav.indice ul { gap: 0.25rem 0.9rem; }
   .detalhe summary { grid-template-columns: 1fr auto; }
   .resumo-pergunta { display: none; }
   .barras-falhas li { grid-template-columns: 8.5rem 1fr 2rem; }

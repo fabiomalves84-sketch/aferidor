@@ -104,7 +104,9 @@ class TestMachineTranslation(unittest.TestCase):
     def test_only_languages_the_report_has_can_be_unreviewed_and_portuguese_never_is(self):
         self.assertTrue(set(traducao.UNREVIEWED) <= set(LANGS))
         self.assertNotIn("pt", traducao.UNREVIEWED)
-        self.assertNotIn("en", traducao.UNREVIEWED)
+
+    def test_every_language_but_portuguese_is_unreviewed_until_a_native_speaker_has_read_it(self):
+        self.assertEqual(set(traducao.UNREVIEWED), set(LANGS) - {"pt"})
 
 
 class TestGrammaticalForms(unittest.TestCase):

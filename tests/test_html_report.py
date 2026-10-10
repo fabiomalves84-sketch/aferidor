@@ -580,13 +580,29 @@ class TestSevenPages(unittest.TestCase):
         self.assertIn("scroll-padding-top: var(--barra)", css)
         self.assertIn("--barra:", css)
 
-    def test_every_language_whose_bar_is_taller_has_its_own_height(self):
-        """The notice about a machine translation adds a line to the bar of those languages."""
-        from aferidor.traducao import UNREVIEWED
+    def test_the_bar_has_the_height_it_declares_and_no_language_has_its_own(self):
+        """The bar is exactly `--barra` high and the page's scroll padding leaves exactly that
+        free, so the height is declared once, per width, and not measured per language."""
+        css = html_estilo.STYLE
+        self.assertRegex(css, r"\.topo \{[^}]*box-sizing: border-box; height: var\(--barra\);")
+        self.assertEqual(re.findall(r"--barra: ([\d.]+)rem", html_estilo.BAR_HEIGHT), ["4.8", "7", "8.6", "9.4"])
+        self.assertNotIn("[lang", html_estilo.BAR_HEIGHT)
 
-        for lang in UNREVIEWED:
-            with self.subTest(lingua=lang):
-                self.assertIn(f'html[lang="{lang}"]', html_estilo.STYLE)
+    def test_the_pages_never_wrap_so_the_bar_keeps_its_height(self):
+        css = html_estilo.STYLE
+        rule = css[css.index("nav.indice ul {"):css.index("nav.indice ul::-webkit-scrollbar")]
+        self.assertIn("flex-wrap: nowrap", rule)
+        self.assertIn("overflow-x: auto", rule)
+
+    def test_the_pages_that_scroll_sideways_show_a_shadow_where_there_is_more(self):
+        """Four backgrounds, no script: two that cover the edge when there is nothing more that
+        way, two that draw the shadow. The scroll bar is hidden, so the shadow is the sign."""
+        css = html_estilo.STYLE
+        rule = css[css.index("nav.indice ul {"):css.index("nav.indice ul::-webkit-scrollbar")]
+        self.assertEqual(rule.count("no-repeat local"), 2)
+        self.assertEqual(rule.count("no-repeat scroll"), 2)
+        self.assertIn("scrollbar-width: none", rule)
+        self.assertNotIn("url(", css)
 
 
 class TestTheNoticeEveryPageCarries(unittest.TestCase):
@@ -615,15 +631,49 @@ class TestTheNoticeEveryPageCarries(unittest.TestCase):
                 self.assertIn(t("Veredictos: triagem automática do corretor, sem validação clínica.", lang), bar)
                 self.assertIn(t("Fontes por confirmar.", lang), bar)
 
-    def test_a_machine_translated_language_says_so_on_the_bar_and_the_others_do_not(self):
+    def test_the_bar_never_carries_the_translation_notice_in_any_language(self):
+        from aferidor.traducao import LANGS
+
+        for lang in LANGS:
+            with self.subTest(lingua=lang):
+                self.assertNotIn('class="traducao"', self.bar(lang))
+
+
+class TestTheTranslationNotice(unittest.TestCase):
+    """Only Portuguese is the reference: every other language says, at the top of each page and in
+    the footer, that it is a machine translation no native speaker has read."""
+
+    def page(self, lang: str) -> str:
+        return build([a_case()], [an_answer("500 mg")], lingua=lang)
+
+    def test_every_other_language_says_so_at_the_top_of_every_page_and_in_the_footer(self):
         from aferidor.traducao import LANGS, UNREVIEWED, UNREVIEWED_NOTICE, t
 
         for lang in LANGS:
             with self.subTest(lingua=lang):
-                said = 'class="traducao"' in self.bar(lang)
-                self.assertEqual(said, lang in UNREVIEWED)
+                text = self.page(lang)
+                said = t(UNREVIEWED_NOTICE, lang)
                 if lang in UNREVIEWED:
-                    self.assertIn(t(UNREVIEWED_NOTICE, lang), self.bar(lang))
+                    notice = f'<p class="traducao" role="note">{said}</p>'
+                    self.assertEqual(text.count(notice), len(PAGES) + 1)  # seven pages and the footer
+                    for ident in PAGES:
+                        at = text.index(f'<section class="painel" id="{ident}"')
+                        self.assertIn(notice, text[at:text.index("</h2>", at)])
+                    self.assertIn(notice, text[text.index('<footer class="rodape">'):])
+                else:
+                    self.assertNotIn('class="traducao"', text)
+
+    def test_the_notice_comes_before_the_title_of_each_page(self):
+        text = self.page("de")
+        for ident in PAGES[1:]:
+            at = text.index(f'<section class="painel" id="{ident}"')
+            self.assertLess(text.index('class="traducao"', at), text.index(f'<h2 id="t-{ident}">', at))
+
+    def test_portuguese_is_the_only_reference(self):
+        from aferidor.traducao import UNREVIEWED
+
+        self.assertEqual(sorted(UNREVIEWED), ["de", "en", "es", "fr"])
+
 
     def test_the_bar_sits_outside_main_so_it_is_on_every_page(self):
         text = build([a_case()], [an_answer("500 mg")])

@@ -1222,6 +1222,15 @@ PANELS = (
 )
 
 
+def _translation_notice() -> str:
+    """Said where a page opens and again in the footer, never in the fixed bar: it is about the
+    language of the page, not about the verdicts, and the bar stays the same height in every language.
+    Empty for the one language that is the reference."""
+    if _LANG.get() not in UNREVIEWED:
+        return ""
+    return f'<p class="traducao" role="note">{_esc(_t(UNREVIEWED_NOTICE))}</p>'
+
+
 def _panel(ident: str, heading: str, *content: str) -> str:
     """One page of the report: a section with its own `<h2>`, shown alone by the CSS.
 
@@ -1229,22 +1238,19 @@ def _panel(ident: str, heading: str, *content: str) -> str:
     """
     return (
         f'<section class="painel" id="{ident}" aria-labelledby="t-{ident}">'
-        f'<h2 id="t-{ident}">{_esc(heading)}</h2>{"".join(content)}</section>'
+        f'{_translation_notice()}<h2 id="t-{ident}">{_esc(heading)}</h2>{"".join(content)}</section>'
     )
 
 
 def _strip(sources_pending: bool) -> str:
     """The notice every page carries, in the fixed bar, so no page is read without it.
 
-    Short on purpose: it says what the verdicts are and, while sources are unconfirmed, links to
-    the page that explains it. A language whose interface was machine translated and not yet
-    read by a native speaker says so here too.
+    The same in every language: what the verdicts are and, while sources are unconfirmed, a link to
+    the page that explains it. Nothing about the language of the page goes here.
     """
     parts = [_esc(_t("Veredictos: triagem automática do corretor, sem validação clínica."))]
     if sources_pending:
         parts.append(f'<a href="#fontes">{_esc(_t("Fontes por confirmar."))}</a>')
-    if _LANG.get() in UNREVIEWED:
-        parts.append(f'<span class="traducao">{_esc(_t(UNREVIEWED_NOTICE))}</span>')
     return f'<p class="faixa" role="note">{" ".join(parts)}</p>'
 
 
@@ -1296,7 +1302,7 @@ def _build(
     # Início: what the report is, and how to read it.
     out.append(
         '<section class="painel" id="inicio" aria-labelledby="titulo-relatorio">'
-        f'<div class="titulo-inicio"><div class="marca">{_t("Aferidor · banco de ensaio clínico")}</div>'
+        f'{_translation_notice()}<div class="titulo-inicio"><div class="marca">{_t("Aferidor · banco de ensaio clínico")}</div>'
         f'<h1 id="titulo-relatorio">{title}</h1>'
         f'<p class="subtitulo">{_t("Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública.")}</p>'
         f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(written))}</p></div>'
@@ -1443,7 +1449,7 @@ def _build(
     out.append(_panel("metodo", _t("Método e detalhes técnicos"), *method, *technical))
     out.append("</main>")
     out.append(
-        f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p><p class="repo">{_repo_link()}</p></footer>'
+        f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p>{_translation_notice()}<p class="repo">{_repo_link()}</p></footer>'
     )
     out.append("</body></html>")
     return "".join(out)
