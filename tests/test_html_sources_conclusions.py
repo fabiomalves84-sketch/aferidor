@@ -111,7 +111,7 @@ class TestConclusionsPage(unittest.TestCase):
         for sentence in (
             "Pode concluir-se",
             "Nenhum dos 4 modelos cumpre o limiar de referência (que não é um protocolo prévio). O melhor tem 8 de 27 casos com falha crítica.",
-            "Entre os dois melhores, a diferença pode ser acaso (McNemar exato, p = 0,375).",
+            "Entre os dois melhores, a diferença pode ser acaso (teste de McNemar exato, p = 0,375).",
             "Não se pode concluir",
             "Que os modelos locais representem os comerciais.",
             "Que um veredicto seja validação clínica: é triagem, sem revisão por especialista.",
@@ -177,7 +177,7 @@ class TestConclusionsPage(unittest.TestCase):
 
     def test_a_significant_difference_says_so_and_a_single_model_has_no_comparison(self):
         text = conclusions_text(example_page_of((GEMMA, PHI)))
-        self.assertIn("Entre os dois melhores, a diferença é estatisticamente significativa (McNemar exato, p < 0,001).", text)
+        self.assertIn("Entre os dois melhores, a diferença é estatisticamente significativa (teste de McNemar exato, p < 0,001).", text)
         single = conclusions_text(example_page_of((GEMINI,)))
         self.assertNotIn("McNemar", single)
         self.assertIn("O modelo não cumpre o limiar de referência (que não é um protocolo prévio). Tem 11 de 27 casos com falha crítica.", single)

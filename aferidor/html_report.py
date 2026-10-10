@@ -1024,9 +1024,9 @@ def _mcnemar_line(standing: _Standing) -> list[tuple[str, str]]:
     if standing.n < 2 or standing.tie or p_value is None:
         return []
     return [("comparacao", "<li>" + _t(
-        "Entre os dois melhores, a diferença é estatisticamente significativa (McNemar exato, {p})."
+        "Entre os dois melhores, a diferença é estatisticamente significativa (teste de McNemar exato, {p})."
         if is_significant(p_value) else
-        "Entre os dois melhores, a diferença pode ser acaso (McNemar exato, {p}).",
+        "Entre os dois melhores, a diferença pode ser acaso (teste de McNemar exato, {p}).",
         p=_p_value(p_value),
     ) + "</li>")]
 
@@ -1152,23 +1152,23 @@ def _comparison(summaries: dict[str, ConsistencySummary], consistency: dict[tupl
         )
         if result.p_value is not None:
             sentence = _t(
-                "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
-                "{outro}). Nos casos em que só um dos dois teve falha crítica ({x} contra {y}), a "
+                "{melhor} teve menos casos com falha crítica ({a} de {n}) do que "
+                "{outro} ({b} de {m}). Nos casos em que só um dos dois teve falha crítica ({x} contra {y}), a "
                 "diferença é estatisticamente significativa (teste de McNemar exato, {p})."
                 if is_significant(result.p_value) else
-                "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
-                "{outro}). Nos casos em que só um dos dois teve falha crítica ({x} contra {y}), a "
+                "{melhor} teve menos casos com falha crítica ({a} de {n}) do que "
+                "{outro} ({b} de {m}). Nos casos em que só um dos dois teve falha crítica ({x} contra {y}), a "
                 "diferença pode dever-se ao acaso (teste de McNemar exato, {p}).",
                 x=result.only_first, y=result.only_second, p=_p_value(result.p_value), **values,
             )
         else:
             sentence = _t(
-                "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
-                "{outro}), mas os intervalos de confiança sobrepõem-se: com {n} casos, a diferença "
+                "{melhor} teve menos casos com falha crítica ({a} de {n}) do que "
+                "{outro} ({b} de {m}), mas os intervalos de confiança sobrepõem-se: com {n} casos, a diferença "
                 "pode dever-se ao acaso."
                 if result.overlap else
-                "{melhor} teve menos casos com falha crítica ({a} de {n}, contra {b} de {m} de "
-                "{outro}), e os intervalos de confiança não se sobrepõem.",
+                "{melhor} teve menos casos com falha crítica ({a} de {n}) do que "
+                "{outro} ({b} de {m}), e os intervalos de confiança não se sobrepõem.",
                 **values,
             )
     rows = []
@@ -1252,8 +1252,8 @@ def _worst(cases: list[Case], consistency: dict[tuple[str, str], Consistency], p
     out = [
         f'<section id="erros"><h3>{_t("Erros mais graves")}</h3>',
         '<p class="seccao-intro">'
-        + _t("Casos em que todas as amostras falharam, com pelo menos uma falha de risco "
-             "crítico. Selecionados por regra fixa: os primeiros casos que a cumprem, "
+        + _t("Casos em que todas as amostras falharam, com pelo menos uma falha "
+             "crítica. Selecionados por regra fixa: os primeiros casos que a cumprem, "
              "alternando entre modelos.")
         + '</p><div class="erros">',
     ]

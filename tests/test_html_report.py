@@ -550,7 +550,7 @@ class TestWhatJumpsOut(unittest.TestCase):
 
     def test_the_comparison_names_the_better_model_and_says_when_it_can_be_chance(self):
         text = self.two_models()
-        self.assertIn("<strong>Qwen 3</strong> teve menos casos com falha crítica (1 de 2, contra 2 de 2", text)
+        self.assertIn("<strong>Qwen 3</strong> teve menos casos com falha crítica (1 de 2) do que Llama 3.1 (2 de 2)", text)
         self.assertIn("a diferença pode dever-se ao acaso", text)
 
     def test_the_gravest_mistakes_are_highlighted_with_what_should_have_been_said(self):

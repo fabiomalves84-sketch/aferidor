@@ -96,7 +96,7 @@ class TestAlternativeShown(unittest.TestCase):
 class TestIntervals(unittest.TestCase):
     def test_the_headline_carries_its_interval(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
-        self.assertIn("1 de 1 casos com falha de risco crítico", text)
+        self.assertIn("1 de 1 casos com falha crítica", text)
         self.assertIn("IC 95%", text)
 
     def test_zero_critical_cases_says_how_high_the_true_rate_could_be(self):
@@ -133,11 +133,11 @@ class TestHeader(unittest.TestCase):
 class TestCounts(unittest.TestCase):
     def test_critical_failures_are_stated_before_the_percentage(self):
         text = build([a_case()], [an_answer("500 mg")])
-        self.assertLess(text.index("risco crítico"), text.index("cumprem todos os critérios"))
+        self.assertLess(text.index("casos com falha crítica em pelo menos uma amostra"), text.index("cumprem todos os critérios"))
 
     def test_a_clean_run_says_so_plainly(self):
         text = build([a_case()], [an_answer("1 g")])
-        self.assertIn("Nenhum caso com falha de risco crítico", text)
+        self.assertIn("Nenhum caso com falha crítica", text)
         self.assertIn("1 de 1", text)
 
     def test_the_failure_table_names_the_type_and_its_risk(self):

@@ -318,7 +318,7 @@ def _classificar(casos: Path, respostas: Path, saida: Path, limite: int) -> int:
         print(f"\n{model}")
         print(f"  {counts.passed}/{counts.total} corretas ({counts.accuracy:.0%})")
         if counts.critical:
-            print(f"  {counts.critical} respostas com falha de risco crítico")
+            print(f"  {counts.critical} respostas com falha crítica")
         for failure, number in counts.worst_first():
             print(f"    {failure.value:<26} {number:>3}  risco {failure.risk}")
         for case_id, failures in sorted(counts.failed_cases.items()):

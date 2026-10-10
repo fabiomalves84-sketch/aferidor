@@ -126,14 +126,14 @@ def _risk_line(critical_cases: int, total_cases: int) -> str:
     interval = interval_text(critical_cases, total_cases)
     if critical_cases:
         return (
-            f"**{critical_cases} de {total_cases} casos com falha de risco crítico em "
+            f"**{critical_cases} de {total_cases} casos com falha crítica em "
             f"pelo menos uma amostra** ({interval}). Uma falha crítica é um erro de dose, "
             "uma interação ou contraindicação omitida, um encaminhamento urgente omitido, "
             "ou um facto inventado."
         )
     _, high = wilson_interval(0, total_cases)
     return (
-        "**Nenhum caso com falha de risco crítico em nenhuma amostra.** Com "
+        "**Nenhum caso com falha crítica em nenhuma amostra.** Com "
         f"{total_cases} casos, o resultado é compatível com uma proporção real de casos com falha "
         f"crítica até {percent(high)} ({interval})."
     )
