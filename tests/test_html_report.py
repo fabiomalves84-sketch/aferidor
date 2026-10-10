@@ -534,6 +534,25 @@ class TestEightPages(unittest.TestCase):
                 self.assertEqual(text.count(f'<h2 id="t-{ident}">'), 1)
                 self.assertIn(f'aria-labelledby="t-{ident}"', text)
 
+    def test_every_page_has_its_own_content_in_every_language(self):
+        """The same pages in the five languages: each one carries what makes it that page."""
+        from aferidor.traducao import LANGS
+
+        markers = {
+            "inicio": ('class="resultado"', 'class="saber-mais"'),
+            "sobre": ('class="sobre"', "<pre><code>git clone"),
+            "fontes": ('class="estado-contagens"', ">DGS</abbr> 16"),
+            "conclusoes": ('class="conclusoes"', 'class="fecho"'),
+        }
+        for lang in LANGS:
+            page = _Example.page(lingua=lang)
+            for ident, wanted in markers.items():
+                section = page[page.index(f'<section class="painel" id="{ident}"'):]
+                section = section[:section.index("</section>")] if ident != "sobre" else section[:section.index('<section class="painel" id="fontes"')]
+                for marker in wanted:
+                    with self.subTest(lingua=lang, pagina=ident, marca=marker):
+                        self.assertIn(marker, section)
+
     def test_every_link_in_the_navigation_is_a_page_and_every_page_is_linked(self):
         self.assertEqual(navigation(self.page()), list(PAGES))
 
@@ -1511,17 +1530,6 @@ class TestSourcesPage(unittest.TestCase):
         sources = page[page.index('<section class="painel" id="fontes"'):page.index('<section class="painel" id="resultados"')]
         self.assertIn("em 2026-10-10:", visible(sources))
 
-    def test_the_page_is_there_in_every_language_with_its_counts(self):
-        from aferidor.traducao import LANGS
-
-        for lang in LANGS:
-            with self.subTest(lingua=lang):
-                page = _Example.page(lingua=lang)
-                sources = page[page.index('<section class="painel" id="fontes"'):page.index('<section class="painel" id="resultados"')]
-                self.assertIn('class="estado-contagens"', sources)
-                self.assertIn(">DGS</abbr> 16", sources)
-
-
 CONCLUSIONS_WORDS = 140
 GEMMA, PHI, GEMINI = "gemini:gemma-4-31b-it", "local:phi4:14b", "gemini:gemini-3.5-flash-lite"
 
@@ -1638,15 +1646,6 @@ class TestConclusionsPage(unittest.TestCase):
             self.assertIn("não recomenda nenhum modelo", text)
             self.assertNotIn("\u2014", text)
             self.assertNotIn("\u2013", text)
-
-    def test_the_page_is_there_in_every_language(self):
-        from aferidor.traducao import LANGS
-
-        for lang in LANGS:
-            with self.subTest(lingua=lang):
-                page = _Example.page(lingua=lang)
-                self.assertIn('class="conclusoes"', page)
-                self.assertIn('class="fecho"', page)
 
     def test_the_old_note_and_triage_paragraph_are_gone_from_the_page(self):
         page = _Example.page()
@@ -1868,12 +1867,7 @@ class TestAboutPage(unittest.TestCase):
             with self.subTest(variante=label):
                 self.assertLessEqual(words(panel_text(page, "sobre")), ABOUT_PAGE_WORDS)
 
-    def test_the_page_is_in_every_language_and_the_numbers_beside_the_text_start_at_80rem(self):
-        from aferidor.traducao import LANGS
-
-        for lang in LANGS:
-            with self.subTest(lingua=lang):
-                self.assertIn('class="sobre"', _Example.page(lingua=lang))
+    def test_the_numbers_beside_the_text_start_at_80rem(self):
         css = html_estilo.STYLE
         self.assertIn("@media (min-width: 80rem)", css)
         self.assertIn("grid-template-columns: 38rem 18rem", css)

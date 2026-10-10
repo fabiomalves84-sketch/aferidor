@@ -68,7 +68,7 @@ julgamento clínico.
   português europeu independente das falhas clínicas.
 - Adaptadores para OpenAI, Anthropic, Google Gemini e modelos locais através
   do Ollama.
-- 655 testes automáticos, sem dependências externas.
+- 654 testes automáticos, sem dependências externas.
 
 Limitações conhecidas:
 
@@ -122,7 +122,7 @@ não nos casos.
 ## Demonstração
 
 ```
-python3 -m unittest discover -s tests   # 655 testes
+python3 -m unittest discover -s tests   # 654 testes
 python3 -m aferidor verificar           # 27/27 casos, 319/319 controlos negativos
 python3 -m aferidor verificar --casos casos/consulta.json   # 31/31, 140/140
 python3 -m aferidor executar --fornecedor falso
