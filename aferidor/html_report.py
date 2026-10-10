@@ -1869,6 +1869,57 @@ def _results_panel(data: _ReportData) -> str:
     )
 
 
+def _areas_panel(data: _ReportData) -> str:
+    """Por área clínica: the heat map, and the failures by type, collapsed."""
+    top = max((n for tally in data.per_model.values() for _, n in tally.worst_first()), default=1)
+    by_type = [
+        f'<details class="recolhe mais" id="falhas"><summary>{_t("Falhas por tipo")}</summary>',
+        '<p class="seccao-intro">'
+        + _t("Quantas respostas tiveram cada tipo de falha, do risco mais alto para o mais "
+             "baixo. Uma resposta pode ter mais do que um tipo.")
+        + "</p>",
+        _risk_legend(),
+        '<div class="falhas-grelha">',
+    ]
+    for model in data.models:
+        by_type.append(_failure_chart(model, data.per_model[model], top))
+    by_type.append("</div></details>")
+    return _panel(
+        "areas", _t("Por área clínica"), _areas(data.cases, data.models, data.consistency), *by_type,
+    )
+
+
+def _cases_panel(data: _ReportData) -> str:
+    """Casos: the gravest mistakes, the grid, and every failing case, collapsed."""
+    grid = [f'<section id="grelha"><h3>{_t("Resultados por caso")}</h3>']
+    grid.append(
+        '<p class="seccao-intro">'
+        + _t("Casos com falha em pelo menos um modelo. Cada ponto é uma amostra (● correta, "
+             "✕ incorreta, ○ sem resposta); por baixo, o tipo de falha mais grave.")
+        + "</p>"
+    )
+    grid.append(_grid_legend())
+    grid.append(_grid(
+        data.cases, data.models, data.consistency, data.pairs, expected_samples(data.answers),
+    ))
+    grid.append("</section>")
+    return _panel(
+        "casos", _t("Casos"), _worst(data.cases, data.consistency, data.pairs), *grid,
+        _detail(data.cases, data.models, data.consistency, data.pairs),
+    )
+
+
+def _conclusions_panel(data: _ReportData) -> str:
+    """Conclusões: what the numbers allow saying."""
+    return _panel(
+        "conclusoes", _t("Conclusões"),
+        _conclusions_html(_conclusions_page(
+            data.models, data.summaries, data.consistency, data.confirmation, data.sources_verified,
+            data.protocol, data.protocol_outcomes, data.protocol_warnings,
+        )),
+    )
+
+
 def _build(
     cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
     protocol, alternates, confirmation=None,
@@ -1886,50 +1937,7 @@ def _build(
 
     out.append(_results_panel(data))
     if data.models:
-        models, cases, per_model = data.models, data.cases, data.per_model
-        summaries, consistency, pairs = data.summaries, data.consistency, data.pairs
-        expected = expected_samples(data.answers)
-
-        # Por área clínica: the heat map, and the failures by type, collapsed.
-        top = max((n for tally in per_model.values() for _, n in tally.worst_first()), default=1)
-        by_type = [
-            f'<details class="recolhe mais" id="falhas"><summary>{_t("Falhas por tipo")}</summary>',
-            '<p class="seccao-intro">'
-            + _t("Quantas respostas tiveram cada tipo de falha, do risco mais alto para o mais "
-                 "baixo. Uma resposta pode ter mais do que um tipo.")
-            + "</p>",
-            _risk_legend(),
-            '<div class="falhas-grelha">',
-        ]
-        for model in models:
-            by_type.append(_failure_chart(model, per_model[model], top))
-        by_type.append("</div></details>")
-        out.append(_panel("areas", _t("Por área clínica"), _areas(cases, models, consistency), *by_type))
-
-        # Casos: the gravest mistakes, the grid, and every failing case, collapsed.
-        grid = [f'<section id="grelha"><h3>{_t("Resultados por caso")}</h3>']
-        grid.append(
-            '<p class="seccao-intro">'
-            + _t("Casos com falha em pelo menos um modelo. Cada ponto é uma amostra (● correta, "
-                 "✕ incorreta, ○ sem resposta); por baixo, o tipo de falha mais grave.")
-            + "</p>"
-        )
-        grid.append(_grid_legend())
-        grid.append(_grid(cases, models, consistency, pairs, expected))
-        grid.append("</section>")
-        out.append(_panel(
-            "casos", _t("Casos"), _worst(cases, consistency, pairs), *grid,
-            _detail(cases, models, consistency, pairs),
-        ))
-
-        # Conclusões: what the numbers allow saying.
-        out.append(_panel(
-            "conclusoes", _t("Conclusões"),
-            _conclusions_html(_conclusions_page(
-                models, summaries, consistency, data.confirmation, data.sources_verified,
-                data.protocol, data.protocol_outcomes, data.protocol_warnings,
-            )),
-        ))
+        out += [_areas_panel(data), _cases_panel(data), _conclusions_panel(data)]
 
     # Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
     method: list[str] = [
