@@ -18,7 +18,8 @@ from aferidor.grading import CASE_RULES, ConsistencyState, grade_all
 from aferidor.protocolo import read_protocol, template
 from aferidor.storage import read_answers, read_cases
 from aferidor.traducao import CATALOG, LANGS, t
-from tests.test_html_report import a_case, an_answer, build as page_of
+from tests.helpers import an_answer
+from tests.html_support import a_case, build as page_of
 
 ROOT = Path(__file__).resolve().parent.parent
 TRIAL = ROOT / "ensaios" / "2026-09-16-comparacao-local"
