@@ -211,31 +211,37 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def comando_executar(
-    args: argparse.Namespace, errors_out: dict[str, str] | None = None
+def comando_executar(args: argparse.Namespace) -> int:
+    return _executar(
+        args.casos, args.fornecedor, args.modelo, args.saida, args.limite, args.tentativas,
+        args.repeticoes, args.temperatura, args.tokens_max, args.recomecar,
+    )
+
+
+def _executar(
+    casos: Path, fornecedor: str, modelo: str | None, saida: Path, limite: int, tentativas: int,
+    repeticoes: int, temperatura: float, tokens_max: int, recomecar: bool,
+    errors_out: dict[str, str] | None = None,
 ) -> int:
-    cases = read_cases(args.casos)
-    if args.limite > 0:
-        cases = cases[: args.limite]
+    cases = read_cases(casos)
+    if limite > 0:
+        cases = cases[:limite]
 
     try:
-        provider = build_provider(
-            args.fornecedor, args.modelo, temperature=args.temperatura,
-            max_tokens=getattr(args, "tokens_max", DEFAULT_TOKENS_MAX),
-        )
+        provider = build_provider(fornecedor, modelo, temperature=temperatura, max_tokens=tokens_max)
     except ProviderError as error:
         print(f"erro: {error}", file=sys.stderr)
         return 2
 
-    if args.recomecar and args.saida.exists():
-        existing = read_answers(args.saida)
+    if recomecar and saida.exists():
+        existing = read_answers(saida)
         kept = [a for a in existing if a.model != provider.name]
         discarded = len(existing) - len(kept)
-        write_answers(kept, args.saida)
+        write_answers(kept, saida)
         if discarded:
             print(f"--recomecar: descartadas {discarded} respostas anteriores de {provider.name}")
 
-    print(f"{len(cases)} casos x {args.repeticoes} amostra(s), modelo {provider.name}")
+    print(f"{len(cases)} casos x {repeticoes} amostra(s), modelo {provider.name}")
 
     def progress(case, answer, status) -> None:
         mark = "." if status == "ok" else ("-" if status == "já respondido" else "!")
@@ -246,9 +252,9 @@ def comando_executar(
         result = run(
             cases,
             provider,
-            path=args.saida,
-            config=RunConfig(attempts=args.tentativas),
-            repetitions=args.repeticoes,
+            path=saida,
+            config=RunConfig(attempts=tentativas),
+            repetitions=repeticoes,
             progress=progress,
         )
     except ConditionsMismatch as error:
@@ -263,7 +269,7 @@ def comando_executar(
     for note in result.notes:
         print(f"aviso: {note}", file=sys.stderr)
     print(result.summary())
-    print(f"respostas em {args.saida}")
+    print(f"respostas em {saida}")
     for case_id, message in result.errors.items():
         print(f"  por responder {case_id}: {message}", file=sys.stderr)
     if errors_out is not None:
@@ -272,22 +278,26 @@ def comando_executar(
 
 
 def comando_classificar(args: argparse.Namespace) -> int:
-    cases = read_cases(args.casos)
-    if getattr(args, "limite", 0) > 0:
-        cases = cases[: args.limite]
-    if not args.respostas.exists():
-        print(f"erro: não há respostas em {args.respostas}", file=sys.stderr)
+    return _classificar(args.casos, args.respostas, args.saida, args.limite)
+
+
+def _classificar(casos: Path, respostas: Path, saida: Path, limite: int) -> int:
+    cases = read_cases(casos)
+    if limite > 0:
+        cases = cases[:limite]
+    if not respostas.exists():
+        print(f"erro: não há respostas em {respostas}", file=sys.stderr)
         return 2
 
-    answers = read_answers(args.respostas)
+    answers = read_answers(respostas)
     try:
         verdicts, missing = grade_all(cases, answers)
     except ValueError as error:
         print(f"erro: {error}", file=sys.stderr)
         return 2
 
-    args.saida.parent.mkdir(parents=True, exist_ok=True)
-    write_verdicts(verdicts, args.saida)
+    saida.parent.mkdir(parents=True, exist_ok=True)
+    write_verdicts(verdicts, saida)
 
     for model, counts in tally_by_model(verdicts).items():
         print(f"\n{model}")
@@ -301,7 +311,7 @@ def comando_classificar(args: argparse.Namespace) -> int:
 
     if missing:
         print(f"\ncasos sem resposta válida: {', '.join(sorted(set(missing)))}", file=sys.stderr)
-    print(f"\nveredictos em {args.saida}")
+    print(f"\nveredictos em {saida}")
     return 0
 
 
@@ -388,7 +398,7 @@ def comando_manifesto(args: argparse.Namespace) -> int:
     return 0 if result.intact else 1
 
 
-def _protocol_problem(args: argparse.Namespace) -> str | None:
+def _protocol_problem(path: Path, limite: int) -> str | None:
     """Why this protocol cannot judge this run, printed; None when it can.
 
     A protocol judges the whole bank. With --limite only part of it is asked,
@@ -396,33 +406,33 @@ def _protocol_problem(args: argparse.Namespace) -> str | None:
     """
     problem = None
     try:
-        protocolo.read_protocol(args.protocolo)
+        protocolo.read_protocol(path)
     except (OSError, ValueError) as error:
         problem = str(error)
-    if problem is None and getattr(args, "limite", 0) > 0:
+    if problem is None and limite > 0:
         problem = "um protocolo avalia o banco inteiro; não é compatível com --limite"
     if problem is not None:
         print(f"erro: {problem}", file=sys.stderr)
     return problem
 
 
-def _protocol_mismatches(args: argparse.Namespace) -> list[str]:
+def _protocol_mismatches(path: Path, repeticoes: int, temperatura: float, casos: Path) -> list[str]:
     """Where this run would not be the one the protocol was written for.
 
     The report flags every one of these afterwards, but by then the run is
     paid for. A protocol that froze the grader also refuses any other build.
     """
-    protocol = protocolo.read_protocol(args.protocolo)
+    protocol = protocolo.read_protocol(path)
     found = []
-    if args.repeticoes != protocol.samples:
+    if repeticoes != protocol.samples:
         found.append(
-            f"--repeticoes {args.repeticoes}, mas o protocolo prevê {protocol.samples} amostras por caso"
+            f"--repeticoes {repeticoes}, mas o protocolo prevê {protocol.samples} amostras por caso"
         )
-    if args.temperatura != protocol.temperature:
+    if temperatura != protocol.temperature:
         found.append(
-            f"--temperatura {args.temperatura:g}, mas o protocolo prevê {protocol.temperature:g}"
+            f"--temperatura {temperatura:g}, mas o protocolo prevê {protocol.temperature:g}"
         )
-    if hashlib.sha256(Path(args.casos).read_bytes()).hexdigest() != protocol.cases_sha256:
+    if hashlib.sha256(Path(casos).read_bytes()).hexdigest() != protocol.cases_sha256:
         found.append("o banco de casos não é o banco para que o protocolo foi escrito (SHA-256 diferente)")
     if protocol.grader_build and protocol.grader_build != build_id():
         found.append(
@@ -432,34 +442,40 @@ def _protocol_mismatches(args: argparse.Namespace) -> list[str]:
     return found
 
 
-def comando_relatorio(
-    args: argparse.Namespace, reasons: dict[str, str] | None = None
+def comando_relatorio(args: argparse.Namespace) -> int:
+    return _relatorio(
+        args.casos, args.respostas, args.saida, args.formato, args.linguas, args.limite,
+        args.protocolo, args.fontes_confirmadas,
+    )
+
+
+def _relatorio(
+    casos: Path, respostas: Path, saida: Path | None, formato: str, linguas: str, limite: int,
+    protocolo_path: Path | None, fontes_confirmadas: bool, reasons: dict[str, str] | None = None,
 ) -> int:
-    cases = read_cases(args.casos)
-    if getattr(args, "limite", 0) > 0:
-        cases = cases[: args.limite]
-    if not args.respostas.exists():
-        print(f"erro: não há respostas em {args.respostas}", file=sys.stderr)
+    cases = read_cases(casos)
+    if limite > 0:
+        cases = cases[:limite]
+    if not respostas.exists():
+        print(f"erro: não há respostas em {respostas}", file=sys.stderr)
         return 2
 
-    answers = read_answers(args.respostas)
+    answers = read_answers(respostas)
     try:
         verdicts, missing = grade_all(cases, answers)
     except ValueError as error:
         print(f"erro: {error}", file=sys.stderr)
         return 2
-    formato = getattr(args, "formato", "md")
 
-    saida = args.saida
     if saida is None:
         saida = DEFAULT_REPORT_HTML if formato == "html" else DEFAULT_REPORT
 
     protocol = None
-    if getattr(args, "protocolo", None) is not None:
-        if _protocol_problem(args) is not None:
+    if protocolo_path is not None:
+        if _protocol_problem(protocolo_path, limite) is not None:
             return 2
-        protocol = protocolo.read_protocol(args.protocolo)
-    langs = [x.strip() for x in getattr(args, "linguas", "pt").split(",") if x.strip()]
+        protocol = protocolo.read_protocol(protocolo_path)
+    langs = [x.strip() for x in linguas.split(",") if x.strip()]
     unknown = [x for x in langs if x not in LANGS]
     if unknown or not langs:
         print(f"erro: língua desconhecida {', '.join(unknown)}; usar {', '.join(LANGS)}", file=sys.stderr)
@@ -468,8 +484,8 @@ def comando_relatorio(
         print("erro: --linguas só se aplica ao formato html", file=sys.stderr)
         return 2
     common = dict(
-        missing=missing, reasons=reasons, sources_verified=args.fontes_confirmadas,
-        cases_source=_cases_source(args.casos), protocol=protocol,
+        missing=missing, reasons=reasons, sources_verified=fontes_confirmadas,
+        cases_source=_cases_source(casos), protocol=protocol,
     )
     saida.parent.mkdir(parents=True, exist_ok=True)
     if formato != "html":
@@ -485,7 +501,7 @@ def comando_relatorio(
     for lang, path in paths.items():
         text = html_report.build(
             cases, answers, verdicts, lingua=lang, alternates=alternates,
-            confirmation=fontes.read_confirmation(args.casos, [c.case_id for c in cases]), **common
+            confirmation=fontes.read_confirmation(casos, [c.case_id for c in cases]), **common
         )
         path.write_text(text, encoding="utf-8")
         print(f"relatório em {path} ({len(text.splitlines())} linhas)")
@@ -599,10 +615,10 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     """
     # The protocol is read before anything is asked: a wrong path or a broken
     # file found only at the report would already have paid for the run.
-    if getattr(args, "protocolo", None) is not None:
-        if _protocol_problem(args) is not None:
+    if args.protocolo is not None:
+        if _protocol_problem(args.protocolo, args.limite) is not None:
             return 2
-        mismatches = _protocol_mismatches(args)
+        mismatches = _protocol_mismatches(args.protocolo, args.repeticoes, args.temperatura, args.casos)
         for mismatch in mismatches:
             print(f"erro: {mismatch}", file=sys.stderr)
         if mismatches:
@@ -623,30 +639,22 @@ def comando_ensaio(args: argparse.Namespace) -> int:
         print("corrigir os casos antes de gastar uma execução", file=sys.stderr)
         return 2
 
-    executar_args = argparse.Namespace(
-        fornecedor=args.fornecedor, modelo=args.modelo, casos=args.casos,
-        saida=args.saida, limite=args.limite, tentativas=args.tentativas,
-        repeticoes=args.repeticoes, temperatura=args.temperatura,
-        tokens_max=args.tokens_max, recomecar=args.recomecar,
-    )
     errors: dict[str, str] = {}
-    codigo = comando_executar(executar_args, errors_out=errors)
+    codigo = _executar(
+        args.casos, args.fornecedor, args.modelo, args.saida, args.limite, args.tentativas,
+        args.repeticoes, args.temperatura, args.tokens_max, args.recomecar, errors_out=errors,
+    )
     if codigo == 2:
         return codigo
 
-    classificar_args = argparse.Namespace(
-        casos=args.casos, respostas=args.saida, saida=args.vereditos, limite=args.limite
-    )
-    codigo_classificar = comando_classificar(classificar_args)
+    codigo_classificar = _classificar(args.casos, args.saida, args.vereditos, args.limite)
     if codigo_classificar != 0:
         return codigo_classificar
 
-    relatorio_args = argparse.Namespace(
-        casos=args.casos, respostas=args.saida, saida=args.relatorio,
-        fontes_confirmadas=args.fontes_confirmadas, limite=args.limite,
-        protocolo=getattr(args, "protocolo", None),
+    codigo_relatorio = _relatorio(
+        args.casos, args.saida, args.relatorio, "md", "pt", args.limite,
+        args.protocolo, args.fontes_confirmadas, reasons=errors,
     )
-    codigo_relatorio = comando_relatorio(relatorio_args, reasons=errors)
     if codigo_relatorio != 0:
         return codigo_relatorio
 
