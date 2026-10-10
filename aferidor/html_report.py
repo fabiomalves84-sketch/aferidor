@@ -209,11 +209,11 @@ def _model_heading(model_id: str, show_id: bool = True) -> str:
 
 
 # Short names of the models on the page being built, made unique by `build`.
-_SHORT: contextvars.ContextVar[dict[str, str]] = contextvars.ContextVar("nomes", default={})
+_SHORT: contextvars.ContextVar[dict[str, str] | None] = contextvars.ContextVar("nomes", default=None)
 
 
 def _model_short(model_id: str) -> str:
-    return _SHORT.get().get(model_id) or model_label(model_id)[0]
+    return (_SHORT.get() or {}).get(model_id) or model_label(model_id)[0]
 
 
 def unique_names(models: list[str]) -> dict[str, str]:
