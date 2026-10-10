@@ -1216,18 +1216,27 @@ class _Example:
 
         return hashlib.sha256((ROOT / "casos" / "casos.json").read_bytes()).hexdigest()
 
+    _pages: dict = {}
+
     @classmethod
     def page(cls, **kwargs) -> str:
+        """The page, built once for each set of arguments (and each value of the review flag, which the
+        tests switch): building the whole report takes a good part of a second, and over fifty tests ask."""
         from aferidor import fontes
 
+        key = (tuple(sorted((k, repr(v)) for k, v in kwargs.items())), _report.CLINICAL_REVIEW_DONE)
+        if key in cls._pages:
+            return cls._pages[key]
         d = cls.data()
-        kwargs.setdefault(
+        built = dict(kwargs)
+        built.setdefault(
             "confirmation", fontes.read_confirmation(ROOT / "casos" / "casos.json", [c.case_id for c in d["cases"]])
         )
-        return html_report.build(
+        cls._pages[key] = html_report.build(
             d["cases"], d["answers"], d["verdicts"], missing=d["missing"], today=date(2026, 10, 10),
-            cases_source=("casos/casos.json", cls.bank_sha256()), **kwargs,
+            cases_source=("casos/casos.json", cls.bank_sha256()), **built,
         )
+        return cls._pages[key]
 
     @classmethod
     def protocol(cls, written_on: date | None = None):
