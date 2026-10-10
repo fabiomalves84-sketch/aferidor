@@ -153,7 +153,7 @@ class TestFirstPageVariants(unittest.TestCase):
         text = visible(panel_text(_Example.page(protocol=_Example.protocol(date(2020, 1, 1))), "inicio"))
         self.assertIn(
             "Modelos aprovados pelo protocolo (todos os casos e amostras respondidos, nenhum caso com falha "
-            "crítica, nenhum parcialmente correto, pelo menos 95% de amostras corretas): 0 de 4.",
+            "crítica, nenhum inconsistente, pelo menos 95% de amostras corretas): 0 de 4.",
             text,
         )
         self.assertNotIn("Melhor resultado", text)
@@ -166,7 +166,7 @@ class TestFirstPageVariants(unittest.TestCase):
         looser = replace(protocol, max_critical_cases=3, max_unstable_cases=2, min_sample_accuracy=0.9)
         text = visible(panel_text(_Example.page(protocol=looser), "inicio"))
         self.assertIn("no máximo 3 casos com falha crítica", text)
-        self.assertIn("no máximo 2 parcialmente corretos", text)
+        self.assertIn("no máximo 2 inconsistentes", text)
         self.assertIn("pelo menos 90% de amostras corretas", text)
 
     def test_a_protocol_with_warnings_points_at_the_method_page_and_one_without_says_nothing(self):

@@ -95,11 +95,18 @@ def _t(text: str, **values: object) -> str:
     """Interface text in the language of the page being built."""
     return _translate(text, _LANG.get(), **values)
 
-# Each consistency state: css class and icon; the written label comes from the state.
+# Each consistency state: css class and icon; the written label is in _STATE_LABEL.
 _STATE_STYLE = {
     ConsistencyState.ESTAVEL_CERTO: ("ok", "✓"),
     ConsistencyState.INSTAVEL: ("instavel", "◐"),
     ConsistencyState.ESTAVEL_ERRADO: ("erro", "✕"),
+}
+# The words for the three states, chosen here and not read from grading.py: the report's vocabulary is
+# the report's own. The states themselves (and the protocol key `casos_instaveis_max`) do not change.
+_STATE_LABEL = {
+    ConsistencyState.ESTAVEL_CERTO: "sempre correto",
+    ConsistencyState.INSTAVEL: "inconsistente",
+    ConsistencyState.ESTAVEL_ERRADO: "nunca correto",
 }
 _STATE_ORDER = (
     ConsistencyState.ESTAVEL_CERTO,
@@ -315,7 +322,7 @@ GLOSSARY: dict[str, str] = {
     "Acordo Ortográfico": "O Acordo Ortográfico de 1990, em vigor em Portugal: escreve-se infeção e não infecção.",
     "amostra": "Uma das respostas do modelo à mesma pergunta. Cada caso é perguntado várias vezes, porque o modelo não responde sempre igual.",
     "sempre correto": "Todas as amostras do caso cumpriram todos os critérios.",
-    "parcialmente correto": "Parte das amostras cumpriu os critérios e parte não: o resultado dependeu da tentativa.",
+    "inconsistente": "Parte das amostras cumpriu os critérios e parte não: o resultado dependeu da tentativa.",
     "nunca correto": "Nenhuma amostra cumpriu os critérios. Não implica falha crítica: a falha pode ser apenas uma resposta incompleta.",
     "falha crítica": "Erro de dose, interação ou contraindicação omitida, encaminhamento urgente omitido, ou facto inventado.",
     "respostas corretas": "Contagem de respostas (casos × amostras), não de casos. Uma taxa alta pode ocultar casos nunca corretos.",
@@ -323,7 +330,7 @@ GLOSSARY: dict[str, str] = {
 }
 # The report's own vocabulary: marked where the report uses it, never in case texts.
 _REPORT_TERMS = (
-    "amostra", "sempre correto", "parcialmente correto", "nunca correto", "falha crítica",
+    "amostra", "sempre correto", "inconsistente", "nunca correto", "falha crítica",
     "casos corretos", "respostas corretas",
 )
 # Clinical and source abbreviations marked automatically in case texts.
@@ -513,7 +520,7 @@ def _how_to_read(how_counted: str) -> str:
         "do modelo e o critério não cumprido, para que cada veredicto possa ser verificado.</li>",
         falha=_term("falha crítica", _t("falha crítica", form="com artigo")),
         sempre=_term("sempre correto", _t("sempre corretos")),
-        parcial=_term("parcialmente correto", _t("parcialmente corretos")),
+        parcial=_term("inconsistente", _t("inconsistentes")),
         nunca=_term("nunca correto", _t("nunca corretos")),
     )
     return f"""
@@ -544,8 +551,8 @@ def _protocol_criteria(protocol: Protocol) -> str:
         else _t("no máximo {n} casos com {falha}", n=protocol.max_critical_cases, falha=failure)
     )
     unstable = (
-        _t("nenhum parcialmente correto") if protocol.max_unstable_cases == 0
-        else _t("no máximo {n} parcialmente corretos", n=protocol.max_unstable_cases)
+        _t("nenhum inconsistente") if protocol.max_unstable_cases == 0
+        else _t("no máximo {n} inconsistentes", n=protocol.max_unstable_cases)
     )
     rate = _t("pelo menos {p} de amostras corretas", p=_protocol_share(protocol.min_sample_accuracy))
     return ", ".join((_t("todos os casos e amostras respondidos"), critical, unstable, rate))
@@ -802,14 +809,14 @@ def _state_bar(model: str, counts: dict[ConsistencyState, int], total: int) -> s
         css, icon = _STATE_STYLE[state]
         legend.append(
             f'<li><span class="swatch {css}" aria-hidden="true"></span>'
-            f"{icon} {_term(state.label)} <strong>{n}</strong></li>"
+            f"{icon} {_term(_STATE_LABEL[state])} <strong>{n}</strong></li>"
         )
         if n:
             segments.append(
                 f'<span class="seg {css}" style="flex-grow:{n}" '
-                f'title="{_esc(_t(state.label))}: {_esc(_t("{n} de {total} casos", n=n, total=total))}"></span>'
+                f'title="{_esc(_t(_STATE_LABEL[state]))}: {_esc(_t("{n} de {total} casos", n=n, total=total))}"></span>'
             )
-    description = ", ".join(f"{counts.get(s, 0)} {_t(s.label)}" for s in _STATE_ORDER)
+    description = ", ".join(f"{counts.get(s, 0)} {_t(_STATE_LABEL[s])}" for s in _STATE_ORDER)
     return (
         f'<div class="barra" role="img" aria-label="{_esc(_model_short(model))}: {_esc(description)}, '
         f'{_esc(_t("em {total} casos", total=total))}">{"".join(segments)}</div>'
@@ -850,7 +857,7 @@ def _how_counted(samples: int, rule: str) -> str:
     half = max(1, n // 2)
     patterns = [
         ("ok", "✓", "sempre correto", "●" * n, "todas as amostras corretas"),
-        ("instavel", "◐", "parcialmente correto", ("●" * (n - half) + "✕" * half) if n > 1 else "●",
+        ("instavel", "◐", "inconsistente", ("●" * (n - half) + "✕" * half) if n > 1 else "●",
          "algumas amostras corretas"),
         ("erro", "✕", "nunca correto", "✕" * n, "nenhuma amostra correta"),
     ]
@@ -867,7 +874,7 @@ def _how_counted(samples: int, rule: str) -> str:
   <p>{_t("Cada caso foi colocado {vezes} a cada modelo; cada resposta é uma {amostra}. Na grelha, cada ponto representa uma amostra, pela ordem de execução: {certa} correta, {errada} incorreta, {falta} sem resposta.", vezes=_esc(times), amostra=_term("amostra"), certa='<span class="pt certa">●</span>', errada='<span class="pt errada">✕</span>', falta='<span class="pt falta">○</span>')}</p>
   <ul>{items}</ul>
   <p>{_t("{casos}: veredicto binário por caso. Regra deste relatório: um caso é correto quando {regra}.", casos="<strong>" + _term("casos corretos", _t("Casos corretos")) + "</strong>", regra=_esc(_t(CASE_RULES[rule])))}</p>
-  <p>{_t("<strong>Um caso nunca correto não tem necessariamente uma {falha}</strong>, e um caso parcialmente correto pode ter uma. Por esse motivo, as falhas críticas são contadas à parte.", falha=_term("falha crítica", _t("falha crítica", form="com artigo")))}</p>
+  <p>{_t("<strong>Um caso nunca correto não tem necessariamente uma {falha}</strong>, e um caso inconsistente pode ter uma. Por esse motivo, as falhas críticas são contadas à parte.", falha=_term("falha crítica", _t("falha crítica", form="com artigo")))}</p>
 </div>"""
 
 
@@ -1316,7 +1323,7 @@ def _cell(entry: Consistency | None, dots: str) -> tuple[str, str]:
     # icon, the dots and the legend above the table.
     label = (
         f'<span class="ic" aria-hidden="true">{icon}</span>'
-        f'<span class="vh">{_esc(_t(entry.state.label))}</span>{dots}'
+        f'<span class="vh">{_esc(_t(_STATE_LABEL[entry.state]))}</span>{dots}'
     )
     if entry.state is ConsistencyState.ESTAVEL_CERTO or not entry.worst_failure:
         return css, label
@@ -1380,7 +1387,7 @@ def _always_right(case: Case, models: list[str], consistency: dict[tuple[str, st
 
 def _grid_legend() -> str:
     items = [
-        f'<li><span class="swatch {css}" aria-hidden="true"></span>{icon} {_term(state.label)}</li>'
+        f'<li><span class="swatch {css}" aria-hidden="true"></span>{icon} {_term(_STATE_LABEL[state])}</li>'
         for state, (css, icon) in _STATE_STYLE.items()
     ]
     items.append(
@@ -1449,7 +1456,7 @@ def _detail(
             if entry is None:
                 continue
             css, icon = _STATE_STYLE[entry.state]
-            said = f"{_model_short(model)}: {_t(entry.state.label)}"
+            said = f"{_model_short(model)}: {_t(_STATE_LABEL[entry.state])}"
             # The glyph is decoration; the model and its state are written out for
             # screen readers, which otherwise hear which case failed but not for whom.
             minis.append(
@@ -1477,7 +1484,7 @@ def _detail(
             css, icon = _STATE_STYLE[entry.state]
             out.append(
                 f'<h4><span class="mini {css}" aria-hidden="true">{icon}</span> {_esc(_model_short(model))} '
-                f'<span class="h4-sub">{_esc(_t(entry.state.label))}, '
+                f'<span class="h4-sub">{_esc(_t(_STATE_LABEL[entry.state]))}, '
                 f'{_esc(_t("{a} de {n} amostras corretas", a=entry.passed, n=entry.samples))}</span></h4>'
             )
             seen: set[str] = set()

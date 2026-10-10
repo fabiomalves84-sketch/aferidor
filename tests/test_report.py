@@ -233,7 +233,7 @@ class TestComparison(unittest.TestCase):
         self.assertIn("## Comparação", text)
         self.assertIn(
             "| Modelo | Casos com falha crítica em alguma amostra | Casos corretos | "
-            "Casos parcialmente corretos | Amostras corretas |",
+            "Casos inconsistentes | Amostras corretas |",
             text,
         )
 

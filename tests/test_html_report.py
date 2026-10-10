@@ -377,7 +377,7 @@ class TestGrid(unittest.TestCase):
             [a_case()],
             [an_answer("1 g", sample=1), an_answer("500 mg", sample=2)],
         )
-        self.assertIn("parcialmente correto", text)
+        self.assertIn("inconsistente", text)
 
     def test_a_case_never_asked_to_a_model_says_so(self):
         cases = [a_case("C1"), a_case("C2")]
@@ -412,7 +412,7 @@ class TestHowItIsCounted(unittest.TestCase):
         text = build([a_case()], [an_answer("1 g", sample=1), an_answer("500 mg", sample=2)])
         self.assertIn('id="como-se-conta"', text)
         self.assertIn("Um caso nunca correto não tem necessariamente", text)
-        for state in ("sempre correto", "parcialmente correto", "nunca correto"):
+        for state in ("sempre correto", "inconsistente", "nunca correto"):
             with self.subTest(state=state):
                 self.assertIn(f'data-termo="{state}"', text)
 

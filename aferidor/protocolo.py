@@ -198,7 +198,7 @@ def evaluate(
             summary.critical_cases <= protocol.max_critical_cases,
         ),
         Check(
-            t("casos parcialmente corretos", lang),
+            t("casos inconsistentes", lang),
             t("no máximo {n}", lang, n=protocol.max_unstable_cases),
             t("{a} de {n}", lang, a=summary.unstable_cases, n=summary.cases),
             summary.unstable_cases <= protocol.max_unstable_cases,

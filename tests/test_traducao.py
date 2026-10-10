@@ -49,7 +49,7 @@ def interface_strings() -> set[str]:
     found.update(html_report.GLOSSARY.values())
     found.update(sentence for _, sentence in html_report._EVIDENCE)
     found.update(CASE_RULES.values())
-    found.update(state.label for state in ConsistencyState)
+    found.update(html_report._STATE_LABEL[state] for state in ConsistencyState)
     found.update(label for _, label in html_report.PANELS)
     found.add(traducao.UNREVIEWED_NOTICE)
     return found

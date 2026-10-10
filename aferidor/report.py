@@ -78,10 +78,10 @@ def how_counted(samples: int, rule: str) -> str:
     return (
         f"Cada caso foi colocado {n} {'vez' if n == 1 else 'vezes'} a cada modelo; cada "
         "resposta é uma amostra. Um caso é **sempre correto** quando todas as amostras são "
-        "corretas, **nunca correto** quando nenhuma o é, e **parcialmente correto** nos "
+        "corretas, **nunca correto** quando nenhuma o é, e **inconsistente** nos "
         "restantes. Veredicto binário por caso: um caso é correto quando "
         f"{CASE_RULES[rule]}. Um caso nunca correto não tem necessariamente uma falha crítica, "
-        "e um caso parcialmente correto pode ter uma; por isso as falhas críticas são contadas "
+        "e um caso inconsistente pode ter uma; por isso as falhas críticas são contadas "
         "à parte."
     )
 
@@ -291,7 +291,7 @@ def _comparison_md(counts: _Counts, right: dict[str, tuple[int, int]]) -> list[s
     out = ["## Comparação", ""]
     out.append(
         "| Modelo | Casos com falha crítica em alguma amostra | Casos corretos | "
-        "Casos parcialmente corretos | Amostras corretas |"
+        "Casos inconsistentes | Amostras corretas |"
     )
     out.append("|---|---|---|---|---|")
     for model in counts.per_model:
@@ -342,7 +342,7 @@ def _model_md(
     if summary.unstable_cases:
         out.append("")
         out.append(
-            f"{summary.unstable_cases} de {summary.cases} casos parcialmente corretos: o "
+            f"{summary.unstable_cases} de {summary.cases} casos inconsistentes: o "
             "resultado variou entre amostras."
         )
     out.append("")
