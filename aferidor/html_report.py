@@ -35,7 +35,6 @@ from .grading import (
     ConsistencyState,
     ConsistencySummary,
     Tally,
-    compare_critical,
     consistency_by_case,
     consistency_by_model,
     critical_by_category,
@@ -50,7 +49,16 @@ from .grading import (
 )
 from . import fontes as _fontes
 from . import report as _report
-from .comparacao import is_significant, meets_reference, models_meeting_reference, percent
+from .comparacao import (
+    is_significant,
+    meets_reference,
+    models_meeting_reference,
+    percent,
+    ranking,
+    same_numbers,
+    same_proportion,
+    top_tie,
+)
 from .html_estilo import STYLE
 from .lingua import language_by_model, language_line
 from .models import Answer, Case, Verdict
@@ -585,12 +593,11 @@ def _start_page(
                 falha=failure, k=meeting, n=len(summaries),
             )
             best = ""
-            rows = compare_critical(summaries).rows  # fewest critical cases first
+            rows = ranking(summaries).rows  # fewest critical cases first
             if meeting == 0 and rows:
-                _, critical, cases_n, _, _ = rows[0]
                 best = " " + _t(
                     "Melhor resultado: {a} de {b} casos com {falha}.",
-                    a=critical, b=cases_n, falha=_term("falha crítica"),
+                    a=rows[0].critical, b=rows[0].cases, falha=_term("falha crítica"),
                 )
         elements.append(("resultado", f'<p class="resultado"><strong>{result}</strong>{best}</p>'))
         if protocol_warnings:
@@ -955,12 +962,11 @@ def _conclusions_page(
     recommends a model. The line about the review follows `report.CLINICAL_REVIEW_DONE`.
     """
     n = len(summaries)
-    comparison = compare_critical(summaries, consistency)
-    rows = comparison.rows                          # (model, critical, cases, low, high), fewest first
-    best = rows[0]
-    tied = [r for r in rows if r[1] * best[2] == best[1] * r[2]]   # the same proportion as the first
+    comparison = ranking(summaries, consistency)
+    best = comparison.rows[0]                       # fewest cases with a critical failure
+    tied = top_tie(comparison.rows)                 # the same proportion as the first
     tie = len(tied) > 1
-    same_numbers = all((r[1], r[2]) == (best[1], best[2]) for r in tied)
+    same_counts = same_numbers(tied)
     elements: list[tuple[str, str]] = [("pode", f'<h3>{_t("Pode concluir-se")}</h3>')]
 
     # 1. the result against the threshold, or against the protocol
@@ -977,7 +983,7 @@ def _conclusions_page(
             ) + "</li>"))
     else:
         meeting = len(models_meeting_reference(summaries))
-        count = (best[1], best[2])
+        count = (best.critical, best.cases)
         if n == 1 and meeting == 0:
             text = _t("O modelo não cumpre o limiar de referência (que não é um protocolo prévio).") + " " \
                 + _t("Tem {a} de {b} casos com falha crítica.", a=count[0], b=count[1])
@@ -986,7 +992,7 @@ def _conclusions_page(
             text = _t("O modelo cumpre o limiar de referência (que não é um protocolo prévio).")
         elif meeting == 0:
             text = _t("Nenhum dos {n} modelos cumpre o limiar de referência (que não é um protocolo prévio).", n=n) + " "
-            text += _tied_line(len(tied), n, count if same_numbers else None) if tie else \
+            text += _tied_line(len(tied), n, count if same_counts else None) if tie else \
                 _t("O melhor tem {a} de {b} casos com falha crítica.", a=count[0], b=count[1])
             said_best = True
         else:
@@ -1018,18 +1024,18 @@ def _conclusions_page(
         "Que uma falha crítica seja sempre um erro real do modelo: o corretor é heurístico, com falsos "
         "passes e falsos falhanços conhecidos (ver {metodo}).", metodo=_link("metodo", "Método"),
     )))
-    if tie and not same_numbers:
+    if tie and not same_counts:
         interval = _t("Nada de firme sobre outros casos: os intervalos são largos.")
     else:
-        low, high = wilson_interval(best[1], best[2])
+        low, high = wilson_interval(best.critical, best.cases)
         who = (
-            _t("{a} de {n}", a=best[1], n=best[2]) if said_best
-            else _t("os melhores, {a} de {n},", a=best[1], n=best[2]) if tie
-            else _t("o melhor, {a} de {n},", a=best[1], n=best[2])
+            _t("{a} de {n}", a=best.critical, n=best.cases) if said_best
+            else _t("os melhores, {a} de {n},", a=best.critical, n=best.cases) if tie
+            else _t("o melhor, {a} de {n},", a=best.critical, n=best.cases)
         )
         interval = _t(
             "Nada de firme sobre outros casos: com {n} casos os intervalos são largos ({quem} é compatível com {low} a {high}).",
-            n=best[2], quem=who, low=percent(low), high=percent(high),
+            n=best.cases, quem=who, low=percent(low), high=percent(high),
         )
     cannot.append(("intervalo", interval))
     if not sources_verified:
@@ -1076,19 +1082,19 @@ def _comparison(summaries: dict[str, ConsistencySummary], consistency=None) -> s
     answered, with the exact McNemar test: they answered the same questions,
     so the comparison is paired, which two separate intervals cannot see.
     """
-    result = compare_critical(summaries, consistency)
+    result = ranking(summaries, consistency)
     if len(result.rows) < 2:
         return ""
     best, second = result.rows[0], result.rows[1]
-    if best[1] * second[2] == second[1] * best[2]:
+    if same_proportion(best, second):
         sentence = _t(
             "{a} e {b} tiveram a mesma proporção de casos com falha crítica.",
-            a=_esc(_model_short(best[0])), b=_esc(_model_short(second[0])),
+            a=_esc(_model_short(best.model)), b=_esc(_model_short(second.model)),
         )
     else:
         values = dict(
-            melhor=f"<strong>{_esc(_model_short(best[0]))}</strong>", a=best[1], n=best[2],
-            b=second[1], m=second[2], outro=_esc(_model_short(second[0])),
+            melhor=f"<strong>{_esc(_model_short(best.model))}</strong>", a=best.critical, n=best.cases,
+            b=second.critical, m=second.cases, outro=_esc(_model_short(second.model)),
         )
         if result.p_value is not None:
             sentence = _t(

@@ -9,7 +9,10 @@ nothing in this module formats text for a page.
 
 from __future__ import annotations
 
-from .grading import ConsistencySummary
+from dataclasses import dataclass
+from typing import NamedTuple
+
+from .grading import Consistency, ConsistencySummary, compare_critical
 from .protocolo import REFERENCE_CRITICAL_LIMIT
 
 # A difference between the two best models counts as significant when the exact McNemar p-value
@@ -30,9 +33,64 @@ def models_meeting_reference(summaries: dict[str, ConsistencySummary]) -> list[s
     return [model for model, summary in summaries.items() if meets_reference(summary)]
 
 
+class Row(NamedTuple):
+    """One model's critical cases and the 95% Wilson interval, as `grading.compare_critical` gives them."""
+
+    model: str
+    critical: int
+    cases: int
+    low: float
+    high: float
+
+    @property
+    def share(self) -> float:
+        return self.critical / self.cases
+
+
+@dataclass(frozen=True)
+class Ranking:
+    """The models from fewest to most cases with a critical failure, and the paired comparison of the
+    first two (None when the cases are not known or there is only one model)."""
+
+    rows: tuple[Row, ...]
+    overlap: bool
+    only_first: int | None
+    only_second: int | None
+    p_value: float | None
+
+
+def ranking(
+    summaries: dict[str, ConsistencySummary],
+    consistency: dict[tuple[str, str], Consistency] | None = None,
+) -> Ranking:
+    result = compare_critical(summaries, consistency)
+    return Ranking(
+        tuple(Row(*row) for row in result.rows), result.overlap,
+        result.only_first, result.only_second, result.p_value,
+    )
+
+
+def same_proportion(first: Row, second: Row) -> bool:
+    """The same share of cases with a critical failure, whatever the number of cases (4 of 10 and 8 of 20)."""
+    return first.critical * second.cases == second.critical * first.cases
+
+
+def top_tie(rows: tuple[Row, ...]) -> tuple[Row, ...]:
+    """The models that share the best proportion with the first one; the first alone when none does."""
+    return tuple(row for row in rows if same_proportion(row, rows[0]))
+
+
+def same_numbers(group: tuple[Row, ...]) -> bool:
+    """Whether the group also shares the counts, and not only the proportion."""
+    return all((row.critical, row.cases) == (group[0].critical, group[0].cases) for row in group)
+
+
 def percent(value: float) -> str:
     """A share as every interval of the reports writes it: rounded to the nearest whole number."""
     return f"{value * 100:.0f}%"
 
 
-__all__ = ["SIGNIFICANCE_LEVEL", "is_significant", "meets_reference", "models_meeting_reference", "percent"]
+__all__ = [
+    "SIGNIFICANCE_LEVEL", "Ranking", "Row", "is_significant", "meets_reference", "models_meeting_reference",
+    "percent", "ranking", "same_numbers", "same_proportion", "top_tie",
+]

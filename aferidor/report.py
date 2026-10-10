@@ -20,7 +20,7 @@ from __future__ import annotations
 from datetime import date
 
 from . import build_id
-from .comparacao import is_significant, percent
+from .comparacao import is_significant, percent, ranking
 from .grading import (
     Tally,
     consistency_by_case,
@@ -29,7 +29,6 @@ from .grading import (
     match_answers,
     missing_samples,
     CASE_RULES,
-    compare_critical,
     DEFAULT_CASE_RULE,
     right_cases_by_model,
     run_conditions,
@@ -428,9 +427,9 @@ def build(
             "verifica, pelo que é mais estreito do que deveria."
         )
         out.append("")
-        paired = compare_critical(consistency_per_model, consistency)
+        paired = ranking(consistency_per_model, consistency)
         if paired.p_value is not None:
-            first, second = paired.rows[0][0], paired.rows[1][0]
+            first, second = paired.rows[0].model, paired.rows[1].model
             verdict = (
                 "a diferença é estatisticamente significativa" if is_significant(paired.p_value)
                 else "a diferença pode dever-se ao acaso"
