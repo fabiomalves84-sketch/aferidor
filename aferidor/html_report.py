@@ -1838,6 +1838,37 @@ def _sources_panel(data: _ReportData) -> str:
     ))
 
 
+def _results_panel(data: _ReportData) -> str:
+    """Resultados: the first result, with the notices that qualify the counts above it. Without
+    verdicts it says there is nothing to report."""
+    if not data.models:
+        return _panel(
+            "resultados", _t("Resultados"), *data.early,
+            f"<p>{_t('Não há veredictos para relatar.')}</p>",
+        )
+    summaries = data.summaries
+    states = states_by_model(data.consistency)
+    right = right_cases_by_model(data.consistency, data.rule)
+    reference = (
+        {m: meets_reference(summaries[m]) for m in data.models}
+        if data.protocol is None else {}
+    )
+    cards = ['<div class="cartoes">']
+    for model in data.models:
+        cards.append(
+            _model_card(
+                model, summaries[model], data.per_model[model], states[model],
+                data.approved.get(model), right[model], reference=reference.get(model),
+            )
+        )
+    cards.append("</div>")
+    return _panel(
+        "resultados", _t("Resultados"), *data.early,
+        _reference_note() if data.protocol is None else "",
+        _comparison(summaries, data.consistency), *cards,
+    )
+
+
 def _build(
     cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
     protocol, alternates, confirmation=None,
@@ -1853,38 +1884,11 @@ def _build(
         _sources_panel(data),
     ]
 
-    if not data.models:
-        out.append(_panel(
-            "resultados", _t("Resultados"), *data.early,
-            f"<p>{_t('Não há veredictos para relatar.')}</p>",
-        ))
-    else:
+    out.append(_results_panel(data))
+    if data.models:
         models, cases, per_model = data.models, data.cases, data.per_model
         summaries, consistency, pairs = data.summaries, data.consistency, data.pairs
-        states = states_by_model(consistency)
         expected = expected_samples(data.answers)
-        right = right_cases_by_model(consistency, data.rule)
-
-        reference = (
-            {m: meets_reference(summaries[m]) for m in models}
-            if data.protocol is None else {}
-        )
-
-        # Resultados: the first result, with the notices that qualify the counts above it.
-        cards = ['<div class="cartoes">']
-        for model in models:
-            cards.append(
-                _model_card(
-                    model, summaries[model], per_model[model], states[model],
-                    data.approved.get(model), right[model], reference=reference.get(model),
-                )
-            )
-        cards.append("</div>")
-        out.append(_panel(
-            "resultados", _t("Resultados"), *data.early,
-            _reference_note() if data.protocol is None else "",
-            _comparison(summaries, consistency), *cards,
-        ))
 
         # Por área clínica: the heat map, and the failures by type, collapsed.
         top = max((n for tally in per_model.values() for _, n in tally.worst_first()), default=1)
