@@ -359,10 +359,12 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   390 px cabem.
 - *Informação só em `title`.* 311 elementos (segmentos das barras, pontos de
   amostra, pergunta cortada) que não aparecem em toque.
-- *Testes de contraste.* Cobrem 6 cores de texto sobre 3 fundos, nos dois temas
-  (`test_every_text_colour_reads_on_the_page_and_on_cards_in_both_themes`, em
-  `tests/test_html_report.py`). Não cobrem o contraste dos elementos
-  gráficos contra o cartão (WCAG 1.4.11, 3:1): no tema claro `warning` 1,83,
+- *Testes de contraste.* Cobrem as cores de texto sobre o fundo, o cartão, o
+  segundo cartão e o realce, nos dois temas (`test_every_text_colour_reads_on_the_page_and_on_cards_in_both_themes`
+  e `test_every_text_colour_reads_on_every_ground_at_4_5_to_1`, em
+  `tests/test_html_report.py`), e o destaque a 3:1 como elemento gráfico
+  (`test_what_is_not_text_stands_out_at_3_to_1`). Não cobrem o contraste das
+  cores clínicas dos segmentos contra o cartão (WCAG 1.4.11, 3:1): no tema claro `warning` 1,83,
   `serious` 2,64, `neutral` 2,41 e `good` 3,35; no escuro `critical` 3,55 e
   `neutral` 3,16. São as cores dos segmentos das barras e das legendas, que
   levam também ícone e texto. O texto sobre fundos translúcidos (mínimo medido

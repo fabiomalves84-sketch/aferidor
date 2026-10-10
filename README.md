@@ -162,6 +162,8 @@ confirmação das fontes restantes.
 - `docs/ARQUITETURA.md`: módulos, fronteiras entre eles e respetiva justificação
 - `docs/QUALIDADE.md`: requisitos ligados aos testes que os verificam, e registo de riscos do instrumento
 - `docs/COMO_CORRER.md`: execução contra um modelo real e afinação de critérios
+- `docs/BANCO_CASOS.md`: o banco de consulta (31 casos), com a descrição de cada área e a versão
+- `casos/PROPOSTA_INTERVALOS.md`: a decisão sobre os critérios de intervalo entre tomas, com o efeito medido
 - `casos/VERIFICACAO.md`: confirmação das fontes, caso a caso
 - `casos/FONTES_DGS.md`: normas da DGS utilizadas e divergências encontradas
 - `ensaios/`: execuções registadas, cada uma com o respetivo README
