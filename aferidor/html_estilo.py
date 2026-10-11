@@ -182,9 +182,17 @@ ul.conclusoes li { margin: 0 0 0.45rem; }
 .painel h3:has(+ ul.conclusoes) { font-size: 1.1rem; margin: 1.1rem 0 0.5rem; }
 .fecho { max-width: 46rem; margin: 1rem 0 0; padding-top: 0.9rem; border-top: 1px solid var(--grid); color: var(--ink-2); }
 .inicio-texto, .inicio-lateral, .sobre { max-width: 38rem; }
-/* From 80rem the numbers and the result sit beside the text; below, they stack under it. */
+/* The numbers and the result sit beside the text from 70rem, where the page still has 52rem for them
+   (the column on the left takes the rest): the text from 35 to 38rem and the result from 14 to 18rem, the
+   result in a smaller letter because it is a narrow column. From 80rem both have their full width, and the
+   letter of the result is the one it has when it stacks. Below 70rem they stack under the text. */
+@media (min-width: 70rem) {
+  .inicio-corpo { display: grid; grid-template-columns: minmax(35rem, 38rem) minmax(14rem, 18rem); column-gap: 1.5rem; align-items: start; }
+  .inicio-corpo .resultado { font-size: 1.05rem; }
+}
 @media (min-width: 80rem) {
   .inicio-corpo { display: grid; grid-template-columns: 38rem 18rem; column-gap: 1.5rem; align-items: start; }
+  .inicio-corpo .resultado { font-size: 1.3rem; }
 }
 .saber-mais { margin: 0 0 1.1rem; font-weight: 600; }
 .definicao { margin: 0.7rem 0 0; font-size: 0.92rem; color: var(--ink-2); }

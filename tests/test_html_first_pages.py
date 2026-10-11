@@ -344,6 +344,17 @@ class TestAboutPage(unittest.TestCase):
         self.assertIn("grid-template-columns: 38rem 18rem", css)
         self.assertIn(".inicio-texto, .inicio-lateral, .sobre { max-width: 38rem; }", css)
 
+    def test_the_numbers_beside_the_text_start_at_70rem_with_a_smaller_letter_for_the_result(self):
+        css = html_estilo.STYLE
+        narrow = css[css.index("@media (min-width: 70rem)"):css.index("@media (min-width: 80rem)")]
+        self.assertIn("grid-template-columns: minmax(35rem, 38rem) minmax(14rem, 18rem)", narrow)
+        self.assertIn(".inicio-corpo .resultado { font-size: 1.05rem; }", narrow)
+        wide = css[css.index("@media (min-width: 80rem)"):]
+        self.assertIn(".inicio-corpo .resultado { font-size: 1.3rem; }", wide[:wide.index("}\n.saber-mais")])
+
+    def test_the_result_keeps_its_big_letter_where_it_stacks_under_the_text(self):
+        self.assertRegex(html_estilo.STYLE, r"\n\.resultado \{ margin: 0 0 0\.6rem; padding: 1rem 1\.25rem; font-size: 1\.3rem;")
+
     def test_no_dash_in_what_the_about_page_says(self):
         text = self.about(_Example.page())
         self.assertNotIn("\u2014", text)
