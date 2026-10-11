@@ -358,6 +358,11 @@ class TestTheShippedCatalogue(unittest.TestCase):
                     # https://platform.claude.com/docs/en/api/messages/create, read 2026-10-11
                     self.assertEqual((found.temperature, found.fixed_temperature), ("fixa_pelo_fornecedor", Decimal("1.0")))
                     self.assertEqual((found.reasoning_tokens, found.token_field), ("incluidos_na_saida", "max_tokens"))
+                elif key == "gemini-3.8-flash":
+                    # the pilot of 2026-10-11 and https://ai.google.dev/gemini-api/docs/thinking: counted apart, still to confirm
+                    self.assertEqual((found.temperature, found.reasoning_tokens), ("desconhecido", "separados_da_saida"))
+                    self.assertIn("tokens_raciocinio", found.to_confirm)
+                    self.assertIn("2026-10-11", found.note)
                 elif found.provider == "gemini":
                     self.assertEqual((found.temperature, found.reasoning_tokens), ("desconhecido", "por_confirmar"))
                 else:

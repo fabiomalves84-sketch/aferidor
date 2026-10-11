@@ -431,14 +431,26 @@ class TestTheCatalogueModelsFromTheCommandLine(WithTheCommandLine):
         self.assertFalse(self.saida.parent.exists())
 
     def test_google_runs_on_its_own_api_and_counts_the_worst_case_while_the_thinking_count_is_to_confirm(self):
-        net = Net((":generateContent", fx.GOOGLE_OK))
-        code, _, err = self.run_cli(net, "google", "gemini-3.8-flash", "--teto-eur", "100")
+        net = Net((":generateContent", {**fx.GOOGLE_OK, "modelVersion": "gemini-3.1-pro-preview"}))
+        code, _, err = self.run_cli(net, "google", "gemini-3.1-pro-preview", "--teto-eur", "100")
         self.assertEqual(code, 0, err)
         self.assertIn(":generateContent", net.requests[0]["url"])
         (first, _) = read_records(self.saida.with_name(FILE_NAME))
-        self.assertEqual((first.count_mode, first.reasoning_tokens, first.served_model), ("pior_caso", 450, "gemini-3.8-flash"))
+        self.assertEqual((first.count_mode, first.reasoning_tokens), ("pior_caso", 450))
         self.assertEqual(first.applied_params["campo_tokens"], "maxOutputTokens")
         self.assertIn("por confirmar", first.count_reason)
+
+    def test_gemini_flash_counts_by_the_usage_with_the_thinking_added_to_the_output_and_keeps_the_total(self):
+        """The catalogue says the thinking tokens come apart from the output (and still to confirm): so the cost is the
+        usage, input at the input price and output plus thinking at the output price, not the worst case."""
+        net = Net((":generateContent", fx.GOOGLE_OK))
+        code, _, err = self.run_cli(net, "google", "gemini-3.8-flash", "--teto-eur", "100")
+        self.assertEqual(code, 0, err)
+        (first, _) = read_records(self.saida.with_name(FILE_NAME))
+        self.assertEqual((first.count_mode, first.served_model, first.reasoning_tokens), ("usage", "gemini-3.8-flash", 450))
+        self.assertEqual(first.cost_usd, (Decimal(130) * Decimal("0.75") + Decimal(700 + 450) * Decimal("3.75")) / 1_000_000)
+        self.assertIn("raciocínio somado", first.count_reason)
+        self.assertEqual((first.total_tokens, first.total_difference), (1280, 450))  # the difference is the thinking tokens
 
     def test_the_old_gemini_choice_still_means_the_compatible_endpoint(self):
         net = Net(("/openai/chat/completions", fx.OPENAI_OK))

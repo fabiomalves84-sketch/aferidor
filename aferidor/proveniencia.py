@@ -22,6 +22,7 @@ from typing import Any
 
 from .catalogo import DEFAULT_PATH, PricePeriod
 from .custos import BILLED_STATES, COUNT_MODES, FREE_STATES, JsonlError, JsonlFile
+from .providers import ERROR_CLASSES, SHORT_MESSAGE_LIMIT
 
 FILE_NAME = "respostas.proveniencia.jsonl"
 STATES = BILLED_STATES + FREE_STATES
@@ -135,6 +136,15 @@ class ProvenanceRecord:
     usd_to_eur_source: str
     build: str
     grader: str
+    # What a failed attempt says about itself (none of these is set on a call that got a reply): the HTTP status
+    # when there was one, a class from `providers.ERROR_CLASSES`, and a short clean message.
+    http_status: int | None = None
+    error_class: str | None = None
+    error_message: str = ""
+    # The provider's own total of tokens, and how far it is above input plus output. When the reasoning tokens
+    # lie beside the output, that difference is them; the line keeps both so this can be checked.
+    total_tokens: int | None = None
+    total_difference: int | None = None
 
     def __post_init__(self) -> None:
         if self.state not in STATES:
@@ -143,6 +153,10 @@ class ProvenanceRecord:
             raise ProvenanceError(f"modo de contagem {self.count_mode!r} desconhecido")
         if self.served_check not in SERVED_STATUSES:
             raise ProvenanceError(f"verificação do modelo servido {self.served_check!r} desconhecida")
+        if self.error_class is not None and self.error_class not in ERROR_CLASSES:
+            raise ProvenanceError(f"classe de erro {self.error_class!r} desconhecida")
+        if len(self.error_message) > SHORT_MESSAGE_LIMIT:
+            raise ProvenanceError("a mensagem de erro guardada tem de ter no máximo 200 caracteres")
         if self.sample < 1 or self.attempt < 1:
             raise ProvenanceError("a amostra e a tentativa começam em 1")
         if self.latency_s < 0:
@@ -173,6 +187,8 @@ class ProvenanceRecord:
             "catalogo_sha256": self.catalog_sha256, "periodo_preco": self.price_period,
             "taxa_usd_eur": None if self.usd_to_eur is None else format(self.usd_to_eur, "f"),
             "taxa_fonte": self.usd_to_eur_source, "build": self.build, "grader": self.grader,
+            "http_status": self.http_status, "classe_erro": self.error_class, "mensagem_erro": self.error_message,
+            "total_tokens": self.total_tokens, "total_diferenca": self.total_difference,
         }
 
     @classmethod
@@ -193,6 +209,10 @@ class ProvenanceRecord:
                 count_reason=raw["motivo_contagem"], state=raw["estado"], catalog_sha256=raw["catalogo_sha256"],
                 price_period=raw["periodo_preco"], usd_to_eur=None if rate is None else Decimal(rate),
                 usd_to_eur_source=raw["taxa_fonte"], build=raw["build"], grader=raw["grader"],
+                # absent from the lines written before these fields existed
+                http_status=raw.get("http_status"), error_class=raw.get("classe_erro"),
+                error_message=raw.get("mensagem_erro") or "", total_tokens=raw.get("total_tokens"),
+                total_difference=raw.get("total_diferenca"),
             )
         except (KeyError, TypeError, ArithmeticError):
             raise ProvenanceError("uma linha de proveniência não tem a forma esperada") from None

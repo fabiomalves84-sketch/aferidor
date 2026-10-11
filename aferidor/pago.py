@@ -96,7 +96,7 @@ class PaidCalls:
             except ProviderError as error:
                 state = "resultado_desconhecido" if error.maybe_billed else "erro"
                 self._settle_and_write(reservation.intent_id, state, None, provider, prompt, case_id, sample, run_id,
-                                       attempt, started_at, t0, None)
+                                       attempt, started_at, t0, None, error)
                 last = error
                 if error.maybe_billed:
                     raise ProviderError(
@@ -135,6 +135,7 @@ class PaidCalls:
     def _settle_and_write(
         self, intent_id: str, state: str, usage, provider: Provider, prompt: str, case_id: str, sample: int,
         run_id: str, attempt: int, started_at: datetime, t0: float, reply: Reply | None,
+        error: ProviderError | None = None,
     ) -> None:
         model = self.catalog.model(self.model_key)
         outcome = self.ledger.settle(intent_id, catalog=self.catalog, state=state, usage=usage)
@@ -164,7 +165,18 @@ class PaidCalls:
             catalog_sha256=catalog_sha256(self.catalog_path), price_period=period_snapshot(period),
             usd_to_eur=self.catalog.usd_to_eur, usd_to_eur_source=self.catalog.usd_to_eur_source,
             build=build_id(), grader=grader_id(),
+            http_status=error.http_status if error else None, error_class=error.error_class if error else None,
+            error_message=error.short_message if error else "",
+            total_tokens=getattr(usage, "total_tokens", None), total_difference=_beyond_input_and_output(usage),
         ))
+
+
+def _beyond_input_and_output(usage: object) -> int | None:
+    """How far the provider's total is above input plus output; 0 when they agree, None when a figure is missing."""
+    total, given, out = (getattr(usage, n, None) for n in ("total_tokens", "input_tokens", "output_tokens"))
+    if total is None or given is None or out is None:
+        return None
+    return total - (given + out)
 
 
 __all__ = ["PaidCalls", "RunStopped"]

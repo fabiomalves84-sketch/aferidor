@@ -47,6 +47,9 @@ class Usage:
     input_tokens: int | None = None
     output_tokens: int | None = None
     reasoning_tokens: int | None = None
+    # The provider's own total (Gemini: `totalTokenCount`), when it gives one. It is kept so that the sum of the
+    # parts can be compared with it: a total above input plus output is what shows where the reasoning tokens are.
+    total_tokens: int | None = None
 
 
 @dataclass(frozen=True)
@@ -81,10 +84,13 @@ def _count(value: object) -> int | None:
     return value
 
 
-def usage_from(data: object, input_key: str, output_key: str, reasoning: tuple[str, ...] = ()) -> Usage | None:
+def usage_from(
+    data: object, input_key: str, output_key: str, reasoning: tuple[str, ...] = (), total_key: str | None = None
+) -> Usage | None:
     """The `usage` object of a decoded reply, read defensively; None when there is nothing usable.
 
-    `reasoning` is the path to the reasoning-token count inside the object, if the vendor has one.
+    `reasoning` is the path to the reasoning-token count inside the object, if the vendor has one, and
+    `total_key` the name of its total, if it states one.
     """
     if not isinstance(data, dict):
         return None
@@ -92,6 +98,7 @@ def usage_from(data: object, input_key: str, output_key: str, reasoning: tuple[s
         input_tokens=_count(data.get(input_key)),
         output_tokens=_count(data.get(output_key)),
         reasoning_tokens=_count(_dig(data, reasoning)) if reasoning else None,
+        total_tokens=_count(data.get(total_key)) if total_key else None,
     )
     return found if found != Usage() else None
 
@@ -140,6 +147,49 @@ def normalize_finish_reason(raw: str | None) -> str:
     return "unknown"
 
 
+# The classes a failed attempt is filed under. The first five are the provider or the network being unavailable;
+# none of them says anything about the model.
+ERROR_CLASSES = (
+    "limite_429", "indisponivel_503", "indisponivel_5xx", "tempo_esgotado", "rede",
+    "autenticacao", "resposta_invalida", "outro",
+)
+UNAVAILABLE_CLASSES = ERROR_CLASSES[:5]
+_URL = re.compile(r"https?://\S+")
+SHORT_MESSAGE_LIMIT = 200
+
+
+def clean_message(text: str, secrets: list[str] | None = None) -> str:
+    """A failure message fit to be written down: keys taken out, URLs replaced, one line, at most 200 characters."""
+    text = _scrub(text, secrets or [])
+    text = _URL.sub("<url>", text)
+    text = " ".join(text.split())
+    return text if len(text) <= SHORT_MESSAGE_LIMIT else text[: SHORT_MESSAGE_LIMIT - 1] + "…"
+
+
+def _http_class(code: int) -> str:
+    if code == 429:
+        return "limite_429"
+    if code == 503:
+        return "indisponivel_503"
+    if code >= 500:
+        return "indisponivel_5xx"
+    return "autenticacao" if code in (401, 403) else "outro"
+
+
+def _error_text(body: str) -> str:
+    """What an error body says in words: its `error.message` (or `message`), never the body itself."""
+    try:
+        data = json.loads(body)
+    except ValueError:
+        return ""
+    if isinstance(data, dict):
+        error = data.get("error")
+        for candidate in (error.get("message") if isinstance(error, dict) else error, data.get("message")):
+            if isinstance(candidate, str) and candidate.strip():
+                return candidate
+    return ""
+
+
 class ProviderError(RuntimeError):
     """A call to a model failed.
 
@@ -150,9 +200,16 @@ class ProviderError(RuntimeError):
     """
 
     def __init__(
-        self, message: str, *, retryable: bool = False, retry_after: float | None = None, maybe_billed: bool = True
+        self, message: str, *, retryable: bool = False, retry_after: float | None = None, maybe_billed: bool = True,
+        http_status: int | None = None, error_class: str = "outro", short_message: str = "",
     ) -> None:
         super().__init__(message)
+        # What a report can say about the failure, apart from `message` (which a log may carry whole): the HTTP
+        # status, a class from `ERROR_CLASSES`, and a short clean message (see `clean_message`). None of the three
+        # carries a body, a URL or a header.
+        self.http_status = http_status
+        self.error_class = error_class if error_class in ERROR_CLASSES else "outro"
+        self.short_message = short_message or clean_message(message)
         self.retryable = retryable
         # Whether the provider may have processed, and so charged for, the request that failed. False only
         # when it is certain it did not: an error status came back, or the request never left. A timeout, a
@@ -299,29 +356,52 @@ def _request_json(
     except urllib.error.HTTPError as error:
         waited = error.headers.get("Retry-After") if error.headers is not None else None
         try:
-            detail = _scrub(error.read().decode("utf-8", "replace")[:400], secrets)
+            raw_body = error.read().decode("utf-8", "replace")
         finally:
             error.close()
+        detail = _scrub(raw_body[:400], secrets)
+        said = _error_text(raw_body)
         raise ProviderError(
             f"{url} respondeu {error.code}: {detail}",
             retryable=error.code == 429 or error.code >= 500,
             retry_after=_retry_after(waited),
             maybe_billed=False,
+            http_status=error.code,
+            error_class=_http_class(error.code),
+            short_message=clean_message(f"HTTP {error.code}" + (f": {said}" if said else ""), secrets),
         ) from None
     except urllib.error.URLError as error:
         if isinstance(error.reason, ssl.SSLCertVerificationError):
-            raise ProviderError(f"{url}: certificado recusado: {_scrub(str(error.reason), secrets)}", retryable=False, maybe_billed=False) from None
-        raise ProviderError(f"{url} inacessível: {_scrub(str(error.reason), secrets)}", retryable=True, maybe_billed=False) from None
+            raise ProviderError(
+                f"{url}: certificado recusado: {_scrub(str(error.reason), secrets)}", retryable=False, maybe_billed=False,
+                error_class="rede", short_message=clean_message("certificado recusado: " + str(error.reason), secrets),
+            ) from None
+        raise ProviderError(
+            f"{url} inacessível: {_scrub(str(error.reason), secrets)}", retryable=True, maybe_billed=False,
+            error_class="rede", short_message=clean_message("inacessível: " + str(error.reason), secrets),
+        ) from None
     except ssl.SSLCertVerificationError as error:
-        raise ProviderError(f"{url}: certificado recusado: {_scrub(str(error), secrets)}", retryable=False, maybe_billed=False) from None
+        raise ProviderError(
+            f"{url}: certificado recusado: {_scrub(str(error), secrets)}", retryable=False, maybe_billed=False,
+            error_class="rede", short_message=clean_message("certificado recusado: " + str(error), secrets),
+        ) from None
     except TimeoutError:
-        raise ProviderError(f"{url} excedeu {timeout}s", retryable=True) from None
+        raise ProviderError(
+            f"{url} excedeu {timeout}s", retryable=True, error_class="tempo_esgotado",
+            short_message=f"sem resposta ao fim de {timeout:g} s",
+        ) from None
     except (OSError, http.client.HTTPException) as error:
         # Reset, abort, broken pipe, SSL error, hang-up or short read mid-reply:
         # whatever the socket raises, the call did not finish and may be repeated.
-        raise ProviderError(f"{url} desligou a meio da leitura: {_scrub(str(error), secrets)}", retryable=True) from None
+        raise ProviderError(
+            f"{url} desligou a meio da leitura: {_scrub(str(error), secrets)}", retryable=True, error_class="rede",
+            short_message=clean_message("desligou a meio da leitura: " + str(error), secrets),
+        ) from None
     except (json.JSONDecodeError, UnicodeDecodeError):
-        raise ProviderError(f"{url} devolveu uma resposta que não é JSON", retryable=True) from None
+        raise ProviderError(
+            f"{url} devolveu uma resposta que não é JSON", retryable=True, error_class="resposta_invalida",
+            short_message="a resposta não é JSON",
+        ) from None
 
 
 def _sorted_names(items: list, field: str, strip: str = "") -> list[str]:
@@ -767,7 +847,9 @@ class GoogleProvider(Provider):
             f"{self.BASE}/models/{self.model}:generateContent", self._headers(),
             {"contents": [{"role": "user", "parts": [{"text": prompt}]}], "generationConfig": config}, self.timeout,
         )
-        usage = usage_from(data.get("usageMetadata"), "promptTokenCount", "candidatesTokenCount", ("thoughtsTokenCount",))
+        usage = usage_from(
+            data.get("usageMetadata"), "promptTokenCount", "candidatesTokenCount", ("thoughtsTokenCount",), "totalTokenCount"
+        )
         candidates = data.get("candidates") if isinstance(data, dict) else None
         if not candidates:
             block = (data.get("promptFeedback") or {}).get("blockReason") if isinstance(data, dict) else None
@@ -882,6 +964,9 @@ class LocalProvider(Provider):
 
 
 __all__ = [
+    "ERROR_CLASSES",
+    "UNAVAILABLE_CLASSES",
+    "clean_message",
     "Provider",
     "ProviderError",
     "Reply",

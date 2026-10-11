@@ -389,6 +389,35 @@ class TestFromTheFilesOnDisk(unittest.TestCase):
         self.assertEqual((files.ledger["chamadas"], files.pilot_ledger["chamadas"], files.ledger["sem_resultado"]), (1, 1, 1))
         self.assertEqual(files.ledger["gasto_eur"], files.ledger["por_liquidar_eur"])
 
+    def test_a_report_over_the_pilot_folder_itself_reads_the_pilots_ledger_under_its_own_id(self):
+        """The pilot's ledger names its trial `<folder>/piloto`. Looking from inside the pilot folder used to ask for
+        the id `piloto` and find nothing, so the cost showed as zero."""
+        pilot = self.folder / "piloto"
+        pilot.mkdir()
+        trial_id, pilot_id = execucao.ensaio_ids(self.folder)
+        Ledger(pilot / "custos.jsonl").reserve(
+            catalog=CATALOG, ensaio=pilot_id, run_id="r", model_key="pago", case_id="C1", sample=1,
+            prompt="x" * 300, tokens_max=1000, day=DAY, ceiling_eur=1)
+        append_record(pilot / FILE_NAME, rec("m", "C01", 1, count_mode="pior_caso", cost_eur=Decimal("0.2")))
+        files = execucao.load(pilot / "respostas.jsonl")
+        self.assertEqual((files.ledger["chamadas"], files.ledger["sem_resultado"]), (1, 1))
+        self.assertGreater(files.ledger["gasto_eur"], 0)
+        self.assertTrue(files.is_pilot)
+        answers, _ = scenario("m", answered=1, mode="pior_caso", cost="0.2")
+        analysis = analyse(files, CASES20, answers, grade_all(CASES20, answers)[0])
+        lines = execucao.cost_lines(analysis)
+        self.assertTrue(lines[0].startswith("Custo do piloto, contado à parte do ensaio: 0,0"), lines[0])
+        self.assertNotIn(": 0,0000 EUR", lines[0])
+
+    def test_from_the_trial_folder_the_pilot_is_still_read_as_before(self):
+        (self.folder / "piloto").mkdir()
+        _, pilot_id = execucao.ensaio_ids(self.folder)
+        Ledger(self.folder / "piloto" / "custos.jsonl").reserve(
+            catalog=CATALOG, ensaio=pilot_id, run_id="r", model_key="pago", case_id="C1", sample=1,
+            prompt="x" * 300, tokens_max=1000, day=DAY, ceiling_eur=1)
+        files = execucao.load(self.answers_file)
+        self.assertEqual((files.pilot_ledger["chamadas"], files.is_pilot), (1, False))
+
     def test_reading_creates_nothing(self):
         self.assertIsNone(execucao.load(self.answers_file))
         self.assertEqual(list(self.folder.iterdir()), [])

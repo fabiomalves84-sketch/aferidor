@@ -275,7 +275,7 @@
       "parametros": {
         "campo_tokens": "maxOutputTokens",
         "temperatura": "desconhecido",
-        "tokens_raciocinio": "por_confirmar",
+        "tokens_raciocinio": "separados_da_saida",
         "esforco_raciocinio": null,
         "tokens_max": 8192
       },
@@ -284,7 +284,7 @@
       "chave_env": "GEMINI_API_KEY",
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Alternativa estável da Google; o preço dobra a partir de 2027-01-01. Lido em https://ai.google.dev/api/generate-content a 2026-10-11 (API nativa generateContent): usageMetadata com thoughtsTokenCount, mas a página não diz se candidatesTokenCount os inclui. O piloto corre na camada gratuita da Google (fonte: https://ai.google.dev/gemini-api/docs/pricing, lida em 2026-10-11, segundo o Fábio). O catálogo não tem campo para a camada gratuita, por isso o preço dos períodos acima, o da camada paga, mantém-se como pior caso e o teto continua obrigatório.",
+      "nota": "Alternativa estável da Google; o preço dobra a partir de 2027-01-01. Lido em https://ai.google.dev/api/generate-content a 2026-10-11 (API nativa generateContent): usageMetadata com thoughtsTokenCount, mas a página não diz se candidatesTokenCount os inclui. O piloto corre na camada gratuita da Google (fonte: https://ai.google.dev/gemini-api/docs/pricing, lida em 2026-10-11, segundo o Fábio). O catálogo não tem campo para a camada gratuita, por isso o preço dos períodos acima, o da camada paga, mantém-se como pior caso e o teto continua obrigatório. Raciocínio marcado como separado da saída a 2026-10-11, e ainda por confirmar, porque o totalTokenCount que o confirma só passa a ser guardado agora. Fontes: (1) https://ai.google.dev/gemini-api/docs/thinking, lido a 2026-10-11: «response pricing is the sum of output tokens and thinking tokens», ou seja, o pensamento fatura-se à taxa de saída; (2) o piloto do Aferidor de 2026-10-11, em ficheiros locais não versionados: em 3 de 4 respostas o thoughtsTokenCount (1426 a 1922) foi superior ao candidatesTokenCount (1002 a 1171), o que só é possível se o pensamento não estiver dentro dos candidatos (na quarta, 1287 contra 1326). Com este valor o custo de uma chamada conta-se pelo usage declarado, com o pensamento somado à saída, e não pelo pior caso; sem thoughtsTokenCount na resposta continua a contar-se o pior caso. Quando o totalTokenCount de várias chamadas confirmar que a sua diferença para entrada mais saída é o pensamento, retira-se «tokens_raciocinio» de por_confirmar.",
       "por_confirmar": [
         "tokens_raciocinio",
         "temperatura",

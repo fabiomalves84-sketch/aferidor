@@ -8,6 +8,7 @@ out exactly as they did before.
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -16,6 +17,7 @@ from typing import Any
 from .checks import REFUSAL_CRITERION
 from .grading import match_answers
 from .models import Answer, Case, Verdict
+from .providers import ERROR_CLASSES, UNAVAILABLE_CLASSES
 from .proveniencia import ProvenanceRecord, provenance_path, read_records
 from .traducao import decimal, t
 
@@ -27,6 +29,7 @@ UNANSWERED_LIMIT_PERCENT = 10
 PILOT_FOLDER = "piloto"
 LEDGER_NAME = "custos.jsonl"
 _UNANSWERED_STATES = ("recusa_api", "truncada", "vazia")
+_FAILED_STATES = ("erro", "resultado_desconhecido")  # attempts with no reply: the provider said no, or said nothing
 
 
 def ensaio_ids(trial_dir: Path) -> tuple[str, str]:
@@ -48,21 +51,33 @@ class Files:
     ledger: dict[str, Any] | None = None
     pilot_records: tuple[ProvenanceRecord, ...] = ()
     pilot_ledger: dict[str, Any] | None = None
+    is_pilot: bool = False  # the answers file is the pilot's own, read from inside the pilot folder
 
 
 def load(answers_path: Path) -> Files | None:
-    """The paid-run files that sit beside an answers file, or None if there are none: then nothing is added."""
+    """The paid-run files that sit beside an answers file, or None if there are none: then nothing is added.
+
+    Read from the pilot folder itself, the files are the pilot's: its ledger names the trial `<folder>/piloto`,
+    so that is the id it is read under, and the report says it is the pilot's cost.
+    """
     from .custos import Ledger  # kept apart: custos is the writer of these files, the reports only read them
 
-    trial_dir = Path(answers_path).parent
-    trial_id, pilot_id = ensaio_ids(trial_dir)
-    trial_ledger, pilot_ledger = ledger_paths(trial_dir)
-    records = tuple(read_records(provenance_path(answers_path)))
-    pilot_records = tuple(read_records(provenance_path(trial_dir / PILOT_FOLDER / Path(answers_path).name)))
+    here = Path(answers_path).parent
+    if here.name == PILOT_FOLDER:
+        _, pilot_id = ensaio_ids(here.parent)
+        ledger_path = here / LEDGER_NAME
+        found = Files(
+            records=tuple(read_records(provenance_path(answers_path))),
+            ledger=Ledger(ledger_path).summary(pilot_id) if ledger_path.exists() else None,
+            is_pilot=True,
+        )
+        return found if (found.records or found.ledger) else None
+    trial_id, pilot_id = ensaio_ids(here)
+    trial_ledger, pilot_ledger = ledger_paths(here)
     found = Files(
-        records=records,
+        records=tuple(read_records(provenance_path(answers_path))),
         ledger=Ledger(trial_ledger).summary(trial_id) if trial_ledger.exists() else None,
-        pilot_records=pilot_records,
+        pilot_records=tuple(read_records(provenance_path(here / PILOT_FOLDER / Path(answers_path).name))),
         pilot_ledger=Ledger(pilot_ledger).summary(pilot_id) if pilot_ledger.exists() else None,
     )
     if not (found.records or found.ledger or found.pilot_records or found.pilot_ledger):
@@ -81,6 +96,11 @@ class ModelRun:
     empty: int
     text_refusals: int
     records: tuple[ProvenanceRecord, ...]
+    # Attempts that failed, by class (`providers.ERROR_CLASSES`), and the samples left with no answer because the
+    # last thing that happened to them was a failure: by the provider being unavailable, or by any other error.
+    failures: dict[str, int] = field(default_factory=dict)
+    unanswered_unavailable: int = 0
+    unanswered_other_error: int = 0
 
     @property
     def received(self) -> int:
@@ -142,11 +162,19 @@ def analyse(files: Files, cases: list[Case], answers: list[Answer], verdicts: li
             if record.state in ("resposta",) + _UNANSWERED_STATES:
                 last[(record.case_id, record.sample)] = record.state
         left = [state for key, state in last.items() if key not in answered_keys and state in _UNANSWERED_STATES]
+        failing = [r for r in records if r.state in _FAILED_STATES]
+        final: dict[tuple[str, int], ProvenanceRecord] = {}
+        for record in records:
+            final[(record.case_id, record.sample)] = record
+        stuck = [r for key, r in final.items() if key not in answered_keys and r.state in _FAILED_STATES]
+        unavailable = sum(1 for r in stuck if (r.error_class or "outro") in UNAVAILABLE_CLASSES)
         runs.append(ModelRun(
             model=model, answered=len(answered_keys),
             api_refusals=left.count("recusa_api"), truncated=left.count("truncada"), empty=left.count("vazia"),
             text_refusals=sum(1 for a, v in pairs if a.model == model and _is_text_refusal(v)),
             records=tuple(records),
+            failures=dict(Counter(r.error_class or "outro" for r in failing)),
+            unanswered_unavailable=unavailable, unanswered_other_error=len(stuck) - unavailable,
         ))
     if not runs:
         return None
@@ -172,6 +200,21 @@ def _eur(value: Decimal, lang: str) -> str:
 
 def _percent(value: Decimal, lang: str) -> str:
     return decimal(f"{value:.1f}", lang)
+
+
+def _error_label(error_class: str, lang: str) -> str:
+    """The words for a class of failed attempt."""
+    labels = {
+        "limite_429": t("limite de pedidos (429)", lang),
+        "indisponivel_503": t("serviço indisponível (503)", lang),
+        "indisponivel_5xx": t("serviço indisponível (outro erro 5xx)", lang),
+        "tempo_esgotado": t("tempo esgotado", lang),
+        "rede": t("falha de ligação", lang),
+        "autenticacao": t("autenticação recusada", lang),
+        "resposta_invalida": t("resposta ilegível", lang),
+        "outro": t("outro erro", lang),
+    }
+    return labels.get(error_class, error_class)
 
 
 def notices(analysis: Analysis, lang: str = "pt") -> list[tuple[str, str]]:
@@ -201,6 +244,23 @@ def notices(analysis: Analysis, lang: str = "pt") -> list[tuple[str, str]]:
                 modelo=run_.model, pct=_percent(run_.percent, lang), n=run_.unanswered, total=run_.received,
                 limite=UNANSWERED_LIMIT_PERCENT,
             )))
+    failed = [run_ for run_ in analysis.models if run_.failures]
+    if failed:
+        parts = [t(
+            "Quando o fornecedor está indisponível (limite de pedidos, serviço em baixo, tempo esgotado, falha de ligação) "
+            "a amostra fica por responder, e isso não diz nada sobre o modelo: nunca conta como resposta errada, em "
+            "nenhuma contagem. Cada tentativa que falhou fica aqui, por classe.", lang,
+        )]
+        for run_ in failed:
+            detail = ", ".join(f"{_error_label(c, lang)} {n}" for c, n in sorted(run_.failures.items(), key=lambda item: ERROR_CLASSES.index(item[0])))
+            latest = next((r.error_message for r in reversed(run_.records) if r.state in _FAILED_STATES and r.error_message), "")
+            parts.append(t(
+                "{modelo}: {n} tentativas falharam ({detalhe}); {k} amostras ficaram por responder por indisponibilidade "
+                "do fornecedor e {m} por outro erro do pedido.", lang,
+                modelo=run_.model, n=sum(run_.failures.values()), detalhe=detail,
+                k=run_.unanswered_unavailable, m=run_.unanswered_other_error,
+            ) + (" " + t("Última mensagem: {mensagem}", lang, mensagem=latest) if latest else ""))
+        out.append((t("Falhas do fornecedor.", lang), " ".join(parts)))
     groups = {values for values in analysis.applied_by_model.values() if values}
     if len(groups) > 1:
         listed = "; ".join(f"{m}: {', '.join(v)}" for m, v in analysis.applied_by_model.items() if v)
@@ -261,6 +321,16 @@ def condition_lines(run_: ModelRun, lang: str = "pt") -> list[str]:
         for rate, source in sorted(rates, key=str)
     )
     catalogs = ", ".join(sorted({r.catalog_sha256[:12] for r in records}))
+    totals = [r for r in records if r.total_tokens is not None and r.total_difference is not None]
+    total_line = ""
+    if totals:
+        total_line = t(
+            "total de tokens declarado pelo fornecedor em {n} chamadas; a diferença para entrada mais saída é igual aos "
+            "tokens de pensamento em {k}, zero em {z} e outra em {o}", lang,
+            n=len(totals), k=sum(1 for r in totals if r.total_difference == r.reasoning_tokens and r.total_difference),
+            z=sum(1 for r in totals if r.total_difference == 0),
+            o=sum(1 for r in totals if r.total_difference not in (0, r.reasoning_tokens)),
+        )
     return [
         t("modelo pedido {pedido}; modelo servido {servido} ({verificacao})", lang,
           pedido=requested, servido=served, verificacao=_verification(records, lang)),
@@ -271,6 +341,7 @@ def condition_lines(run_: ModelRun, lang: str = "pt") -> list[str]:
         *priced,
         rate_text,
         t("catálogo de modelos e preços, SHA-256 {sha}", lang, sha=catalogs),
+        *([total_line] if total_line else []),
     ]
 
 
@@ -306,7 +377,8 @@ def cost_lines(analysis: Analysis, lang: str = "pt") -> list[str]:
             ))
         return lines
 
-    out += block(files.records, files.ledger, t("Custo do ensaio", lang))
+    title = t("Custo do piloto, contado à parte do ensaio", lang) if files.is_pilot else t("Custo do ensaio", lang)
+    out += block(files.records, files.ledger, title)
     if files.pilot_records or files.pilot_ledger:
         out += block(files.pilot_records, files.pilot_ledger, t("Custo do piloto, contado à parte do ensaio", lang))
     for run_ in analysis.models:

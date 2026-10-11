@@ -31,8 +31,11 @@ from typing import IO, Any
 
 from .catalogo import POR_CONFIRMAR, UNKNOWN, Catalog, CatalogError
 
-# Portuguese averages about four characters a token; three overstates on purpose, so an estimate made
-# without a tokenizer errs on the side of a higher bill. The pilot run compares it with what the provider says.
+# A guess at the tokens of a prompt without a tokenizer: characters over three. It is NOT an upper bound. How many
+# characters a token holds depends on the tokenizer, and the pilot of 2026-10-11 measured it: the declared input was
+# 0.82 to 0.83 of the estimate for Gemini 3.8 Flash (the estimate was 1.21 to 1.22 times too high) and 1.65 to 2.05 times
+# the estimate for the Amália GGUF on Ollama (the estimate was 0.49 to 0.61 of the declared). The estimate is used for
+# `--a-seco` and for the worst case reserved before a call; the declared input replaces it when the call is settled.
 CHARS_PER_TOKEN = 3
 OUTPUT_SCENARIOS = (1000, 4000)
 

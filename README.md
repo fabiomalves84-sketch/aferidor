@@ -75,7 +75,7 @@ Requer Python 3.10 ou superior. Não tem dependências externas.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 1098 testes
+python3 -m unittest discover -s tests          # 1124 testes
 python3 -m aferidor verificar                  # coerência dos casos e do corretor
 python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
@@ -154,7 +154,7 @@ documentos públicos ou são sintéticos.
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar`: 27/27 e 31/31 casos coerentes; 319/319 e 140/140 controlos
-  negativos detetados. 1098 testes, em Python 3.10 a 3.14 na integração
+  negativos detetados. 1124 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 10 de 58 confirmadas por uma pessoa, caso a caso, nos PDF da DGS; 24
   declaradas confirmadas em grupo, sem registo de página por caso; as 24
@@ -165,10 +165,13 @@ A ferramenta sabe medir modelos de vários fornecedores pela via paga: com teto
 de gasto, livro de custos que só acrescenta, estimativa sem chamar, piloto e
 proveniência por chamada (o modelo pedido e o servido, a temperatura aplicada, os
 tokens e o custo), e o relatório diz o que ficou sem resposta e em que condições
-cada modelo correu. **Ainda não houve nenhuma corrida real contra um
-fornecedor** desta via: o que foi testado usa respostas simuladas, escritas a
-partir da documentação oficial, e `docs/ARQUITETURA.md` lista o que não ficou
-provado.
+cada modelo correu. Houve só um piloto, a 2026-10-11, de 3 casos por 2 amostras
+com dois modelos gratuitos, e **nenhum ensaio completo** contra um fornecedor
+desta via: o resto foi testado com respostas simuladas, escritas a partir da
+documentação oficial, e `docs/ARQUITETURA.md` lista o que não ficou provado. A
+estimativa de tokens da entrada (caracteres a dividir por três) não é um limite
+superior: o fator depende do tokenizador, e no piloto sobrestimou um modelo
+(1,2 vezes) e subestimou outro (ficou a cerca de metade do declarado).
 
 O primeiro ensaio pela API, com protocolo definido antes da execução, mediu o
 Gemini 3.5 Flash Lite (`ensaios/2026-09-28-gemini-flash/`). Não há revisor

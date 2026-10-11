@@ -169,7 +169,7 @@ pelo livro e pela proveniência mas não pede `--teto-eur`.
 - **Por confirmar.** O que a documentação lida não diz fica na lista `por_confirmar` de cada modelo em `catalogo.json`:
   a OpenAI (as páginas da API não abriram), o vLLM (a página lida só lista os endpoints), e do Google a contagem dos
   tokens de pensamento (`totalTokenCount` é «prompt + pensamento + candidatos», mas a página não diz se
-  `candidatesTokenCount` os inclui). Enquanto for «por confirmar» ou «desconhecido», uma chamada conta no pior caso.
+  `candidatesTokenCount` os inclui). Enquanto for «por confirmar» ou «desconhecido», uma chamada conta no pior caso. O Gemini 3.8 Flash está marcado `separados_da_saida` (a documentação diz que o pensamento se fatura como saída, e o piloto mostrou o pensamento à parte), com «por confirmar» mantido até o `totalTokenCount` o confirmar: conta-se pelo usage, com o pensamento somado à saída, e pelo pior caso se a resposta não trouxer o `thoughtsTokenCount`.
 - **Tempos limite.** Vêm do catálogo (`tempo_limite_s`) para os modelos pagos, e são os que os fornecedores já tinham:
   60 s para a OpenAI e a Anthropic, 300 s para o Gemini. Os 60 s herdados podem ser curtos para modelos que raciocinam
   antes de responder; o piloto deve rever este valor, no catálogo, antes do ensaio completo.
@@ -189,6 +189,8 @@ linha se apaga nem se reescreve, e nenhuma repetição faz desaparecer um gasto 
 com o ficheiro bloqueado, e é o do ensaio inteiro, todos os modelos da pasta somados. Uma intenção sem resultado conta
 pelo pior caso; e enquanto o catálogo não disser como o fornecedor conta os tokens de raciocínio, também o resultado de
 uma chamada conta pelo pior caso (entrada mais `tokens_max` ao preço de saída), com o `usage` declarado registado ao lado.
+A entrada do pior caso reservado antes da chamada é estimada por caracteres a dividir por três, e esse fator depende do
+tokenizador (ver o quadro do que não está provado): sobrestima onde o fornecedor conta menos tokens, e subestima onde conta mais.
 
 ### Proveniência
 
@@ -196,7 +198,10 @@ uma chamada conta pelo pior caso (entrada mais `tokens_max` ao preço de saída)
 parâmetros pedidos e aplicados, tokens como o fornecedor os deu, custo e modo de contagem, estado, o SHA-256 do
 `catalogo.json` e o período de preço usados. Vive à parte de `Answer` porque `models.py` e `storage.py` pertencem ao
 `grader_id`. `Reply` leva a palavra do fornecedor sobre porque parou (`finish_reason_original`) antes de ser normalizada, e
-a proveniência guarda as duas; nada do que se grava nas respostas muda.
+a proveniência guarda as duas; nada do que se grava nas respostas muda. De uma tentativa falhada guarda o estado HTTP, a classe do
+erro (`limite_429`, `indisponivel_503`, `indisponivel_5xx`, `tempo_esgotado`, `rede`, `autenticacao`, `resposta_invalida`, `outro`)
+e uma mensagem curta e limpa (no máximo 200 caracteres, sem corpo, sem URL, sem chave); de uma chamada do Gemini guarda também
+o `totalTokenCount` e a sua diferença para entrada mais saída, que mostra de onde vêm os tokens de pensamento.
 
 ### A guarda de cada chamada
 
@@ -252,6 +257,9 @@ igual byte a byte (um teste regenera-o e compara-o com o publicado, a menos da l
   aplicada, limite e campo de tokens, modo de contagem do custo e a razão, o período de preço, a taxa e o SHA-256 do
   catálogo. Se as temperaturas aplicadas diferem entre modelos (incluindo um que não aceita e corre à sua), o relatório
   diz que a comparação entre fornecedores não é feita em condições idênticas.
+- **Falhas do fornecedor.** As tentativas que falharam, por classe, à parte do modelo: limite de pedidos, serviço indisponível, tempo
+  esgotado e falha de ligação são o fornecedor, não o modelo, e uma amostra que ficou por responder por isso nunca conta como
+  resposta errada. Lido de dentro da pasta `piloto/`, o relatório usa o id que o livro do piloto tem e diz que o custo é o do piloto.
 - **Custo.** Por modelo e total, em EUR, separando o que se contou pelo usage declarado do que se contou pelo pior caso
   (que é um máximo, não a fatura), e o piloto à parte.
 
@@ -268,11 +276,11 @@ igual byte a byte (um teste regenera-o e compara-o com o publicado, a menos da l
 
 | Não provado | Porquê |
 |---|---|
-| Nenhuma resposta real de nenhum fornecedor | Não houve nenhuma corrida real. As fixtures foram escritas à mão a partir da documentação oficial lida, e dizem-no no próprio ficheiro |
+| Um ensaio completo contra um fornecedor | Só houve um piloto de 3 casos x 2 amostras por modelo, a 2026-10-11: a Amália em GGUF pelo Ollama (6 de 6 respostas) e o Gemini 3.8 Flash na camada gratuita (4 de 6; as outras tentativas falharam por erros do fornecedor, cuja causa só agora passa a ser guardada). Os testes usam fixtures escritas à mão a partir da documentação oficial lida, e dizem-no no próprio ficheiro |
 | O formato real das respostas da OpenAI e do vLLM | As páginas da API da OpenAI não abriram (HTTP 403 e 404) e a do vLLM só lista os endpoints |
-| A contagem dos tokens de pensamento do Google | A documentação lida não diz se `candidatesTokenCount` os inclui; conta-se pelo pior caso |
+| A contagem dos tokens de pensamento do Google | A documentação lida não diz se `candidatesTokenCount` os inclui. O piloto de 2026-10-11 mostrou que o pensamento vem à parte nos 4 casos em que houve resposta (em 3 deles, o pensamento declarado é maior do que os candidatos), mas o `totalTokenCount` só passa a ser guardado agora. O Gemini 3.8 Flash conta-se pelo usage, e continua por confirmar; os outros do Google contam-se pelo pior caso |
 | O pior caso contra uma fatura real | Só o piloto, confrontado com a consola de faturação do fornecedor, o pode dizer |
-| Um tokenizador real | A entrada estima-se por caracteres a dividir por três, de propósito por excesso; não foi comparada com o `prompt_tokens` de nenhum fornecedor |
+| Um tokenizador real | A entrada estima-se por caracteres a dividir por três, e o fator depende do tokenizador: no piloto a estimativa ficou 1,21 a 1,22 vezes acima do declarado no Gemini (sobrestima) e a 0,49 a 0,61 do declarado na Amália em GGUF no Ollama (subestima: o declarado foi quase o dobro). Não é, portanto, um limite superior: o pior caso reservado antes de uma chamada usa esta estimativa, e o declarado só entra quando a chamada se liquida |
 | O bloqueio do livro em Windows (`msvcrt`) | Está escrito e nunca correu; só o caminho POSIX (`flock`) foi testado |
 | A tradução das cadeias novas do relatório | São minhas, em en, es, fr e de, e esperam por um nativo |
 | A confirmação do id de cada modelo pelo endpoint de listagem do fornecedor | `verificado_em_execucao` é falso em todos os modelos do catálogo; só o servidor compatível o confirma, e só antes de correr |

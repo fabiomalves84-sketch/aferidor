@@ -432,6 +432,14 @@ original por ferramenta e coincidem com a referência.
 O enquadramento normativo (ISO/IEC 42001, ISO 13485, Regulamento de
 Dispositivos Médicos) está em `docs/APRESENTACAO.md`.
 
+### Estimativa de tokens e custo de uma corrida paga
+
+A estimativa dos tokens da entrada (caracteres a dividir por três, em `aferidor/custos.py`) serve `--a-seco` e o pior caso
+reservado antes de cada chamada. Não é um limite superior: o fator depende do tokenizador. No piloto de 2026-10-11 o
+declarado ficou 0,82 a 0,83 da estimativa no Gemini 3.8 Flash (a estimativa sobrestimou, 1,21 a 1,22 vezes) e 1,65 a 2,05 vezes
+a estimativa na Amália em GGUF no Ollama (a estimativa ficou a 0,49 a 0,61 do declarado). Quando a chamada se liquida, o
+declarado substitui a estimativa. Os valores vêm de três casos por modelo e valem só para esses modelos.
+
 ## Ensaios registados
 
 `ensaios/` contém as execuções realizadas, com respostas em bruto, veredictos e

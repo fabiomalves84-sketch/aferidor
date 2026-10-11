@@ -269,10 +269,10 @@ produz o exemplo atual.
 ## 15. Correr modelos de fornecedores
 
 Esta secção cobre os modelos que o `aferidor/catalogo.json` lista (hoje, a
-Anthropic, a OpenAI, o Google e a Amália num servidor próprio). Ainda não houve
-nenhuma corrida real contra um fornecedor: o que aqui se descreve foi testado com
-respostas simuladas, escritas à mão a partir da documentação oficial, e o
-primeiro pedido real é o piloto do passo 5.
+Anthropic, a OpenAI, o Google e a Amália num servidor próprio). Só houve, a 2026-10-11,
+um piloto de 3 casos por 2 amostras com a Amália em GGUF e com o Gemini 3.8 Flash, e nenhum ensaio
+completo: o resto do que aqui se descreve foi testado com respostas simuladas, escritas à mão a partir
+da documentação oficial.
 
 **1. Chaves.** Uma variável de ambiente por fornecedor (`ANTHROPIC_API_KEY`,
 `OPENAI_API_KEY`, `GEMINI_API_KEY`) ou, na falta dela, uma linha `NOME=valor` num
@@ -298,9 +298,11 @@ python3 -m aferidor executar --fornecedor anthropic --modelo claude-opus-5-5 --a
 ```
 
 Mede os prompts reais, estima o custo em três cenários de saída e sai com 0. Não
-chama ninguém, não precisa de chave e não escreve nada. A entrada estima-se por
-excesso (caracteres a dividir por três), e a saída depende de quanto o modelo
-escreve e raciocina, por isso o cenário maior é o que o teto protege.
+chama ninguém, não precisa de chave e não escreve nada. A entrada
+estima-se por caracteres a dividir por três, e esse fator depende do tokenizador: no piloto de 2026-10-11
+sobrestimou o Gemini (1,2 vezes) e subestimou a Amália em GGUF no Ollama (ficou a cerca de metade do declarado), por isso
+não é um limite superior. A saída depende de quanto o modelo escreve e raciocina, por isso o cenário maior é o que o teto
+protege.
 
 **4. O teto.** `--teto-eur` é obrigatório para um modelo do catálogo, sem valor
 por omissão (só o que custa zero, a Amália, dispensa-o). Antes de cada chamada,
