@@ -243,7 +243,7 @@ class TestAboutPage(unittest.TestCase):
             "Mede, não aconselha. Não é um dispositivo médico e não contém dados de doentes.",
             "Serve para ver como um assistente responde a perguntas clínicas e que erros comete.",
             "Objetivos.", "Medir, sem aconselhar.", "Mostrar primeiro as falhas críticas, e não a média.",
-            "Preparar a validação por um especialista.",
+            "Ter a folha cega pronta, se houver revisor.",
             "Para experimentar não é preciso chave nem custo:",
             "As chaves de API são lidas do ambiente e nunca do repositório.",
         ):

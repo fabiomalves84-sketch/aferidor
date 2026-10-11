@@ -58,7 +58,7 @@ consulta; à data, 1,000 e 0,500, segundo a mensagem do commit `4c497e5`). Entre
 Gemma 4 31B e o Gemma 3 12B, 1 contra 9 casos, p = 0,021, sem correção para
 comparações múltiplas; antes da afinação `3fa7e65` (09/10) era 2 contra 9,
 p = 0,065. Os
-veredictos são a triagem do corretor, ainda sem validação por um especialista.
+veredictos são a triagem automática do corretor, sem validação clínica.
 Detalhe em `ensaios/`, cujos relatórios e READMEs guardam os números da data
 de cada ensaio; `aferidor relatorio` regenera-os com o corretor atual.
 
@@ -75,7 +75,7 @@ Requer Python 3.10 ou superior. Não tem dependências externas.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 1141 testes
+python3 -m unittest discover -s tests          # 1145 testes
 python3 -m aferidor verificar                  # coerência dos casos e do corretor
 python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
@@ -112,15 +112,17 @@ respostas corretas parece adequado; se os 8% de erros forem doses pediátricas,
    e classifica cada falha por tipo e por risco clínico.
 4. Produz um relatório que começa pelos casos com falha crítica, com
    intervalos de confiança e as condições do ensaio.
-5. Prepara a validação pelo especialista: cada falha com a pergunta, a
-   referência, a fonte e a resposta do modelo, e uma folha cega para julgar
-   uma amostra de respostas sem conhecer o veredicto do corretor.
+5. Deixa o material pronto para uma validação, se houver um revisor: cada
+   falha com a pergunta, a referência, a fonte e a resposta do modelo, e uma
+   folha cega para julgar uma amostra de respostas sem conhecer o veredicto do
+   corretor.
 
-**A ferramenta faz a triagem; o especialista valida.** O veredicto do corretor
-é uma proposta. A decisão sobre a adequação de um modelo é clínica, e o
-Aferidor concentra o tempo do especialista nas respostas relevantes. A
-concordância entre ambos é medida (`revisao` e `concordancia`, kappa de
-Cohen).
+**A ferramenta faz uma triagem automática, sem validação clínica.** Não há
+revisor clínico. O veredicto do corretor é uma proposta, e a decisão sobre a
+adequação de um modelo é clínica, não do Aferidor. A folha cega e a medida de
+concordância com o corretor (`revisao` e `concordancia`, kappa de Cohen) estão
+preparadas para o dia em que houver um revisor; enquanto não houver, não medem
+nada, e nenhum número do relatório foi validado por uma pessoa.
 
 O instrumento é verificado antes do ensaio: cada critério tem de aceitar a
 resposta de referência e rejeitar uma resposta errada construída para o
@@ -154,7 +156,7 @@ documentos públicos ou são sintéticos.
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar`: 27/27 e 31/31 casos coerentes; 319/319 e 140/140 controlos
-  negativos detetados. 1141 testes, em Python 3.10 a 3.14 na integração
+  negativos detetados. 1145 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 10 de 58 confirmadas por uma pessoa, caso a caso, nos PDF da DGS; 24
   declaradas confirmadas em grupo, sem registo de página por caso; as 24

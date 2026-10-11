@@ -56,8 +56,8 @@ from .risk import Risk
 # is a decision with a record: BRIEFING.md and the README have to say the same, and a test checks both.
 CLINICAL_REVIEW_DONE = False
 TRIAGE_NOTE = (
-    "Os veredictos são a triagem automática do corretor; a validação por um "
-    "especialista faz-se à parte, numa folha cega (`aferidor revisao`)."
+    "Os veredictos são a triagem automática do corretor, sem validação clínica: não há revisor, e a folha "
+    "cega (`aferidor revisao`) está pronta para quando houver."
 )
 
 

@@ -741,7 +741,7 @@ def _about_page(protocol: Protocol | None, cases: list[Case]) -> list[str]:
         f'<p class="objetivos-titulo"><strong>{_t("Objetivos.")}</strong></p><ul class="objetivos">'
         f'<li>{_t("Medir, sem aconselhar.")}</li>'
         f'<li>{_t("Mostrar primeiro as falhas críticas, e não a média.")}</li>'
-        f'<li>{_t("Preparar a validação por um especialista.")}</li></ul>',
+        f'<li>{_t("Ter a folha cega pronta, se houver revisor.")}</li></ul>',
         "<p>" + _t(
             "Quem corrige as respostas é um programa, o corretor: procura no texto o que o caso exige e o "
             "que não pode aparecer, e dá sempre o mesmo resultado para a mesma resposta. É automático e "

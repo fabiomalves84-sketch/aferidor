@@ -107,11 +107,12 @@ ficheiro é declarativa; a prova é
 o commit do protocolo antes do ensaio. O comando recusa reescrever um
 protocolo existente.
 
-## Validação do corretor por um clínico
+## Validação do corretor por um clínico (ainda sem revisor)
 
 O `verificar` demonstra que cada critério aceita a resposta correta e rejeita
 uma resposta errada construída. Não mede a concordância do corretor com um
-clínico em respostas reais.
+clínico em respostas reais, e não há revisor clínico: os dois comandos abaixo
+estão preparados para quando houver, e até lá nenhuma concordância foi medida.
 
 ```
 python3 -m aferidor revisao --respostas <ficheiro> --n 60   # folha para julgar
@@ -507,6 +508,6 @@ e Phi-4 no banco principal, Gemma 4 31B no de consulta) não mudaram.
   indicador de português europeu, intervalos de confiança
 - [x] **Fase 8** Ferramentas de validação (27/09/2026): protocolo de aprovação
   prévio e folha cega para revisão clínica
-- [ ] **Fase 9** Validação: revisão clínica de uma amostra de respostas reais e
-  confirmação das fontes restantes (o ensaio pela API com protocolo prévio foi
-  feito a 28/09/2026)
+- [ ] **Fase 9** Validação do corretor contra a referência citada em cada caso,
+  e confirmação das fontes restantes (o ensaio pela API com protocolo prévio foi
+  feito a 28/09/2026). Não há revisor clínico e não há data.

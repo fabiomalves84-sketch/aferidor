@@ -24,16 +24,18 @@ O relatório apresenta, antes de qualquer percentagem, os casos com falha de
 risco crítico, cada um com a pergunta, a resposta de referência, a fonte e o
 texto do modelo.
 
-## Utilização: triagem pela ferramenta, validação pelo especialista
+## Utilização: triagem automática, sem validação clínica
 
-O Aferidor não substitui o clínico que avalia um modelo; prepara-lhe o
-trabalho. Coloca cada caso várias vezes, corrige todas as respostas de forma
-determinista e ordena as falhas por risco. O especialista recebe primeiro as
-falhas críticas, com a evidência necessária para confirmar ou contestar cada
-veredicto. A folha cega (`aferidor revisao`) permite-lhe julgar uma amostra de
-respostas sem conhecer a decisão do corretor, e `aferidor concordancia` mede o
-acordo entre ambos. Essa medida indica o grau de confiança que a triagem
-automática merece em ensaios seguintes.
+O Aferidor não substitui o clínico que avalia um modelo. Coloca cada caso
+várias vezes, corrige todas as respostas de forma determinista e ordena as
+falhas por risco, e quem lê o relatório vê primeiro as falhas críticas, com a
+evidência para confirmar ou contestar cada veredicto. Não há revisor clínico: os
+veredictos são triagem, sem validação. A folha cega (`aferidor revisao`) e a
+medida de concordância (`aferidor concordancia`) estão preparadas para o dia em
+que houver um revisor: a primeira dá a uma pessoa uma amostra de respostas sem a
+decisão do corretor, a segunda mede o acordo entre ambos. Enquanto não houver,
+essa medida não existe, e o grau de confiança que a triagem merece não está
+medido.
 
 ## Âmbito
 
@@ -63,19 +65,20 @@ julgamento clínico.
   antes do ensaio. Sem protocolo, o relatório usa o limiar de referência e diz
   que não é prévio; com protocolo, indica aprovado ou reprovado e assinala os
   escritos depois do ensaio.
-- **Folha cega para revisão clínica** e medida de concordância com o corretor.
+- **Folha cega e medida de concordância com o corretor**, preparadas para uma
+  revisão clínica que ainda não tem revisor.
 - Intervalos de confiança nos resultados principais e um indicador de
   português europeu independente das falhas clínicas.
 - Adaptadores para OpenAI, Anthropic, Google Gemini e modelos locais através
   do Ollama.
-- 1141 testes automáticos, sem dependências externas.
+- 1145 testes automáticos, sem dependências externas.
 
 Limitações conhecidas:
 
-- **A validação pelo especialista ainda não foi feita nos ensaios
-  registados.** O circuito está pronto e a folha cega gera-se com um comando;
-  falta um clínico disponível para a julgar. Até lá, os resultados
-  correspondem à triagem do corretor, e os relatórios dizem-no no topo.
+- **Não há validação clínica nem revisor.** O circuito está pronto e a folha
+  cega gera-se com um comando, mas ninguém a julgou: os resultados dos ensaios
+  registados são a triagem do corretor, sem validação, e os relatórios dizem-no
+  no topo.
 - **Fontes parcialmente confirmadas.** 10 casos confirmados nos PDF da DGS, um
   a um; 24 declarados confirmados em grupo; os 24 restantes lidos no
   documento original por ferramenta, todos coincidentes, à espera de
@@ -106,7 +109,7 @@ uma demonstração, esse tipo de evidência:
 | Classificação de falhas por risco | `aferidor/risk.py` |
 | Registo íntegro dos resultados | `data/respostas.jsonl`, escrito à medida que as respostas chegam; em cada ensaio registado, `MANIFESTO.sha256` com o SHA-256 de cada ficheiro (`aferidor manifesto --verificar`) |
 | Relatório para revisão humana | `relatorios/relatorio.md` e `.html`, com condições do ensaio e intervalos de confiança |
-| Validação do método de medida | `aferidor revisao` e `concordancia`: corretor contra clínico, às cegas |
+| Validação do método de medida | `aferidor revisao` e `concordancia`, preparados e ainda sem revisor: corretor contra uma pessoa, às cegas |
 | Requisitos rastreáveis e gestão de riscos | `docs/QUALIDADE.md`: 39 requisitos ligados aos testes que os verificam, 13 riscos do instrumento com mitigação e risco residual; um teste garante que os testes citados existem |
 
 O comando `verificar` avalia a resposta de referência de cada caso contra os
@@ -122,7 +125,7 @@ não nos casos.
 ## Demonstração
 
 ```
-python3 -m unittest discover -s tests   # 1141 testes
+python3 -m unittest discover -s tests   # 1145 testes
 python3 -m aferidor verificar           # 27/27 casos, 319/319 controlos negativos
 python3 -m aferidor verificar --casos casos/consulta.json   # 31/31, 140/140
 python3 -m aferidor executar --fornecedor falso

@@ -205,10 +205,11 @@ gerado também nas outras línguas, cada uma num ficheiro ao lado
 substituir `--fornecedor local` por `openai`, `anthropic` ou `gemini`. O custo
 de 405 pedidos nos modelos correntes é da ordem dos cêntimos a poucos euros.
 
-## 12. Validação por um clínico
+## 12. Validação por um clínico (ainda sem revisor)
 
-Antes de apresentar resultados, um clínico deve julgar uma amostra das
-respostas:
+Não há hoje um revisor clínico, por isso nenhum resultado foi validado. Quando
+houver, deve julgar uma amostra das respostas antes de se apresentarem
+resultados:
 
 ```
 python3 -m aferidor revisao --respostas data/respostas.jsonl --n 60
