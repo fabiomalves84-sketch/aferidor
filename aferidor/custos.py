@@ -37,6 +37,12 @@ CHARS_PER_TOKEN = 3
 OUTPUT_SCENARIOS = (1000, 4000)
 
 BILLED_STATES = ("resposta", "recusa_api", "truncada", "vazia", "resultado_desconhecido")
+# States an earlier attempt can be in and still be asked again on request (`retry_uncertain`): the call has no
+# settled result ("sem_resultado": the process died between `reserve` and `settle`), it timed out or was cut off
+# ("resultado_desconhecido"), or it came back as an answer that the runner never kept ("resposta"; the runner
+# only reaches `reserve` for a sample with no saved answer, so it is the caller who guarantees that). A truncated,
+# refused or empty reply is not here: whether to ask those again is still the owner's decision.
+REPEATABLE_STATES = ("sem_resultado", "resultado_desconhecido", "resposta")
 FREE_STATES = ("erro",)
 STATES = BILLED_STATES + FREE_STATES
 COUNT_MODES = ("pior_caso", "usage", "sem_custo")
@@ -294,6 +300,7 @@ class Reservation:
     worst_usd: Decimal
     worst_eur: Decimal
     attempt: int
+    previous_id: str | None = None  # the earlier attempt this one follows, which keeps its cost in the total
 
 
 @dataclass(frozen=True)
@@ -309,6 +316,7 @@ class Settlement:
 class _Intent:
     raw: dict[str, Any]
     result: dict[str, Any] | None = None
+    archived: bool = False  # before a restart: still counted as spent, no longer blocks its sample
 
     @property
     def key(self) -> tuple[str, str, str, int]:
@@ -331,6 +339,7 @@ class _Intent:
 _INTENT_FIELDS = ("id", "ensaio", "run_id", "modelo", "fornecedor", "caso", "amostra", "tentativa", "repeticao",
                   "tokens_max", "entrada_estimada", "dia_preco", "pior_caso_usd", "pior_caso_eur", "quando")
 _RESULT_FIELDS = ("intencao", "estado", "modo", "motivo", "custo_usd", "custo_eur", "usage", "quando")
+_RESTART_FIELDS = ("ensaio", "modelo", "razao", "gasto_anterior_eur", "quando")
 
 
 def _usage_dict(usage: object) -> dict[str, int | None] | None:
@@ -429,10 +438,16 @@ class Ledger:
                         raise KeyError
                     Decimal(line["custo_eur"]), Decimal(line["custo_usd"])
                     target.result = line
+                elif kind == "recomeco":
+                    if any(f not in line for f in _RESTART_FIELDS):
+                        raise KeyError
+                    for earlier in intents.values():
+                        if earlier.raw["ensaio"] == line["ensaio"] and earlier.raw["modelo"] == line["modelo"]:
+                            earlier.archived = True
                 else:
                     raise KeyError
             except (KeyError, ArithmeticError, TypeError):
-                raise LedgerError(f"{locked._name}: a linha {number} não é uma intenção nem um resultado válidos") from None
+                raise LedgerError(f"{locked._name}: a linha {number} não é uma intenção, um resultado ou um recomeço válidos") from None
         return intents
 
     @staticmethod
@@ -443,19 +458,27 @@ class Ledger:
         for i in mine:
             by_provider[i.raw["fornecedor"]] = by_provider.get(i.raw["fornecedor"], Decimal(0)) + i.eur
             by_model[i.raw["modelo"]] = by_model.get(i.raw["modelo"], Decimal(0)) + i.eur
+        unsettled = [i for i in mine if i.result is None]
         return {
             "ensaio": ensaio,
             "teto_eur": cap,
             "gasto_eur": sum((i.eur for i in mine), Decimal(0)),
             "gasto_usd": sum((i.usd for i in mine), Decimal(0)),
+            "anterior_eur": sum((i.eur for i in mine if i.archived), Decimal(0)),  # before a restart
+            "novo_eur": sum((i.eur for i in mine if not i.archived), Decimal(0)),
             "chamadas": len(mine),
-            "sem_resultado": sum(1 for i in mine if i.result is None),
+            "sem_resultado": len(unsettled),  # reserved and never settled: counted at the worst case
+            "por_liquidar_eur": sum((i.eur for i in unsettled), Decimal(0)),
             "por_fornecedor": by_provider,
             "por_modelo": by_model,
         }
 
     def summary(self, ensaio: str) -> dict[str, Any]:
-        """What the trial has spent, in total and by provider and model, as the file stands now."""
+        """What the trial has spent, in total and by provider and model, as the file stands now.
+
+        Reading a ledger that does not exist is not writing one: it says nothing was spent and creates nothing."""
+        if not self.path.exists():
+            return self._summary({}, ensaio)
         with self._file.locked() as locked:
             return self._summary(self._load(locked), ensaio)
 
@@ -473,11 +496,16 @@ class Ledger:
         day: date,
         ceiling_eur: Decimal | int | str,
         repeat: bool = False,
+        retry_uncertain: bool = False,
     ) -> Reservation:
         """Write the intention to make one call, or refuse. Nothing is written when it refuses.
 
         Raises `AlreadyAsked` if this sample was already asked of this model in this trial and `repeat` is
-        not set (the one exception: every earlier attempt ended in `erro`, which cost nothing), and
+        not set. Two exceptions: every earlier attempt ended in `erro`, which cost nothing; or
+        `retry_uncertain` is set and the sample's last attempt is one of `REPEATABLE_STATES` (the caller says
+        there is no saved answer for it). A repetition is a new reservation with its own worst case, linked to
+        the one before it, which keeps its cost in the total. Attempts before a restart no longer count as
+        asking, but they still count as spent. Raises
         `CeilingReached` if the total so far plus the worst case of this call would pass `ceiling_eur`.
         The ceiling is the trial's, all models together. Raises `CatalogError` or `EurosUnavailable` before
         anything else if the call cannot be priced.
@@ -493,13 +521,17 @@ class Ledger:
         worst_eur = catalog.cost_eur(model_key, day, estimated_in, tokens_max)
         with self._file.locked() as locked:
             intents = self._load(locked)
-            earlier = [i for i in intents.values() if i.key == (ensaio, model_key, case_id, sample)]
+            earlier = [i for i in intents.values() if i.key == (ensaio, model_key, case_id, sample) and not i.archived]
             if earlier and not repeat and any(i.state != "erro" for i in earlier):
-                states = ", ".join(sorted({i.state for i in earlier}))
-                raise AlreadyAsked(
-                    f"a amostra {sample} de {case_id} já foi pedida a {model_key} neste ensaio (estado: {states}); "
-                    "pedi-la outra vez custa de novo e só se faz a pedido explícito"
-                )
+                found = {i.state for i in earlier} - {"erro"}
+                if not (retry_uncertain and earlier[-1].state in REPEATABLE_STATES and found <= set(REPEATABLE_STATES)):
+                    hint = "; pedi-la outra vez custa de novo e só se faz a pedido explícito"
+                    if found <= set(REPEATABLE_STATES):
+                        hint += " (o resultado é incerto: --repetir-incertas pede-a de novo e conta os dois gastos)"
+                    raise AlreadyAsked(
+                        f"a amostra {sample} de {case_id} já foi pedida a {model_key} neste ensaio "
+                        f"(estado: {', '.join(sorted(found))}){hint}"
+                    )
             summary = self._summary(intents, ensaio, cap)
             if summary["gasto_eur"] + worst_eur > cap:
                 raise CeilingReached(
@@ -514,11 +546,28 @@ class Ledger:
             locked.append({
                 "t": "intencao", "id": intent_id, "ensaio": ensaio, "run_id": run_id, "modelo": model_key,
                 "fornecedor": model.provider, "caso": case_id, "amostra": sample, "tentativa": len(earlier) + 1,
-                "repeticao": bool(earlier) and repeat and any(i.state != "erro" for i in earlier),
+                "repeticao": bool(earlier) and (repeat or retry_uncertain) and any(i.state != "erro" for i in earlier),
+                "tentativa_anterior": earlier[-1].raw["id"] if earlier else None,
                 "tokens_max": tokens_max, "entrada_estimada": estimated_in, "dia_preco": day.isoformat(),
                 "pior_caso_usd": _plain(worst_usd), "pior_caso_eur": _plain(worst_eur), "quando": self._now(),
             })
-            return Reservation(intent_id, worst_usd, worst_eur, len(earlier) + 1)
+            return Reservation(intent_id, worst_usd, worst_eur, len(earlier) + 1, earlier[-1].raw["id"] if earlier else None)
+
+    def restart(self, ensaio: str, model_key: str, reason: str) -> dict[str, Any]:
+        """Record that a model's answers were thrown away to start over. The ledger keeps every line.
+
+        What was spent before stays in the total, and the ceiling still counts it; those samples stop blocking
+        a new request. Returns the trial's summary as it stood just before. Needs a reason, in a line.
+        """
+        if not reason.strip():
+            raise LedgerError("um recomeço precisa de uma razão escrita")
+        with self._file.locked() as locked:
+            intents = self._load(locked)
+            before = self._summary(intents, ensaio)
+            mine = sum((i.eur for i in intents.values() if i.raw["ensaio"] == ensaio and i.raw["modelo"] == model_key), Decimal(0))
+            locked.append({"t": "recomeco", "ensaio": ensaio, "modelo": model_key, "razao": reason.strip(),
+                           "gasto_anterior_eur": _plain(mine), "quando": self._now()})
+            return before
 
     def settle(self, intent_id: str, *, catalog: Catalog, state: str, usage: object = None) -> Settlement:
         """Write the result of a reserved call and say what it cost."""

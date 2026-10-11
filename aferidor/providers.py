@@ -49,12 +49,15 @@ class Reply:
     `served_model` is the model id the provider says it answered with, which is not always the one
     asked for (an alias can point at a snapshot), and `usage` the tokens it counted. Both are
     empty when the provider did not say; nothing here changes how a reply is read or graded.
+    `finish_reason_original` is the provider's own word for why it stopped, before `finish_reason` folded it
+    into one vocabulary; None when it did not say.
     """
 
     text: str
     finish_reason: str = "stop"
     served_model: str = ""
     usage: Usage | None = None
+    finish_reason_original: str | None = None
 
 
 def _count(value: object) -> int | None:
@@ -91,6 +94,11 @@ def _served(data: object) -> str:
     """The `model` field of a decoded reply, if it is a string."""
     value = data.get("model") if isinstance(data, dict) else None
     return value if isinstance(value, str) else ""
+
+
+def _original(raw: object) -> str | None:
+    """The provider's own finish reason, as written, if it is text."""
+    return raw if isinstance(raw, str) and raw else None
 
 
 def normalize_finish_reason(raw: str | None) -> str:
@@ -314,6 +322,7 @@ def _chat_completion(
             data.get("usage"), "prompt_tokens", "completion_tokens",
             ("completion_tokens_details", "reasoning_tokens"),
         ),
+        finish_reason_original=_original(choice.get("finish_reason")),
     )
 
 
@@ -405,6 +414,7 @@ class AnthropicProvider(Provider):
             finish_reason=normalize_finish_reason(data.get("stop_reason")),
             served_model=_served(data),
             usage=usage_from(data.get("usage"), "input_tokens", "output_tokens"),
+            finish_reason_original=_original(data.get("stop_reason")),
         )
 
     def available_models(self) -> list[str]:

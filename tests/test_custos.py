@@ -74,9 +74,9 @@ def a_catalog(rate: float | None = 0.5):
 CATALOG = a_catalog()
 
 
-def reserve(ledger: Ledger, *, key="pago", case="C1", sample=1, ceiling="1", ensaio="e1", repeat=False, catalog=None):
+def reserve(ledger: Ledger, *, key="pago", case="C1", sample=1, ceiling="1", ensaio="e1", repeat=False, catalog=None, **more):
     return ledger.reserve(catalog=catalog or CATALOG, ensaio=ensaio, run_id="r1", model_key=key, case_id=case,
-                          sample=sample, prompt=PROMPT, tokens_max=1000, day=DAY, ceiling_eur=ceiling, repeat=repeat)
+                          sample=sample, prompt=PROMPT, tokens_max=1000, day=DAY, ceiling_eur=ceiling, repeat=repeat, **more)
 
 
 class WithAFolder(unittest.TestCase):

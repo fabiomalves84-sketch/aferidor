@@ -160,6 +160,27 @@ ou vazia foi paga, fica escrita e não se repete (decisão pendente do Fábio). 
 60 s para a OpenAI e a Anthropic, 300 s para o Gemini. Os 60 s herdados podem ser curtos para modelos que raciocinam
 antes de responder; o piloto deve rever este valor, no catálogo, antes do ensaio completo.
 
+## Uma corrida paga que acaba
+
+O livro só acrescenta: nenhuma linha se apaga nem se reescreve, e nenhuma repetição faz desaparecer um gasto da conta.
+
+- **Reserva órfã.** Uma intenção sem linha de resultado: o processo morreu entre `reserve` e `settle`. Conta no pior
+  caso, aparece no resumo como «por liquidar» e só se repete com `--repetir-incertas`. O bloqueio do ficheiro liberta-se
+  com o processo, por isso uma morte não deixa nada preso.
+- **`--repetir-incertas`.** Pede de novo, numa reserva nova com o seu próprio pior caso, a amostra cuja última tentativa
+  está por liquidar, deu tempo limite (`resultado_desconhecido`) ou foi paga como `resposta` sem que a resposta chegasse
+  ao ficheiro. A nova reserva fica ligada à anterior (`tentativa_anterior`), a anterior mantém o custo, e o teto conta as
+  duas. Uma resposta truncada, recusada ou vazia continua a não se repetir (decisão pendente). Um tempo limite desta
+  corrida não se repete nesta corrida. Cuidado: com dois processos a correr o mesmo ensaio, uma reserva ainda a meio de
+  uma chamada de outro processo parece uma órfã; não usar a flag assim.
+- **`--recomecar` num modelo pago.** Mostra o gasto acumulado, pede em texto a confirmação e uma razão, escreve uma linha
+  `recomeco` no livro e só depois apaga as respostas. As reservas anteriores continuam no gasto (o resumo mostra o
+  «anterior» e o «novo», e o teto conta o total) e deixam de bloquear as amostras. Sem terminal para confirmar, recusa.
+- **Resumo.** No fim de uma corrida paga: gasto do ensaio, do piloto e a soma. São dois livros, cada um com o seu teto;
+  o gasto efetivo máximo dos dois é o dobro. Ler um livro que não existe não o cria.
+- **`finish_reason_original`.** `Reply` leva a palavra do fornecedor para o fim da resposta, antes de ser normalizada, e a
+  proveniência guarda as duas. Nada do que se grava nas respostas muda.
+
 ## Sem dependências externas
 
 Apenas a biblioteca padrão do Python, incluindo os adaptadores HTTP. Um

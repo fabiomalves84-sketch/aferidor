@@ -48,6 +48,7 @@ class PaidCalls:
     provenance_file: Path
     ensaio: str
     ceiling_eur: Decimal
+    retry_uncertain: bool = False  # ask again the samples whose earlier attempt is uncertain (`--repetir-incertas`)
     catalog_path: Path = DEFAULT_PATH
     day: date = field(default_factory=date.today)
     now: Callable[[], datetime] = lambda: datetime.now(timezone.utc)
@@ -80,6 +81,9 @@ class PaidCalls:
                     catalog=self.catalog, ensaio=self.ensaio, run_id=run_id, model_key=self.model_key,
                     case_id=case_id, sample=sample, prompt=prompt,
                     tokens_max=provider.max_tokens or model.tokens_max or 0, day=self.day, ceiling_eur=self.ceiling_eur,
+                    # A call that times out in this run is not asked again in it (the loop below gives up on it),
+                    # with or without the flag: the flag reaches attempts made in earlier runs.
+                    retry_uncertain=self.retry_uncertain,
                 )
             except CeilingReached as stop:
                 raise RunStopped(f"{stop}. Nada do que já estava guardado foi apagado.") from None
@@ -146,7 +150,7 @@ class PaidCalls:
             applied_params=applied,
             input_tokens=getattr(usage, "input_tokens", None), output_tokens=getattr(usage, "output_tokens", None),
             reasoning_tokens=getattr(usage, "reasoning_tokens", None),
-            finish_reason=reply.finish_reason if reply else "unknown", finish_reason_original=None,
+            finish_reason=reply.finish_reason if reply else "unknown", finish_reason_original=reply.finish_reason_original if reply else None,
             started_at=started_at.isoformat(timespec="seconds"), ended_at=self.now().isoformat(timespec="seconds"),
             latency_s=max(0.0, self.monotonic() - t0), cost_usd=outcome.usd, cost_eur=outcome.eur,
             count_mode=outcome.count_mode, count_reason=outcome.reason, state=state,

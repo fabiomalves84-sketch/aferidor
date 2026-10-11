@@ -169,6 +169,11 @@ def build_parser() -> argparse.ArgumentParser:
              f"gravados à parte, numa subpasta '{PILOT_FOLDER}' ao lado de --saida",
     )
     run_options.add_argument(
+        "--repetir-incertas", action="store_true",
+        help="num modelo pago, pedir de novo as amostras sem resposta guardada cujo resultado ficou incerto "
+             "(tempo limite, ou reservadas e nunca liquidadas); cada repetição custa de novo e as duas contam no teto",
+    )
+    run_options.add_argument(
         "--recomecar",
         action="store_true",
         help="ignorar respostas anteriores deste modelo e perguntar tudo de novo",
@@ -300,7 +305,7 @@ def comando_executar(args: argparse.Namespace) -> int:
     return _executar(
         args.casos, args.fornecedor, args.modelo, args.saida, args.limite, args.tentativas,
         args.repeticoes, args.temperatura, args.tokens_max, args.recomecar,
-        teto_eur=args.teto_eur, a_seco=args.a_seco, piloto=args.piloto,
+        teto_eur=args.teto_eur, a_seco=args.a_seco, piloto=args.piloto, repetir_incertas=args.repetir_incertas,
     )
 
 
@@ -309,6 +314,7 @@ def _executar(
     repeticoes: int, temperatura: float, tokens_max: int, recomecar: bool,
     errors_out: dict[str, str] | None = None,
     *, teto_eur: Decimal | None = None, a_seco: bool = False, piloto: bool = False,
+    repetir_incertas: bool = False,
 ) -> int:
     cases = read_cases(casos)
     if piloto:
@@ -358,8 +364,14 @@ def _executar(
         paid = PaidCalls(
             catalog=catalog, model_key=entry.key, ledger=Ledger(saida.with_name("custos.jsonl")),
             provenance_file=provenance_path(saida), ensaio=ensaio, ceiling_eur=teto_eur,
+            retry_uncertain=repetir_incertas,
         )
+    elif repetir_incertas:
+        print("aviso: --repetir-incertas só tem efeito num modelo pago (do catálogo); este não tem livro de custos",
+              file=sys.stderr)
 
+    if recomecar and paid is not None and not _confirm_paid_restart(paid, provider.name, saida):
+        return 2
     if recomecar and saida.exists():
         existing = read_answers(saida)
         kept = [a for a in existing if a.model != provider.name]
@@ -403,15 +415,73 @@ def _executar(
     if errors_out is not None:
         errors_out.update(result.errors)
     if paid is not None:
-        spent = paid.ledger.summary(paid.ensaio)
-        print(
-            f"gasto contado neste ensaio: {spent['gasto_eur']:.4f} EUR de um teto de {teto_eur} EUR, "
-            f"em {spent['chamadas']} chamadas (o pior caso conta onde não se sabe)"
-        )
+        for line in _spend_lines(paid, saida, piloto, teto_eur):
+            print(line)
     if result.stopped:
         print(f"parada: {result.stopped}", file=sys.stderr)
         return STOPPED
     return 0 if result.complete else 1
+
+
+def _ledgers_of(saida: Path, piloto: bool) -> tuple[Path, Path]:
+    """The ledger of the trial and the ledger of its pilot, beside `saida` (which already is the pilot's, for a pilot)."""
+    trial = saida.parent.parent if piloto else saida.parent
+    return trial / "custos.jsonl", trial / PILOT_FOLDER / "custos.jsonl"
+
+
+def _spend_lines(paid: PaidCalls, saida: Path, piloto: bool, ceiling: Decimal | None) -> list[str]:
+    """What the trial and its pilot have spent, apart and together. They are two ledgers, each with its own ceiling."""
+    trial_path, pilot_path = _ledgers_of(saida, piloto)
+    name = paid.ensaio.split("/")[0]
+    trial = Ledger(trial_path).summary(name)  # reading a ledger that is not there creates nothing
+    pilot = Ledger(pilot_path).summary(f"{name}/{PILOT_FOLDER}")
+    mine = pilot if piloto else trial
+    lines = [
+        f"gasto do ensaio: {trial['gasto_eur']:.4f} EUR em {trial['chamadas']} chamadas; "
+        f"do piloto: {pilot['gasto_eur']:.4f} EUR em {pilot['chamadas']} chamadas; "
+        f"soma: {trial['gasto_eur'] + pilot['gasto_eur']:.4f} EUR",
+        f"o teto de {ceiling} EUR conta cada livro por si: o gasto efetivo máximo dos dois é o dobro, "
+        f"{ceiling * 2} EUR (o pior caso conta onde não se sabe)",
+    ]
+    if mine["anterior_eur"]:
+        lines.append(f"deste livro, {mine['anterior_eur']:.4f} EUR são de antes de um recomeço e {mine['novo_eur']:.4f} EUR de depois; "
+                     "o teto conta os dois")
+    if mine["sem_resultado"]:
+        lines.append(f"por liquidar: {mine['sem_resultado']} chamadas reservadas e nunca liquidadas, {mine['por_liquidar_eur']:.4f} EUR "
+                     "contados no pior caso; só se repetem com --repetir-incertas")
+    return lines
+
+
+def _confirm_paid_restart(paid: PaidCalls, model_name: str, saida: Path) -> bool:
+    """Show what is already spent and ask, in writing, before the answers of a paid model are thrown away.
+
+    The ledger keeps every line: what was spent stays in the total and the ceiling still counts it. Nothing is
+    thrown away without a typed confirmation and a reason, so a script cannot do it by accident.
+    """
+    summary = paid.ledger.summary(paid.ensaio)
+    if not summary["chamadas"] and not (saida.exists() and any(a.model == model_name for a in read_answers(saida))):
+        return True
+    print(
+        f"--recomecar num modelo pago: neste ensaio já se gastaram {summary['gasto_eur']:.4f} EUR em {summary['chamadas']} "
+        f"chamadas ({summary['anterior_eur']:.4f} EUR de antes de recomeços anteriores). O livro não se apaga e este "
+        f"gasto continua a contar para o teto de {paid.ceiling_eur} EUR; só as respostas de {model_name} são apagadas."
+    )
+    try:
+        typed = input("Para apagar as respostas e recomeçar escreve RECOMECAR: ")
+        if typed.strip().lower() not in ("recomecar", "recomeçar"):
+            print("erro: recomeço não confirmado; nada foi apagado", file=sys.stderr)
+            return False
+        reason = input("Razão do recomeço (uma linha): ").strip()
+    except EOFError:
+        print("erro: o recomeço de um modelo pago pede confirmação escrita e não há onde a ler; nada foi apagado",
+              file=sys.stderr)
+        return False
+    if not reason:
+        print("erro: um recomeço precisa de uma razão; nada foi apagado", file=sys.stderr)
+        return False
+    paid.ledger.restart(paid.ensaio, paid.model_key, reason)
+    print("recomeço registado no livro de custos")
+    return True
 
 
 def _a_seco(
@@ -814,7 +884,7 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     codigo = _executar(
         args.casos, args.fornecedor, args.modelo, args.saida, args.limite, args.tentativas,
         args.repeticoes, args.temperatura, args.tokens_max, args.recomecar, errors_out=errors,
-        teto_eur=args.teto_eur,
+        teto_eur=args.teto_eur, repetir_incertas=args.repetir_incertas,
     )
     if codigo in (2, STOPPED):
         return codigo

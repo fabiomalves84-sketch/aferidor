@@ -106,7 +106,7 @@ class TestAPaidRun(WithACli):
         self.assertEqual(len(read_answers(self.saida)), 2)
         self.assertEqual(len(read_records(self.saida.with_name(FILE_NAME))), 2)
         self.assertIn("Estimativa a seco", out)  # the estimate is shown before the first call
-        self.assertIn("gasto contado neste ensaio", out)
+        self.assertIn("gasto do ensaio: 0.1473 EUR em 2 chamadas; do piloto: 0.0000 EUR em 0 chamadas; soma: 0.1473 EUR", out)
 
     def test_the_timeout_comes_from_the_catalogue(self):
         self.run_paid()
