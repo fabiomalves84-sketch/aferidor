@@ -30,7 +30,8 @@ export GEMINI_API_KEY="..."
 A variável vale apenas para a sessão de terminal. Uma chave escrita num
 ficheiro do projeto fica no histórico do git de forma permanente. Para uma
 configuração persistente, as linhas podem ser acrescentadas a `~/.zshrc`, que
-não pertence ao projeto.
+não pertence ao projeto. Na falta da variável, o Aferidor lê também um ficheiro
+`.env` na raiz do repositório, que o git ignora (ver a secção 15).
 
 ## 3. Modelos disponíveis
 
@@ -96,8 +97,11 @@ deteta uma resposta errada construída; se algum falhar, interrompe sem custo.
 As respostas ficam em `data/respostas.jsonl`, e uma nova execução retoma os
 casos em falta desse modelo. A retoma recusa condições diferentes
 (`--temperatura`, `--tokens-max` ou texto de um caso alterado); para uma nova
-medição, usar `--recomecar` ou outro `--saida`. Com 27 perguntas curtas, o
-custo nos modelos correntes é da ordem dos cêntimos.
+medição, usar `--recomecar` ou outro `--saida`. O custo depende do modelo: nos
+pequenos pode ser da ordem dos cêntimos, mas nos de topo do catálogo, com várias
+amostras por caso e respostas longas, pode chegar a dezenas de euros. Antes de
+gastar, `--a-seco` estima-o; um modelo do catálogo não arranca sem `--teto-eur`
+(secção 15).
 
 ## 7. Afinação de critérios
 
@@ -168,10 +172,12 @@ mais tokens, para não misturar duas medições no mesmo ficheiro. A solução �
 repetir o ensaio desde o início com um `--tokens-max` maior.
 
 **Os modelos de raciocínio da OpenAI (`o1`, `o3`, `gpt-5` e semelhantes)
-aceitam apenas `--temperatura 1.0`** e usam `max_completion_tokens` em vez de
-`max_tokens`. O `OpenAIProvider` envia o parâmetro correto, verificado apenas
-com pedidos simulados; recomenda-se confirmar com `--limite 1`
-antes de uma execução completa.
+costumam aceitar apenas `--temperatura 1.0`** e usar `max_completion_tokens` em
+vez de `max_tokens`. O `OpenAIProvider` envia `max_completion_tokens`, verificado
+apenas com pedidos simulados, e nenhuma destas duas regras está confirmada na
+documentação oficial da OpenAI, cujas páginas da API não abriram quando se
+tentou (ficam «por confirmar» no catálogo). Recomenda-se confirmar com
+`--limite 1`, ou com o piloto da secção 15, antes de uma execução completa.
 
 ## 11. Ensaio de comparação completo
 
@@ -226,7 +232,9 @@ python3 -m aferidor ensaio --fornecedor openai --modelo <nome> --recomecar
 ```
 
 Descarta as respostas anteriores do modelo e repete todos os pedidos, com o
-custo correspondente. As novas respostas não serão iguais às anteriores.
+custo correspondente. As novas respostas não serão iguais às anteriores. Num
+modelo pago, pede confirmação escrita e o gasto anterior continua a contar para
+o teto (secção 15).
 
 ## 14. Regenerar o relatório de exemplo
 
@@ -257,3 +265,119 @@ mesmos números do relatório.
 O README do ensaio `2026-09-16-comparacao-local` tem uma receita mais antiga
 para o mesmo exemplo, com só esse ensaio. Ficou como registo da altura e não
 produz o exemplo atual.
+
+## 15. Correr modelos de fornecedores
+
+Esta secção cobre os modelos que o `aferidor/catalogo.json` lista (hoje, a
+Anthropic, a OpenAI, o Google e a Amália num servidor próprio). Ainda não houve
+nenhuma corrida real contra um fornecedor: o que aqui se descreve foi testado com
+respostas simuladas, escritas à mão a partir da documentação oficial, e o
+primeiro pedido real é o piloto do passo 5.
+
+**1. Chaves.** Uma variável de ambiente por fornecedor (`ANTHROPIC_API_KEY`,
+`OPENAI_API_KEY`, `GEMINI_API_KEY`) ou, na falta dela, uma linha `NOME=valor` num
+ficheiro `.env` na raiz do repositório. O `.env` está no `.gitignore`; confirma
+com `git check-ignore .env`. A chave nunca vai para o repositório, nem para uma
+opção da linha de comandos (não existe nenhuma), nem para uma conversa. O
+Aferidor não a imprime: um erro nomeia a variável que falta, nunca o valor.
+
+**2. O catálogo.** `aferidor/catalogo.json` guarda, por modelo, o id, os preços
+por período com a página de onde vieram e o dia em que foram lidos, e os
+parâmetros. Os ids e os preços não estão no código. Três palavras a saber:
+`verificado_em_execucao: false` quer dizer que o id e o preço ainda não foram
+confrontados com o que o fornecedor lista; «desconhecido» é o que ninguém sabe
+ainda; e `por_confirmar` lista o que a documentação oficial lida não diz, por
+modelo. Onde não se sabe como o fornecedor conta os tokens de raciocínio, cada
+chamada conta-se pelo pior caso. Lê o catálogo e confirma os preços nas páginas
+dos fornecedores antes de gastar, porque mudam.
+
+**3. Estimar sem gastar.**
+
+```
+python3 -m aferidor executar --fornecedor anthropic --modelo claude-opus-5-5 --a-seco --tokens-max 8192 --repeticoes 5
+```
+
+Mede os prompts reais, estima o custo em três cenários de saída e sai com 0. Não
+chama ninguém, não precisa de chave e não escreve nada. A entrada estima-se por
+excesso (caracteres a dividir por três), e a saída depende de quanto o modelo
+escreve e raciocina, por isso o cenário maior é o que o teto protege.
+
+**4. O teto.** `--teto-eur` é obrigatório para um modelo do catálogo, sem valor
+por omissão (só o que custa zero, a Amália, dispensa-o). Antes de cada chamada,
+o gasto acumulado mais o pior caso dessa chamada tem de caber no teto; senão a
+corrida pára antes de chamar. O teto é do ensaio inteiro: soma todos os modelos
+que correram na mesma pasta. O gasto fica no `custos.jsonl`, ao lado das
+respostas, que só acrescenta.
+
+**5. O piloto.**
+
+```
+python3 -m aferidor executar --fornecedor anthropic --modelo claude-opus-5-5 --piloto --teto-eur 5 --temperatura 1.0 --tokens-max 8192
+```
+
+Pergunta três casos (ATB-PAC-001, PED-OMA-021 ou, se não existir, ATB-FAR-004, e
+GRA-VPA-024), duas vezes cada, e diz quais escolheu. Serve para ver o custo real,
+as recusas, as respostas truncadas, se o modelo aceita a temperatura pedida e se
+o tempo limite chega (os 60 s herdados podem ser curtos para modelos que
+raciocinam; está no catálogo, em `tempo_limite_s`). Grava tudo numa subpasta
+`piloto/`, com respostas, livro e proveniência próprios, para não gastar as
+amostras do ensaio. Tem por isso um teto próprio, e o gasto máximo efetivo de
+piloto mais ensaio é a soma dos dois tetos. `ensaio --piloto` não existe: o
+piloto corre-se com `executar`.
+
+**6. O ensaio.** Com o protocolo escrito e commitado antes (secção 5):
+
+```
+python3 -m aferidor ensaio --fornecedor anthropic --modelo claude-opus-5-5 --teto-eur 50 --temperatura 1.0 --tokens-max 8192 --repeticoes 5 --protocolo protocolos/<nome>.json
+python3 -m aferidor executar --fornecedor google --modelo <id do catálogo> --teto-eur 50 ...
+python3 -m aferidor executar --fornecedor local-compativel --modelo amalia-9b-0626-dpo --base-url http://localhost:8000/v1 ...
+```
+
+Os modelos da Anthropic do catálogo não aceitam outra temperatura que não a 1,0:
+pede-se `--temperatura 1.0` e a chamada vai sem temperatura, o que a proveniência
+regista como pedida 1,0 e aplicada «ausente». `--fornecedor gemini` é o endpoint compatível dos ensaios guardados e pede sempre
+`--modelo`; `google` é a API própria do Google. O servidor compatível (um vLLM,
+por exemplo) pergunta a `/models` o que tem carregado e recusa se o modelo pedido
+não estiver lá.
+
+**7. Códigos de saída.** 0: completo. 1: houve casos por responder. 2: o comando
+recusou arrancar (falta o teto, falta uma chave, as condições da retoma diferem,
+um modelo não aceita a temperatura pedida). 3: a
+corrida parou de propósito, porque o teto seria ultrapassado ou porque o
+fornecedor serviu outro modelo que não o pedido. Com 3, o que já estava guardado
+fica, e o `ensaio` não classifica nem escreve o relatório.
+
+**8. Quando uma corrida fica a meio.**
+
+- Uma amostra que deu tempo limite pode ter sido cobrada, por isso não se repete
+  sozinha. `--repetir-incertas` pede de novo as amostras sem resposta guardada
+  cujo resultado ficou incerto (tempo limite, ou reservadas e nunca liquidadas);
+  cada repetição custa de novo, fica ligada à anterior, e o teto conta as duas.
+- Uma resposta truncada, recusada pelo fornecedor ou vazia foi paga, fica escrita
+  e não se repete, nem com a flag. Se se deve repetir é uma decisão que o Fábio
+  ainda não tomou.
+- `--recomecar` num modelo pago mostra o gasto acumulado, pede que escrevas
+  `RECOMECAR` e uma razão, regista o recomeço no livro e só depois apaga as
+  respostas. O livro não se apaga: o gasto anterior continua a contar para o
+  teto. Sem terminal para confirmar, recusa.
+
+**9. O que o relatório mostra.** Ao lado das contagens, sem as mudar: as amostras
+não respondidas por modelo (um modelo com mais de 10% fica marcado «não
+comparável com os restantes»), as condições em que cada modelo correu (pedido e
+servido, temperatura pedida e aplicada, contagem do custo, preço, taxa e SHA-256
+do catálogo) e o custo em euros, com o piloto à parte. Se as temperaturas
+aplicadas diferem entre modelos, diz que a comparação não é em condições
+idênticas.
+
+**Avisos.**
+
+- Não correr dois processos ao mesmo tempo no mesmo ensaio: uma reserva ainda a
+  meio de uma chamada de outro processo parece uma reserva órfã, e
+  `--repetir-incertas` pagaria duas vezes.
+- Não renomear a pasta de um ensaio pago: o id do ensaio no livro é o nome da
+  pasta, e o livro deixaria de reconhecer o que já se gastou.
+- O custo que o Aferidor mostra é o pior caso onde não se sabe como o fornecedor
+  conta, e um máximo não é uma fatura. A fatura confirma-se na consola do
+  fornecedor, e o piloto é a ocasião de comparar as duas.
+- A estimativa de tokens da entrada não foi comparada com a de nenhum
+  fornecedor, e o bloqueio do livro só foi testado no caminho POSIX, em macOS.

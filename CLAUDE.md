@@ -54,6 +54,19 @@ aconteceu os documentos dizerem 181 com a bateria em 211. Qualquer tarefa que
 acrescente ou remova testes atualiza o número no README, no
 `docs/APRESENTACAO.md` e aqui, no mesmo commit que muda os testes.
 
+**Um modelo pago só corre com `--teto-eur`, e antes se estima com `--a-seco`.**
+Um modelo é pago quando o `aferidor/catalogo.json` o lista.
+
+**Nunca leias nem imprimas uma chave.** Nem a variável de ambiente, nem o `.env`.
+Os testes usam chaves falsas e `.env` temporários; nenhum teste abre o `.env`
+verdadeiro.
+
+**O livro `custos.jsonl` só acrescenta.** Nunca se apaga nem se reescreve uma
+linha dele, e nenhuma repetição pode fazer um gasto desaparecer da conta.
+
+**Sem push sem o OK explícito do Fábio**, de cada vez; uma aprovação não vale
+para a seguinte.
+
 ## Mensagens de commit
 
 Explicam a decisão, não listam ficheiros. Corre `git log` e lê duas ou três

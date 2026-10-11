@@ -12,8 +12,14 @@ flowchart LR
     D --> E[vereditos.json<br/>certo, errado, que falha]
     D --> F[report<br/>documento em Markdown]
     D --> G[html_report<br/>documento em HTML]
-    B -.fala com.-> P[providers<br/>OpenAI, Anthropic, Gemini, local via Ollama, falso]
+    B -.fala com.-> P[providers<br/>OpenAI e compatíveis, Anthropic, Gemini, Google, local via Ollama, falso]
+    B -.modelo pago.-> Q[pago + custos + proveniencia<br/>teto, livro, registo por chamada]
+    Q -.lido por.-> F
+    Q -.lido por.-> G
 ```
+
+A linha a tracejado de baixo é a via dos modelos pagos, descrita em «Vários fornecedores, do pedido ao relatório». O
+corretor (`checks`, `grading`) não a conhece: o que mede não depende dela.
 
 ## Módulos
 
@@ -23,18 +29,18 @@ flowchart LR
 | `risk.py` | A taxonomia de falhas e o risco clínico de cada uma |
 | `models.py` | Caso, fonte, critério, resposta (com amostra e condições de obtenção), veredicto |
 | `storage.py` | Leitura e escrita destes objetos em JSON legível |
-| `providers.py` | Comunicação com um modelo, através de uma interface estreita |
+| `providers.py` | Comunicação com um modelo, através de uma interface estreita: OpenAI e servidores compatíveis, Anthropic, Gemini pelo endpoint compatível, Google pela API própria, Ollama e um falso para os testes |
 | `catalogo.py` | Os modelos que se podem medir, lidos de `catalogo.json` em execução: fornecedor, id pedido, preços por período com fonte e data de leitura, parâmetros e tempos limite. Nenhum preço nem id está no código, e um teste falha se estiver; o que não se sabe diz «desconhecido» |
 | `chaves.py` | A leitura das chaves de API, do ambiente e, na falta, do `.env` da raiz, só das variáveis que o catálogo declara; o valor nunca entra numa mensagem, num `repr` nem numa exceção |
 | `custos.py` | O custo de uma corrida paga: a estimativa a seco (zero pedidos), o livro `custos.jsonl` que só acrescenta (uma intenção com o pior caso antes de cada chamada, um resultado depois) e o teto, verificado com o ficheiro bloqueado e somado sobre todos os modelos do ensaio. Sem resultado, uma intenção conta pelo pior caso; sem o catálogo dizer como se contam os tokens de raciocínio, também o resultado conta pelo pior caso |
 | `proveniencia.py` | O ficheiro lateral `respostas.proveniencia.jsonl`, uma linha por chamada: id pedido e servido, parâmetros pedidos e aplicados, tokens como o fornecedor os deu, custo e modo de contagem, estado, o sha256 do `catalogo.json` e o período de preço usados. Vive à parte de `Answer` porque `models.py` e `storage.py` pertencem ao `grader_id` |
 | `pago.py` | A guarda que o `runner` põe à volta de cada chamada a um modelo que custa dinheiro (um modelo que o catálogo lista): reservar, chamar, liquidar, escrever a proveniência, conferir o modelo servido. O `runner` só lhe entrega a tentativa; não sabe de preços |
-| `execucao.py` | O que os ficheiros de uma corrida paga (proveniência, livro de custos, os do piloto) dizem ao relatório: as amostras não respondidas por modelo, as condições em que cada um correu e o custo. Só lê; sem estes ficheiros não devolve nada e os relatórios saem como sempre |
-| `runner.py` | Execução dos casos, com repetições, novas tentativas e retoma |
+| `runner.py` | Execução dos casos, com repetições, novas tentativas e retoma; para um modelo pago entrega cada tentativa a `pago.py` |
 | `checks.py` | Avaliação de uma resposta contra um critério |
 | `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |
 | `report.py` | Relatório em Markdown |
 | `condicoes.py` | O que os dois relatórios dizem do ensaio antes dos resultados: as condições em que foi feito, os casos e as amostras que não vieram, e o que o protocolo faz deles |
+| `execucao.py` | O que os ficheiros de uma corrida paga (proveniência, livro de custos, os do piloto) dizem ao relatório: as amostras não respondidas por modelo, as condições em que cada um correu e o custo. Só lê; sem estes ficheiros não devolve nada e os relatórios saem como sempre |
 | `comparacao.py` | O que os números de uma comparação decidem, numa só função cada: o limiar de referência, o empate no topo, a significância (p abaixo de 0,05) e o arredondamento das percentagens; os dois relatórios usam-no, para não discordarem |
 | `html_report.py` | O mesmo relatório em HTML, num único ficheiro, em oito páginas mostradas uma de cada vez só com CSS; a navegação, os controlos e uma ligação de salto por página ficam num só cabeçalho |
 | `html_estilo.py` | A folha de estilo e as cores do relatório HTML, à parte do código que monta a página; é ela que decide, com os mesmos elementos, o menu de cima (abaixo de 62rem) ou a coluna lateral fixa (a partir de 62rem) |
@@ -129,60 +135,15 @@ fique sem tradução. O teste que procura cadeias sem uso lê os módulos à mã
 `interface_strings()` (`tests/test_traducao.py`): um módulo novo com cadeias de
 interface tem de ser acrescentado a essa lista, como `condicoes.py` foi.
 
-## Chamadas pagas: reservar, liquidar, conferir
+## Vários fornecedores, do pedido ao relatório
 
-Um modelo é pago quando o `aferidor/catalogo.json` o lista, com o mesmo fornecedor e o mesmo identificador. Sem
-`--modelo`, o identificador é o do próprio fornecedor (a OpenAI e a Anthropic têm um por omissão; o `gemini` já não: pede
-`--modelo`, porque um id escrito no código envelhece). Os modelos que o catálogo não lista (os locais, o falso, os Gemma e o Gemini Flash Lite
-dos ensaios guardados) correm como sempre: sem livro, sem proveniência, sem teto, e o resultado é o mesmo byte a byte
-(`tests/golden_runner_sem_flags.json`, gravado antes desta ligação e comparado por um teste).
+O caminho de um modelo pago, pela ordem em que acontece: o catálogo diz o que é o modelo e quanto custa; as chaves vêm
+de `chaves.py`; `--a-seco` estima sem chamar; cada chamada passa pela guarda de `pago.py` (reserva no livro, chamada,
+liquidação, linha de proveniência, conferência do modelo servido); uma corrida que pára ou fica incerta pode acabar sem
+esconder gasto; e o relatório lê os ficheiros que isto deixou ao lado das respostas. Nada disto altera o que o corretor
+mede nem o `grader_id`.
 
-Para um modelo pago, cada tentativa percorre o mesmo caminho, em `pago.py`:
-
-1. **`reserve`** escreve a intenção no `custos.jsonl`, com o pior caso da chamada, sob um bloqueio do ficheiro. É aqui
-   que o teto (do ensaio inteiro, todos os modelos somados) e a regra «esta amostra já foi pedida» são decididos, antes
-   da chamada. Se recusar, a corrida pára limpa (`RunStopped`, `resultado.stopped`, código de saída 3) e nada do que já
-   estava guardado é apagado.
-2. A chamada ao fornecedor.
-3. **`settle`** escreve o resultado: quanto custou, pela regra do pior caso enquanto o catálogo não disser como se
-   contam os tokens de raciocínio. Uma falha em que o fornecedor respondeu com um erro não cobra e deixa repetir; um
-   tempo limite ou uma ligação cortada a meio pode ter sido cobrado, conta o pior caso e não se repete sozinho.
-4. A linha de proveniência, em `respostas.proveniencia.jsonl` ao lado das respostas.
-5. **`check_served`**, estrito: se o modelo servido não é o pedido nem um dos `ids_servidos_aceites` do catálogo, a
-   corrida pára nessa chamada e a resposta não é guardada (a chamada foi paga e fica no livro). Um fornecedor que não
-   declara o modelo servido fica registado como «não declarado» e a corrida segue.
-
-Um 429 espera o `Retry-After` do servidor, ou o recuo habitual, dentro de uma espera máxima por tentativa (60 s) e de um
-total por chamada (300 s); um pedido de espera maior do que o permitido desiste da chamada. Uma resposta truncada, recusada
-ou vazia foi paga, fica escrita e não se repete (decisão pendente do Fábio). `--a-seco` estima e sai sem escrever nada;
-`--piloto` pergunta três casos duas vezes e grava tudo numa subpasta `piloto/`, com o seu próprio livro.
-
-**Tempos limite.** Vêm do catálogo (`tempo_limite_s`) para os modelos pagos, e são os que os fornecedores já tinham:
-60 s para a OpenAI e a Anthropic, 300 s para o Gemini. Os 60 s herdados podem ser curtos para modelos que raciocinam
-antes de responder; o piloto deve rever este valor, no catálogo, antes do ensaio completo.
-
-## Uma corrida paga que acaba
-
-O livro só acrescenta: nenhuma linha se apaga nem se reescreve, e nenhuma repetição faz desaparecer um gasto da conta.
-
-- **Reserva órfã.** Uma intenção sem linha de resultado: o processo morreu entre `reserve` e `settle`. Conta no pior
-  caso, aparece no resumo como «por liquidar» e só se repete com `--repetir-incertas`. O bloqueio do ficheiro liberta-se
-  com o processo, por isso uma morte não deixa nada preso.
-- **`--repetir-incertas`.** Pede de novo, numa reserva nova com o seu próprio pior caso, a amostra cuja última tentativa
-  está por liquidar, deu tempo limite (`resultado_desconhecido`) ou foi paga como `resposta` sem que a resposta chegasse
-  ao ficheiro. A nova reserva fica ligada à anterior (`tentativa_anterior`), a anterior mantém o custo, e o teto conta as
-  duas. Uma resposta truncada, recusada ou vazia continua a não se repetir (decisão pendente). Um tempo limite desta
-  corrida não se repete nesta corrida. Cuidado: com dois processos a correr o mesmo ensaio, uma reserva ainda a meio de
-  uma chamada de outro processo parece uma órfã; não usar a flag assim.
-- **`--recomecar` num modelo pago.** Mostra o gasto acumulado, pede em texto a confirmação e uma razão, escreve uma linha
-  `recomeco` no livro e só depois apaga as respostas. As reservas anteriores continuam no gasto (o resumo mostra o
-  «anterior» e o «novo», e o teto conta o total) e deixam de bloquear as amostras. Sem terminal para confirmar, recusa.
-- **Resumo.** No fim de uma corrida paga: gasto do ensaio, do piloto e a soma. São dois livros, cada um com o seu teto;
-  o gasto efetivo máximo dos dois é o dobro. Ler um livro que não existe não o cria.
-- **`finish_reason_original`.** `Reply` leva a palavra do fornecedor para o fim da resposta, antes de ser normalizada, e a
-  proveniência guarda as duas. Nada do que se grava nas respostas muda.
-
-## Fornecedores, chaves e o que não se confirmou
+### Fornecedores e catálogo
 
 `providers.py` fala com cinco famílias, todas por `urllib`: a OpenAI e qualquer servidor compatível (`OpenAICompatible`,
 com o endereço base como parâmetro: o `OpenAIProvider` é esta classe com o endereço e o campo de tokens da OpenAI), a
@@ -191,22 +152,91 @@ Google pela API própria (`GoogleProvider`, `--fornecedor google`), que devolve 
 pensamento (`thoughtsTokenCount`), `modelVersion` e o `finishReason` do próprio Google. O Ollama continua em
 `LocalProvider`. Cada classe cita no docstring as páginas oficiais que foram lidas e a data.
 
-- **Chaves.** `chaves.py` lê a variável de ambiente e, na falta, o `.env` da raiz do repositório (que o `.gitignore`
-  ignora). A chave vive num `Secret`, só sai para o cabeçalho do pedido, e é retirada de qualquer mensagem de erro que
-  um fornecedor devolva a repeti-la. Um erro nomeia a variável, nunca o valor, e nenhuma opção da linha de comandos
-  recebe uma chave.
+Um modelo é pago quando o `aferidor/catalogo.json` o lista, com o mesmo fornecedor e o mesmo identificador. Sem
+`--modelo`, o identificador é o do próprio fornecedor (a OpenAI e a Anthropic têm um por omissão; o `gemini` já não: pede
+`--modelo`, porque um id escrito no código envelhece, e os ensaios guardados com ele continuam legíveis e retomáveis).
+Os modelos que o catálogo não lista (os locais, o falso, os Gemma e o Gemini Flash Lite dos ensaios guardados) correm
+como sempre: sem livro, sem proveniência, sem teto, e o resultado é o mesmo byte a byte (`tests/golden_runner_sem_flags.json`,
+gravado antes desta ligação e comparado por um teste). Um modelo que custa zero (a Amália, num servidor próprio) passa
+pelo livro e pela proveniência mas não pede `--teto-eur`.
+
 - **Temperatura.** O catálogo diz se um modelo a aceita. Se não aceita (a Anthropic documenta que os modelos
   posteriores ao Opus 4.6 correm sempre a 1,0), o pedido vai sem ela, a proveniência regista pedido 1,0 e aplicado
   «ausente», e pedir outro valor recusa antes de gastar. `confirmado_pelo_fornecedor` só é verdadeiro se a resposta
   devolver o parâmetro, o que nenhuma das lidas faz.
 - **Servidor compatível (Amália).** `--fornecedor local-compativel --base-url ...`: pergunta a `/models` o que tem
-  carregado e recusa se o modelo pedido não estiver lá. Sem chave obrigatória e, por custar zero, sem `--teto-eur`.
+  carregado e recusa se o modelo pedido não estiver lá. Sem chave obrigatória.
 - **Por confirmar.** O que a documentação lida não diz fica na lista `por_confirmar` de cada modelo em `catalogo.json`:
   a OpenAI (as páginas da API não abriram), o vLLM (a página lida só lista os endpoints), e do Google a contagem dos
   tokens de pensamento (`totalTokenCount` é «prompt + pensamento + candidatos», mas a página não diz se
   `candidatesTokenCount` os inclui). Enquanto for «por confirmar» ou «desconhecido», uma chamada conta no pior caso.
+- **Tempos limite.** Vêm do catálogo (`tempo_limite_s`) para os modelos pagos, e são os que os fornecedores já tinham:
+  60 s para a OpenAI e a Anthropic, 300 s para o Gemini. Os 60 s herdados podem ser curtos para modelos que raciocinam
+  antes de responder; o piloto deve rever este valor, no catálogo, antes do ensaio completo.
 
-## O que o relatório diz de uma corrida paga
+### Chaves
+
+`chaves.py` lê a variável de ambiente e, na falta, o `.env` da raiz do repositório (que o `.gitignore` ignora), só das
+variáveis que o catálogo declara. A chave vive num `Secret`, só sai para o cabeçalho do pedido, e é retirada de qualquer
+mensagem de erro que um fornecedor devolva a repeti-la. Um erro nomeia a variável, nunca o valor, e nenhuma opção da linha
+de comandos recebe uma chave.
+
+### Custos e teto
+
+`custos.py` tem três partes, nenhuma delas chama um fornecedor. A estimativa a seco (`--a-seco`) conta chamadas e tokens a
+partir dos prompts reais e recusa estimar se faltar um preço ou a taxa. O livro `custos.jsonl` só acrescenta: nenhuma
+linha se apaga nem se reescreve, e nenhuma repetição faz desaparecer um gasto da conta. O teto é verificado na reserva,
+com o ficheiro bloqueado, e é o do ensaio inteiro, todos os modelos da pasta somados. Uma intenção sem resultado conta
+pelo pior caso; e enquanto o catálogo não disser como o fornecedor conta os tokens de raciocínio, também o resultado de
+uma chamada conta pelo pior caso (entrada mais `tokens_max` ao preço de saída), com o `usage` declarado registado ao lado.
+
+### Proveniência
+
+`proveniencia.py` escreve o ficheiro lateral `respostas.proveniencia.jsonl`, uma linha por chamada: id pedido e servido,
+parâmetros pedidos e aplicados, tokens como o fornecedor os deu, custo e modo de contagem, estado, o SHA-256 do
+`catalogo.json` e o período de preço usados. Vive à parte de `Answer` porque `models.py` e `storage.py` pertencem ao
+`grader_id`. `Reply` leva a palavra do fornecedor sobre porque parou (`finish_reason_original`) antes de ser normalizada, e
+a proveniência guarda as duas; nada do que se grava nas respostas muda.
+
+### A guarda de cada chamada
+
+Para um modelo pago, cada tentativa percorre o mesmo caminho, em `pago.py`:
+
+1. **`reserve`** escreve a intenção no `custos.jsonl`, com o pior caso da chamada, sob um bloqueio do ficheiro. É aqui
+   que o teto e a regra «esta amostra já foi pedida» são decididos, antes da chamada. Se recusar, a corrida pára limpa
+   (`RunStopped`, `result.stopped`, código de saída 3) e nada do que já estava guardado é apagado.
+2. A chamada ao fornecedor.
+3. **`settle`** escreve o resultado e o custo pelas regras acima. Uma falha em que o fornecedor respondeu com um erro não
+   cobra e deixa repetir; um tempo limite ou uma ligação cortada a meio pode ter sido cobrado, conta o pior caso e não
+   se repete sozinho.
+4. A linha de proveniência.
+5. **`check_served`**, estrito: se o modelo servido não é o pedido nem um dos `ids_servidos_aceites` do catálogo, a
+   corrida pára nessa chamada e a resposta não é guardada (a chamada foi paga e fica no livro). Um fornecedor que não
+   declara o modelo servido fica registado como «não declarado» e a corrida segue.
+
+Um 429 espera o `Retry-After` do servidor, ou o recuo habitual, dentro de uma espera máxima por tentativa (60 s) e de um
+total por chamada (300 s); um pedido de espera maior do que o permitido desiste da chamada. Uma resposta truncada,
+recusada ou vazia foi paga, fica escrita e não se repete: é uma decisão do Fábio que continua por tomar.
+
+### Uma corrida paga que acaba
+
+- **Reserva órfã.** Uma intenção sem linha de resultado: o processo morreu entre `reserve` e `settle`. Conta no pior
+  caso, aparece no resumo como «por liquidar» e só se repete com `--repetir-incertas`. O bloqueio do ficheiro liberta-se
+  com o processo, por isso uma morte não deixa nada preso.
+- **`--repetir-incertas`.** Pede de novo, numa reserva nova com o seu próprio pior caso, a amostra cuja última tentativa
+  está por liquidar, deu tempo limite (`resultado_desconhecido`) ou foi paga como `resposta` sem que a resposta chegasse
+  ao ficheiro. A nova reserva fica ligada à anterior (`tentativa_anterior`), a anterior mantém o custo, e o teto conta as
+  duas. Um tempo limite desta corrida não se repete nesta corrida. Com dois processos a correr o mesmo ensaio, uma reserva
+  ainda a meio de uma chamada de outro processo parece uma órfã: não usar a flag assim.
+- **`--recomecar` num modelo pago.** Mostra o gasto acumulado, pede em texto a confirmação e uma razão, escreve uma linha
+  `recomeco` no livro e só depois apaga as respostas. As reservas anteriores continuam no gasto (o resumo mostra o
+  «anterior» e o «novo», e o teto conta o total) e deixam de bloquear as amostras. Sem terminal para confirmar, recusa.
+- **Piloto e resumo.** `--a-seco` estima e sai sem escrever nada; `--piloto` pergunta três casos duas vezes e grava tudo
+  numa subpasta `piloto/`, com o seu próprio livro e o seu próprio teto. No fim de uma corrida paga o resumo mostra o gasto
+  do ensaio, o do piloto e a soma; o gasto efetivo máximo dos dois é a soma dos dois tetos. Ler um livro que não existe não
+  o cria.
+
+### O que o relatório diz
 
 O relatório lê, ao lado das respostas, o `respostas.proveniencia.jsonl`, o `custos.jsonl` e os do piloto (`piloto/`).
 Sem nenhum deles, ou quando nenhum modelo do relatório tem proveniência, não acrescenta nada: o relatório de exemplo sai
@@ -224,8 +254,28 @@ igual byte a byte (um teste regenera-o e compara-o com o publicado, a menos da l
   diz que a comparação entre fornecedores não é feita em condições idênticas.
 - **Custo.** Por modelo e total, em EUR, separando o que se contou pelo usage declarado do que se contou pelo pior caso
   (que é um máximo, não a fatura), e o piloto à parte.
-- O `--fornecedor gemini` (o endpoint compatível dos ensaios guardados) já não tem modelo por omissão: pede `--modelo`.
-  Os ensaios guardados com ele continuam legíveis e retomáveis.
+
+## O que está provado e o que não
+
+| Provado por teste, sem rede | Onde |
+|---|---|
+| O fluxo reserva, chamada, liquidação, incluindo falhas, tempos limite, 429 com `Retry-After` e retoma | `tests/test_custos.py`, `test_pago.py`, `test_incertas.py` |
+| O teto pára antes da chamada que o ultrapassaria, soma os modelos do ensaio e resiste a threads e a processos em simultâneo | `tests/test_custos.py` |
+| Os identificadores: o `grader_id` não depende de nenhum módulo da via paga, e o modelo servido é conferido estritamente (id diferente pára a corrida) | `tests/test_grader_id.py`, `test_pago.py` |
+| Compatibilidade: sem as flags novas, uma corrida e o comando `executar` saem byte a byte como antes, e o relatório de exemplo sai igual | `tests/golden_runner_sem_flags.json`, `test_cli_pago.py`, `test_execucao.py` |
+| A chave sentinela falsa não aparece em ficheiros, mensagens, proveniência nem livro | `tests/test_fornecedores.py`, `test_chaves.py` |
+| Nenhum preço nem id de modelo no código | `tests/test_catalogo.py` |
+
+| Não provado | Porquê |
+|---|---|
+| Nenhuma resposta real de nenhum fornecedor | Não houve nenhuma corrida real. As fixtures foram escritas à mão a partir da documentação oficial lida, e dizem-no no próprio ficheiro |
+| O formato real das respostas da OpenAI e do vLLM | As páginas da API da OpenAI não abriram (HTTP 403 e 404) e a do vLLM só lista os endpoints |
+| A contagem dos tokens de pensamento do Google | A documentação lida não diz se `candidatesTokenCount` os inclui; conta-se pelo pior caso |
+| O pior caso contra uma fatura real | Só o piloto, confrontado com a consola de faturação do fornecedor, o pode dizer |
+| Um tokenizador real | A entrada estima-se por caracteres a dividir por três, de propósito por excesso; não foi comparada com o `prompt_tokens` de nenhum fornecedor |
+| O bloqueio do livro em Windows (`msvcrt`) | Está escrito e nunca correu; só o caminho POSIX (`flock`) foi testado |
+| A tradução das cadeias novas do relatório | São minhas, em en, es, fr e de, e esperam por um nativo |
+| A confirmação do id de cada modelo pelo endpoint de listagem do fornecedor | `verificado_em_execucao` é falso em todos os modelos do catálogo; só o servidor compatível o confirma, e só antes de correr |
 
 ## Sem dependências externas
 
@@ -238,6 +288,7 @@ execuções separadas no tempo diferem apenas no modelo.
 
 - `casos/casos.json`: casos escritos à mão, em português, com fonte
 - `casos/VERIFICACAO.md`: confirmação humana das fontes
+- `aferidor/catalogo.json`: os modelos que se podem medir, com preços datados e fonte; lido em execução
 - `data/respostas.jsonl`: uma resposta por linha, para permitir a retoma. Cada
   linha regista as condições de obtenção: temperatura, limite de tokens,
   SHA-256 do texto enviado e versão do Aferidor com o SHA-256 do código. Sem
@@ -247,7 +298,10 @@ execuções separadas no tempo diferem apenas no modelo.
   corrigir as respostas com os critérios atuais)
 - `relatorios/relatorio.md`: relatório em Markdown
 - `relatorios/relatorio.html`: relatório em HTML (`--formato html`)
+- ao lado das respostas, só numa corrida de um modelo pago: `custos.jsonl` (o livro),
+  `respostas.proveniencia.jsonl` e uma subpasta `piloto/` com os seus próprios. O id do ensaio no livro é o nome da pasta,
+  por isso não se renomeia a pasta de um ensaio pago. O `aferidor manifesto` inclui-os como a qualquer outro ficheiro da pasta
 
-Os quatro últimos não entram no repositório, por serem produto de execução.
+Os quatro ficheiros de dados de `data/` e de `relatorios/` não entram no repositório, por serem produto de execução.
 As execuções com valor de registo são guardadas em `ensaios/`, cada uma com o
 respetivo README.

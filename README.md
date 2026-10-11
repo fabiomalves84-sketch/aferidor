@@ -88,9 +88,10 @@ de tradução não revista, e rever uma língua é tirá-la de `UNREVIEWED`, em
 `aferidor/traducao.py`. Para atualizar uma cópia
 existente: `git pull`.
 
-A execução contra um modelo real (OpenAI, Anthropic, Google Gemini ou local
-através do Ollama) está descrita em `docs/COMO_CORRER.md`. As chaves de API
-são lidas do ambiente e nunca do repositório.
+A execução contra um modelo real (OpenAI, Anthropic, Google ou local através do
+Ollama ou de um servidor compatível) está descrita em `docs/COMO_CORRER.md`. As
+chaves de API são lidas do ambiente ou de um `.env` local que o git ignora, e
+nunca do repositório.
 
 ## O problema
 
@@ -159,6 +160,15 @@ documentos públicos ou são sintéticos.
   declaradas confirmadas em grupo, sem registo de página por caso; as 24
   restantes foram lidas no documento original por ferramenta e batem, e
   aguardam a pessoa. Detalhe em `casos/VERIFICACAO.md`.
+
+A ferramenta sabe medir modelos de vários fornecedores pela via paga: com teto
+de gasto, livro de custos que só acrescenta, estimativa sem chamar, piloto e
+proveniência por chamada (o modelo pedido e o servido, a temperatura aplicada, os
+tokens e o custo), e o relatório diz o que ficou sem resposta e em que condições
+cada modelo correu. **Ainda não houve nenhuma corrida real contra um
+fornecedor** desta via: o que foi testado usa respostas simuladas, escritas a
+partir da documentação oficial, e `docs/ARQUITETURA.md` lista o que não ficou
+provado.
 
 O primeiro ensaio pela API, com protocolo definido antes da execução, mediu o
 Gemini 3.5 Flash Lite (`ensaios/2026-09-28-gemini-flash/`). Em falta: a revisão
