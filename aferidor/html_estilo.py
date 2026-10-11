@@ -211,6 +211,9 @@ ul.conclusoes li { margin: 0 0 0.45rem; }
 .resultado { margin: 0 0 0.6rem; padding: 1rem 1.25rem; font-size: 1.3rem; line-height: 1.4; background: var(--highlight);
   border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 12px; }
 .resultado strong { font-weight: 650; }
+/* A long word, in German, breaks instead of running out of the box; `anywhere` and not `break-word` because it
+   also lowers the width the box needs in the narrow column. */
+.resultado { overflow-wrap: anywhere; }
 .remate { margin: 0 0 0.6rem; font-size: 0.95rem; color: var(--ink-2); }
 .inicio-corpo .triagem { margin: 0.9rem 0 0; font-size: 0.95rem; color: var(--ink-2); }
 footer.rodape .data, footer.rodape .marca { margin: 0.2rem 0 0; font-size: 0.82rem; color: var(--muted); }
@@ -291,7 +294,9 @@ footer.rodape .traducao { margin-top: 0.9rem; }
 .erro-pergunta { font-weight: 600; }
 .erro-par { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .erro-rotulo { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 0.25rem; font-weight: 600; }
-.erro-par blockquote { max-height: 12rem; font-size: 0.84rem; }
+/* What the model answered is cut to 240 characters in the data, so the box needs no height limit: the text is
+   never hidden by the CSS. */
+.erro-par blockquote { max-height: none; overflow: visible; font-size: 0.84rem; }
 .erro-ref { background: var(--good-bg); border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.88rem; margin-bottom: 0.4rem; }
 .erro-chips { margin: 0.6rem 0 0.3rem; }
 .erro-cartao a, .rodape a { color: var(--accent); }

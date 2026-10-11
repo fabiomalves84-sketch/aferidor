@@ -151,6 +151,15 @@ class TestTheSideColumn(unittest.TestCase):
         self.assertLess(line.index('class="controlos"'), line.index('<nav class="indice"'))
         self.assertIsNone(re.search(r"(?<![\w-])order\s*:", html_estilo.STYLE))
 
+    def test_what_the_model_answered_in_the_gravest_errors_has_no_height_limit_and_never_scrolls(self):
+        """The text is cut to 240 characters in the data; the CSS must not hide any more of it."""
+        css = html_estilo.STYLE
+        self.assertIn(".erro-par blockquote { max-height: none; overflow: visible;", css)
+        self.assertNotIn("max-height: 12rem", css)
+
+    def test_a_long_word_in_the_result_breaks_instead_of_running_out_of_the_box(self):
+        self.assertIn(".resultado { overflow-wrap: anywhere; }", html_estilo.STYLE)
+
     def test_the_column_does_not_print_and_the_text_takes_the_width_of_the_sheet(self):
         css = html_estilo.STYLE
         printing = css[css.index("@media print {", css.index("@media (min-width: 62rem)")):]
