@@ -25,11 +25,14 @@ CURRENCIES = ("USD", "EUR")
 UNKNOWN = "desconhecido"
 # How a model treats the temperature: "aceita" (sent as asked), "fixa_pelo_fornecedor" (not sent: the provider runs
 # at one value, `temperatura_fixa`, and a different one asked is refused), "nao_aceita" (not sent, and the
-# provenance says asked X, applied absent), "ignorada" (sent and ignored), or not known yet.
-TEMPERATURE_POLICIES = ("aceita", "fixa_pelo_fornecedor", "nao_aceita", "ignorada", UNKNOWN)
+# provenance says asked X, applied absent), "fixa_por_recomendacao" (the provider accepts others and recommends one:
+# `temperatura_fixa`, which is sent as it is, and a different one asked is refused), "ignorada" (sent and ignored), or
+# not known yet.
+TEMPERATURE_POLICIES = ("aceita", "fixa_pelo_fornecedor", "fixa_por_recomendacao", "nao_aceita", "ignorada", UNKNOWN)
 TOKEN_FIELDS = ("max_tokens", "max_completion_tokens", "maxOutputTokens", UNKNOWN)
 # How the output token count relates to the reasoning tokens. "por_confirmar" is "desconhecido" for the sums: the
 # documentation was read and does not settle it, so a call is counted at its worst case until someone confirms it.
+FIXED_TEMPERATURES = ("fixa_pelo_fornecedor", "fixa_por_recomendacao")  # the ones that name a value in `temperatura_fixa`
 POR_CONFIRMAR = "por_confirmar"
 REASONING_COUNTS = ("incluidos_na_saida", "separados_da_saida", POR_CONFIRMAR, UNKNOWN)
 PROVIDERS = ("openai", "anthropic", "gemini", "openai_compativel", "local")
@@ -283,8 +286,8 @@ def _model(key: str, raw: object) -> Model:
     fixed = params.get("temperatura_fixa")
     if fixed is not None:
         fixed = _number(fixed, "temperatura_fixa", pwhere)
-    if temperature == "fixa_pelo_fornecedor" and fixed is None:
-        raise _fail(pwhere, "uma temperatura 'fixa_pelo_fornecedor' tem de dizer qual em 'temperatura_fixa'")
+    if temperature in FIXED_TEMPERATURES and fixed is None:
+        raise _fail(pwhere, f"uma temperatura {temperature!r} tem de dizer qual em 'temperatura_fixa'")
     tokens_max = _field(params, "tokens_max", pwhere)
     if tokens_max is not None and (isinstance(tokens_max, bool) or not isinstance(tokens_max, int) or tokens_max <= 0):
         raise _fail(pwhere, "'tokens_max' tem de ser um inteiro positivo ou null")

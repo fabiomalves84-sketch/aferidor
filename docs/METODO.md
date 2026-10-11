@@ -440,6 +440,10 @@ declarado ficou 0,82 a 0,83 da estimativa no Gemini 3.8 Flash (a estimativa sobr
 a estimativa na Amália em GGUF no Ollama (a estimativa ficou a 0,49 a 0,61 do declarado). Quando a chamada se liquida, o
 declarado substitui a estimativa. Os valores vêm de três casos por modelo e valem só para esses modelos.
 
+### Temperatura dos Gemini 3.x
+
+O piloto do Gemini de 2026-10-11 correu a **0,0**, contra a recomendação da Google para os modelos Gemini 3 (manter a temperatura em 1,0, o valor por omissão; fonte: https://ai.google.dev/gemini-api/docs/gemini-3, lida inteira a 2026-10-11, que a recomenda sem a impor e não indica a gama válida). As corridas seguintes dos Gemini 3.x do catálogo correm a 1,0, fixo, e recusam outro valor. Por isso as respostas do piloto do Gemini e as das corridas seguintes não se comparam sem esta ressalva. O valor por omissão do projeto é 0,0 (foi o do piloto da Amália), os ensaios registados correram a 1,0 e a diferença para o Gemini vem da recomendação do fabricante, não de uma escolha do Aferidor sobre o que mede melhor.
+
 ## Ensaios registados
 
 `ensaios/` contém as execuções realizadas, com respostas em bruto, veredictos e

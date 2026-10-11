@@ -335,9 +335,13 @@ python3 -m aferidor executar --fornecedor google --modelo <id do catálogo> --te
 python3 -m aferidor executar --fornecedor local-compativel --modelo amalia-9b-0626-dpo --base-url http://localhost:8000/v1 ...
 ```
 
-Os modelos da Anthropic do catálogo não aceitam outra temperatura que não a 1,0:
-pede-se `--temperatura 1.0` e a chamada vai sem temperatura, o que a proveniência
-regista como pedida 1,0 e aplicada «ausente». `--fornecedor gemini` é o endpoint compatível dos ensaios guardados e pede sempre
+Sem `--temperatura`, um modelo cuja temperatura o catálogo fixa corre a 1,0, e um
+valor diferente é recusado antes de qualquer pedido. Os da Anthropic do catálogo
+não aceitam outra temperatura que não a 1,0: a chamada vai sem temperatura, o que
+a proveniência regista como pedida 1,0 e aplicada «ausente». Os Gemini 3.x do
+catálogo correm a 1,0 por recomendação da Google (que a recomenda, e a API aceitaria
+outro valor): o pedido leva 1,0 e a proveniência regista pedida 1,0 e aplicada 1,0.
+O piloto do Gemini de 2026-10-11 correu a **0,0**, contra a recomendação da Google para os modelos Gemini 3 (manter a temperatura em 1,0, o valor por omissão; fonte: https://ai.google.dev/gemini-api/docs/gemini-3, lida inteira a 2026-10-11, que a recomenda sem a impor e não indica a gama válida). As corridas seguintes dos Gemini 3.x do catálogo correm a 1,0, fixo, e recusam outro valor. Por isso as respostas do piloto do Gemini e as das corridas seguintes não se comparam sem esta ressalva. O valor por omissão do projeto é 0,0 (foi o do piloto da Amália), os ensaios registados correram a 1,0 e a diferença para o Gemini vem da recomendação do fabricante, não de uma escolha do Aferidor sobre o que mede melhor. `--fornecedor gemini` é o endpoint compatível dos ensaios guardados e pede sempre
 `--modelo`; `google` é a API própria do Google. O servidor compatível (um vLLM,
 por exemplo) pergunta a `/models` o que tem carregado e recusa se o modelo pedido
 não estiver lá.

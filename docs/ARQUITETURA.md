@@ -162,8 +162,10 @@ pelo livro e pela proveniência mas não pede `--teto-eur`.
 
 - **Temperatura.** O catálogo diz se um modelo a aceita. Se não aceita (a Anthropic documenta que os modelos
   posteriores ao Opus 4.6 correm sempre a 1,0), o pedido vai sem ela, a proveniência regista pedido 1,0 e aplicado
-  «ausente», e pedir outro valor recusa antes de gastar. `confirmado_pelo_fornecedor` só é verdadeiro se a resposta
-  devolver o parâmetro, o que nenhuma das lidas faz.
+  «ausente», e pedir outro valor recusa antes de gastar. Nos Gemini 3.x a política é outra: `fixa_por_recomendacao`. A Google
+  recomenda manter 1,0 mas a API aceita outros valores, por isso o pedido leva 1,0 e a proveniência regista pedida 1,0 e
+  aplicada 1,0; outro valor é recusado. Sem `--temperatura`, um modelo que o catálogo fixa corre no seu valor, e os outros
+  em 0,0. `confirmado_pelo_fornecedor` só é verdadeiro se a resposta devolver o parâmetro, o que nenhuma das lidas faz.
 - **Servidor compatível (Amália).** `--fornecedor local-compativel --base-url ...`: pergunta a `/models` o que tem
   carregado e recusa se o modelo pedido não estiver lá. Sem chave obrigatória.
 - **Por confirmar.** O que a documentação lida não diz fica na lista `por_confirmar` de cada modelo em `catalogo.json`:

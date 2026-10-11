@@ -17,7 +17,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from . import build_id, execucao, fontes, grader_id, html_report, manifesto, protocolo, report, revisao
-from .catalogo import Catalog, Model, load_catalog
+from .catalogo import FIXED_TEMPERATURES, Catalog, Model, load_catalog
 from .custos import JsonlError, Ledger, estimate, format_estimate
 from .grading import (
     grade_all,
@@ -99,10 +99,16 @@ def build_provider(
             kwargs["key_variable"] = entry.key_variable
         if kind in ("openai", "anthropic", "google", "local-compativel"):
             kwargs["send_temperature"] = entry.temperature not in ("fixa_pelo_fornecedor", "nao_aceita")
-        if entry.temperature == "fixa_pelo_fornecedor" and Decimal(str(temperature)) != entry.fixed_temperature:
+        if entry.temperature in FIXED_TEMPERATURES and Decimal(str(temperature)) != entry.fixed_temperature:
+            if entry.temperature == "fixa_pelo_fornecedor":
+                raise ProviderError(
+                    f"{entry.requested_id} não aceita temperatura e corre sempre a {entry.fixed_temperature}; foi pedida "
+                    f"{temperature}. Pedir --temperatura {entry.fixed_temperature}, que é o que o catálogo diz que se aplica"
+                )
             raise ProviderError(
-                f"{entry.requested_id} não aceita temperatura e corre sempre a {entry.fixed_temperature}; foi pedida "
-                f"{temperature}. Pedir --temperatura {entry.fixed_temperature}, que é o que o catálogo diz que se aplica"
+                f"{entry.requested_id}: a Google recomenda manter a temperatura em {entry.fixed_temperature} nos modelos Gemini 3 "
+                f"e o catálogo fixa-a nesse valor; foi pedida {temperature}. Pedir --temperatura {entry.fixed_temperature} "
+                "ou não pedir nenhuma (https://ai.google.dev/gemini-api/docs/gemini-3)"
             )
     if kind == "openai":
         return OpenAIProvider(model=model, **kwargs) if model else OpenAIProvider(**kwargs)
@@ -158,6 +164,16 @@ def _paid_model(kind: str, model: str | None) -> tuple[Catalog, Model] | None:
     return (catalog, found) if found else None
 
 
+def _effective_temperature(kind: str, model: str | None, given: float | None) -> float:
+    """The temperature a run is made at: the one asked for, else the one the catalogue fixes for the model, else 0.0."""
+    if given is not None:
+        return given
+    found = _paid_model(kind, model)
+    if found is not None and found[1].temperature in FIXED_TEMPERATURES:
+        return float(found[1].fixed_temperature)
+    return 0.0
+
+
 def _pilot_cases(cases: list[Case]) -> tuple[list[Case], list[str]]:
     """The pilot's cases and a line saying which were chosen and which alternatives the bank did not have."""
     by_id = {c.case_id: c for c in cases}
@@ -201,7 +217,9 @@ def build_parser() -> argparse.ArgumentParser:
         "--repeticoes", type=int, default=1, help="quantas vezes perguntar cada caso"
     )
     run_options.add_argument(
-        "--temperatura", type=float, default=0.0, help="temperatura pedida ao fornecedor"
+        "--temperatura", type=float, default=None,
+        help="temperatura pedida ao fornecedor; sem ela, a do modelo se o catálogo a fixa (1,0 nos Gemini 3 e nos "
+             "da Anthropic), senão 0,0",
     )
     run_options.add_argument(
         "--tokens-max", type=int, default=DEFAULT_TOKENS_MAX,
@@ -355,6 +373,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def comando_executar(args: argparse.Namespace) -> int:
+    args.temperatura = _effective_temperature(args.fornecedor, args.modelo, args.temperatura)
     return _executar(
         args.casos, args.fornecedor, args.modelo, args.saida, args.limite, args.tentativas,
         args.repeticoes, args.temperatura, args.tokens_max, args.recomecar,
@@ -923,6 +942,7 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     if args.piloto:
         print("erro: o piloto corre-se com 'executar --piloto'; 'ensaio' classificaria e escreveria o relatório de 3 casos", file=sys.stderr)
         return 2
+    args.temperatura = _effective_temperature(args.fornecedor, args.modelo, args.temperatura)
     # The protocol is read before anything is asked: a wrong path or a broken
     # file found only at the report would already have paid for the run.
     if args.protocolo is not None:

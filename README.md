@@ -75,7 +75,7 @@ Requer Python 3.10 ou superior. Não tem dependências externas.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 1128 testes
+python3 -m unittest discover -s tests          # 1141 testes
 python3 -m aferidor verificar                  # coerência dos casos e do corretor
 python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
@@ -154,7 +154,7 @@ documentos públicos ou são sintéticos.
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar`: 27/27 e 31/31 casos coerentes; 319/319 e 140/140 controlos
-  negativos detetados. 1128 testes, em Python 3.10 a 3.14 na integração
+  negativos detetados. 1141 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 10 de 58 confirmadas por uma pessoa, caso a caso, nos PDF da DGS; 24
   declaradas confirmadas em grupo, sem registo de página por caso; as 24
@@ -172,6 +172,8 @@ documentação oficial, e `docs/ARQUITETURA.md` lista o que não ficou provado. 
 estimativa de tokens da entrada (caracteres a dividir por três) não é um limite
 superior: o fator depende do tokenizador, e no piloto sobrestimou um modelo
 (1,2 vezes) e subestimou outro (ficou a cerca de metade do declarado).
+
+**Temperatura.** O piloto do Gemini de 2026-10-11 correu a **0,0**, contra a recomendação da Google para os modelos Gemini 3 (manter a temperatura em 1,0, o valor por omissão; fonte: https://ai.google.dev/gemini-api/docs/gemini-3, lida inteira a 2026-10-11, que a recomenda sem a impor e não indica a gama válida). As corridas seguintes dos Gemini 3.x do catálogo correm a 1,0, fixo, e recusam outro valor. Por isso as respostas do piloto do Gemini e as das corridas seguintes não se comparam sem esta ressalva. O valor por omissão do projeto é 0,0 (foi o do piloto da Amália), os ensaios registados correram a 1,0 e a diferença para o Gemini vem da recomendação do fabricante, não de uma escolha do Aferidor sobre o que mede melhor.
 
 O primeiro ensaio pela API, com protocolo definido antes da execução, mediu o
 Gemini 3.5 Flash Lite (`ensaios/2026-09-28-gemini-flash/`). Não há revisor

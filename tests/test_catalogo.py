@@ -360,11 +360,11 @@ class TestTheShippedCatalogue(unittest.TestCase):
                     self.assertEqual((found.reasoning_tokens, found.token_field), ("incluidos_na_saida", "max_tokens"))
                 elif key == "gemini-3.8-flash":
                     # the pilot of 2026-10-11 and https://ai.google.dev/gemini-api/docs/thinking: counted apart, still to confirm
-                    self.assertEqual((found.temperature, found.reasoning_tokens), ("desconhecido", "separados_da_saida"))
+                    self.assertEqual((found.temperature, found.reasoning_tokens), ("fixa_por_recomendacao", "separados_da_saida"))
                     self.assertIn("tokens_raciocinio", found.to_confirm)
                     self.assertIn("2026-10-11", found.note)
                 elif found.provider == "gemini":
-                    self.assertEqual((found.temperature, found.reasoning_tokens), ("desconhecido", "por_confirmar"))
+                    self.assertEqual((found.temperature, found.reasoning_tokens), ("fixa_por_recomendacao", "por_confirmar"))
                 else:
                     self.assertEqual((found.temperature, found.reasoning_tokens), ("desconhecido", "desconhecido"))
 
