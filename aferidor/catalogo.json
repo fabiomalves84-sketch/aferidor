@@ -1,0 +1,268 @@
+{
+  "lido_em": "2026-10-11",
+  "aviso": "Ids e preços lidos em páginas oficiais a 2026-10-11 e ainda não confirmados pelo endpoint de listagem de cada fornecedor (verificado_em_execucao: false). Um valor que não se conhece diz 'desconhecido'; o piloto é que o determina. Os campos campo_tokens, tempo_limite_s e ritmo_min_s repetem o que o código atual de providers.py envia e usa; não foram lidos em nenhuma ficha.",
+  "usd_para_eur": {
+    "valor": null,
+    "fonte": "",
+    "lido_em": null,
+    "nota": "Por definir pelo Fábio. Enquanto estiver vazio, o catálogo recusa calcular em euros."
+  },
+  "modelos": {
+    "claude-fable-5-1": {
+      "fornecedor": "anthropic",
+      "id_pedido": "claude-fable-5-1",
+      "verificado_em_execucao": false,
+      "moeda": "USD",
+      "precos": [
+        {
+          "entrada_por_milhao": 10,
+          "saida_por_milhao": 50,
+          "valido_de": null,
+          "valido_ate": null,
+          "prompt_tokens_ate": null,
+          "origem": "pagina_oficial",
+          "fonte": "https://platform.claude.com/docs/en/models/overview",
+          "lido_em": "2026-10-11"
+        }
+      ],
+      "parametros": {
+        "campo_tokens": "max_tokens",
+        "temperatura": "desconhecido",
+        "tokens_raciocinio": "desconhecido",
+        "esforco_raciocinio": null,
+        "tokens_max": 8192
+      },
+      "tempo_limite_s": 60,
+      "ritmo_min_s": 0,
+      "chave_env": "ANTHROPIC_API_KEY",
+      "base_url": null,
+      "nota": "Candidato de topo da Anthropic."
+    },
+    "claude-opus-5-5": {
+      "fornecedor": "anthropic",
+      "id_pedido": "claude-opus-5-5",
+      "verificado_em_execucao": false,
+      "moeda": "USD",
+      "precos": [
+        {
+          "entrada_por_milhao": 4,
+          "saida_por_milhao": 20,
+          "valido_de": null,
+          "valido_ate": null,
+          "prompt_tokens_ate": null,
+          "origem": "pagina_oficial",
+          "fonte": "https://platform.claude.com/docs/en/models/overview",
+          "lido_em": "2026-10-11"
+        }
+      ],
+      "parametros": {
+        "campo_tokens": "max_tokens",
+        "temperatura": "desconhecido",
+        "tokens_raciocinio": "desconhecido",
+        "esforco_raciocinio": null,
+        "tokens_max": 8192
+      },
+      "tempo_limite_s": 60,
+      "ritmo_min_s": 0,
+      "chave_env": "ANTHROPIC_API_KEY",
+      "base_url": null,
+      "nota": "Alternativa mais barata da Anthropic."
+    },
+    "gpt-6-astra": {
+      "fornecedor": "openai",
+      "id_pedido": "gpt-6-astra",
+      "verificado_em_execucao": false,
+      "moeda": "USD",
+      "precos": [
+        {
+          "entrada_por_milhao": 10,
+          "saida_por_milhao": 50,
+          "valido_de": null,
+          "valido_ate": null,
+          "prompt_tokens_ate": null,
+          "origem": "pagina_oficial",
+          "fonte": "https://developers.openai.com/api/docs/pricing",
+          "lido_em": "2026-10-11",
+          "nota": "Escalão Standard, contexto curto. Em contexto longo a entrada custa 20 por milhão; o limite entre curto e longo não foi lido, por isso este período não o separa. Os prompts do Aferidor têm cerca de 150 tokens."
+        }
+      ],
+      "parametros": {
+        "campo_tokens": "max_completion_tokens",
+        "temperatura": "desconhecido",
+        "tokens_raciocinio": "desconhecido",
+        "esforco_raciocinio": null,
+        "tokens_max": 8192
+      },
+      "tempo_limite_s": 60,
+      "ritmo_min_s": 0,
+      "chave_env": "OPENAI_API_KEY",
+      "base_url": null,
+      "nota": "Candidato de topo da OpenAI."
+    },
+    "gpt-6.1-sol": {
+      "fornecedor": "openai",
+      "id_pedido": "gpt-6.1-sol",
+      "verificado_em_execucao": false,
+      "moeda": "USD",
+      "precos": [
+        {
+          "entrada_por_milhao": 2,
+          "saida_por_milhao": 10,
+          "valido_de": null,
+          "valido_ate": null,
+          "prompt_tokens_ate": null,
+          "origem": "pagina_oficial",
+          "fonte": "https://developers.openai.com/api/docs/pricing",
+          "lido_em": "2026-10-11",
+          "nota": "Escalão Standard, contexto curto."
+        }
+      ],
+      "parametros": {
+        "campo_tokens": "max_completion_tokens",
+        "temperatura": "desconhecido",
+        "tokens_raciocinio": "desconhecido",
+        "esforco_raciocinio": null,
+        "tokens_max": 8192
+      },
+      "tempo_limite_s": 60,
+      "ritmo_min_s": 0,
+      "chave_env": "OPENAI_API_KEY",
+      "base_url": null,
+      "nota": "Alternativa intermédia da OpenAI."
+    },
+    "gpt-6-luna": {
+      "fornecedor": "openai",
+      "id_pedido": "gpt-6-luna",
+      "verificado_em_execucao": false,
+      "moeda": "USD",
+      "precos": [
+        {
+          "entrada_por_milhao": 0.1,
+          "saida_por_milhao": 0.5,
+          "valido_de": null,
+          "valido_ate": null,
+          "prompt_tokens_ate": null,
+          "origem": "pagina_oficial",
+          "fonte": "https://developers.openai.com/api/docs/pricing",
+          "lido_em": "2026-10-11",
+          "nota": "Escalão Standard, contexto curto."
+        }
+      ],
+      "parametros": {
+        "campo_tokens": "max_completion_tokens",
+        "temperatura": "desconhecido",
+        "tokens_raciocinio": "desconhecido",
+        "esforco_raciocinio": null,
+        "tokens_max": 8192
+      },
+      "tempo_limite_s": 60,
+      "ritmo_min_s": 0,
+      "chave_env": "OPENAI_API_KEY",
+      "base_url": null,
+      "nota": "Alternativa económica da OpenAI."
+    },
+    "gemini-3.1-pro-preview": {
+      "fornecedor": "gemini",
+      "id_pedido": "gemini-3.1-pro-preview",
+      "verificado_em_execucao": false,
+      "moeda": "USD",
+      "precos": [
+        {
+          "entrada_por_milhao": 2,
+          "saida_por_milhao": 12,
+          "valido_de": null,
+          "valido_ate": null,
+          "prompt_tokens_ate": 200000,
+          "origem": "pagina_oficial",
+          "fonte": "https://ai.google.dev/gemini-api/docs/pricing",
+          "lido_em": "2026-10-11",
+          "nota": "Escalão pago Standard, prompts até 200k tokens; acima disso o catálogo não tem preço e recusa estimar. O raciocínio fatura-se à taxa de saída. Modelo em preview."
+        }
+      ],
+      "parametros": {
+        "campo_tokens": "max_tokens",
+        "temperatura": "desconhecido",
+        "tokens_raciocinio": "desconhecido",
+        "esforco_raciocinio": null,
+        "tokens_max": 8192
+      },
+      "tempo_limite_s": 300,
+      "ritmo_min_s": 13,
+      "chave_env": "GEMINI_API_KEY",
+      "base_url": null,
+      "nota": "Candidato de topo da Google, em preview."
+    },
+    "gemini-3.8-flash": {
+      "fornecedor": "gemini",
+      "id_pedido": "gemini-3.8-flash",
+      "verificado_em_execucao": false,
+      "moeda": "USD",
+      "precos": [
+        {
+          "entrada_por_milhao": 0.75,
+          "saida_por_milhao": 3.75,
+          "valido_de": null,
+          "valido_ate": "2026-12-31",
+          "prompt_tokens_ate": null,
+          "origem": "pagina_oficial",
+          "fonte": "https://ai.google.dev/gemini-api/docs/pricing",
+          "lido_em": "2026-10-11",
+          "nota": "Escalão pago Standard; o raciocínio fatura-se à taxa de saída."
+        },
+        {
+          "entrada_por_milhao": 1.5,
+          "saida_por_milhao": 7.5,
+          "valido_de": "2027-01-01",
+          "valido_ate": null,
+          "prompt_tokens_ate": null,
+          "origem": "pagina_oficial",
+          "fonte": "https://ai.google.dev/gemini-api/docs/pricing",
+          "lido_em": "2026-10-11",
+          "nota": "Escalão pago Standard; o raciocínio fatura-se à taxa de saída."
+        }
+      ],
+      "parametros": {
+        "campo_tokens": "max_tokens",
+        "temperatura": "desconhecido",
+        "tokens_raciocinio": "desconhecido",
+        "esforco_raciocinio": null,
+        "tokens_max": 8192
+      },
+      "tempo_limite_s": 300,
+      "ritmo_min_s": 13,
+      "chave_env": "GEMINI_API_KEY",
+      "base_url": null,
+      "nota": "Alternativa estável da Google; o preço dobra a partir de 2027-01-01."
+    },
+    "amalia-9b-0626-dpo": {
+      "fornecedor": "openai_compativel",
+      "id_pedido": "AMALIA-9B-0626-DPO",
+      "verificado_em_execucao": false,
+      "moeda": "USD",
+      "precos": [
+        {
+          "entrada_por_milhao": 0,
+          "saida_por_milhao": 0,
+          "valido_de": null,
+          "valido_ate": null,
+          "prompt_tokens_ate": null,
+          "origem": "declarado_pelo_fabio",
+          "fonte": "custo 0 USD indicado pelo Fábio no pedido do commit 2; o custo do servidor onde corre (GPU alugada, por exemplo) não está aqui",
+          "lido_em": "2026-10-11"
+        }
+      ],
+      "parametros": {
+        "campo_tokens": "max_tokens",
+        "temperatura": "desconhecido",
+        "tokens_raciocinio": "desconhecido",
+        "esforco_raciocinio": null,
+        "tokens_max": 4096
+      },
+      "tempo_limite_s": 300,
+      "ritmo_min_s": 0,
+      "chave_env": null,
+      "base_url": null,
+      "nota": "Pesos abertos; sem API pública. Corre num servidor próprio compatível com OpenAI (vLLM, por exemplo); o base_url está por configurar e a chave, se o servidor a exigir, ainda não tem variável declarada."
+    }
+  }
+}

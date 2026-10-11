@@ -21,6 +21,10 @@ version = { attr = "aferidor.__version__" }
 [tool.setuptools.packages.find]
 include = ["aferidor*"]
 
+# O catálogo de modelos é lido em execução; sem isto não viajaria numa instalação.
+[tool.setuptools.package-data]
+aferidor = ["catalogo.json"]
+
 # Ferramenta de desenvolvimento, fora do runtime e da bateria de testes (não é uma dependência
 # do pacote): `ruff check .` com as regras mínimas, imports não usados e erros evidentes.
 [tool.ruff]

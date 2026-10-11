@@ -24,6 +24,8 @@ flowchart LR
 | `models.py` | Caso, fonte, critério, resposta (com amostra e condições de obtenção), veredicto |
 | `storage.py` | Leitura e escrita destes objetos em JSON legível |
 | `providers.py` | Comunicação com um modelo, através de uma interface estreita |
+| `catalogo.py` | Os modelos que se podem medir, lidos de `catalogo.json` em execução: fornecedor, id pedido, preços por período com fonte e data de leitura, parâmetros e tempos limite. Nenhum preço nem id está no código, e um teste falha se estiver; o que não se sabe diz «desconhecido» |
+| `chaves.py` | A leitura das chaves de API, do ambiente e, na falta, do `.env` da raiz, só das variáveis que o catálogo declara; o valor nunca entra numa mensagem, num `repr` nem numa exceção |
 | `runner.py` | Execução dos casos, com repetições, novas tentativas e retoma |
 | `checks.py` | Avaliação de uma resposta contra um critério |
 | `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |
