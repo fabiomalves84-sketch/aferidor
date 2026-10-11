@@ -698,6 +698,12 @@ def _verification_block() -> str:
         ) + "</p><p>" + _t(
             "O corretor foi afinado depois de alguns ensaios, com cada afinação registada e a razão "
             "escrita; por isso os números dependem da versão do corretor."
+        ) + "</p><p>" + _t(
+            "O corretor procura palavras e erra nos dois sentidos. Pode dar como errada uma resposta certa "
+            "escrita de outra forma, como «a cada 8 horas» em vez de «de 8 em 8 horas»; num caso de dose, "
+            "isso conta como falha crítica. E pode dar como certa uma dose errada quando a dose certa "
+            "aparece noutra parte da resposta, por exemplo num ajuste renal. Ainda não se mediu com que "
+            "frequência, porque nenhum especialista reviu uma amostra das respostas."
         ) + "</p></details>"
     )
 
