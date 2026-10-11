@@ -41,13 +41,16 @@ THEME_CSS = (
 PANEL_IDS = ("inicio", "sobre", "fontes", "resultados", "areas", "casos", "conclusoes", "metodo")
 # Height of the fixed bar. It is declared, not measured: `.topo` has exactly this height and the
 # page's scroll padding leaves exactly this much free, so a page or an anchor opens just below the
-# bar in every language and at every width. What it holds has to fit: the pages never wrap (they
-# scroll sideways), and the notice sentence takes one line from 600 px up, two below, and three
-# in German under 24rem. Four values, one per width; checked in a browser at fourteen widths in the
-# five languages (see METODO.md).
+# bar in every language and at every width. From 62rem the pages are a column on the left and the
+# bar holds only the notice: one line from 68rem, and two between 62 and 68rem, where a wider font
+# can break the German sentence. Below 62rem the bar holds the pages, the controls and the notice,
+# and the pages never wrap (they scroll sideways): the notice takes one line from 600 px up, two
+# below, and three in German under 24rem. Five values, one per width; checked in a browser at
+# twenty widths in the five languages (see METODO.md).
 BAR_HEIGHT = (
-    "html { --barra: 4.8rem; }\n"
-    "@media (max-width: 62rem) { html { --barra: 7rem; } }\n"
+    "html { --barra: 2.6rem; }\n"
+    "@media (max-width: 68rem) { html { --barra: 3.7rem; } }\n"
+    "@media (max-width: 61.99rem) { html { --barra: 7rem; } }\n"
     "@media (max-width: 46rem) { html { --barra: 8.6rem; } }\n"
     "@media (max-width: 24rem) { html { --barra: 9.4rem; } }\n"
 )
@@ -56,6 +59,39 @@ CURRENT_PAGE = "".join(
     f'body:has(main #{ident} :target) nav.indice a[href="#{ident}"], '
     for ident in PANEL_IDS[1:]
 ) + 'body:not(:has(main :target)) nav.indice a[href="#inicio"], body:has(main #inicio:target) nav.indice a[href="#inicio"], body:has(main #inicio :target) nav.indice a[href="#inicio"]'
+# The pages that list subsections under them in the side navigation (html_report.SUBPAGES has the same keys).
+SUBPAGE_IDS = ("casos", "metodo")
+# The list of a page is shown when that page, or something inside it, is the target of the address.
+SUBPAGES_SHOWN = ", ".join(
+    f'body:has(main #{ident}{inside}) nav.indice li:has(> a[href="#{ident}"]) > ul.sub'
+    for ident in SUBPAGE_IDS for inside in (":target", " :target")
+)
+# From 62rem the pages are a column fixed on the left, 14rem wide, with the controls on top of it, and
+# the bar over the text only carries the notice. It is the same markup as the phone menu; only what
+# is shown changes. The text keeps 17rem on the left (the margin, the column and a gap of 2rem).
+SIDEBAR = """@media (min-width: 62rem) {
+  body { max-width: 88rem; padding-left: 17rem; }
+  .topo { display: flex; align-items: center; padding-top: 0; }
+  .faixa { padding: 0; }
+  .topo-linha { position: fixed; top: 0; bottom: 0; left: calc(max(0px, 50% - 44rem) + 1rem); width: 14rem; z-index: 6;
+    flex-direction: column; flex-wrap: nowrap; align-items: stretch; justify-content: flex-start; gap: 1.1rem;
+    padding: 1rem 0.5rem 1.5rem; overflow-y: auto; background: var(--page); border-right: 1px solid var(--grid); }
+  .controlos { order: -1; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .linguas ul { left: 0; right: auto; }
+  nav.indice { flex: 0 0 auto; }
+  nav.indice ul { flex-direction: column; overflow: visible; background: none; gap: 0.1rem; }
+  nav.indice a { display: block; white-space: normal; padding: 0.3rem 0 0.3rem 0.5rem; border-bottom: 0;
+    border-left: 3px solid transparent; }
+  nav.indice a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  nav.indice ul.sub { margin: 0.1rem 0 0.4rem; padding-left: 0.9rem; gap: 0; }
+  nav.indice ul.sub a { font-size: 0.88rem; font-weight: 400; color: var(--ink-2); padding-top: 0.2rem; padding-bottom: 0.2rem; }
+  nav.indice ul.sub a:hover, nav.indice ul.sub a:focus-visible { color: var(--accent); }
+  @supports selector(:has(*)) {
+    """ + CURRENT_PAGE + """ { border-left-color: var(--accent); }
+    """ + SUBPAGES_SHOWN + """ { display: block; }
+  }
+}
+"""
 STYLE = THEME_CSS + BAR_HEIGHT + """
 * { box-sizing: border-box; }
 html { background: var(--page); scroll-behavior: smooth; scroll-padding-top: var(--barra); }
@@ -344,7 +380,7 @@ details.recolhe h3 { margin-top: 1.25rem; }
 .glossario dd { margin: 0 0 0.5rem; color: var(--ink-2); font-size: 0.86rem; }
 footer.rodape { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--grid); color: var(--ink-2); font-size: 0.88rem; }
 footer.rodape h2 { font-size: 1rem; color: var(--ink); }
-@media (max-width: 62rem) {
+@media (max-width: 61.99rem) {
   .topo-linha { flex-wrap: wrap; justify-content: flex-start; }
   .controlos { order: -1; }
   nav.indice { flex: 1 1 100%; }
@@ -360,8 +396,10 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
   .erro-par { grid-template-columns: 1fr; }
   .comp-lista li, .comp-eixo { grid-template-columns: 6rem 1fr 6.5rem; }
 }
-@media print {
+""" + SIDEBAR + """@media print {
   .topo { position: static; }
+  .topo-linha { display: none; }
+  body { max-width: 72rem; padding-left: 1rem; }
   .controlos { display: none; }
   main > .painel { display: block !important; break-before: page; }
   main > .painel:first-child { break-before: auto; }

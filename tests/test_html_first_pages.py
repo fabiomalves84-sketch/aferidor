@@ -46,8 +46,8 @@ class TestReadableByAnOutsider(unittest.TestCase):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])
         method = panel_html(text, "metodo")
         self.assertRegex(method, r'<details class="recolhe ler" id="como-ler">\s*<summary>Como interpretar este relatório</summary>')
-        pages_before = text[text.index("<main>"):text.index('<section class="painel" id="metodo"')]
-        self.assertNotIn("Como interpretar este relatório", pages_before)  # the side navigation may link to it
+        without_navigation = re.sub(r'<nav class="indice".*?</nav>', "", text, flags=re.S)  # it links to the block
+        self.assertNotIn("Como interpretar este relatório", without_navigation[:without_navigation.index('<section class="painel" id="metodo"')])
 
     def test_every_section_is_reachable_from_the_index(self):
         text = build([a_case()], [an_answer("Amoxicilina 500 mg")])

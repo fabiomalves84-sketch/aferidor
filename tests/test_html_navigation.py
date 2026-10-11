@@ -22,6 +22,12 @@ def sublists(page: str) -> dict[str, list[tuple[str, str]]]:
     return found
 
 
+def side_column(css: str) -> str:
+    """The rules that apply from 62rem: the side column."""
+    start = css.index("@media (min-width: 62rem)")
+    return css[start:css.index("@media print", start)]
+
+
 def heading_of(page: str, anchor: str) -> str:
     """The words the page itself writes for the block a link points to: the heading or summary of the
     element with that id, or of the closed block that holds it."""
@@ -95,13 +101,54 @@ class TestTheSubsectionsAreInTheNavigation(unittest.TestCase):
                     self.assertIn(label, CATALOG)
                     self.assertEqual(sorted(CATALOG[label]), ["de", "en", "es", "fr"])
 
-    def test_the_subsections_are_hidden_by_the_css_for_now(self):
-        self.assertIn("nav.indice ul.sub { display: none; }", html_estilo.STYLE)
+    def test_the_subsections_are_hidden_unless_the_side_column_shows_them_for_the_current_page(self):
+        css = html_estilo.STYLE
+        self.assertIn("nav.indice ul.sub { display: none; }", css)
+        side = side_column(css)
+        for ident in ("casos", "metodo"):
+            for inside in (":target", " :target"):
+                self.assertIn(f'body:has(main #{ident}{inside}) nav.indice li:has(> a[href="#{ident}"]) > ul.sub', side)
+        self.assertRegex(side, r"ul\.sub[^{]*\{ display: block; \}")
+        self.assertEqual(tuple(SUBPAGES), html_estilo.SUBPAGE_IDS)
 
     def test_the_subsections_hold_no_glossary_term_and_the_glossary_is_unchanged_by_them(self):
         page = _Example.page(protocol=_Example.protocol())
         nav = re.search(r'<nav class="indice".*?</nav>', page, flags=re.S).group(0)
         self.assertNotIn("data-termo", nav)
+
+
+class TestTheSideColumn(unittest.TestCase):
+    """From 62rem the pages are a column fixed on the left and the bar over the text only has the notice."""
+
+    def test_the_column_is_fixed_14rem_wide_and_the_text_keeps_room_for_it(self):
+        side = side_column(html_estilo.STYLE)
+        self.assertIn("body { max-width: 88rem; padding-left: 17rem; }", side)
+        self.assertRegex(side, r"\.topo-linha \{ position: fixed; top: 0; bottom: 0; left: calc\(max\(0px, 50% - 44rem\) \+ 1rem\); width: 14rem;")
+        self.assertIn("overflow-y: auto", side)
+
+    def test_the_phone_menu_ends_where_the_column_begins(self):
+        css = html_estilo.STYLE
+        self.assertIn("@media (max-width: 61.99rem) {\n  .topo-linha { flex-wrap: wrap;", css)
+        self.assertNotIn("@media (max-width: 62rem)", css)
+        self.assertIn("@media (max-width: 61.99rem) { html { --barra: 7rem; } }", html_estilo.BAR_HEIGHT)
+
+    def test_in_the_column_the_pages_do_not_scroll_sideways_and_the_shadows_are_off(self):
+        side = side_column(html_estilo.STYLE)
+        self.assertRegex(side, r"nav\.indice ul \{ flex-direction: column; overflow: visible; background: none;")
+
+    def test_the_language_menu_opens_inwards_so_the_column_does_not_cut_it(self):
+        self.assertIn(".linguas ul { left: 0; right: auto; }", side_column(html_estilo.STYLE))
+
+    def test_the_bar_over_the_text_has_two_declared_heights_before_the_phone_ones(self):
+        bar = html_estilo.BAR_HEIGHT
+        self.assertLess(bar.index("--barra: 2.6rem"), bar.index("max-width: 68rem"))
+        self.assertLess(bar.index("max-width: 68rem"), bar.index("max-width: 61.99rem"))
+
+    def test_the_column_does_not_print_and_the_text_takes_the_width_of_the_sheet(self):
+        css = html_estilo.STYLE
+        printing = css[css.index("@media print {", css.index("@media (min-width: 62rem)")):]
+        self.assertIn(".topo-linha { display: none; }", printing)
+        self.assertIn("body { max-width: 72rem; padding-left: 1rem; }", printing)
 
 
 if __name__ == "__main__":

@@ -236,7 +236,7 @@ class TestEightPages(unittest.TestCase):
         free, so the height is declared once, per width, and not measured per language."""
         css = html_estilo.STYLE
         self.assertRegex(css, r"\.topo \{[^}]*box-sizing: border-box; height: var\(--barra\);")
-        self.assertEqual(re.findall(r"--barra: ([\d.]+)rem", html_estilo.BAR_HEIGHT), ["4.8", "7", "8.6", "9.4"])
+        self.assertEqual(re.findall(r"--barra: ([\d.]+)rem", html_estilo.BAR_HEIGHT), ["2.6", "3.7", "7", "8.6", "9.4"])
         self.assertNotIn("[lang", html_estilo.BAR_HEIGHT)
 
     def test_the_pages_never_wrap_so_the_bar_keeps_its_height(self):
