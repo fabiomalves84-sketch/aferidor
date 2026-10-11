@@ -284,7 +284,7 @@
       "chave_env": "GEMINI_API_KEY",
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Alternativa estável da Google; o preço dobra a partir de 2027-01-01. Lido em https://ai.google.dev/api/generate-content a 2026-10-11 (API nativa generateContent): usageMetadata com thoughtsTokenCount, mas a página não diz se candidatesTokenCount os inclui.",
+      "nota": "Alternativa estável da Google; o preço dobra a partir de 2027-01-01. Lido em https://ai.google.dev/api/generate-content a 2026-10-11 (API nativa generateContent): usageMetadata com thoughtsTokenCount, mas a página não diz se candidatesTokenCount os inclui. O piloto corre na camada gratuita da Google (fonte: https://ai.google.dev/gemini-api/docs/pricing, lida em 2026-10-11, segundo o Fábio). O catálogo não tem campo para a camada gratuita, por isso o preço dos períodos acima, o da camada paga, mantém-se como pior caso e o teto continua obrigatório.",
       "por_confirmar": [
         "tokens_raciocinio",
         "temperatura",
@@ -330,6 +330,46 @@
         "usage",
         "modelo_na_resposta",
         "autenticacao",
+        "tempo_limite_s",
+        "ritmo_min_s"
+      ]
+    },
+    "amalia-9b-0626-dpo-gguf-q4km-ollama": {
+      "fornecedor": "openai_compativel",
+      "id_pedido": "hf.co/teex-pt/AMALIA-9B-0626-DPO-GGUF:Q4_K_M",
+      "verificado_em_execucao": false,
+      "moeda": "USD",
+      "precos": [
+        {
+          "entrada_por_milhao": 0,
+          "saida_por_milhao": 0,
+          "valido_de": null,
+          "valido_ate": null,
+          "prompt_tokens_ate": null,
+          "origem": "declarado_pelo_fabio",
+          "fonte": "custo 0 USD: corre no computador do Fábio, pelo Ollama, sem fatura de fornecedor; o custo da eletricidade e da máquina não está aqui",
+          "lido_em": "2026-10-11"
+        }
+      ],
+      "parametros": {
+        "campo_tokens": "max_tokens",
+        "temperatura": "desconhecido",
+        "tokens_raciocinio": "desconhecido",
+        "esforco_raciocinio": null,
+        "tokens_max": 4096
+      },
+      "tempo_limite_s": 300,
+      "ritmo_min_s": 0,
+      "chave_env": null,
+      "base_url": "http://localhost:11434/v1",
+      "ids_servidos_aceites": [],
+      "nota": "Conversão GGUF quantizada (Q4_K_M) da TEEX, de terceiros: não é da equipa da Amália, e não é o AMALIA-9B-0626-DPO original, por isso tem entrada à parte da do vLLM. Licença Apache-2.0 segundo o Fábio; não confirmada, porque a página do modelo não foi aberta. Fonte, derivada da referência e indicada pelo Fábio a 2026-10-11: https://huggingface.co/teex-pt/AMALIA-9B-0626-DPO-GGUF. Servida pelo Ollama em http://localhost:11434/v1. O id pedido é a referência do Ollama, com a etiqueta, e a conferência do modelo servido continua estrita: um nome diferente, mesmo da mesma família ou de outra etiqueta, pára a corrida. O Aferidor não verifica o ficheiro GGUF nem guarda o seu hash; tem de ser registado à mão. Nem a documentação do Ollama nem a da conversão foram lidas.",
+      "por_confirmar": [
+        "campo_tokens",
+        "temperatura",
+        "usage",
+        "modelo_na_resposta",
+        "listagem_de_modelos",
         "tempo_limite_s",
         "ritmo_min_s"
       ]

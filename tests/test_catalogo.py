@@ -289,7 +289,8 @@ class TestTheShippedCatalogue(unittest.TestCase):
         self.assertEqual(
             sorted(self.catalog.models),
             sorted(["claude-fable-5-1", "claude-opus-5-5", "gpt-6-astra", "gpt-6.1-sol", "gpt-6-luna",
-                    "gemini-3.1-pro-preview", "gemini-3.8-flash", "amalia-9b-0626-dpo"]),
+                    "gemini-3.1-pro-preview", "gemini-3.8-flash", "amalia-9b-0626-dpo",
+                    "amalia-9b-0626-dpo-gguf-q4km-ollama"]),
         )
 
     def test_none_of_them_has_an_accepted_served_id_yet(self):
@@ -323,7 +324,7 @@ class TestTheShippedCatalogue(unittest.TestCase):
                     if price.origin == "pagina_oficial":
                         self.assertTrue(price.source.startswith("https://"))
                     else:
-                        self.assertEqual(key, "amalia-9b-0626-dpo")
+                        self.assertTrue(key.startswith("amalia-9b-0626-dpo"), key)
 
     def test_the_prices_are_the_ones_given(self):
         expected = {
@@ -371,8 +372,9 @@ class TestTheShippedCatalogue(unittest.TestCase):
         self.assertIn("tokens_raciocinio", self.catalog.model("gemini-3.8-flash").to_confirm)
         self.assertNotIn("campo_tokens", self.catalog.model("claude-opus-5-5").to_confirm)
 
-    def test_only_amalia_is_free_and_needs_no_ceiling(self):
-        self.assertEqual([k for k, m in self.catalog.models.items() if m.is_free], ["amalia-9b-0626-dpo"])
+    def test_only_the_two_amalia_entries_are_free_and_need_no_ceiling(self):
+        self.assertEqual([k for k, m in self.catalog.models.items() if m.is_free],
+                         ["amalia-9b-0626-dpo", "amalia-9b-0626-dpo-gguf-q4km-ollama"])
 
     def test_amalia_is_a_compatible_server_to_configure_at_4096_tokens(self):
         found = self.catalog.model("amalia-9b-0626-dpo")

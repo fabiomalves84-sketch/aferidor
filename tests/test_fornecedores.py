@@ -506,6 +506,100 @@ class TestTheCatalogueModelsFromTheCommandLine(WithTheCommandLine):
                 self.assertIn("Nenhum pedido foi feito", out)
 
 
+GGUF_KEY = "amalia-9b-0626-dpo-gguf-q4km-ollama"
+GGUF_ID = "hf.co/teex-pt/AMALIA-9B-0626-DPO-GGUF:Q4_K_M"
+OLLAMA = "http://localhost:11434/v1"
+
+
+class TestTheAmaliaGgufOnOllama(WithTheCommandLine):
+    """A third-party quantised conversion served by Ollama is its own entry, and the check of the served model stays
+    strict for it: the name Ollama lists is the reference with the tag, and nothing else is accepted."""
+
+    def models(self, *names):
+        return {"object": "list", "data": [{"id": n, "object": "model"} for n in names]}
+
+    def chat(self, model):
+        return {**fx.VLLM_CHAT, "model": model}
+
+    def test_the_entry_is_the_conversion_and_says_so_and_the_original_is_untouched(self):
+        catalog = load_catalog()
+        found, original = catalog.model(GGUF_KEY), catalog.model("amalia-9b-0626-dpo")
+        self.assertEqual((found.provider, found.requested_id, found.base_url, found.is_free), ("openai_compativel", GGUF_ID, OLLAMA, True))
+        for word in ("TEEX", "Q4_K_M", "Apache-2.0", "não é da equipa da Amália", "https://huggingface.co/teex-pt/AMALIA-9B-0626-DPO-GGUF",
+                     "nem guarda o seu hash"):
+            self.assertIn(word, found.note)
+        self.assertEqual((original.requested_id, original.base_url), ("AMALIA-9B-0626-DPO", None))
+
+    def test_no_served_name_is_accepted_beyond_the_requested_one(self):
+        catalog = load_catalog()
+        for key in (GGUF_KEY, "amalia-9b-0626-dpo"):
+            self.assertEqual(catalog.model(key).accepted_served_ids, ())
+
+    def test_the_run_goes_ahead_when_ollama_lists_and_serves_the_reference_with_its_tag(self):
+        net = Net(("/models", self.models(GGUF_ID)), ("/chat/completions", self.chat(GGUF_ID)))
+        code, out, err = self.run_cli(net, "local-compativel", GGUF_KEY, env={})
+        self.assertEqual(code, 0, err)
+        self.assertEqual(net.requests[0]["url"], f"{OLLAMA}/models")  # the address came from the catalogue
+        self.assertEqual(net.bodies("/chat/completions")[0]["model"], GGUF_ID)
+        self.assertEqual(net.bodies("/chat/completions")[0]["max_tokens"], 8192)
+        (first, _) = read_records(self.saida.with_name(FILE_NAME))
+        self.assertEqual((first.requested_model, first.served_model, first.served_check, first.cost_eur), (GGUF_ID, GGUF_ID, "igual", 0))
+
+    def test_the_original_name_does_not_work_against_ollama_and_says_what_it_has(self):
+        net = Net(("/models", self.models(GGUF_ID)))
+        code, _, err = self.run_cli(net, "local-compativel", "amalia-9b-0626-dpo", "--base-url", OLLAMA, env={})
+        self.assertEqual((code, len(net.requests)), (2, 1))
+        self.assertIn(f"não tem o modelo AMALIA-9B-0626-DPO; tem: {GGUF_ID}", err)
+        self.assertFalse(self.saida.exists())
+
+    def test_another_tag_of_the_same_repository_is_not_this_model(self):
+        net = Net(("/models", self.models("hf.co/teex-pt/AMALIA-9B-0626-DPO-GGUF:Q8_0")))
+        code, _, err = self.run_cli(net, "local-compativel", GGUF_KEY, env={})
+        self.assertEqual(code, 2)
+        self.assertIn("não tem o modelo " + GGUF_ID, err)
+        self.assertEqual(len(net.requests), 1)
+
+    def test_if_ollama_answers_with_another_name_the_run_stops_at_that_call(self):
+        net = Net(("/models", self.models(GGUF_ID)), ("/chat/completions", self.chat("hf.co/teex-pt/AMALIA-9B-0626-DPO-GGUF:Q8_0")))
+        code, _, err = self.run_cli(net, "local-compativel", GGUF_KEY, env={})
+        self.assertEqual(code, cli.STOPPED)
+        self.assertIn("serviu 'hf.co/teex-pt/AMALIA-9B-0626-DPO-GGUF:Q8_0' em vez de " + repr(GGUF_ID), err)
+        self.assertEqual(len(net.bodies("/chat/completions")), 1)
+        self.assertFalse(self.saida.exists() and read_answers(self.saida))
+
+    def test_the_pilot_is_two_samples_of_three_cases_in_its_own_folder_and_needs_no_ceiling_but_takes_one(self):
+        net = Net(("/models", self.models(GGUF_ID)), ("/chat/completions", self.chat(GGUF_ID)))
+        code, out, err = self.main(net, "executar", "--fornecedor", "local-compativel", "--modelo", GGUF_KEY, "--casos", str(CASES),
+                                   "--saida", str(self.saida), "--piloto", "--teto-eur", "1", "--temperatura", "1.0", "--tokens-max", "4096", env={})
+        self.assertEqual(code, 0, err)
+        self.assertEqual(len(net.bodies("/chat/completions")), 6)
+        self.assertEqual(sorted(p.name for p in (self.saida.parent / "piloto").iterdir()),
+                         sorted(["custos.jsonl", FILE_NAME, "respostas.jsonl"]))
+
+    def test_the_dry_run_of_the_pilot_of_each_free_model_asks_nothing_and_writes_nothing(self):
+        for kind, model, flags in (("local-compativel", GGUF_KEY, ["--tokens-max", "4096"]), ("google", "gemini-3.8-flash", ["--tokens-max", "8192"])):
+            with self.subTest(modelo=model):
+                net = Net()
+                code, out, _ = self.main(net, "executar", "--fornecedor", kind, "--modelo", model, "--casos", str(CASES), "--saida", str(self.saida),
+                                         "--piloto", "--a-seco", *flags, env={})
+                self.assertEqual((code, net.requests), (0, []))
+                self.assertIn("6 chamadas", out)
+                self.assertFalse(self.saida.parent.exists())
+
+    def test_the_gemini_pilot_runs_on_the_free_tier_but_the_ceiling_stays_mandatory_and_the_note_says_why(self):
+        found = load_catalog().model("gemini-3.8-flash")
+        self.assertIn("camada gratuita", found.note)
+        self.assertIn("https://ai.google.dev/gemini-api/docs/pricing", found.note)
+        self.assertFalse(found.is_free)  # the catalogue has no field for the free tier: the priced periods stay
+        code, _, err = self.run_cli(Net(), "google", "gemini-3.8-flash")
+        self.assertEqual(code, 2)
+        self.assertIn("--teto-eur", err)
+
+    def test_the_pilot_folders_are_ignored_by_git(self):
+        ignored = [line.strip() for line in (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()]
+        self.assertIn("data/**/*.jsonl", ignored)  # data/piloto/... is a subfolder: data/*.jsonl does not reach it
+
+
 class TestTheKeyNeverLeavesTheProvider(WithTheCommandLine):
     """A made-up key goes through whole runs, good and bad, and is looked for in everything they write and print."""
 

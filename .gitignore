@@ -4,6 +4,8 @@ __pycache__/
 data/*.csv
 data/*.json
 data/*.jsonl
+# os pilotos e os livros de custos ficam em subpastas de data/
+data/**/*.jsonl
 relatorios/
 .env
 _to_delete/
