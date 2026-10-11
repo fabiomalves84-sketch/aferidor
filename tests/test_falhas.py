@@ -28,7 +28,7 @@ from aferidor.providers import (
     clean_message,
     usage_from,
 )
-from aferidor.proveniencia import FILE_NAME, ProvenanceError, read_records
+from aferidor.proveniencia import FILE_NAME, ProvenanceError, ProvenanceRecord, read_records
 from aferidor.runner import run
 from tests import fixtures_fornecedores as fx
 from tests.helpers import a_case
@@ -236,7 +236,7 @@ class TestTheReportKeepsTheProviderApartFromTheModel(unittest.TestCase):
         self.assertIn("> **Falhas do fornecedor.**", md)
         self.assertIn("anthropic:modelo-a: 12 tentativas falharam (limite de pedidos (429) 6, "
                       "serviço indisponível (503) 4, tempo esgotado 1, autenticação recusada 1); 11 amostras ficaram por responder por indisponibilidade "
-                      "do fornecedor e 1 por outro erro do pedido.", md)
+                      "do fornecedor, 1 por outro erro do pedido e 0 por responder, causa não registada.", md)
         self.assertIn("nunca conta como resposta errada, em nenhuma contagem", md)
 
     def test_an_unanswered_sample_for_unavailability_is_not_a_wrong_answer_nor_an_unanswered_reply_of_the_model(self):
@@ -270,11 +270,62 @@ class TestTheReportKeepsTheProviderApartFromTheModel(unittest.TestCase):
         self.assertIn("Ausfälle des Anbieters.", html["de"])
         self.assertIn("request limit (429) 6", html["en"].replace("&amp;", "&"))
 
-    def test_lines_without_a_class_count_as_other_errors(self):
-        answers, records = scenario("anthropic:modelo-a", answered=99)
-        records.append(rec("anthropic:modelo-a", "C20", 5, "erro"))
+    def old_lines_without_a_class(self, attempts):
+        """Provenance lines as they were written before the class existed: the fields are not there at all."""
+        lines = []
+        for case, sample in attempts:
+            raw = rec("anthropic:modelo-a", case, sample, "erro").to_dict()
+            for key in ("http_status", "classe_erro", "mensagem_erro", "total_tokens", "total_diferenca"):
+                del raw[key]
+            lines.append(ProvenanceRecord.from_dict(raw))
+        return lines
+
+    def test_an_attempt_from_before_the_class_was_recorded_is_its_own_category_never_other(self):
+        answers, records = scenario("anthropic:modelo-a", answered=98)
+        old = self.old_lines_without_a_class([("C20", 4), ("C20", 4), ("C20", 5), ("C20", 5), ("C20", 5)])
+        run_ = analyse(Files(records=tuple(records + old)), CASES20, answers, grade_all(CASES20, answers)[0]).models[0]
+        self.assertEqual(run_.failures, {"sem_classe": 5})
+        self.assertNotIn("outro", run_.failures)
+        self.assertEqual((run_.unanswered_unknown_cause, run_.unanswered_unavailable, run_.unanswered_other_error), (2, 0, 0))
+
+    def test_the_report_says_the_cause_was_not_recorded_and_does_not_claim_unavailability_or_a_request_error(self):
+        answers, records = scenario("anthropic:modelo-a", answered=98)
+        old = self.old_lines_without_a_class([("C20", 4), ("C20", 4), ("C20", 5), ("C20", 5), ("C20", 5)])
+        md, html = reports(answers, Files(records=tuple(records + old)))
+        self.assertIn("anthropic:modelo-a: 5 tentativas falharam (sem classe registada (anterior ao registo) 5); "
+                      "0 amostras ficaram por responder por indisponibilidade do fornecedor, 0 por outro erro do pedido "
+                      "e 2 por responder, causa não registada.", md)
+        self.assertNotIn("outro erro 5", md)
+        self.assertNotIn("2 amostras ficaram por responder por indisponibilidade", md)
+
+    def test_such_samples_are_still_neither_wrong_answers_nor_a_reason_for_not_comparable(self):
+        answers, records = scenario("anthropic:modelo-a", answered=88)
+        keys = [(c.case_id, s) for c in CASES20 for s in range(1, 6)][88:]
+        old = self.old_lines_without_a_class([key for key in keys for _ in range(3)])  # twelve samples, three attempts each
+        verdicts, _ = grade_all(CASES20, answers)
+        run_ = analyse(Files(records=tuple(records + old)), CASES20, answers, verdicts).models[0]
+        self.assertEqual((run_.unanswered_unknown_cause, run_.unanswered, run_.over_limit), (12, 0, False))
+        self.assertEqual(len(verdicts), 88)
+        md, _ = reports(answers, Files(records=tuple(records + old)))
+        self.assertNotIn("não comparável", md)
+
+    def test_a_line_that_does_say_other_is_still_other_and_the_two_are_told_apart(self):
+        answers, records = scenario("anthropic:modelo-a", answered=96)
+        records += [rec("anthropic:modelo-a", "C20", 2, "erro", error_class="outro", http_status=400, error_message="HTTP 400: pedido inválido")]
+        records += self.old_lines_without_a_class([("C20", 3)])
+        records += [rec("anthropic:modelo-a", "C20", 4, "erro", error_class="limite_429", http_status=429, error_message="HTTP 429")]
         run_ = analyse(Files(records=tuple(records)), CASES20, answers, grade_all(CASES20, answers)[0]).models[0]
-        self.assertEqual((run_.failures, run_.unanswered_other_error), ({"outro": 1}, 1))
+        self.assertEqual(run_.failures, {"outro": 1, "sem_classe": 1, "limite_429": 1})
+        self.assertEqual((run_.unanswered_other_error, run_.unanswered_unknown_cause, run_.unanswered_unavailable), (1, 1, 1))
+
+    def test_the_new_category_is_in_every_language_without_a_missing_translation(self):
+        answers, records = scenario("anthropic:modelo-a", answered=98)
+        old = self.old_lines_without_a_class([("C20", 4), ("C20", 5)])
+        traducao.MISSING.clear()
+        _, html = reports(answers, Files(records=tuple(records + old)))
+        self.assertEqual(sorted(traducao.MISSING), [])
+        self.assertIn("no class recorded (from before the class was recorded) 2", html["en"])
+        self.assertIn("kein Klassenvermerk (aus der Zeit vor der Erfassung) 2", html["de"])
 
 
 if __name__ == "__main__":

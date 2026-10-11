@@ -29,6 +29,9 @@ UNANSWERED_LIMIT_PERCENT = 10
 PILOT_FOLDER = "piloto"
 LEDGER_NAME = "custos.jsonl"
 _UNANSWERED_STATES = ("recusa_api", "truncada", "vazia")
+# The category of an attempt that failed in a line written before the class was recorded. It is not a class of
+# `providers.ERROR_CLASSES`: nothing is known about those attempts, so they are never filed as "outro".
+NO_CLASS = "sem_classe"
 _FAILED_STATES = ("erro", "resultado_desconhecido")  # attempts with no reply: the provider said no, or said nothing
 
 
@@ -101,6 +104,7 @@ class ModelRun:
     failures: dict[str, int] = field(default_factory=dict)
     unanswered_unavailable: int = 0
     unanswered_other_error: int = 0
+    unanswered_unknown_cause: int = 0  # the last attempt is from before the class was recorded: the cause is not known
 
     @property
     def received(self) -> int:
@@ -167,14 +171,16 @@ def analyse(files: Files, cases: list[Case], answers: list[Answer], verdicts: li
         for record in records:
             final[(record.case_id, record.sample)] = record
         stuck = [r for key, r in final.items() if key not in answered_keys and r.state in _FAILED_STATES]
-        unavailable = sum(1 for r in stuck if (r.error_class or "outro") in UNAVAILABLE_CLASSES)
+        unavailable = sum(1 for r in stuck if r.error_class in UNAVAILABLE_CLASSES)
+        unknown = sum(1 for r in stuck if r.error_class is None)
         runs.append(ModelRun(
             model=model, answered=len(answered_keys),
             api_refusals=left.count("recusa_api"), truncated=left.count("truncada"), empty=left.count("vazia"),
             text_refusals=sum(1 for a, v in pairs if a.model == model and _is_text_refusal(v)),
             records=tuple(records),
-            failures=dict(Counter(r.error_class or "outro" for r in failing)),
-            unanswered_unavailable=unavailable, unanswered_other_error=len(stuck) - unavailable,
+            failures=dict(Counter(r.error_class or NO_CLASS for r in failing)),
+            unanswered_unavailable=unavailable, unanswered_other_error=len(stuck) - unavailable - unknown,
+            unanswered_unknown_cause=unknown,
         ))
     if not runs:
         return None
@@ -202,6 +208,11 @@ def _percent(value: Decimal, lang: str) -> str:
     return decimal(f"{value:.1f}", lang)
 
 
+def _class_order(error_class: str) -> int:
+    """Where a class goes in a list: the listed ones in their order, the unrecorded last."""
+    return ERROR_CLASSES.index(error_class) if error_class in ERROR_CLASSES else len(ERROR_CLASSES)
+
+
 def _error_label(error_class: str, lang: str) -> str:
     """The words for a class of failed attempt."""
     labels = {
@@ -213,6 +224,7 @@ def _error_label(error_class: str, lang: str) -> str:
         "autenticacao": t("autenticação recusada", lang),
         "resposta_invalida": t("resposta ilegível", lang),
         "outro": t("outro erro", lang),
+        NO_CLASS: t("sem classe registada (anterior ao registo)", lang),
     }
     return labels.get(error_class, error_class)
 
@@ -252,13 +264,13 @@ def notices(analysis: Analysis, lang: str = "pt") -> list[tuple[str, str]]:
             "nenhuma contagem. Cada tentativa que falhou fica aqui, por classe.", lang,
         )]
         for run_ in failed:
-            detail = ", ".join(f"{_error_label(c, lang)} {n}" for c, n in sorted(run_.failures.items(), key=lambda item: ERROR_CLASSES.index(item[0])))
+            detail = ", ".join(f"{_error_label(c, lang)} {n}" for c, n in sorted(run_.failures.items(), key=lambda item: _class_order(item[0])))
             latest = next((r.error_message for r in reversed(run_.records) if r.state in _FAILED_STATES and r.error_message), "")
             parts.append(t(
                 "{modelo}: {n} tentativas falharam ({detalhe}); {k} amostras ficaram por responder por indisponibilidade "
-                "do fornecedor e {m} por outro erro do pedido.", lang,
+                "do fornecedor, {m} por outro erro do pedido e {c} por responder, causa não registada.", lang,
                 modelo=run_.model, n=sum(run_.failures.values()), detalhe=detail,
-                k=run_.unanswered_unavailable, m=run_.unanswered_other_error,
+                k=run_.unanswered_unavailable, m=run_.unanswered_other_error, c=run_.unanswered_unknown_cause,
             ) + (" " + t("Última mensagem: {mensagem}", lang, mensagem=latest) if latest else ""))
         out.append((t("Falhas do fornecedor.", lang), " ".join(parts)))
     groups = {values for values in analysis.applied_by_model.values() if values}
