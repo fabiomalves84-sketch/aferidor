@@ -2,10 +2,10 @@
   "lido_em": "2026-10-11",
   "aviso": "Ids e preços lidos em páginas oficiais a 2026-10-11 e ainda não confirmados pelo endpoint de listagem de cada fornecedor (verificado_em_execucao: false). Um valor que não se conhece diz 'desconhecido'; o piloto é que o determina. Os campos campo_tokens, tempo_limite_s e ritmo_min_s repetem o que o código atual de providers.py envia e usa; não foram lidos em nenhuma ficha.",
   "usd_para_eur": {
-    "valor": null,
-    "fonte": "",
-    "lido_em": null,
-    "nota": "Por definir pelo Fábio. Enquanto estiver vazio, o catálogo recusa calcular em euros."
+    "valor": 0.8924,
+    "fonte": "BCE, taxa de referência de 2026-10-09: 1 EUR = 1,1206 USD (1 USD = 0,8924 EUR); decisão do Fábio, não confirmada por mim no site do BCE",
+    "lido_em": "2026-10-09",
+    "nota": "Taxa em EUR por USD. Atualizar com a data e a fonte antes de um ensaio pago noutro dia."
   },
   "modelos": {
     "claude-fable-5-1": {

@@ -26,6 +26,8 @@ flowchart LR
 | `providers.py` | Comunicação com um modelo, através de uma interface estreita |
 | `catalogo.py` | Os modelos que se podem medir, lidos de `catalogo.json` em execução: fornecedor, id pedido, preços por período com fonte e data de leitura, parâmetros e tempos limite. Nenhum preço nem id está no código, e um teste falha se estiver; o que não se sabe diz «desconhecido» |
 | `chaves.py` | A leitura das chaves de API, do ambiente e, na falta, do `.env` da raiz, só das variáveis que o catálogo declara; o valor nunca entra numa mensagem, num `repr` nem numa exceção |
+| `custos.py` | O custo de uma corrida paga: a estimativa a seco (zero pedidos), o livro `custos.jsonl` que só acrescenta (uma intenção com o pior caso antes de cada chamada, um resultado depois) e o teto, verificado com o ficheiro bloqueado e somado sobre todos os modelos do ensaio. Sem resultado, uma intenção conta pelo pior caso; sem o catálogo dizer como se contam os tokens de raciocínio, também o resultado conta pelo pior caso |
+| `proveniencia.py` | O ficheiro lateral `respostas.proveniencia.jsonl`, uma linha por chamada: id pedido e servido, parâmetros pedidos e aplicados, tokens como o fornecedor os deu, custo e modo de contagem, estado, o sha256 do `catalogo.json` e o período de preço usados. Vive à parte de `Answer` porque `models.py` e `storage.py` pertencem ao `grader_id` |
 | `runner.py` | Execução dos casos, com repetições, novas tentativas e retoma |
 | `checks.py` | Avaliação de uma resposta contra um critério |
 | `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |

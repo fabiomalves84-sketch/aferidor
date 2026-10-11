@@ -266,10 +266,18 @@ class TestTheShippedCatalogue(unittest.TestCase):
             with self.subTest(modelo=key):
                 self.assertIs(found.verified_at_run_time, False)
 
-    def test_the_rate_is_empty_and_euros_are_refused(self):
-        self.assertIsNone(self.catalog.usd_to_eur)
-        with self.assertRaises(EurosUnavailable):
-            self.catalog.cost_eur("gpt-6-luna", date(2026, 10, 11), 100, 100)
+    def test_the_rate_is_the_one_the_fabio_gave_with_its_source_and_day(self):
+        self.assertEqual(self.catalog.usd_to_eur, Decimal("0.8924"))
+        self.assertIn("BCE", self.catalog.usd_to_eur_source)
+        self.assertIn("2026-10-09", self.catalog.usd_to_eur_source)
+        self.assertIn("1,1206", self.catalog.usd_to_eur_source)
+        raw = json.loads(DEFAULT_PATH.read_text(encoding="utf-8"))
+        self.assertEqual(raw["usd_para_eur"]["lido_em"], "2026-10-09")
+
+    def test_a_cost_in_euros_follows_the_rate(self):
+        day = date(2026, 10, 11)
+        usd = self.catalog.cost_usd("gpt-6-luna", day, 1_000_000, 1_000_000)
+        self.assertEqual(self.catalog.cost_eur("gpt-6-luna", day, 1_000_000, 1_000_000), usd * Decimal("0.8924"))
 
     def test_every_commercial_price_has_its_page_and_the_day_it_was_read(self):
         for key, found in self.catalog.models.items():
