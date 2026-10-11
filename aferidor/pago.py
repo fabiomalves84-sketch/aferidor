@@ -140,13 +140,20 @@ class PaidCalls:
         outcome = self.ledger.settle(intent_id, catalog=self.catalog, state=state, usage=usage)
         check = check_served(model.requested_id, reply.served_model if reply else "", model.accepted_served_ids)
         period = model.price_on(self.day, estimate_tokens(prompt))
-        applied = {"temperatura": provider.temperature, "tokens_max": provider.max_tokens, "campo_tokens": model.token_field,
-                   "confirmado_pelo_fornecedor": False}
+        # What the provider says it put in the request. A parameter it left out is "ausente" there, with what was
+        # asked beside it in `requested`: never a silent difference. "confirmado_pelo_fornecedor" is true only when
+        # the reply itself gives the parameter back and it matches.
+        said = provider.applied_params()
+        applied = dict(said) if said else {
+            "temperatura": provider.temperature, "tokens_max": provider.max_tokens, "campo_tokens": model.token_field,
+        }
+        echoed = reply.echoed_params if reply else None
+        applied["confirmado_pelo_fornecedor"] = bool(echoed) and echoed.get("temperatura") == applied.get("temperatura")
         append_record(self.provenance_file, ProvenanceRecord(
             run_id=run_id, model=provider.name, case_id=case_id, sample=sample, attempt=attempt, catalog_key=self.model_key,
             requested_model=model.requested_id, served_model=reply.served_model if reply else "", served_check=check.status,
             requested_params={"temperatura": provider.temperature, "tokens_max": provider.max_tokens,
-                              "campo_tokens": model.token_field},
+                              "campo_tokens": applied.get("campo_tokens", model.token_field)},
             applied_params=applied,
             input_tokens=getattr(usage, "input_tokens", None), output_tokens=getattr(usage, "output_tokens", None),
             reasoning_tokens=getattr(usage, "reasoning_tokens", None),

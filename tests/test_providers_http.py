@@ -11,6 +11,7 @@ going to clear.
 
 from __future__ import annotations
 
+import tests  # noqa: F401  (a importação fixa a raiz das chaves numa pasta vazia)
 import http.client
 import ssl
 import io

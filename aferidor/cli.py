@@ -32,7 +32,9 @@ from .providers import (
     AnthropicProvider,
     FakeProvider,
     GeminiProvider,
+    GoogleProvider,
     LocalProvider,
+    OpenAICompatible,
     OpenAIProvider,
     Provider,
     ProviderError,
@@ -54,7 +56,15 @@ PILOT_CASES = (("ATB-PAC-001",), ("PED-OMA-021", "ATB-FAR-004"), ("GRA-VPA-024",
 PILOT_SAMPLES = 2
 PILOT_FOLDER = "piloto"
 STOPPED = 3  # exit code of a run that stopped on purpose (ceiling, or another model served the call)
-_PAID_KINDS = {"openai": OpenAIProvider, "anthropic": AnthropicProvider, "gemini": GeminiProvider}
+# The provider of the catalogue that each `--fornecedor` means, and the classes whose default model a bare
+# `--fornecedor` stands for. `gemini` is the OpenAI-compatible endpoint the earlier trials used, as it always was;
+# `google` is Google's own API, which reports the thinking tokens and the model version.
+_CATALOG_PROVIDER = {
+    "openai": "openai", "anthropic": "anthropic", "gemini": "gemini", "google": "gemini",
+    "local-compativel": "openai_compativel",
+}
+_DEFAULT_MODEL_CLASSES = {"openai": OpenAIProvider, "anthropic": AnthropicProvider, "gemini": GeminiProvider}
+PROVIDER_CHOICES = ("falso", "openai", "anthropic", "gemini", "google", "local", "local-compativel")
 # The program does not check when a protocol was written, so the text does not claim it was early.
 PROTOCOL_HELP = (
     "protocolo com o critério de aprovação, que deve ser escrito antes do ensaio; "
@@ -64,8 +74,14 @@ PROTOCOL_HELP = (
 
 def build_provider(
     kind: str, model: str | None, temperature: float = 0.0, max_tokens: int | None = None,
-    timeout: float | None = None,
+    timeout: float | None = None, entry: Model | None = None, base_url: str | None = None,
 ) -> Provider:
+    """The provider for a `--fornecedor`; for a model the catalogue lists, `entry` says how to ask it.
+
+    From `entry` come the id to request, the variable the key is read from, whether the temperature is sent, and
+    (through `timeout`) the time limit. A model that does not take a temperature runs at its own, and asking for
+    another is refused here, before anything is paid for, rather than sent to be answered with a 400.
+    """
     if kind == "falso":
         return FakeProvider(name=f"falso:{model}" if model else "falso", temperature=temperature)
     kwargs: dict = {"temperature": temperature}
@@ -73,6 +89,17 @@ def build_provider(
         kwargs["max_tokens"] = max_tokens
     if timeout is not None:
         kwargs["timeout"] = timeout
+    if entry is not None:
+        model = entry.requested_id
+        if entry.key_variable and kind in ("openai", "anthropic", "gemini", "google"):
+            kwargs["key_variable"] = entry.key_variable
+        if kind in ("openai", "anthropic", "google", "local-compativel"):
+            kwargs["send_temperature"] = entry.temperature not in ("fixa_pelo_fornecedor", "nao_aceita")
+        if entry.temperature == "fixa_pelo_fornecedor" and Decimal(str(temperature)) != entry.fixed_temperature:
+            raise ProviderError(
+                f"{entry.requested_id} não aceita temperatura e corre sempre a {entry.fixed_temperature}; foi pedida "
+                f"{temperature}. Pedir --temperatura {entry.fixed_temperature}, que é o que o catálogo diz que se aplica"
+            )
     if kind == "openai":
         return OpenAIProvider(model=model, **kwargs) if model else OpenAIProvider(**kwargs)
     if kind == "anthropic":
@@ -81,6 +108,18 @@ def build_provider(
         return LocalProvider(model=model, **kwargs) if model else LocalProvider(**kwargs)
     if kind == "gemini":
         return GeminiProvider(model=model, **kwargs) if model else GeminiProvider(**kwargs)
+    if kind == "google":
+        if not model:
+            raise ProviderError("--fornecedor google precisa de --modelo, o id do modelo do catálogo")
+        return GoogleProvider(model=model, **kwargs)
+    if kind == "local-compativel":
+        if not model:
+            raise ProviderError("--fornecedor local-compativel precisa de --modelo")
+        url = base_url or (entry.base_url if entry else None)
+        if not url:
+            raise ProviderError("--fornecedor local-compativel precisa de --base-url, o endereço do servidor, por exemplo http://localhost:8000/v1")
+        tokens_param = entry.token_field if entry and entry.token_field in ("max_tokens", "max_completion_tokens") else "max_tokens"
+        return OpenAICompatible(model=model, base_url=url, tokens_param=tokens_param, **kwargs)
     raise ValueError(f"fornecedor desconhecido {kind!r}")
 
 
@@ -95,16 +134,18 @@ def _euros(text: str) -> Decimal:
 
 
 def _paid_model(kind: str, model: str | None) -> tuple[Catalog, Model] | None:
-    """The catalogue entry of a model that costs money, or None for one that does not (or that it does not list).
+    """The catalogue entry of a model the catalogue lists, or None for one it does not list.
 
-    A model is paid when the catalogue lists it under this provider and id. Without `--modelo` the id is the
-    provider's own default, so a bare `--fornecedor gemini` is the catalogue's Gemini model.
+    A listed model goes through the ledger and the provenance. Without `--modelo` the id is the provider's own
+    default, so a bare `--fornecedor gemini` is the catalogue's Gemini model. `--modelo` may be the id or the key.
     """
-    if kind not in _PAID_KINDS:
+    provider = _CATALOG_PROVIDER.get(kind)
+    if provider is None:
         return None
     catalog = load_catalog()
-    requested = model or inspect.signature(_PAID_KINDS[kind].__init__).parameters["model"].default
-    found = catalog.find(kind, requested)
+    default = _DEFAULT_MODEL_CLASSES.get(kind)
+    wanted = model or (inspect.signature(default.__init__).parameters["model"].default if default else None)
+    found = catalog.resolve(provider, wanted) if wanted else None
     return (catalog, found) if found else None
 
 
@@ -134,10 +175,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     # The options `executar` and `ensaio` share, in this order.
     run_options = argparse.ArgumentParser(add_help=False)
+    run_options.add_argument("--fornecedor", choices=PROVIDER_CHOICES, default="falso")
+    run_options.add_argument("--modelo", default=None, help="identificador do modelo (ou a chave dele no catálogo)")
     run_options.add_argument(
-        "--fornecedor", choices=("falso", "openai", "anthropic", "gemini", "local"), default="falso"
+        "--base-url", default=None,
+        help="endereço de um servidor compatível com a API da OpenAI, só com --fornecedor local-compativel, "
+             "por exemplo http://localhost:8000/v1",
     )
-    run_options.add_argument("--modelo", default=None, help="identificador do modelo")
     run_options.add_argument("--casos", type=Path, default=DEFAULT_CASES)
     run_options.add_argument("--saida", type=Path, default=DEFAULT_OUTPUT)
     run_options.add_argument(
@@ -219,7 +263,7 @@ def build_parser() -> argparse.ArgumentParser:
     modelos = sub.add_parser(
         "modelos", help="listar os modelos disponíveis no fornecedor"
     )
-    modelos.add_argument("--fornecedor", choices=("openai", "anthropic", "gemini", "local"), required=True)
+    modelos.add_argument("--fornecedor", choices=("openai", "anthropic", "gemini", "google", "local"), required=True)
 
     prot = sub.add_parser(
         "protocolo", help="escrever um protocolo com o critério de aprovação, antes do ensaio"
@@ -306,6 +350,7 @@ def comando_executar(args: argparse.Namespace) -> int:
         args.casos, args.fornecedor, args.modelo, args.saida, args.limite, args.tentativas,
         args.repeticoes, args.temperatura, args.tokens_max, args.recomecar,
         teto_eur=args.teto_eur, a_seco=args.a_seco, piloto=args.piloto, repetir_incertas=args.repetir_incertas,
+        base_url=args.base_url,
     )
 
 
@@ -314,7 +359,7 @@ def _executar(
     repeticoes: int, temperatura: float, tokens_max: int, recomecar: bool,
     errors_out: dict[str, str] | None = None,
     *, teto_eur: Decimal | None = None, a_seco: bool = False, piloto: bool = False,
-    repetir_incertas: bool = False,
+    repetir_incertas: bool = False, base_url: str | None = None,
 ) -> int:
     cases = read_cases(casos)
     if piloto:
@@ -331,10 +376,13 @@ def _executar(
     elif limite > 0:
         cases = cases[:limite]
 
+    if base_url is not None and fornecedor != "local-compativel":
+        print("erro: --base-url só se usa com --fornecedor local-compativel", file=sys.stderr)
+        return 2
     paid_info = _paid_model(fornecedor, modelo)
     if a_seco:
         return _a_seco(paid_info, cases, repeticoes, tokens_max, teto_eur)
-    if paid_info is not None and teto_eur is None:
+    if paid_info is not None and not paid_info[1].is_free and teto_eur is None:
         print(
             f"erro: {paid_info[1].requested_id} é um modelo pago (está em aferidor/catalogo.json) e não arranca sem "
             "--teto-eur, o gasto máximo do ensaio em euros; sem valor por omissão. Para ver o custo antes, "
@@ -347,7 +395,10 @@ def _executar(
         provider = build_provider(
             fornecedor, modelo, temperature=temperatura, max_tokens=tokens_max,
             timeout=paid_info[1].timeout_s if paid_info else None,
+            entry=paid_info[1] if paid_info else None, base_url=base_url,
         )
+        if fornecedor == "local-compativel":
+            print(f"o servidor tem carregado: {provider.confirm_model()}")
     except ProviderError as error:
         print(f"erro: {error}", file=sys.stderr)
         return 2
@@ -363,7 +414,7 @@ def _executar(
         ensaio = (f"{saida.resolve().parent.parent.name}/{PILOT_FOLDER}" if piloto else saida.resolve().parent.name)
         paid = PaidCalls(
             catalog=catalog, model_key=entry.key, ledger=Ledger(saida.with_name("custos.jsonl")),
-            provenance_file=provenance_path(saida), ensaio=ensaio, ceiling_eur=teto_eur,
+            provenance_file=provenance_path(saida), ensaio=ensaio, ceiling_eur=teto_eur if teto_eur is not None else Decimal(0),
             retry_uncertain=repetir_incertas,
         )
     elif repetir_incertas:
@@ -415,7 +466,7 @@ def _executar(
     if errors_out is not None:
         errors_out.update(result.errors)
     if paid is not None:
-        for line in _spend_lines(paid, saida, piloto, teto_eur):
+        for line in _spend_lines(paid, saida, piloto, paid.ceiling_eur):
             print(line)
     if result.stopped:
         print(f"parada: {result.stopped}", file=sys.stderr)

@@ -23,9 +23,15 @@ DEFAULT_PATH = Path(__file__).with_name("catalogo.json")
 
 CURRENCIES = ("USD", "EUR")
 UNKNOWN = "desconhecido"
-TEMPERATURE_POLICIES = ("aceita", "fixa_pelo_fornecedor", "ignorada", UNKNOWN)
-TOKEN_FIELDS = ("max_tokens", "max_completion_tokens", UNKNOWN)
-REASONING_COUNTS = ("incluidos_na_saida", "separados_da_saida", UNKNOWN)
+# How a model treats the temperature: "aceita" (sent as asked), "fixa_pelo_fornecedor" (not sent: the provider runs
+# at one value, `temperatura_fixa`, and a different one asked is refused), "nao_aceita" (not sent, and the
+# provenance says asked X, applied absent), "ignorada" (sent and ignored), or not known yet.
+TEMPERATURE_POLICIES = ("aceita", "fixa_pelo_fornecedor", "nao_aceita", "ignorada", UNKNOWN)
+TOKEN_FIELDS = ("max_tokens", "max_completion_tokens", "maxOutputTokens", UNKNOWN)
+# How the output token count relates to the reasoning tokens. "por_confirmar" is "desconhecido" for the sums: the
+# documentation was read and does not settle it, so a call is counted at its worst case until someone confirms it.
+POR_CONFIRMAR = "por_confirmar"
+REASONING_COUNTS = ("incluidos_na_saida", "separados_da_saida", POR_CONFIRMAR, UNKNOWN)
 PROVIDERS = ("openai", "anthropic", "gemini", "openai_compativel", "local")
 PRICE_ORIGINS = ("pagina_oficial", "declarado_pelo_fabio")
 _ENV_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
@@ -71,6 +77,7 @@ class Model:
     prices: tuple[PricePeriod, ...]
     token_field: str
     temperature: str
+    fixed_temperature: Decimal | None  # the value a provider that does not take one runs at
     reasoning_tokens: str  # whether the output count includes the reasoning tokens
     reasoning_effort: str | None
     tokens_max: int | None
@@ -79,7 +86,13 @@ class Model:
     key_variable: str | None
     base_url: str | None
     accepted_served_ids: tuple[str, ...]  # served ids a person looked at and allowed, besides the requested one
+    to_confirm: tuple[str, ...]  # what here was not found in an official page: names of fields, to say so in a report
     note: str
+
+    @property
+    def is_free(self) -> bool:
+        """Whether every price period is zero: a model on one's own server, say. It needs no ceiling to run."""
+        return all(p.input_per_million == 0 and p.output_per_million == 0 for p in self.prices)
 
     def price_on(self, day: date, prompt_tokens: int = 0) -> PricePeriod:
         found = [p for p in self.prices if p.covers(day, prompt_tokens)]
@@ -110,6 +123,12 @@ class Catalog:
             if found.provider == provider and found.requested_id == requested_id:
                 return found
         return None
+
+    def resolve(self, provider: str, name: str) -> Model | None:
+        """The model that `name` means for `provider`: its requested id, or its key in this catalogue."""
+        return self.find(provider, name) or next(
+            (m for k, m in self.models.items() if k == name and m.provider == provider), None
+        )
 
     def key_variables(self) -> frozenset[str]:
         """The environment variables the catalogue declares for keys, and the only ones `chaves` may read."""
@@ -261,6 +280,11 @@ def _model(key: str, raw: object) -> Model:
     reasoning_tokens = _text(params, "tokens_raciocinio", pwhere)
     if reasoning_tokens not in REASONING_COUNTS:
         raise _fail(pwhere, f"'tokens_raciocinio' tem de ser um de {', '.join(REASONING_COUNTS)}")
+    fixed = params.get("temperatura_fixa")
+    if fixed is not None:
+        fixed = _number(fixed, "temperatura_fixa", pwhere)
+    if temperature == "fixa_pelo_fornecedor" and fixed is None:
+        raise _fail(pwhere, "uma temperatura 'fixa_pelo_fornecedor' tem de dizer qual em 'temperatura_fixa'")
     tokens_max = _field(params, "tokens_max", pwhere)
     if tokens_max is not None and (isinstance(tokens_max, bool) or not isinstance(tokens_max, int) or tokens_max <= 0):
         raise _fail(pwhere, "'tokens_max' tem de ser um inteiro positivo ou null")
@@ -275,6 +299,9 @@ def _model(key: str, raw: object) -> Model:
     accepted = raw.get("ids_servidos_aceites", [])
     if not isinstance(accepted, list) or not all(isinstance(a, str) and a.strip() for a in accepted):
         raise _fail(where, "'ids_servidos_aceites' tem de ser uma lista de textos")
+    to_confirm = raw.get("por_confirmar", [])
+    if not isinstance(to_confirm, list) or not all(isinstance(a, str) and a.strip() for a in to_confirm):
+        raise _fail(where, "'por_confirmar' tem de ser uma lista de textos")
     return Model(
         key=key,
         provider=provider,
@@ -283,6 +310,7 @@ def _model(key: str, raw: object) -> Model:
         prices=periods,
         token_field=token_field,
         temperature=temperature,
+        fixed_temperature=fixed,
         reasoning_tokens=reasoning_tokens,
         reasoning_effort=_optional_text(params, "esforco_raciocinio", pwhere),
         tokens_max=tokens_max,
@@ -291,6 +319,7 @@ def _model(key: str, raw: object) -> Model:
         key_variable=variable,
         base_url=_optional_text(raw, "base_url", where),
         accepted_served_ids=tuple(accepted),
+        to_confirm=tuple(to_confirm),
         note=note if isinstance(note, str) else "",
     )
 

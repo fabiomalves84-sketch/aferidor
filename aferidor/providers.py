@@ -21,16 +21,27 @@ import urllib.request
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, replace
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+from typing import Any
+
+from .chaves import REPOSITORY_ROOT, KeysError, Secret, read_key
 
 USER_AGENT = "aferidor/0.1"
+# Where a key may be read from when it is not in the environment: the `.env` at the root of the repository. A test
+# points this at an empty folder, so no test opens the real file.
+KEYS_ROOT = REPOSITORY_ROOT
+# The request headers that carry a key. Their values are scrubbed out of any message built from a reply or an error.
+_SECRET_HEADERS = ("authorization", "x-api-key", "x-goog-api-key")
 
 
 @dataclass(frozen=True)
 class Usage:
     """Tokens a provider says a call used. A figure the provider did not give is None, never zero.
 
-    `reasoning_tokens` is the part of the output spent on reasoning when the provider reports it
-    apart; where it does not (Anthropic counts it inside `output_tokens`), it stays None.
+    `reasoning_tokens` is the reasoning the provider reports, whether it lies inside `output_tokens` (Anthropic:
+    `output_tokens_details.thinking_tokens`, a part of the billed output) or beside it (Gemini: `thoughtsTokenCount`).
+    Which of the two it is, for billing, is the catalogue's `tokens_raciocinio`, not something read from here.
     """
 
     input_tokens: int | None = None
@@ -58,6 +69,9 @@ class Reply:
     served_model: str = ""
     usage: Usage | None = None
     finish_reason_original: str | None = None
+    # What the reply itself says was applied (a temperature, say), when it says. None of the replies read so far
+    # echoes a parameter, so nothing fills this yet; it is where a provider that does would put it.
+    echoed_params: dict[str, Any] | None = None
 
 
 def _count(value: object) -> int | None:
@@ -115,6 +129,14 @@ def normalize_finish_reason(raw: str | None) -> str:
         return "length"
     if raw in ("content_filter", "refusal"):
         return "filtered"
+    # Google's own `finishReason` values (https://ai.google.dev/api/generate-content, read 2026-10-11). Only the
+    # ones that say the content was withheld are folded into "filtered"; the rest stay "unknown", never guessed at.
+    if raw == "STOP":
+        return "stop"
+    if raw == "MAX_TOKENS":
+        return "length"
+    if raw in ("SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII", "IMAGE_SAFETY"):
+        return "filtered"
     return "unknown"
 
 
@@ -156,6 +178,14 @@ class Provider(ABC):
     @abstractmethod
     def ask(self, prompt: str) -> Reply:
         """Send one prompt and return the reply, text and finish reason."""
+
+    def applied_params(self) -> dict[str, Any] | None:
+        """What this provider actually puts in the request, for the provenance line; None if it does not say.
+
+        The conditions the runner records (`temperature`, `max_tokens`) are what was asked for. A provider that
+        leaves one out, or sends it under another name, says so here: asked 1.0, applied "ausente", never silently.
+        """
+        return None
 
     def available_models(self) -> list[str]:
         """Model identifiers this provider currently offers.
@@ -204,21 +234,55 @@ class FakeProvider(Provider):
         return Reply(text=self.default, finish_reason=self.finish_reason)
 
 
-def _retry_after(raw: object) -> float | None:
-    """`Retry-After` as seconds, when the server gave a number; a date, or nothing usable, is None."""
-    if not isinstance(raw, str):
+def _retry_after(raw: object, now: Callable[[], datetime] | None = None) -> float | None:
+    """`Retry-After` as seconds from now: a number of seconds, or an HTTP date (RFC 9110, section 10.2.3).
+
+    Both forms are the standard's; whether a given provider sends either is for its own documentation, which the
+    Anthropic errors page (https://platform.claude.com/docs/en/api/errors, read 2026-10-11) says only for the header
+    itself. Anything else, a negative number, a date already past, more than a day, is None.
+    """
+    if not isinstance(raw, str) or not raw.strip():
         return None
+    text = raw.strip()
     try:
-        seconds = float(raw.strip())
+        seconds = float(text)
     except ValueError:
-        return None
+        try:
+            when = parsedate_to_datetime(text)
+        except (TypeError, ValueError, IndexError):
+            return None
+        if when.tzinfo is None:
+            when = when.replace(tzinfo=timezone.utc)
+        seconds = (when - (now or (lambda: datetime.now(timezone.utc)))()).total_seconds()
     return seconds if 0 <= seconds < 86400 else None
+
+
+def _secrets_in(headers: dict[str, str]) -> list[str]:
+    """The key values in these request headers, so they can be taken out of anything written from a reply."""
+    found = []
+    for name, value in headers.items():
+        if name.lower() in _SECRET_HEADERS and value:
+            token = value.split(" ", 1)[-1].strip()
+            if len(token) >= 6:
+                found.append(token)
+    return found
+
+
+def _scrub(text: str, secrets: list[str]) -> str:
+    for secret in secrets:
+        text = text.replace(secret, "<chave omitida>")
+    return text
 
 
 def _request_json(
     url: str, headers: dict[str, str], payload: dict | None, timeout: float
 ) -> dict:
-    """Call an endpoint and return the decoded reply, classifying every failure."""
+    """Call an endpoint and return the decoded reply, classifying every failure.
+
+    Anything a message says about the reply or the error has the key taken out first: a provider may echo the key it
+    was sent in an error body, and a message that reaches a log or a file must not carry it.
+    """
+    secrets = _secrets_in(headers)
     body = json.dumps(payload).encode("utf-8") if payload is not None else None
     request = urllib.request.Request(
         url, data=body, method="POST" if body is not None else "GET"
@@ -235,7 +299,7 @@ def _request_json(
     except urllib.error.HTTPError as error:
         waited = error.headers.get("Retry-After") if error.headers is not None else None
         try:
-            detail = error.read().decode("utf-8", "replace")[:400]
+            detail = _scrub(error.read().decode("utf-8", "replace")[:400], secrets)
         finally:
             error.close()
         raise ProviderError(
@@ -246,16 +310,16 @@ def _request_json(
         ) from None
     except urllib.error.URLError as error:
         if isinstance(error.reason, ssl.SSLCertVerificationError):
-            raise ProviderError(f"{url}: certificado recusado: {error.reason}", retryable=False, maybe_billed=False) from None
-        raise ProviderError(f"{url} inacessível: {error.reason}", retryable=True, maybe_billed=False) from None
+            raise ProviderError(f"{url}: certificado recusado: {_scrub(str(error.reason), secrets)}", retryable=False, maybe_billed=False) from None
+        raise ProviderError(f"{url} inacessível: {_scrub(str(error.reason), secrets)}", retryable=True, maybe_billed=False) from None
     except ssl.SSLCertVerificationError as error:
-        raise ProviderError(f"{url}: certificado recusado: {error}", retryable=False, maybe_billed=False) from None
+        raise ProviderError(f"{url}: certificado recusado: {_scrub(str(error), secrets)}", retryable=False, maybe_billed=False) from None
     except TimeoutError:
         raise ProviderError(f"{url} excedeu {timeout}s", retryable=True) from None
     except (OSError, http.client.HTTPException) as error:
         # Reset, abort, broken pipe, SSL error, hang-up or short read mid-reply:
         # whatever the socket raises, the call did not finish and may be repeated.
-        raise ProviderError(f"{url} desligou a meio da leitura: {error}", retryable=True) from None
+        raise ProviderError(f"{url} desligou a meio da leitura: {_scrub(str(error), secrets)}", retryable=True) from None
     except (json.JSONDecodeError, UnicodeDecodeError):
         raise ProviderError(f"{url} devolveu uma resposta que não é JSON", retryable=True) from None
 
@@ -265,13 +329,23 @@ def _sorted_names(items: list, field: str, strip: str = "") -> list[str]:
     return sorted(str(m.get(field, "")).removeprefix(strip) for m in items if m.get(field))
 
 
-def _key_from_env(variable: str, given: str | None) -> str:
-    key = given or os.environ.get(variable, "")
-    if not key.strip():
+def _key_from_env(variable: str, given: Secret | str | None) -> Secret:
+    """The key a provider will use: the one given, else the environment variable, else the `.env` of the repository.
+
+    The value only ever lives in a `Secret`. The error names the variable and never a value.
+    """
+    if given is not None and (given.reveal() if isinstance(given, Secret) else given).strip():
+        return given if isinstance(given, Secret) else Secret(given.strip())
+    try:
+        found = read_key(variable, [variable], KEYS_ROOT)
+    except KeysError as error:
+        raise ProviderError(str(error)) from None
+    if found is None:
         raise ProviderError(
-            f"falta a chave de API: definir {variable} no ambiente ou passá-la ao construtor"
+            f"falta a chave de API: definir {variable} no ambiente ou no ficheiro .env da raiz do repositório, "
+            "ou passá-la ao construtor"
         )
-    return key.strip()
+    return found
 
 
 def _chat_completion(
@@ -279,7 +353,7 @@ def _chat_completion(
     headers: dict[str, str],
     model: str,
     prompt: str,
-    temperature: float,
+    temperature: float | None,
     max_tokens: int,
     timeout: float,
     who: str,
@@ -297,18 +371,15 @@ def _chat_completion(
     `max_completion_tokens` instead, while Ollama's compatibility layer only
     understands `max_tokens`. The caller picks the right one; this function
     does not guess.
+
+    A `temperature` of None is left out of the request, for a model that does not take one.
     """
-    data = _request_json(
-        endpoint,
-        headers,
-        {
-            "model": model,
-            "temperature": temperature,
-            tokens_param: max_tokens,
-            "messages": [{"role": "user", "content": prompt}],
-        },
-        timeout,
-    )
+    payload: dict[str, Any] = {"model": model}
+    if temperature is not None:
+        payload["temperature"] = temperature
+    payload[tokens_param] = max_tokens
+    payload["messages"] = [{"role": "user", "content": prompt}]
+    data = _request_json(endpoint, headers, payload, timeout)
     try:
         choice = data["choices"][0]
         text = choice["message"]["content"] or ""
@@ -326,52 +397,142 @@ def _chat_completion(
     )
 
 
-class OpenAIProvider(Provider):
+class OpenAICompatible(Provider):
+    """Any server that speaks OpenAI's Chat Completions: OpenAI itself, a vLLM server, another local one.
+
+    `base_url` ends where the versioned path starts (for OpenAI, `https://api.openai.com/v1`); the calls go to
+    `{base_url}/chat/completions` and `{base_url}/models`. The key is optional, because a local server may not ask
+    for one; when there is one it goes in the `Authorization: Bearer` header and nowhere else.
+
+    Read from the providers' documentation on 2026-10-11, and what could not be read is marked "por confirmar" in
+    `catalogo.json` rather than assumed here:
+    - https://developers.openai.com/api/docs/guides/migrate-to-responses: Chat Completions "remains supported",
+      Responses "is recommended for all new projects"; GPT-6 Astra and Sol "require the Responses API for tool
+      calling". This provider asks a plain text question, with no tools, so it uses Chat Completions, which is
+      also what the compatible servers speak. The page does not state the usage fields, the token-limit parameter
+      or the temperature rule for these models.
+    - https://platform.openai.com/docs/api-reference/chat/create (HTTP 403) and
+      https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create (HTTP 404)
+      could not be opened, so the request and response fields below (`model`, `messages`, `temperature`, the
+      token-limit field, `choices[].message.content`, `choices[].finish_reason`, `model`, `usage.prompt_tokens`,
+      `usage.completion_tokens`, `usage.completion_tokens_details.reasoning_tokens`) are the ones the earlier
+      providers already used and are unconfirmed against the official page.
+    - https://docs.vllm.ai/en/latest/serving/online_serving/ lists `/v1/chat/completions` and `/v1/models`, and says
+      nothing on the key, the token-limit parameter, the temperature or the reply fields.
+
+    `confirm_model` asks `/models` which models the server has loaded; the id found there is then used as the served
+    model when a reply does not carry its own `model` field.
+    """
+
+    def __init__(
+        self,
+        model: str,
+        *,
+        base_url: str,
+        api_key: Secret | str | None = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        timeout: float = 300.0,
+        tokens_param: str = "max_tokens",
+        send_temperature: bool = True,
+        name_prefix: str = "compativel",
+        who: str = "do servidor compatível",
+    ) -> None:
+        self.name = f"{name_prefix}:{model}"
+        self.model = model
+        self.base_url = base_url.rstrip("/")
+        self.api_key: Secret | None = (
+            None if api_key is None or not (api_key.reveal() if isinstance(api_key, Secret) else api_key).strip()
+            else (api_key if isinstance(api_key, Secret) else Secret(api_key.strip()))
+        )
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.timeout = timeout
+        self.tokens_param = tokens_param
+        self.send_temperature = send_temperature
+        self.who = who
+        self.loaded_model = ""
+
+    def _headers(self) -> dict[str, str]:
+        return {"authorization": f"Bearer {self.api_key.reveal()}"} if self.api_key else {}
+
+    def ask(self, prompt: str) -> Reply:
+        reply = _chat_completion(
+            f"{self.base_url}/chat/completions", self._headers(), self.model, prompt,
+            self.temperature if self.send_temperature else None, self.max_tokens, self.timeout, self.who,
+            tokens_param=self.tokens_param,
+        )
+        if not reply.served_model and self.loaded_model:
+            reply = replace(reply, served_model=self.loaded_model)
+        return reply
+
+    def available_models(self) -> list[str]:
+        data = _request_json(f"{self.base_url}/models", self._headers(), None, self.timeout)
+        return _sorted_names(data.get("data", []), "id")
+
+    def confirm_model(self) -> str:
+        """Ask the server which models it has loaded and check that the one wanted is among them."""
+        names = self.available_models()
+        if self.model not in names:
+            have = ", ".join(names) if names else "nenhum"
+            raise ProviderError(
+                f"o servidor em {self.base_url} não tem o modelo {self.model}; tem: {have}. "
+                "Num vLLM, o nome vem de --served-model-name",
+                retryable=False, maybe_billed=False,
+            )
+        self.loaded_model = self.model
+        return self.loaded_model
+
+    def applied_params(self) -> dict[str, Any]:
+        return {
+            "temperatura": self.temperature if self.send_temperature else "ausente",
+            "tokens_max": self.max_tokens,
+            "campo_tokens": self.tokens_param,
+            "confirmado_pelo_fornecedor": False,
+        }
+
+
+class OpenAIProvider(OpenAICompatible):
     """OpenAI chat completions."""
 
-    ENDPOINT = "https://api.openai.com/v1/chat/completions"
     ENV_KEY = "OPENAI_API_KEY"
+    BASE_URL = "https://api.openai.com/v1"
 
     def __init__(
         self,
         model: str = "gpt-4o",
-        api_key: str | None = None,
+        api_key: Secret | str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1024,
         timeout: float = 60.0,
+        send_temperature: bool = True,
+        key_variable: str | None = None,
     ) -> None:
-        self.name = f"openai:{model}"
-        self.model = model
-        self.api_key = _key_from_env(self.ENV_KEY, api_key)
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-        self.timeout = timeout
-
-    def ask(self, prompt: str) -> Reply:
-        return _chat_completion(
-            self.ENDPOINT,
-            {"authorization": f"Bearer {self.api_key}"},
-            self.model,
-            prompt,
-            self.temperature,
-            self.max_tokens,
-            self.timeout,
-            "da OpenAI",
-            tokens_param="max_completion_tokens",
+        super().__init__(
+            model, base_url=self.BASE_URL, api_key=_key_from_env(key_variable or self.ENV_KEY, api_key),
+            temperature=temperature, max_tokens=max_tokens, timeout=timeout, tokens_param="max_completion_tokens",
+            send_temperature=send_temperature, name_prefix="openai", who="da OpenAI",
         )
-
-    def available_models(self) -> list[str]:
-        data = _request_json(
-            "https://api.openai.com/v1/models",
-            {"authorization": f"Bearer {self.api_key}"},
-            None,
-            self.timeout,
-        )
-        return _sorted_names(data.get("data", []), "id")
 
 
 class AnthropicProvider(Provider):
-    """Anthropic messages."""
+    """Anthropic messages.
+
+    Read on 2026-10-11 from https://platform.claude.com/docs/en/api/messages/create and
+    https://platform.claude.com/docs/en/api/errors:
+    - headers: `X-Api-Key`, `anthropic-version: 2023-06-01`, `Content-Type: application/json` (the page's example);
+    - request: `model`, `max_tokens`, `messages`; `temperature` is "Deprecated. Models released after Claude Opus 4.6
+      do not support setting temperature. A value of 1.0 will be accepted for backwards compatibility, all other
+      values will be rejected with a 400 error", and "Defaults to 1.0". So for such a model `send_temperature` is
+      False: the call goes without one and runs at the provider's 1.0;
+    - reply: `model`, `stop_reason` (`end_turn`, `max_tokens`, `stop_sequence`, `tool_use`, `pause_turn`, `refusal`,
+      `model_context_window_exceeded`), `usage.input_tokens`, `usage.output_tokens` ("the inclusive, authoritative
+      total used for billing") and `usage.output_tokens_details.thinking_tokens`, which "approximates" the part of
+      it spent on reasoning; thinking tokens count toward `max_tokens` (the Fable 5.1 overview says thinking is
+      adaptive and always on);
+    - errors: 429 `rate_limit_error` (a spend-cap 429 "has no `retry-after` header"), 5xx retryable, 529 overloaded,
+      the body `{"type": "error", "error": {"type", "message"}, "request_id"}`; every reply has a `request-id` header.
+    """
 
     ENDPOINT = "https://api.anthropic.com/v1/messages"
     ENV_KEY = "ANTHROPIC_API_KEY"
@@ -380,30 +541,31 @@ class AnthropicProvider(Provider):
     def __init__(
         self,
         model: str = "claude-sonnet-4-5",
-        api_key: str | None = None,
+        api_key: Secret | str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1024,
         timeout: float = 60.0,
+        send_temperature: bool = True,
+        key_variable: str | None = None,
     ) -> None:
         self.name = f"anthropic:{model}"
         self.model = model
-        self.api_key = _key_from_env(self.ENV_KEY, api_key)
+        self.api_key = _key_from_env(key_variable or self.ENV_KEY, api_key)
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.timeout = timeout
+        self.send_temperature = send_temperature
+
+    def _headers(self) -> dict[str, str]:
+        return {"x-api-key": self.api_key.reveal(), "anthropic-version": self.VERSION}
 
     def ask(self, prompt: str) -> Reply:
-        data = _request_json(
-            self.ENDPOINT,
-            {"x-api-key": self.api_key, "anthropic-version": self.VERSION},
-            {
-                "model": self.model,
-                "temperature": self.temperature,
-                "max_tokens": self.max_tokens,
-                "messages": [{"role": "user", "content": prompt}],
-            },
-            self.timeout,
-        )
+        payload: dict[str, Any] = {"model": self.model}
+        if self.send_temperature:
+            payload["temperature"] = self.temperature
+        payload["max_tokens"] = self.max_tokens
+        payload["messages"] = [{"role": "user", "content": prompt}]
+        data = _request_json(self.ENDPOINT, self._headers(), payload, self.timeout)
         try:
             blocks = data["content"]
             text = "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
@@ -413,18 +575,24 @@ class AnthropicProvider(Provider):
             text=text,
             finish_reason=normalize_finish_reason(data.get("stop_reason")),
             served_model=_served(data),
-            usage=usage_from(data.get("usage"), "input_tokens", "output_tokens"),
+            usage=usage_from(data.get("usage"), "input_tokens", "output_tokens", ("output_tokens_details", "thinking_tokens")),
             finish_reason_original=_original(data.get("stop_reason")),
         )
 
     def available_models(self) -> list[str]:
-        data = _request_json(
-            "https://api.anthropic.com/v1/models?limit=100",
-            {"x-api-key": self.api_key, "anthropic-version": self.VERSION},
-            None,
-            self.timeout,
-        )
+        data = _request_json("https://api.anthropic.com/v1/models?limit=100", self._headers(), None, self.timeout)
         return _sorted_names(data.get("data", []), "id")
+
+    def applied_params(self) -> dict[str, Any]:
+        applied: dict[str, Any] = {
+            "temperatura": self.temperature if self.send_temperature else "ausente",
+            "tokens_max": self.max_tokens,
+            "campo_tokens": "max_tokens",
+            "confirmado_pelo_fornecedor": False,
+        }
+        if not self.send_temperature:
+            applied["nota"] = "o modelo não aceita temperatura (documentado); corre à temperatura por omissão do fornecedor, 1.0"
+        return applied
 
 
 class GeminiProvider(Provider):
@@ -447,17 +615,18 @@ class GeminiProvider(Provider):
     def __init__(
         self,
         model: str = "gemini-3.8-flash",
-        api_key: str | None = None,
+        api_key: Secret | str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1024,
         timeout: float = 300.0,
         min_interval_s: float | None = None,
         clock: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
+        key_variable: str | None = None,
     ) -> None:
         self.name = f"gemini:{model}"
         self.model = model
-        self.api_key = _key_from_env(self.ENV_KEY, api_key)
+        self.api_key = _key_from_env(key_variable or self.ENV_KEY, api_key)
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.timeout = timeout
@@ -481,7 +650,7 @@ class GeminiProvider(Provider):
         self._pace()
         reply = _chat_completion(
             f"{self.BASE}/chat/completions",
-            {"authorization": f"Bearer {self.api_key}"},
+            {"authorization": f"Bearer {self.api_key.reveal()}"},
             self.model,
             prompt,
             self.temperature,
@@ -493,9 +662,13 @@ class GeminiProvider(Provider):
 
     def available_models(self) -> list[str]:
         data = _request_json(
-            f"{self.BASE}/models", {"authorization": f"Bearer {self.api_key}"}, None, self.timeout
+            f"{self.BASE}/models", {"authorization": f"Bearer {self.api_key.reveal()}"}, None, self.timeout
         )
         return _sorted_names(data.get("data", []), "id", "models/")
+
+    def applied_params(self) -> dict[str, Any]:
+        return {"temperatura": self.temperature, "tokens_max": self.max_tokens, "campo_tokens": "max_tokens",
+                "confirmado_pelo_fornecedor": False}
 
 
 _THOUGHT = re.compile(r"<thought>.*?(?:</thought>|\Z)", re.S)
@@ -512,6 +685,118 @@ def without_thoughts(text: str) -> str:
     answer rather than as an answer.
     """
     return _THOUGHT.sub("", text).strip()
+
+
+class GoogleProvider(Provider):
+    """Google Gemini through its own `generateContent` API, which reports what the OpenAI-compatible one does not.
+
+    The compatible endpoint of `GeminiProvider` has no field for the thinking tokens, the model version or the
+    provider's own finish reason; this one has. Read on 2026-10-11 from https://ai.google.dev/api/generate-content
+    and https://ai.google.dev/gemini-api/docs/api-key:
+    - `POST {BASE}/models/{model}:generateContent`, the key in the `x-goog-api-key` header (the key page's REST
+      example; the generate-content page's shell examples use `?key=`, which this provider never does);
+    - request: `contents: [{"role": "user", "parts": [{"text": ...}]}]` and `generationConfig` with `temperature` and
+      `maxOutputTokens` (both used in the page's examples; the page's table of their ranges and defaults was not
+      in the part read, and whether `maxOutputTokens` covers thinking is stated on the thinking page, not here:
+      "sets the maximum number of tokens a response can generate, including thought tokens");
+    - reply: `candidates[].content.parts[].text`, `candidates[].finishReason` (`STOP`, `MAX_TOKENS`, `SAFETY`,
+      `RECITATION`, `BLOCKLIST`, `PROHIBITED_CONTENT`, `SPII`, ... listed on the same page), `modelVersion`,
+      `promptFeedback.blockReason` (no candidates when the prompt itself was blocked) and `usageMetadata` with
+      `promptTokenCount`, `candidatesTokenCount`, `thoughtsTokenCount`, `totalTokenCount`.
+    NOT stated by the pages read, so left "por confirmar" in the catalogue: whether `candidatesTokenCount` includes
+    the thought tokens (`totalTokenCount` is described as "prompt + thoughts + response candidates", which suggests
+    it does not), and whether thoughts come back in `parts` flagged `thought: true`. Such parts are left out of the
+    text if they appear, because the answer a doctor would read is not the reasoning.
+    The listing of models (`GET {BASE}/models`, `models[].name`) is also not from a page read.
+    """
+
+    BASE = "https://generativelanguage.googleapis.com/v1beta"
+    ENV_KEY = "GEMINI_API_KEY"
+    ENV_INTERVAL = "AFERIDOR_GEMINI_INTERVALO"
+    DEFAULT_INTERVAL_S = 13.0
+
+    def __init__(
+        self,
+        model: str,
+        api_key: Secret | str | None = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        timeout: float = 300.0,
+        min_interval_s: float | None = None,
+        clock: Callable[[], float] = time.monotonic,
+        sleep: Callable[[float], None] = time.sleep,
+        send_temperature: bool = True,
+        key_variable: str | None = None,
+    ) -> None:
+        self.name = f"google:{model}"
+        self.model = model
+        self.api_key = _key_from_env(key_variable or self.ENV_KEY, api_key)
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.timeout = timeout
+        self.send_temperature = send_temperature
+        if min_interval_s is None:
+            min_interval_s = float(os.environ.get(self.ENV_INTERVAL, self.DEFAULT_INTERVAL_S))
+        self.min_interval_s = min_interval_s
+        self._clock = clock
+        self._sleep = sleep
+        self._last_start: float | None = None
+
+    def _headers(self) -> dict[str, str]:
+        return {"x-goog-api-key": self.api_key.reveal()}
+
+    def _pace(self) -> None:
+        now = self._clock()
+        if self._last_start is not None:
+            wait = self.min_interval_s - (now - self._last_start)
+            if wait > 0:
+                self._sleep(wait)
+                now = self._clock()
+        self._last_start = now
+
+    def ask(self, prompt: str) -> Reply:
+        self._pace()
+        config: dict[str, Any] = {}
+        if self.send_temperature:
+            config["temperature"] = self.temperature
+        config["maxOutputTokens"] = self.max_tokens
+        data = _request_json(
+            f"{self.BASE}/models/{self.model}:generateContent", self._headers(),
+            {"contents": [{"role": "user", "parts": [{"text": prompt}]}], "generationConfig": config}, self.timeout,
+        )
+        usage = usage_from(data.get("usageMetadata"), "promptTokenCount", "candidatesTokenCount", ("thoughtsTokenCount",))
+        candidates = data.get("candidates") if isinstance(data, dict) else None
+        if not candidates:
+            block = (data.get("promptFeedback") or {}).get("blockReason") if isinstance(data, dict) else None
+            if isinstance(block, str) and block:
+                return Reply("", "filtered", _served_version(data), usage, block)
+            raise ProviderError(f"resposta do Google sem candidatos: {str(data)[:300]}")
+        first = candidates[0]
+        try:
+            parts = first["content"]["parts"]
+            text = "".join(p.get("text", "") for p in parts if isinstance(p, dict) and not p.get("thought"))
+        except (KeyError, TypeError):
+            text = ""  # a candidate stopped before any content: the runner counts it as a reply with no text
+        raw = first.get("finishReason") if isinstance(first, dict) else None
+        return Reply(text, normalize_finish_reason(raw), _served_version(data), usage, _original(raw))
+
+    def available_models(self) -> list[str]:
+        data = _request_json(f"{self.BASE}/models", self._headers(), None, self.timeout)
+        return _sorted_names(data.get("models", []), "name", "models/")
+
+    def applied_params(self) -> dict[str, Any]:
+        return {
+            "temperatura": self.temperature if self.send_temperature else "ausente",
+            "tokens_max": self.max_tokens,
+            "campo_tokens": "maxOutputTokens",
+            "confirmado_pelo_fornecedor": False,
+        }
+
+
+def _served_version(data: object) -> str:
+    """`modelVersion` of a generateContent reply, if it is text."""
+    value = data.get("modelVersion") if isinstance(data, dict) else None
+    return value if isinstance(value, str) else ""
 
 
 def _unreachable(base_url: str, error: ProviderError) -> bool:
@@ -579,6 +864,10 @@ class LocalProvider(Provider):
                 raise self._not_running() from None
             raise
 
+    def applied_params(self) -> dict[str, Any]:
+        return {"temperatura": self.temperature, "tokens_max": self.max_tokens, "campo_tokens": "max_tokens",
+                "confirmado_pelo_fornecedor": False}
+
     def available_models(self) -> list[str]:
         try:
             data = _request_json(f"{self.base_url}/api/tags", {}, None, self.timeout)
@@ -600,4 +889,6 @@ __all__ = [
     "AnthropicProvider",
     "LocalProvider",
     "GeminiProvider",
+    "GoogleProvider",
+    "OpenAICompatible",
 ]

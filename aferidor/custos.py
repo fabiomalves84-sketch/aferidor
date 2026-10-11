@@ -29,7 +29,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import IO, Any
 
-from .catalogo import UNKNOWN, Catalog, CatalogError
+from .catalogo import POR_CONFIRMAR, UNKNOWN, Catalog, CatalogError
 
 # Portuguese averages about four characters a token; three overstates on purpose, so an estimate made
 # without a tokenizer errs on the side of a higher bill. The pilot run compares it with what the provider says.
@@ -377,8 +377,8 @@ def settle_cost(catalog: Catalog, intent: dict[str, Any], state: str, usage: dic
     counted: tuple[int, int] | None = None
     if state == "resultado_desconhecido":
         reason = "não se sabe se a chamada foi processada: conta o pior caso"
-    elif model.reasoning_tokens == UNKNOWN:
-        reason = "o catálogo não diz como este modelo conta os tokens de raciocínio: conta o pior caso"
+    elif model.reasoning_tokens in (UNKNOWN, POR_CONFIRMAR):
+        reason = "o catálogo não diz, ou ainda tem por confirmar, como este modelo conta os tokens de raciocínio: conta o pior caso"
     elif declared_in is None or out is None:
         reason = "o fornecedor não declarou a entrada e a saída: conta o pior caso"
     elif model.reasoning_tokens == "incluidos_na_saida":

@@ -45,7 +45,7 @@ class TestNumbersWrittenInTheDocuments(unittest.TestCase):
     def test_every_test_count_in_the_documents_is_the_real_one(self):
         real = unittest.TestLoader().discover(str(ROOT / "tests")).countTestCases()
         for name in self.DOCUMENTS:
-            written = [int(n) for n in re.findall(r"\b(\d{3}) testes", self.read(name))]
+            written = [int(n) for n in re.findall(r"\b(\d{3,5}) testes", self.read(name))]
             with self.subTest(documento=name):
                 self.assertTrue(written, "o documento já não diz quantos testes tem")
                 self.assertEqual(set(written), {real}, f"a bateria tem {real} testes; atualizar o número em {name}")

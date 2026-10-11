@@ -87,6 +87,23 @@ class TestAValidCatalogue(unittest.TestCase):
         data = catalog(modelos={"a": model(chave_env="UMA"), "b": model(chave_env="OUTRA"), "c": model(chave_env=None)})
         self.assertEqual(parse(data).key_variables(), frozenset({"UMA", "OUTRA"}))
 
+    def test_a_model_is_resolved_by_its_id_or_by_its_key(self):
+        data = catalog(modelos={"chave": model(id_pedido="id-do-fornecedor")})
+        found = parse(data)
+        self.assertEqual(found.resolve("openai", "id-do-fornecedor").key, "chave")
+        self.assertEqual(found.resolve("openai", "chave").key, "chave")
+        self.assertIsNone(found.resolve("anthropic", "chave"))
+
+    def test_a_fixed_temperature_has_to_say_which_and_a_model_with_only_zero_prices_is_free(self):
+        parametros = {**model()["parametros"], "temperatura": "fixa_pelo_fornecedor"}
+        with self.assertRaisesRegex(CatalogError, "temperatura_fixa"):
+            parse(catalog(modelos={"m": model(parametros=parametros)}))
+        self.assertEqual(parse(catalog(modelos={"m": model(parametros={**parametros, "temperatura_fixa": 1})})).model("m").fixed_temperature, 1)
+        self.assertFalse(parse(catalog()).model("m").is_free)
+        self.assertTrue(parse(catalog(modelos={"m": model(precos=[period(entrada_por_milhao=0, saida_por_milhao=0)])})).model("m").is_free)
+        with self.assertRaisesRegex(CatalogError, "por_confirmar"):
+            parse(catalog(modelos={"m": model(por_confirmar="x")}))
+
     def test_a_model_is_found_by_provider_and_requested_id_and_only_by_both(self):
         found = parse(catalog())
         self.assertEqual(found.find("openai", "modelo-falso").key, "m")
@@ -332,12 +349,30 @@ class TestTheShippedCatalogue(unittest.TestCase):
         with self.assertRaises(CatalogError):
             pro.price_on(date(2026, 10, 11), 200_001)
 
-    def test_what_is_not_known_says_so_instead_of_a_guess(self):
+    def test_what_the_documentation_settled_is_written_and_the_rest_says_so_instead_of_a_guess(self):
         for key, found in self.catalog.models.items():
             with self.subTest(modelo=key):
-                self.assertEqual(found.temperature, "desconhecido")
-                self.assertEqual(found.reasoning_tokens, "desconhecido")
                 self.assertIsNone(found.reasoning_effort)
+                if found.provider == "anthropic":
+                    # https://platform.claude.com/docs/en/api/messages/create, read 2026-10-11
+                    self.assertEqual((found.temperature, found.fixed_temperature), ("fixa_pelo_fornecedor", Decimal("1.0")))
+                    self.assertEqual((found.reasoning_tokens, found.token_field), ("incluidos_na_saida", "max_tokens"))
+                elif found.provider == "gemini":
+                    self.assertEqual((found.temperature, found.reasoning_tokens), ("desconhecido", "por_confirmar"))
+                else:
+                    self.assertEqual((found.temperature, found.reasoning_tokens), ("desconhecido", "desconhecido"))
+
+    def test_every_model_lists_what_was_not_found_in_an_official_page(self):
+        for key, found in self.catalog.models.items():
+            with self.subTest(modelo=key):
+                self.assertIn("tempo_limite_s", found.to_confirm)  # copied from the code, never read from a page
+        self.assertEqual(self.catalog.model("gpt-6-astra").to_confirm,
+                         ("campo_tokens", "temperatura", "tokens_raciocinio", "usage", "finish_reason", "tempo_limite_s", "ritmo_min_s"))
+        self.assertIn("tokens_raciocinio", self.catalog.model("gemini-3.8-flash").to_confirm)
+        self.assertNotIn("campo_tokens", self.catalog.model("claude-opus-5-5").to_confirm)
+
+    def test_only_amalia_is_free_and_needs_no_ceiling(self):
+        self.assertEqual([k for k, m in self.catalog.models.items() if m.is_free], ["amalia-9b-0626-dpo"])
 
     def test_amalia_is_a_compatible_server_to_configure_at_4096_tokens(self):
         found = self.catalog.model("amalia-9b-0626-dpo")

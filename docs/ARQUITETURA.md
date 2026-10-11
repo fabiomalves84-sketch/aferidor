@@ -181,6 +181,30 @@ O livro só acrescenta: nenhuma linha se apaga nem se reescreve, e nenhuma repet
 - **`finish_reason_original`.** `Reply` leva a palavra do fornecedor para o fim da resposta, antes de ser normalizada, e a
   proveniência guarda as duas. Nada do que se grava nas respostas muda.
 
+## Fornecedores, chaves e o que não se confirmou
+
+`providers.py` fala com cinco famílias, todas por `urllib`: a OpenAI e qualquer servidor compatível (`OpenAICompatible`,
+com o endereço base como parâmetro: o `OpenAIProvider` é esta classe com o endereço e o campo de tokens da OpenAI), a
+Anthropic (Messages), o Gemini pelo endpoint compatível (`GeminiProvider`, o dos ensaios guardados, que não mudou) e o
+Google pela API própria (`GoogleProvider`, `--fornecedor google`), que devolve o que o outro não devolve: os tokens de
+pensamento (`thoughtsTokenCount`), `modelVersion` e o `finishReason` do próprio Google. O Ollama continua em
+`LocalProvider`. Cada classe cita no docstring as páginas oficiais que foram lidas e a data.
+
+- **Chaves.** `chaves.py` lê a variável de ambiente e, na falta, o `.env` da raiz do repositório (que o `.gitignore`
+  ignora). A chave vive num `Secret`, só sai para o cabeçalho do pedido, e é retirada de qualquer mensagem de erro que
+  um fornecedor devolva a repeti-la. Um erro nomeia a variável, nunca o valor, e nenhuma opção da linha de comandos
+  recebe uma chave.
+- **Temperatura.** O catálogo diz se um modelo a aceita. Se não aceita (a Anthropic documenta que os modelos
+  posteriores ao Opus 4.6 correm sempre a 1,0), o pedido vai sem ela, a proveniência regista pedido 1,0 e aplicado
+  «ausente», e pedir outro valor recusa antes de gastar. `confirmado_pelo_fornecedor` só é verdadeiro se a resposta
+  devolver o parâmetro, o que nenhuma das lidas faz.
+- **Servidor compatível (Amália).** `--fornecedor local-compativel --base-url ...`: pergunta a `/models` o que tem
+  carregado e recusa se o modelo pedido não estiver lá. Sem chave obrigatória e, por custar zero, sem `--teto-eur`.
+- **Por confirmar.** O que a documentação lida não diz fica na lista `por_confirmar` de cada modelo em `catalogo.json`:
+  a OpenAI (as páginas da API não abriram), o vLLM (a página lida só lista os endpoints), e do Google a contagem dos
+  tokens de pensamento (`totalTokenCount` é «prompt + pensamento + candidatos», mas a página não diz se
+  `candidatesTokenCount` os inclui). Enquanto for «por confirmar» ou «desconhecido», uma chamada conta no pior caso.
+
 ## Sem dependências externas
 
 Apenas a biblioteca padrão do Python, incluindo os adaptadores HTTP. Um

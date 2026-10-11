@@ -27,17 +27,22 @@
       ],
       "parametros": {
         "campo_tokens": "max_tokens",
-        "temperatura": "desconhecido",
-        "tokens_raciocinio": "desconhecido",
+        "temperatura": "fixa_pelo_fornecedor",
+        "tokens_raciocinio": "incluidos_na_saida",
         "esforco_raciocinio": null,
-        "tokens_max": 8192
+        "tokens_max": 8192,
+        "temperatura_fixa": 1.0
       },
       "tempo_limite_s": 60,
       "ritmo_min_s": 0,
       "chave_env": "ANTHROPIC_API_KEY",
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Candidato de topo da Anthropic."
+      "nota": "Candidato de topo da Anthropic. Lido em https://platform.claude.com/docs/en/api/messages/create a 2026-10-11: os modelos posteriores ao Opus 4.6 não aceitam temperatura (1.0 aceite, outro valor dá 400, por omissão 1.0), output_tokens é o total inclusivo que se fatura (o raciocínio vai lá dentro), o campo de tokens é max_tokens.",
+      "por_confirmar": [
+        "tempo_limite_s",
+        "ritmo_min_s"
+      ]
     },
     "claude-opus-5-5": {
       "fornecedor": "anthropic",
@@ -58,17 +63,22 @@
       ],
       "parametros": {
         "campo_tokens": "max_tokens",
-        "temperatura": "desconhecido",
-        "tokens_raciocinio": "desconhecido",
+        "temperatura": "fixa_pelo_fornecedor",
+        "tokens_raciocinio": "incluidos_na_saida",
         "esforco_raciocinio": null,
-        "tokens_max": 8192
+        "tokens_max": 8192,
+        "temperatura_fixa": 1.0
       },
       "tempo_limite_s": 60,
       "ritmo_min_s": 0,
       "chave_env": "ANTHROPIC_API_KEY",
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Alternativa mais barata da Anthropic."
+      "nota": "Alternativa mais barata da Anthropic. Lido em https://platform.claude.com/docs/en/api/messages/create a 2026-10-11: os modelos posteriores ao Opus 4.6 não aceitam temperatura (1.0 aceite, outro valor dá 400, por omissão 1.0), output_tokens é o total inclusivo que se fatura (o raciocínio vai lá dentro), o campo de tokens é max_tokens.",
+      "por_confirmar": [
+        "tempo_limite_s",
+        "ritmo_min_s"
+      ]
     },
     "gpt-6-astra": {
       "fornecedor": "openai",
@@ -100,7 +110,16 @@
       "chave_env": "OPENAI_API_KEY",
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Candidato de topo da OpenAI."
+      "nota": "Candidato de topo da OpenAI. A documentação da API de Chat Completions não abriu (HTTP 403 e 404); só se leu que o Chat Completions continua suportado e que o Responses é o recomendado para projetos novos.",
+      "por_confirmar": [
+        "campo_tokens",
+        "temperatura",
+        "tokens_raciocinio",
+        "usage",
+        "finish_reason",
+        "tempo_limite_s",
+        "ritmo_min_s"
+      ]
     },
     "gpt-6.1-sol": {
       "fornecedor": "openai",
@@ -132,7 +151,16 @@
       "chave_env": "OPENAI_API_KEY",
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Alternativa intermédia da OpenAI."
+      "nota": "Alternativa intermédia da OpenAI. A documentação da API de Chat Completions não abriu (HTTP 403 e 404); só se leu que o Chat Completions continua suportado e que o Responses é o recomendado para projetos novos.",
+      "por_confirmar": [
+        "campo_tokens",
+        "temperatura",
+        "tokens_raciocinio",
+        "usage",
+        "finish_reason",
+        "tempo_limite_s",
+        "ritmo_min_s"
+      ]
     },
     "gpt-6-luna": {
       "fornecedor": "openai",
@@ -164,7 +192,16 @@
       "chave_env": "OPENAI_API_KEY",
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Alternativa económica da OpenAI."
+      "nota": "Alternativa económica da OpenAI. A documentação da API de Chat Completions não abriu (HTTP 403 e 404); só se leu que o Chat Completions continua suportado e que o Responses é o recomendado para projetos novos.",
+      "por_confirmar": [
+        "campo_tokens",
+        "temperatura",
+        "tokens_raciocinio",
+        "usage",
+        "finish_reason",
+        "tempo_limite_s",
+        "ritmo_min_s"
+      ]
     },
     "gemini-3.1-pro-preview": {
       "fornecedor": "gemini",
@@ -185,9 +222,9 @@
         }
       ],
       "parametros": {
-        "campo_tokens": "max_tokens",
+        "campo_tokens": "maxOutputTokens",
         "temperatura": "desconhecido",
-        "tokens_raciocinio": "desconhecido",
+        "tokens_raciocinio": "por_confirmar",
         "esforco_raciocinio": null,
         "tokens_max": 8192
       },
@@ -196,7 +233,15 @@
       "chave_env": "GEMINI_API_KEY",
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Candidato de topo da Google, em preview."
+      "nota": "Candidato de topo da Google, em preview. Lido em https://ai.google.dev/api/generate-content a 2026-10-11 (API nativa generateContent): usageMetadata com thoughtsTokenCount, mas a página não diz se candidatesTokenCount os inclui.",
+      "por_confirmar": [
+        "tokens_raciocinio",
+        "temperatura",
+        "partes_com_thought",
+        "listagem_de_modelos",
+        "tempo_limite_s",
+        "ritmo_min_s"
+      ]
     },
     "gemini-3.8-flash": {
       "fornecedor": "gemini",
@@ -228,9 +273,9 @@
         }
       ],
       "parametros": {
-        "campo_tokens": "max_tokens",
+        "campo_tokens": "maxOutputTokens",
         "temperatura": "desconhecido",
-        "tokens_raciocinio": "desconhecido",
+        "tokens_raciocinio": "por_confirmar",
         "esforco_raciocinio": null,
         "tokens_max": 8192
       },
@@ -239,7 +284,15 @@
       "chave_env": "GEMINI_API_KEY",
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Alternativa estável da Google; o preço dobra a partir de 2027-01-01."
+      "nota": "Alternativa estável da Google; o preço dobra a partir de 2027-01-01. Lido em https://ai.google.dev/api/generate-content a 2026-10-11 (API nativa generateContent): usageMetadata com thoughtsTokenCount, mas a página não diz se candidatesTokenCount os inclui.",
+      "por_confirmar": [
+        "tokens_raciocinio",
+        "temperatura",
+        "partes_com_thought",
+        "listagem_de_modelos",
+        "tempo_limite_s",
+        "ritmo_min_s"
+      ]
     },
     "amalia-9b-0626-dpo": {
       "fornecedor": "openai_compativel",
@@ -270,7 +323,16 @@
       "chave_env": null,
       "base_url": null,
       "ids_servidos_aceites": [],
-      "nota": "Pesos abertos; sem API pública. Corre num servidor próprio compatível com OpenAI (vLLM, por exemplo); o base_url está por configurar e a chave, se o servidor a exigir, ainda não tem variável declarada."
+      "nota": "Pesos abertos; sem API pública. Corre num servidor próprio compatível com OpenAI (vLLM, por exemplo); o base_url está por configurar e a chave, se o servidor a exigir, ainda não tem variável declarada. A página de vLLM lida (https://docs.vllm.ai/en/latest/serving/online_serving/) lista /v1/chat/completions e /v1/models e não diz mais nada dos campos.",
+      "por_confirmar": [
+        "campo_tokens",
+        "temperatura",
+        "usage",
+        "modelo_na_resposta",
+        "autenticacao",
+        "tempo_limite_s",
+        "ritmo_min_s"
+      ]
     }
   }
 }

@@ -3,6 +3,7 @@ counted, and how long the server asked to wait. None of it changes how a reply i
 
 from __future__ import annotations
 
+import tests  # noqa: F401  (a importação fixa a raiz das chaves numa pasta vazia)
 import io
 import json
 import socket
