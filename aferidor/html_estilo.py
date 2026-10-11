@@ -127,6 +127,8 @@ nav.indice ul::-webkit-scrollbar { display: none; }
 nav.indice a { display: inline-block; white-space: nowrap; padding: 0.15rem 0; color: var(--ink-2); text-decoration: none; font-size: 0.95rem;
   border-bottom: 2px solid transparent; }
 nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); }
+/* The subsections of Casos and Método are in the page and hidden; they show only with the side navigation. */
+nav.indice ul.sub { display: none; }
 .faixa { margin: 0; padding: 0.25rem 0 0.4rem; font-size: 0.8rem; line-height: 1.35; color: var(--ink-2); }
 .faixa a { color: var(--accent); }
 @supports selector(:has(*)) {

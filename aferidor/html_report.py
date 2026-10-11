@@ -526,7 +526,7 @@ def _how_to_read(how_counted: str) -> str:
     return f"""
 <details class="recolhe ler" id="como-ler">
   <summary>{_t("Como interpretar este relatório")}</summary>
-  <p>{_t("Cada pergunta tem uma resposta de referência com fonte pública (normas da {dgs}, {infarmed}, diretrizes europeias) e critérios de correção, em código e com histórico de alterações. Cada pergunta é colocada várias vezes a cada modelo, uma vez que as respostas variam; cada resposta constitui uma {amostra}. A correção é automática e determinista. Como a média de respostas corretas oculta os erros relevantes, o relatório apresenta primeiro as falhas críticas.", dgs=_term("DGS"), infarmed=_term("Infarmed"), amostra=_term("amostra"))}</p>
+  <p id="como-ler-texto">{_t("Cada pergunta tem uma resposta de referência com fonte pública (normas da {dgs}, {infarmed}, diretrizes europeias) e critérios de correção, em código e com histórico de alterações. Cada pergunta é colocada várias vezes a cada modelo, uma vez que as respostas variam; cada resposta constitui uma {amostra}. A correção é automática e determinista. Como a média de respostas corretas oculta os erros relevantes, o relatório apresenta primeiro as falhas críticas.", dgs=_term("DGS"), infarmed=_term("Infarmed"), amostra=_term("amostra"))}</p>
   <ol class="como-ler">{reading}</ol>
   {how_counted}
 </details>"""
@@ -1603,6 +1603,34 @@ PANELS = (
     ("metodo", "Método"),
 )
 
+# The pages that have subsections in the side navigation, and what each links to: the heading of a
+# block of the page. A link is written only if its target is in the report, so none points nowhere.
+# The targets of Método lie inside its closed blocks, which the browser opens on arrival.
+SUBPAGES = {
+    "casos": (
+        ("erros", "Erros mais graves"),
+        ("grelha", "Resultados por caso"),
+        ("casos-com-falha", "Casos com falha"),
+    ),
+    "metodo": (
+        ("como-ler-texto", "Como interpretar este relatório"),
+        ("como-se-verifica-o-corretor", "Como se verifica e se afina o corretor"),
+        ("fontes-por-organismo", "Fontes por organismo"),
+        ("criterio", "Critério de aprovação"),
+        ("condicoes", "Condições do ensaio"),
+        ("glossario", "Glossário"),
+        ("metodo-texto", "Método"),
+    ),
+}
+
+
+def _subpages(built: str) -> dict[str, tuple[tuple[str, str], ...]]:
+    """The subsections of each page whose target is in the HTML already built."""
+    return {
+        page: tuple((anchor, label) for anchor, label in links if f' id="{anchor}"' in built)
+        for page, links in SUBPAGES.items()
+    }
+
 
 def _translation_notice() -> str:
     """Said where a page opens and again in the footer, never in the fixed bar: it is about the
@@ -1785,9 +1813,10 @@ def _prepare(
     )
 
 
-def _head_html(data: _ReportData) -> str:
+def _head_html(data: _ReportData, subpages: dict[str, tuple[tuple[str, str], ...]] | None = None) -> str:
     """From the doctype to the opening of <main>: the head, and the fixed bar with the pages, the
-    language menu, the theme switch and the notice every page carries."""
+    language menu, the theme switch and the notice every page carries. `subpages` are the
+    subsections the side navigation lists under Casos and Método."""
     title = _t("Relatório do Aferidor")
     menu = _language_menu(data.alternates) if data.alternates else ""
     # Without verdicts there is nothing to break down, so those pages do not exist.
@@ -1800,7 +1829,10 @@ def _head_html(data: _ReportData) -> str:
         f"<title>{title}</title>{_preview_meta(title)}<style>{STYLE}</style></head><body>"
         '<header class="topo"><div class="topo-linha">'
         f'<nav class="indice" aria-label="{_esc(_t("Secções"))}"><ul>'
-        + "".join(f'<li><a href="#{anchor}">{_esc(_t(label))}</a></li>' for anchor, label in present)
+        + "".join(
+            f'<li><a href="#{anchor}">{_esc(_t(label))}</a>{_sublist((subpages or {}).get(anchor, ()))}</li>'
+            for anchor, label in present
+        )
         + "</ul></nav>"
         '<div class="controlos">' + menu
         + f'<div class="tema" role="radiogroup" aria-label="{_esc(_t("Tema"))}">'
@@ -1814,6 +1846,14 @@ def _head_html(data: _ReportData) -> str:
         # reader can jump straight to it. The header, the navigation and the footer stay outside.
         "<main>"
     )
+
+
+def _sublist(links: tuple[tuple[str, str], ...]) -> str:
+    if not links:
+        return ""
+    return '<ul class="sub">' + "".join(
+        f'<li><a href="#{anchor}">{_esc(_t(label))}</a></li>' for anchor, label in links
+    ) + "</ul>"
 
 
 def _start_panel(data: _ReportData) -> str:
@@ -2009,18 +2049,14 @@ def _build(
         cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
         protocol, alternates, confirmation,
     )
-    out: list[str] = [
-        _head_html(data),
-        _start_panel(data),
-        _about_panel(data),
-        _sources_panel(data),
-    ]
-
-    out.append(_results_panel(data))
+    # The pages first, so the side navigation lists only the subsections that are in the report. The
+    # glossary is worked out over the head without them: they hold no glossary term.
+    head = _head_html(data)
+    pages: list[str] = [_start_panel(data), _about_panel(data), _sources_panel(data), _results_panel(data)]
     if data.models:
-        out += [_areas_panel(data), _cases_panel(data), _conclusions_panel(data)]
-
-    out.append(_method_panel(data, "".join(out)))
+        pages += [_areas_panel(data), _cases_panel(data), _conclusions_panel(data)]
+    pages.append(_method_panel(data, head + "".join(pages)))
+    out: list[str] = [_head_html(data, _subpages("".join(pages))), *pages]
     out.append("</main>")
     out.append(_foot_html(data))
     out.append("</body></html>")

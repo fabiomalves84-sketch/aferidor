@@ -38,6 +38,7 @@ PAGES = ("inicio", "sobre", "fontes", "resultados", "areas", "casos", "conclusoe
 
 def navigation(text: str) -> list[str]:
     nav = re.search(r'<nav class="indice".*?</nav>', text, flags=re.S).group(0)
+    nav = re.sub(r'<ul class="sub">.*?</ul>', "", nav, flags=re.S)  # the pages only, not their subsections
     return re.findall(r'href="#([^"]+)"', nav)
 
 
