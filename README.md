@@ -171,10 +171,11 @@ partir da documentação oficial, e `docs/ARQUITETURA.md` lista o que não ficou
 provado.
 
 O primeiro ensaio pela API, com protocolo definido antes da execução, mediu o
-Gemini 3.5 Flash Lite (`ensaios/2026-09-28-gemini-flash/`). Em falta: a revisão
-de uma amostra de respostas por um clínico, que ainda não tem revisor (a folha
-cega gera-se com `aferidor revisao` e fica pronta para quando houver), e a
-confirmação das fontes restantes.
+Gemini 3.5 Flash Lite (`ensaios/2026-09-28-gemini-flash/`). Não há revisor
+clínico: o projeto ainda não tem revisor, e não há data para o ter. O corretor
+mede a concordância das respostas com a norma citada em cada caso, não a correção
+clínica. O que falta é validar o corretor contra a referência citada (a folha
+cega gera-se com `aferidor revisao`) e confirmar as fontes restantes.
 
 ## Documentação
 

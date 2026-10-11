@@ -89,7 +89,8 @@ ruff check .   # opcional, ferramenta de desenvolvimento: imports não usados e 
 
 Desde 27 de setembro de 2026 o projeto é trabalhado numa sessão só, a do
 Claude Code dentro do VS Code, com o Fábio. É essa sessão que decide o desenho
-com ele, escreve o código, corre os testes, commita e faz push.
+com ele, escreve o código, corre os testes e commita. O push só se faz com o OK
+explícito do Fábio, de cada vez.
 
 Até essa data havia duas sessões com papéis separados: uma na aplicação Claude
 que decidia e escrevia o `BRIEFING.md`, e outra no terminal que executava e era
