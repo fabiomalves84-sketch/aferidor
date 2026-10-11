@@ -30,8 +30,8 @@ flowchart LR
 | `report.py` | Relatório em Markdown |
 | `condicoes.py` | O que os dois relatórios dizem do ensaio antes dos resultados: as condições em que foi feito, os casos e as amostras que não vieram, e o que o protocolo faz deles |
 | `comparacao.py` | O que os números de uma comparação decidem, numa só função cada: o limiar de referência, o empate no topo, a significância (p abaixo de 0,05) e o arredondamento das percentagens; os dois relatórios usam-no, para não discordarem |
-| `html_report.py` | O mesmo relatório em HTML, num único ficheiro, em oito páginas mostradas uma de cada vez só com CSS |
-| `html_estilo.py` | A folha de estilo e as cores do relatório HTML, à parte do código que monta a página |
+| `html_report.py` | O mesmo relatório em HTML, num único ficheiro, em oito páginas mostradas uma de cada vez só com CSS; a navegação, os controlos e uma ligação de salto por página ficam num só cabeçalho |
+| `html_estilo.py` | A folha de estilo e as cores do relatório HTML, à parte do código que monta a página; é ela que decide, com os mesmos elementos, o menu de cima (abaixo de 62rem) ou a coluna lateral fixa (a partir de 62rem) |
 | `traducao.py` | A interface do relatório HTML em inglês, espanhol, francês e alemão; os casos e as respostas ficam em português |
 | `traducao_catalogo.py` | O catálogo das cadeias da interface, uma linha por texto português com as quatro traduções; um teste falha se houver cadeias sem uso |
 | `fontes.py` | De onde vêm os casos e até onde as fontes estão confirmadas: lê o `casos/VERIFICACAO.md` por ID, só para leitura; a lista dos casos confirmados um a um é conferida por teste com a tabela e com o texto do ficheiro |
@@ -87,6 +87,16 @@ mais estrita, todas as amostras corretas, é a regra por omissão, e o protocolo
 pode fixar outra no campo `regra_do_caso`. O resultado principal do relatório
 é o número de casos com falha crítica em pelo menos uma amostra, e não a média
 de amostras corretas: na prática clínica é observada uma única resposta.
+
+**O HTML do cabeçalho é um só, e o CSS decide o layout.** `_head_html` escreve,
+por esta ordem, as ligações de salto, os controlos (língua e tema), a navegação
+e o aviso de triagem, que é também a ordem do foco do teclado e a ordem em que se
+vê nos dois layouts: nenhuma regra usa `order`. As subsecções de Casos e Método
+(`SUBPAGES`, em `html_report.py`) estão sempre no HTML, dentro da navegação, e só
+o CSS mostra as da página atual, onde `:has()` existe. As alturas da barra, os
+pontos de quebra (62, 68, 70 e 80rem) e a ligação de salto vivem em
+`html_estilo.py`; as páginas e os títulos a que as ligações apontam, em
+`html_report.py` (`_panel`, `_heading_id`).
 
 **O relatório HTML não calcula; apresenta o que `grading` produziu.**
 `html_report.py` usa as mesmas contagens e a mesma estrutura de consistência

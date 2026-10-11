@@ -324,9 +324,10 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
 - *Barra fixa e páginas.* O relatório são oito páginas, mostradas uma de cada
   vez só com CSS (`main > .painel` em `html_estilo.py`). A barra fixa
   (navegação, controlos e o aviso de triagem) tem a altura que declara
-  (`--barra`, em `BAR_HEIGHT`: 4,8rem, 7rem abaixo de 62rem, 8,6rem abaixo de
-  46rem e 9,4rem abaixo de 24rem), e o `scroll-padding-top` da página usa a mesma
-  variável, por isso um separador ou uma âncora abre logo por baixo dela, em
+  (`--barra`, em `BAR_HEIGHT`: 2,6rem a partir de 68rem, 3,7rem entre 62rem e
+  68rem, 7rem abaixo de 62rem, 8,6rem abaixo de 46rem e 9,4rem abaixo de 24rem),
+  e o `scroll-padding-top` da página usa a mesma variável, por isso um separador
+  ou uma âncora abre logo por baixo dela, em
   qualquer língua. Declarar em vez de medir foi uma correção: na primeira versão
   as alturas estavam medidas à mão a 1280 e 390 px e a 768 px a navegação
   quebrava em duas linhas, a barra crescia 26 a 43 px e o título de 4 das 6
@@ -335,12 +336,40 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   Medido a 10/10/2026 em Chromium, com cliques reais em cada separador, a 14
   larguras (320 a 1920 px) nas cinco línguas: nenhum título escondido e nenhum
   texto da barra a transbordar; o mesmo, em Chromium, Firefox e WebKit, a 320,
-  390, 768 e 1024 px em português e alemão. A 1280 e 390 px, nos três motores,
+  390, 768 e 1024 px em português e alemão. Repetido a 11/10/2026 com a coluna
+  lateral, em Chromium, Firefox e WebKit, a 21 larguras, nas cinco línguas, com
+  e sem protocolo, e a alturas de 600 e 700 px: sem problemas. A 1280 e 390 px, nos três motores,
   `#corpo-<caso>` abre o painel Casos e o `<details>` do caso. **Em telemóvel a
   barra mede 138 px** (cerca de um sexto do ecrã) e fica por afinar. A frase da
   barra cabe numa linha a partir de 600 px (de 768 px em alemão); abaixo disso
   ocupa duas linhas, e três em alemão a 320 e 360 px. As alturas declaradas já o
   assumem, e se o texto da barra mudar tem de se remedir.
+- *Coluna lateral e pontos de quebra.* A partir de 62rem a navegação é uma
+  coluna fixa de 14rem à esquerda, com a língua e o tema no cimo, e a barra de
+  cima fica só com o aviso de triagem; abaixo de 62rem é o menu de cima, com
+  deslocação para o lado. É o mesmo HTML, e só o CSS muda o que se vê. Os pontos
+  de quebra são 62rem (a coluna aparece), 68rem (a barra de cima passa de 3,7rem
+  a 2,6rem), 70rem (o resultado do Início passa para ao lado do texto) e 80rem
+  (essa coluna chega à largura completa). Casos e Método listam por baixo as suas
+  subsecções, só para a página atual e só onde `:has()` existe. Em Casos, as
+  três; em Método, até sete, e o critério de aprovação só com protocolo. Nenhum
+  rótulo das páginas quebra nem sai da coluna, em nenhuma língua. Em ecrãs baixos (600 e 700 px) a coluna rola por si e
+  alcança o último sublink. Na impressão a coluna não sai.
+- *Teclado e ligação de salto.* A ordem do foco é a ordem em que se vê: a
+  língua e o tema vêm antes da navegação, no HTML e no ecrã. Há uma ligação
+  «Saltar para o conteúdo» por página, a primeira paragem do Tab, escondida até
+  receber o foco, que leva o foco ao título da página atual sem a mudar (o
+  fragmento do endereço decide que página se vê, e por isso não há uma ligação
+  única). Verificado a 11/10/2026 em Chromium, Firefox e WebKit, a 21 larguras,
+  nas cinco línguas, com e sem protocolo, nas oito páginas: o título fica à vista
+  por baixo da barra. O Tab por teclado foi usado em Chromium e Firefox; em WebKit
+  a ligação recebeu o foco por código, porque o Playwright não faz Tab em
+  ligações por omissão. Os títulos têm `tabindex="-1"` (recebem o foco, mas o
+  Tab não pára neles) e, depois do salto, mostram o contorno de foco do
+  navegador. **Limite:** depois de Enter numa ligação como «Casos», o ponto de
+  partida do foco passa a ser a página aberta, por isso o Tab seguinte vai para o
+  conteúdo; Shift+Tab leva primeiro à ligação «Fontes por confirmar» da barra,
+  depois a Método e Conclusões, e só à quarta vez aos sublinks de Casos.
 - *Navegação sem `aria-current`.* A navegação é uma lista de ligações e não
   marca a página atual para tecnologias de apoio, porque sem script o estado
   não se mantém e marcar uma página que deixou de o ser diria uma coisa falsa.
@@ -354,10 +383,14 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   (`UNREVIEWED` em `aferidor/traducao.py`), e não na barra fixa, para a barra
   ter a mesma altura em todas as línguas. Rever uma língua é tirá-la dessa
   lista.
-- *Blocos de resposta.* 382 dos 397 `<blockquote>` têm `max-height` e
-  `overflow:auto` (regras `blockquote` e `.erro-par blockquote` em
-  `html_estilo.py`): scroll dentro do scroll, e não são focáveis, por isso não
-  se rolam com o teclado.
+- *Blocos de resposta.* Os `<blockquote>` têm `max-height` e `overflow:auto`
+  (regra `blockquote` em `html_estilo.py`): scroll dentro do scroll, e não são
+  focáveis, por isso não se rolam com o teclado. Fica de fora a caixa «O modelo
+  respondeu» dos erros mais graves (`.erro-par blockquote`), que deixou de ter
+  altura máxima: com a coluna lateral ficava mais estreita e, a 1280 px, cortava
+  as 4 caixas medidas (192 px de altura) quando o texto, já cortado a 240
+  caracteres nos dados, ainda cabia. Medido a 11/10/2026 depois da mudança: 0 de
+  4 cortadas, com 207 a 227 px, e o cartão mais alto igual (684 px).
 - *Cartões de falhas por tipo.* Em 360 px estendem-se até 389 px
   (`minmax(22rem, 1fr)` na regra `.falhas-grelha` de `html_estilo.py`); em
   390 px cabem.
@@ -372,8 +405,7 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   `neutral` 3,16. São as cores dos segmentos das barras e das legendas, que
   levam também ícone e texto. O texto sobre fundos translúcidos (mínimo medido
   5,33) e sobre os círculos (4,80 a 10,73) passa, mas sem teste.
-- *Estrutura.* Sem ligação para saltar para o conteúdo, e 173
-  elementos com `tabindex=0` (os termos do glossário) antes de qualquer secção.
+- *Estrutura.* 173 elementos com `tabindex=0` (os termos do glossário).
   As tabelas têm `scope` mas não `<caption>` (`_areas()` e `_grid()`, em
   `html_report.py`). Não foi verificado se os leitores de ecrã anunciam o
   `aria-label` do `<abbr>` dos códigos de caso (`_case_code()`).
@@ -382,7 +414,7 @@ sobre o exemplo público (banco principal, 4 modelos, 5 idiomas), medido em Brav
   ficam fechados e o detalhe dos casos não sai (a regra `@media print` só evita
   quebras de página).
 
-Não testado: leitor de ecrã, telemóvel real. A dúvida sobre a página arrastar
+Não testado: leitor de ecrã real (a ordem do foco, a ligação de salto e os títulos com `tabindex="-1"` só foram verificados em navegadores, nunca ouvidos num leitor), telemóvel real. A dúvida sobre a página arrastar
 para o lado em 390 px ficou respondida a 10/10/2026, com uma janela real de
 390 px (Playwright): o `scrollWidth` do documento é 875 px no painel Casos em
 Chromium e em WebKit (914 px em alemão), e 390 px nos restantes painéis; no
