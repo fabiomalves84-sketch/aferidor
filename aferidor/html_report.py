@@ -1828,18 +1828,20 @@ def _head_html(data: _ReportData, subpages: dict[str, tuple[tuple[str, str], ...
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{title}</title>{_preview_meta(title)}<style>{STYLE}</style></head><body>"
         '<header class="topo"><div class="topo-linha">'
-        f'<nav class="indice" aria-label="{_esc(_t("Secções"))}"><ul>'
-        + "".join(
-            f'<li><a href="#{anchor}">{_esc(_t(label))}</a>{_sublist((subpages or {}).get(anchor, ()))}</li>'
-            for anchor, label in present
-        )
-        + "</ul></nav>"
+        # The controls come first in the markup because they come first on the page, in both layouts:
+        # the order the focus follows is the order the reader sees.
         '<div class="controlos">' + menu
         + f'<div class="tema" role="radiogroup" aria-label="{_esc(_t("Tema"))}">'
         '<input type="radio" name="tema" id="tema-claro"><label for="tema-claro">'
         f'<span aria-hidden="true">☀</span> {_t("Claro")}</label>'
         '<input type="radio" name="tema" id="tema-escuro"><label for="tema-escuro">'
-        f'<span aria-hidden="true">☾</span> {_t("Escuro")}</label></div></div></div>'
+        f'<span aria-hidden="true">☾</span> {_t("Escuro")}</label></div></div>'
+        + f'<nav class="indice" aria-label="{_esc(_t("Secções"))}"><ul>'
+        + "".join(
+            f'<li><a href="#{anchor}">{_esc(_t(label))}</a>{_sublist((subpages or {}).get(anchor, ()))}</li>'
+            for anchor, label in present
+        )
+        + "</ul></nav></div>"
         + _strip(not data.sources_verified)
         + "</header>"
         # The content sits in one <main> landmark, between the bar and the footer, so a screen

@@ -76,7 +76,7 @@ SIDEBAR = """@media (min-width: 62rem) {
   .topo-linha { position: fixed; top: 0; bottom: 0; left: calc(max(0px, 50% - 44rem) + 1rem); width: 14rem; z-index: 6;
     flex-direction: column; flex-wrap: nowrap; align-items: stretch; justify-content: flex-start; gap: 1.1rem;
     padding: 1rem 0.5rem 1.5rem; overflow-y: auto; background: var(--page); border-right: 1px solid var(--grid); }
-  .controlos { order: -1; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .controlos { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
   .linguas ul { left: 0; right: auto; }
   nav.indice { flex: 0 0 auto; }
   nav.indice ul { flex-direction: column; overflow: visible; background: none; gap: 0.1rem; }
@@ -390,7 +390,6 @@ footer.rodape { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid va
 footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 @media (max-width: 61.99rem) {
   .topo-linha { flex-wrap: wrap; justify-content: flex-start; }
-  .controlos { order: -1; }
   nav.indice { flex: 1 1 100%; }
 }
 @media (max-width: 46rem) {

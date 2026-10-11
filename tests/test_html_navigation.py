@@ -144,6 +144,13 @@ class TestTheSideColumn(unittest.TestCase):
         self.assertLess(bar.index("--barra: 2.6rem"), bar.index("max-width: 68rem"))
         self.assertLess(bar.index("max-width: 68rem"), bar.index("max-width: 61.99rem"))
 
+    def test_the_controls_come_before_the_pages_in_the_markup_and_no_rule_reorders_them(self):
+        """The focus follows the markup: the controls are first on the page, so they are first in it."""
+        page = _Example.page()
+        line = page[page.index('<div class="topo-linha">'):page.index("</header>")]
+        self.assertLess(line.index('class="controlos"'), line.index('<nav class="indice"'))
+        self.assertIsNone(re.search(r"(?<![\w-])order\s*:", html_estilo.STYLE))
+
     def test_the_column_does_not_print_and_the_text_takes_the_width_of_the_sheet(self):
         css = html_estilo.STYLE
         printing = css[css.index("@media print {", css.index("@media (min-width: 62rem)")):]
