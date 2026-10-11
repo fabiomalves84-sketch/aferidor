@@ -605,6 +605,9 @@ class GeminiProvider(Provider):
     default, 13 seconds, fits the strictest free limit (5 requests a minute);
     lighter models allow more and the interval can be shortened from the
     environment.
+
+    There is no model by default: a default id written here goes stale, and a run that quietly asks the wrong
+    model is worse than one that asks which.
     """
 
     BASE = "https://generativelanguage.googleapis.com/v1beta/openai"
@@ -614,7 +617,7 @@ class GeminiProvider(Provider):
 
     def __init__(
         self,
-        model: str = "gemini-3.8-flash",
+        model: str,
         api_key: Secret | str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1024,

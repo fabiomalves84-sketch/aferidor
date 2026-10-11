@@ -342,7 +342,7 @@ class TestGeminiReplies(unittest.TestCase):
     def test_without_a_key_it_says_which_variable_to_set(self):
         with mock.patch.dict("os.environ", {}, clear=True):
             with self.assertRaises(ProviderError) as caught:
-                GeminiProvider()
+                GeminiProvider(model="m")
         self.assertIn("GEMINI_API_KEY", str(caught.exception))
 
 

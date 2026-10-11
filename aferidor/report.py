@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from datetime import date
 
 from .comparacao import Ranking, is_significant, percent, ranking, top_tie
+from . import execucao
 from .condicoes import (
     HEADER_NOTE,
     complete_cases_by_model,
@@ -259,6 +260,22 @@ def _notices_md(
     return out
 
 
+def _execution_md(
+    execution: "execucao.Files | None", cases: list[Case], answers: list[Answer], verdicts: list[Verdict],
+) -> list[str]:
+    analysis = execucao.analyse(execution, cases, answers, verdicts) if execution is not None else None
+    if analysis is None:
+        return []
+    out = [f"> **{label}** {text}\n" for label, text in execucao.notices(analysis)]
+    out += ["## Proveniência e custo", ""]
+    for run in analysis.models:
+        out.append(f"- **{run.model}**")
+        out += [f"  - {line}" for line in execucao.condition_lines(run) if line]
+    out.append("")
+    out += [f"{line}\n" for line in execucao.cost_lines(analysis)]
+    return out
+
+
 def _protocol_md(
     protocol: Protocol, answers: list[Answer], counts: _Counts, cases_source: tuple[str, str] | None,
 ) -> list[str]:
@@ -388,10 +405,12 @@ def build(
     today: date | None = None,
     cases_source: tuple[str, str] | None = None,
     protocol: Protocol | None = None,
+    execution: "execucao.Files | None" = None,
 ) -> str:
     """Write the whole report as Markdown.
 
-    `cases_source` is the case file's path and SHA-256, when known.
+    `cases_source` is the case file's path and SHA-256, when known. `execution` is what the files of a paid
+    run say (provenance, cost ledger); without it, or when no model of the report has any, nothing is added.
     """
     consistency = consistency_by_case(cases, answers, verdicts)
     counts = _Counts(
@@ -404,6 +423,7 @@ def build(
         *_head_md(today),
         *_conditions_md(cases, answers, cases_source),
         *_notices_md(cases, answers, missing, reasons, sources_verified),
+        *_execution_md(execution, cases, answers, verdicts),
     ]
     if not counts.per_model:
         out.append("Não há veredictos para relatar.")

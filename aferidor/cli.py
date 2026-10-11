@@ -16,9 +16,9 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
-from . import build_id, fontes, grader_id, html_report, manifesto, protocolo, report, revisao
+from . import build_id, execucao, fontes, grader_id, html_report, manifesto, protocolo, report, revisao
 from .catalogo import Catalog, Model, load_catalog
-from .custos import Ledger, estimate, format_estimate
+from .custos import JsonlError, Ledger, estimate, format_estimate
 from .grading import (
     grade_all,
     met_by_the_question,
@@ -54,7 +54,7 @@ DEFAULT_TOKENS_MAX = 4096
 # The cases the pilot run asks, in order. A tuple is a set of alternatives: the first one the bank has is used.
 PILOT_CASES = (("ATB-PAC-001",), ("PED-OMA-021", "ATB-FAR-004"), ("GRA-VPA-024",))
 PILOT_SAMPLES = 2
-PILOT_FOLDER = "piloto"
+PILOT_FOLDER = execucao.PILOT_FOLDER
 STOPPED = 3  # exit code of a run that stopped on purpose (ceiling, or another model served the call)
 # The provider of the catalogue that each `--fornecedor` means, and the classes whose default model a bare
 # `--fornecedor` stands for. `gemini` is the OpenAI-compatible endpoint the earlier trials used, as it always was;
@@ -63,7 +63,8 @@ _CATALOG_PROVIDER = {
     "openai": "openai", "anthropic": "anthropic", "gemini": "gemini", "google": "gemini",
     "local-compativel": "openai_compativel",
 }
-_DEFAULT_MODEL_CLASSES = {"openai": OpenAIProvider, "anthropic": AnthropicProvider, "gemini": GeminiProvider}
+# The Gemini provider has no default model: the id has to be said.
+_DEFAULT_MODEL_CLASSES = {"openai": OpenAIProvider, "anthropic": AnthropicProvider}
 PROVIDER_CHOICES = ("falso", "openai", "anthropic", "gemini", "google", "local", "local-compativel")
 # The program does not check when a protocol was written, so the text does not claim it was early.
 PROTOCOL_HELP = (
@@ -75,6 +76,7 @@ PROTOCOL_HELP = (
 def build_provider(
     kind: str, model: str | None, temperature: float = 0.0, max_tokens: int | None = None,
     timeout: float | None = None, entry: Model | None = None, base_url: str | None = None,
+    for_listing: bool = False,
 ) -> Provider:
     """The provider for a `--fornecedor`; for a model the catalogue lists, `entry` says how to ask it.
 
@@ -84,6 +86,8 @@ def build_provider(
     """
     if kind == "falso":
         return FakeProvider(name=f"falso:{model}" if model else "falso", temperature=temperature)
+    if for_listing and not model and kind in ("gemini", "google"):
+        model = "(listagem)"  # listing the models of a provider asks no model
     kwargs: dict = {"temperature": temperature}
     if max_tokens is not None:
         kwargs["max_tokens"] = max_tokens
@@ -107,7 +111,12 @@ def build_provider(
     if kind == "local":
         return LocalProvider(model=model, **kwargs) if model else LocalProvider(**kwargs)
     if kind == "gemini":
-        return GeminiProvider(model=model, **kwargs) if model else GeminiProvider(**kwargs)
+        if not model:
+            raise ProviderError(
+                "--fornecedor gemini precisa de --modelo: já não há um modelo por omissão, porque o id escrito no "
+                "código envelhece. Os ids disponíveis vêm de: aferidor modelos --fornecedor gemini"
+            )
+        return GeminiProvider(model=model, **kwargs)
     if kind == "google":
         if not model:
             raise ProviderError("--fornecedor google precisa de --modelo, o id do modelo do catálogo")
@@ -376,6 +385,10 @@ def _executar(
     elif limite > 0:
         cases = cases[:limite]
 
+    if fornecedor == "gemini" and not modelo:
+        print("erro: --fornecedor gemini precisa de --modelo; já não há um modelo por omissão. "
+              "Os ids disponíveis vêm de: aferidor modelos --fornecedor gemini", file=sys.stderr)
+        return 2
     if base_url is not None and fornecedor != "local-compativel":
         print("erro: --base-url só se usa com --fornecedor local-compativel", file=sys.stderr)
         return 2
@@ -411,7 +424,8 @@ def _executar(
             tokens_max=tokens_max, ceiling_eur=teto_eur,
         )
         print(format_estimate(preview))
-        ensaio = (f"{saida.resolve().parent.parent.name}/{PILOT_FOLDER}" if piloto else saida.resolve().parent.name)
+        trial_id, pilot_id = execucao.ensaio_ids(saida.parent.parent if piloto else saida.parent)
+        ensaio = pilot_id if piloto else trial_id
         paid = PaidCalls(
             catalog=catalog, model_key=entry.key, ledger=Ledger(saida.with_name("custos.jsonl")),
             provenance_file=provenance_path(saida), ensaio=ensaio, ceiling_eur=teto_eur if teto_eur is not None else Decimal(0),
@@ -476,8 +490,7 @@ def _executar(
 
 def _ledgers_of(saida: Path, piloto: bool) -> tuple[Path, Path]:
     """The ledger of the trial and the ledger of its pilot, beside `saida` (which already is the pilot's, for a pilot)."""
-    trial = saida.parent.parent if piloto else saida.parent
-    return trial / "custos.jsonl", trial / PILOT_FOLDER / "custos.jsonl"
+    return execucao.ledger_paths(saida.parent.parent if piloto else saida.parent)
 
 
 def _spend_lines(paid: PaidCalls, saida: Path, piloto: bool, ceiling: Decimal | None) -> list[str]:
@@ -761,9 +774,14 @@ def _relatorio(
     if formato != "html" and langs != ["pt"]:
         print("erro: --linguas só se aplica ao formato html", file=sys.stderr)
         return 2
+    try:
+        execution = execucao.load(respostas)  # None when no paid-run file sits beside the answers
+    except JsonlError as error:
+        print(f"erro: {error}", file=sys.stderr)
+        return 2
     common = dict(
         missing=missing, reasons=reasons, sources_verified=fontes_confirmadas,
-        cases_source=_cases_source(casos), protocol=protocol,
+        cases_source=_cases_source(casos), protocol=protocol, execution=execution,
     )
     saida.parent.mkdir(parents=True, exist_ok=True)
     if formato != "html":
@@ -878,7 +896,7 @@ def comando_concordancia(args: argparse.Namespace) -> int:
 
 def comando_modelos(args: argparse.Namespace) -> int:
     try:
-        provider = build_provider(args.fornecedor, None)
+        provider = build_provider(args.fornecedor, None, for_listing=True)
         nomes = provider.available_models()
     except ProviderError as error:
         print(f"erro: {error}", file=sys.stderr)

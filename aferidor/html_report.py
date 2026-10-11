@@ -63,6 +63,7 @@ from .comparacao import (
     same_proportion,
     top_tie,
 )
+from . import execucao
 from .condicoes import (
     HEADER_NOTE,
     conditions_rows,
@@ -1575,13 +1576,15 @@ def build(
     lingua: str = "pt",
     alternates: dict[str, str] | None = None,
     confirmation: "_fontes.Confirmation | None" = None,
+    execution: "execucao.Files | None" = None,
 ) -> str:
     """Write the whole report as one self contained HTML file.
 
     `lingua` is the language of the interface; the cases and the answers are
     always shown in the original Portuguese. `alternates` maps each language
     to the address of the same report in it, for the language menu; without
-    it, the page has no menu.
+    it, the page has no menu. `execution` is what the files of a paid run say (provenance, cost
+    ledger); without it, or when no model of the report has any, nothing is added to the page.
     """
     if lingua not in HTML_LANG:
         raise ValueError(f"língua desconhecida {lingua!r}; esperava uma de {', '.join(HTML_LANG)}")
@@ -1590,7 +1593,7 @@ def build(
     try:
         return _build(
             cases, answers, verdicts, missing, reasons, sources_verified, today,
-            cases_source, protocol, alternates, confirmation,
+            cases_source, protocol, alternates, confirmation, execution,
         )
     finally:
         _SHORT.reset(names)
@@ -1775,6 +1778,7 @@ class _ReportData:
     rule: str
     early: list[str]
     late: list[str]
+    analysis: "execucao.Analysis | None" = None
     consistency: dict[tuple[str, str], Consistency] | None = None
     pairs: dict[tuple[str, str], list[tuple[Answer, Verdict]]] | None = None
     summaries: dict[str, ConsistencySummary] | None = None
@@ -1790,10 +1794,14 @@ def _prepare(
     reasons: dict[str, str] | None, sources_verified: bool, today: date | None,
     cases_source: tuple[str, str] | None, protocol: Protocol | None,
     alternates: dict[str, str] | None, confirmation: "_fontes.Confirmation | None" = None,
+    execution: "execucao.Files | None" = None,
 ) -> _ReportData:
     per_model = tally_by_model(verdicts)
     models = list(per_model)
     early, late = _notices(cases, answers, missing, reasons, sources_verified)
+    analysis = execucao.analyse(execution, cases, answers, verdicts, _LANG.get()) if execution is not None else None
+    if analysis is not None:
+        early += [_aviso(_esc(label), _esc(text)) for label, text in execucao.notices(analysis, _LANG.get())]
     data = dict(
         cases=cases, answers=answers, verdicts=verdicts, missing=missing, reasons=reasons,
         sources_verified=sources_verified, cases_source=cases_source, protocol=protocol,
@@ -1801,7 +1809,7 @@ def _prepare(
         written=(today or date.today()).isoformat(), models=models, per_model=per_model,
         samples_n=max(expected_samples(answers).values(), default=0),
         rule=protocol.case_rule if protocol is not None else DEFAULT_CASE_RULE,
-        early=early, late=late,
+        early=early, late=late, analysis=analysis,
     )
     if not models:
         return _ReportData(**data)
@@ -1986,6 +1994,20 @@ def _conclusions_panel(data: _ReportData) -> str:
     )
 
 
+def _execution_html(analysis: "execucao.Analysis") -> str:
+    """Under what conditions each paid model ran, and what it cost: read from the provenance, shown beside the
+    conditions of the trial."""
+    lang = _LANG.get()
+    out = [f'<div class="condicoes" id="proveniencia"><h3>{_t("Proveniência e custo")}</h3>', "<dl>"]
+    for run in analysis.models:
+        items = "".join(f"<li>{_esc(line)}</li>" for line in execucao.condition_lines(run, lang) if line)
+        out.append(f"<dt>{_esc(_model_short(run.model))} ({_esc(run.model)})</dt><dd><ul>{items}</ul></dd>")
+    out.append("</dl>")
+    out.extend(f"<p>{_esc(line)}</p>" for line in execucao.cost_lines(analysis, lang))
+    out.append("</div>")
+    return "".join(out)
+
+
 def _method_panel(data: _ReportData, before: str) -> str:
     """Método e detalhes técnicos: the protocol, the language indicator, the conditions, the glossary.
 
@@ -2044,6 +2066,8 @@ def _method_panel(data: _ReportData, before: str) -> str:
     else:
         technical.append(f"<p>{_t('Sem respostas registadas.')}</p>")
     technical.append("</div>")
+    if data.analysis is not None:
+        technical.append(_execution_html(data.analysis))
     technical.append(_glossary_section(before + "".join(method) + "".join(technical)))
     technical.append(
         f'<div class="metodo" id="metodo-texto"><h3>{_t("Método")}</h3>'
@@ -2076,10 +2100,11 @@ def _build(
     reasons: dict[str, str] | None, sources_verified: bool, today: date | None,
     cases_source: tuple[str, str] | None, protocol: Protocol | None,
     alternates: dict[str, str] | None, confirmation: "_fontes.Confirmation | None" = None,
+    execution: "execucao.Files | None" = None,
 ) -> str:
     data = _prepare(
         cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
-        protocol, alternates, confirmation,
+        protocol, alternates, confirmation, execution,
     )
     # The pages first, so the side navigation lists only the subsections that are in the report. The
     # glossary is worked out over the head without them: they hold no glossary term.

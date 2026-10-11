@@ -67,8 +67,16 @@ class TestAPaidModelNeedsACeiling(WithACli):
         self.assertIn("--a-seco", err)
         self.assertEqual((self.build_calls, self.provider.calls, self.tree()), ([], 0, []))
 
-    def test_a_default_model_that_the_catalogue_lists_is_paid_too(self):
-        code, _, err = self.main("executar", "--fornecedor", "gemini", "--casos", str(CASES), "--saida", str(self.saida))
+    def test_the_gemini_provider_has_no_default_model_so_a_bare_choice_asks_which(self):
+        for extra in ([], ["--a-seco"]):
+            code, _, err = self.main("executar", "--fornecedor", "gemini", "--casos", str(CASES), "--saida", str(self.saida), *extra)
+            self.assertEqual((code, self.provider.calls, self.build_calls, self.tree()), (2, 0, [], []))
+            self.assertIn("--fornecedor gemini precisa de --modelo", err)
+            self.assertIn("aferidor modelos --fornecedor gemini", err)
+
+    def test_the_gemini_model_of_the_catalogue_is_paid_when_it_is_named(self):
+        code, _, err = self.main("executar", "--fornecedor", "gemini", "--modelo", "gemini-3.8-flash", "--casos", str(CASES),
+                                 "--saida", str(self.saida))
         self.assertEqual((code, self.provider.calls), (2, 0))
         self.assertIn("gemini-3.8-flash é um modelo pago", err)
 

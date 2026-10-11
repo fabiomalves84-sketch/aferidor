@@ -398,23 +398,13 @@ class TestNoPriceLivesInTheCode(unittest.TestCase):
             with self.subTest(modulo=name):
                 self.assertIsNone(self.CURRENCY.search(text))
 
-    # Written in the code before the catalogue existed: the default model of `GeminiProvider`. A default
-    # is not a price, but it is an id kept in two places. It leaves this list when the providers read the
-    # catalogue; the test fails if it stays after the code stops carrying it.
-    KNOWN_DEFAULTS = {("providers.py", "gemini-3.8-flash")}
-
     def test_no_catalogue_id_is_written_in_any_module(self):
+        """Not even as a default: the Gemini provider had one (`gemini-3.8-flash`) and no longer does."""
         ids = [m.requested_id for m in load_catalog().models.values()]
-        sources = self.sources()
-        for name, text in sources.items():
+        for name, text in self.sources().items():
             for requested in ids:
-                if (name, requested) in self.KNOWN_DEFAULTS:
-                    continue
                 with self.subTest(modulo=name, id=requested):
                     self.assertNotIn(requested, text, msg="id de modelo escrito no código")
-        for name, requested in self.KNOWN_DEFAULTS:
-            with self.subTest(excecao=(name, requested)):
-                self.assertIn(requested, sources[name], msg="a exceção já não é precisa: retirá-la da lista")
 
     def test_the_check_would_catch_one(self):
         self.assertTrue(self.CURRENCY.search("PRICE = 10 USD"))

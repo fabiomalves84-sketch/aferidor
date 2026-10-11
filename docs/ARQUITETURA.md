@@ -29,6 +29,7 @@ flowchart LR
 | `custos.py` | O custo de uma corrida paga: a estimativa a seco (zero pedidos), o livro `custos.jsonl` que só acrescenta (uma intenção com o pior caso antes de cada chamada, um resultado depois) e o teto, verificado com o ficheiro bloqueado e somado sobre todos os modelos do ensaio. Sem resultado, uma intenção conta pelo pior caso; sem o catálogo dizer como se contam os tokens de raciocínio, também o resultado conta pelo pior caso |
 | `proveniencia.py` | O ficheiro lateral `respostas.proveniencia.jsonl`, uma linha por chamada: id pedido e servido, parâmetros pedidos e aplicados, tokens como o fornecedor os deu, custo e modo de contagem, estado, o sha256 do `catalogo.json` e o período de preço usados. Vive à parte de `Answer` porque `models.py` e `storage.py` pertencem ao `grader_id` |
 | `pago.py` | A guarda que o `runner` põe à volta de cada chamada a um modelo que custa dinheiro (um modelo que o catálogo lista): reservar, chamar, liquidar, escrever a proveniência, conferir o modelo servido. O `runner` só lhe entrega a tentativa; não sabe de preços |
+| `execucao.py` | O que os ficheiros de uma corrida paga (proveniência, livro de custos, os do piloto) dizem ao relatório: as amostras não respondidas por modelo, as condições em que cada um correu e o custo. Só lê; sem estes ficheiros não devolve nada e os relatórios saem como sempre |
 | `runner.py` | Execução dos casos, com repetições, novas tentativas e retoma |
 | `checks.py` | Avaliação de uma resposta contra um critério |
 | `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |
@@ -131,8 +132,8 @@ interface tem de ser acrescentado a essa lista, como `condicoes.py` foi.
 ## Chamadas pagas: reservar, liquidar, conferir
 
 Um modelo é pago quando o `aferidor/catalogo.json` o lista, com o mesmo fornecedor e o mesmo identificador. Sem
-`--modelo`, o identificador é o do próprio fornecedor, por isso um `--fornecedor gemini` simples é o modelo do
-catálogo e pede `--teto-eur`. Os modelos que o catálogo não lista (os locais, o falso, os Gemma e o Gemini Flash Lite
+`--modelo`, o identificador é o do próprio fornecedor (a OpenAI e a Anthropic têm um por omissão; o `gemini` já não: pede
+`--modelo`, porque um id escrito no código envelhece). Os modelos que o catálogo não lista (os locais, o falso, os Gemma e o Gemini Flash Lite
 dos ensaios guardados) correm como sempre: sem livro, sem proveniência, sem teto, e o resultado é o mesmo byte a byte
 (`tests/golden_runner_sem_flags.json`, gravado antes desta ligação e comparado por um teste).
 
@@ -204,6 +205,27 @@ pensamento (`thoughtsTokenCount`), `modelVersion` e o `finishReason` do próprio
   a OpenAI (as páginas da API não abriram), o vLLM (a página lida só lista os endpoints), e do Google a contagem dos
   tokens de pensamento (`totalTokenCount` é «prompt + pensamento + candidatos», mas a página não diz se
   `candidatesTokenCount` os inclui). Enquanto for «por confirmar» ou «desconhecido», uma chamada conta no pior caso.
+
+## O que o relatório diz de uma corrida paga
+
+O relatório lê, ao lado das respostas, o `respostas.proveniencia.jsonl`, o `custos.jsonl` e os do piloto (`piloto/`).
+Sem nenhum deles, ou quando nenhum modelo do relatório tem proveniência, não acrescenta nada: o relatório de exemplo sai
+igual byte a byte (um teste regenera-o e compara-o com o publicado, a menos da linha que copia o contador de testes).
+
+- **Amostras não respondidas, por modelo.** Recusadas pelo fornecedor, truncadas e vazias vêm da proveniência (não têm
+  resposta guardada); as recusas no texto vêm dos veredictos, onde o corretor já as classifica como `recusa_indevida`, de
+  risco baixo, e onde continuam. Mostra-se ao lado quantas são, sem mudar nenhum denominador: as primeiras três não entram
+  em contagem nenhuma. A percentagem é sobre as respostas que o fornecedor deu (as guardadas mais as três categorias).
+- **Limiar.** `UNANSWERED_LIMIT_PERCENT` (10) em `execucao.py`: um modelo com mais de 10% não respondidas é marcado «não
+  comparável com os restantes», com o número. Truncadas e recusadas não se repetem sozinhas; o relatório diz-o.
+- **Condições por modelo.** Pedido e servido (e se foi confirmado, não declarado ou diferente), temperatura pedida e
+  aplicada, limite e campo de tokens, modo de contagem do custo e a razão, o período de preço, a taxa e o SHA-256 do
+  catálogo. Se as temperaturas aplicadas diferem entre modelos (incluindo um que não aceita e corre à sua), o relatório
+  diz que a comparação entre fornecedores não é feita em condições idênticas.
+- **Custo.** Por modelo e total, em EUR, separando o que se contou pelo usage declarado do que se contou pelo pior caso
+  (que é um máximo, não a fatura), e o piloto à parte.
+- O `--fornecedor gemini` (o endpoint compatível dos ensaios guardados) já não tem modelo por omissão: pede `--modelo`.
+  Os ensaios guardados com ele continuam legíveis e retomáveis.
 
 ## Sem dependências externas
 
