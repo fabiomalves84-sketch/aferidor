@@ -20,9 +20,22 @@ import urllib.error
 import urllib.request
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 USER_AGENT = "aferidor/0.1"
+
+
+@dataclass(frozen=True)
+class Usage:
+    """Tokens a provider says a call used. A figure the provider did not give is None, never zero.
+
+    `reasoning_tokens` is the part of the output spent on reasoning when the provider reports it
+    apart; where it does not (Anthropic counts it inside `output_tokens`), it stays None.
+    """
+
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    reasoning_tokens: int | None = None
 
 
 @dataclass(frozen=True)
@@ -32,10 +45,52 @@ class Reply:
     `finish_reason` is normalized across vendors to one of "stop" (the model
     finished on its own), "length" (cut off by `max_tokens`), or "unknown"
     (anything else, kept rather than guessed at).
+
+    `served_model` is the model id the provider says it answered with, which is not always the one
+    asked for (an alias can point at a snapshot), and `usage` the tokens it counted. Both are
+    empty when the provider did not say; nothing here changes how a reply is read or graded.
     """
 
     text: str
     finish_reason: str = "stop"
+    served_model: str = ""
+    usage: Usage | None = None
+
+
+def _count(value: object) -> int | None:
+    """A token count as the provider wrote it, or None if it is not a plain non-negative integer."""
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        return None
+    return value
+
+
+def usage_from(data: object, input_key: str, output_key: str, reasoning: tuple[str, ...] = ()) -> Usage | None:
+    """The `usage` object of a decoded reply, read defensively; None when there is nothing usable.
+
+    `reasoning` is the path to the reasoning-token count inside the object, if the vendor has one.
+    """
+    if not isinstance(data, dict):
+        return None
+    found = Usage(
+        input_tokens=_count(data.get(input_key)),
+        output_tokens=_count(data.get(output_key)),
+        reasoning_tokens=_count(_dig(data, reasoning)) if reasoning else None,
+    )
+    return found if found != Usage() else None
+
+
+def _dig(data: object, path: tuple[str, ...]) -> object:
+    for key in path:
+        if not isinstance(data, dict):
+            return None
+        data = data.get(key)
+    return data
+
+
+def _served(data: object) -> str:
+    """The `model` field of a decoded reply, if it is a string."""
+    value = data.get("model") if isinstance(data, dict) else None
+    return value if isinstance(value, str) else ""
 
 
 def normalize_finish_reason(raw: str | None) -> str:
@@ -60,12 +115,15 @@ class ProviderError(RuntimeError):
 
     `retryable` separates a transient condition (rate limit, timeout, server
     error) from a permanent one (bad key, unknown model). Retrying a permanent
-    failure ten times just wastes the run.
+    failure ten times just wastes the run. `retry_after` is how long the server
+    asked to wait, in seconds, when it said so.
     """
 
-    def __init__(self, message: str, *, retryable: bool = False) -> None:
+    def __init__(self, message: str, *, retryable: bool = False, retry_after: float | None = None) -> None:
         super().__init__(message)
         self.retryable = retryable
+        # Seconds the server asked to wait (`Retry-After`), when it said; the runner does not read it yet.
+        self.retry_after = retry_after
 
 
 class Provider(ABC):
@@ -132,6 +190,17 @@ class FakeProvider(Provider):
         return Reply(text=self.default, finish_reason=self.finish_reason)
 
 
+def _retry_after(raw: object) -> float | None:
+    """`Retry-After` as seconds, when the server gave a number; a date, or nothing usable, is None."""
+    if not isinstance(raw, str):
+        return None
+    try:
+        seconds = float(raw.strip())
+    except ValueError:
+        return None
+    return seconds if 0 <= seconds < 86400 else None
+
+
 def _request_json(
     url: str, headers: dict[str, str], payload: dict | None, timeout: float
 ) -> dict:
@@ -150,6 +219,7 @@ def _request_json(
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
+        waited = error.headers.get("Retry-After") if error.headers is not None else None
         try:
             detail = error.read().decode("utf-8", "replace")[:400]
         finally:
@@ -157,6 +227,7 @@ def _request_json(
         raise ProviderError(
             f"{url} respondeu {error.code}: {detail}",
             retryable=error.code == 429 or error.code >= 500,
+            retry_after=_retry_after(waited),
         ) from None
     except urllib.error.URLError as error:
         if isinstance(error.reason, ssl.SSLCertVerificationError):
@@ -228,7 +299,15 @@ def _chat_completion(
         text = choice["message"]["content"] or ""
     except (KeyError, IndexError, TypeError):
         raise ProviderError(f"resposta {who} sem texto: {str(data)[:300]}") from None
-    return Reply(text=text, finish_reason=normalize_finish_reason(choice.get("finish_reason")))
+    return Reply(
+        text=text,
+        finish_reason=normalize_finish_reason(choice.get("finish_reason")),
+        served_model=_served(data),
+        usage=usage_from(
+            data.get("usage"), "prompt_tokens", "completion_tokens",
+            ("completion_tokens_details", "reasoning_tokens"),
+        ),
+    )
 
 
 class OpenAIProvider(Provider):
@@ -314,7 +393,12 @@ class AnthropicProvider(Provider):
             text = "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
         except (KeyError, TypeError):
             raise ProviderError(f"resposta da Anthropic sem texto: {str(data)[:300]}") from None
-        return Reply(text=text, finish_reason=normalize_finish_reason(data.get("stop_reason")))
+        return Reply(
+            text=text,
+            finish_reason=normalize_finish_reason(data.get("stop_reason")),
+            served_model=_served(data),
+            usage=usage_from(data.get("usage"), "input_tokens", "output_tokens"),
+        )
 
     def available_models(self) -> list[str]:
         data = _request_json(
@@ -388,7 +472,7 @@ class GeminiProvider(Provider):
             self.timeout,
             "do Gemini",
         )
-        return Reply(text=without_thoughts(reply.text), finish_reason=reply.finish_reason)
+        return replace(reply, text=without_thoughts(reply.text))
 
     def available_models(self) -> list[str]:
         data = _request_json(
@@ -492,6 +576,7 @@ __all__ = [
     "Provider",
     "ProviderError",
     "Reply",
+    "Usage",
     "normalize_finish_reason",
     "FakeProvider",
     "OpenAIProvider",
