@@ -49,6 +49,7 @@ from .grading import (
     worst_examples,
 )
 from . import fontes as _fontes
+from . import grader_id
 from . import report as _report
 from .comparacao import (
     Ranking,
@@ -2011,6 +2012,21 @@ def _method_panel(data: _ReportData, before: str) -> str:
         f'<div class="condicoes" id="condicoes"><h3>{_t("Condições do ensaio")}</h3>',
     ]
     if rows:
+        # The grader that judged the answers is the one running now, as the protocol warnings already take it.
+        technical.append("<p>" + _t(
+            "Respostas corrigidas em {data} com o corretor {corretor}. A versão que aparece por modelo, "
+            "abaixo, é a do código quando cada resposta foi recolhida.",
+            data=_esc(data.written), corretor=f"<code>{_esc(grader_id())}</code>",
+        ) + "</p>")
+    technical.append("<p>" + _t(
+        "Cada relatório volta a corrigir, no momento em que é gerado, todas as respostas aos seus casos, "
+        "com a versão atual do corretor, mesmo as recolhidas com outra versão. Um protocolo pode congelar o "
+        "corretor antes do ensaio; um relatório gerado com esse protocolo assinala as respostas obtidas com "
+        "outra versão e a correção feita com outra. O resultado de um ensaio assim publica-se como saiu, "
+        "porque corrigi-lo de novo com outra versão do corretor, ou com outro banco de casos, pode dar um "
+        "número diferente do que o protocolo avaliou."
+    ) + "</p>")
+    if rows:
         technical.append("<dl>")
         for label, value in rows:
             shown = _t(label) if label == "Banco de casos" else f"{_model_short(label)} ({label})"
@@ -2044,6 +2060,7 @@ def _foot_html(data: _ReportData) -> str:
     return (
         f'<footer class="rodape"><p>{_esc(_t(HEADER_NOTE))}</p>{_translation_notice()}<p class="repo">{_repo_link()}</p>'
         f'<p class="data">{_t("Relatório escrito em {data}.", data=_esc(data.written))}</p>'
+        f'<p class="data">{_esc(grader_id())}</p>'
         f'<p class="marca">{_t("Aferidor · banco de ensaio para respostas clínicas")}</p></footer>'
     )
 
