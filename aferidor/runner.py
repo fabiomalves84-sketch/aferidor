@@ -19,12 +19,16 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 from . import build_id, grader_id
 from .models import Answer, Case
+from .pago import RunStopped
 from .providers import Provider, ProviderError, Reply
 from .storage import append_answer, discard_truncated_tail, read_answers
+
+if TYPE_CHECKING:
+    from .pago import PaidCalls
 
 # The instruction is written in correct European Portuguese, accents
 # included. Until 27/09/2026 it went out without a single accent ("Responde
@@ -63,6 +67,10 @@ class RunConfig:
     attempts: int = 3
     backoff_s: float = 2.0
     sleep: Callable[[float], None] = time.sleep
+    # Only for a paid model: the longest single wait, and the longest total wait on one call, when the server
+    # asks to be left alone (`Retry-After`). A model that is not paid keeps the retry loop it always had.
+    max_wait_s: float = 60.0
+    max_total_wait_s: float = 300.0
 
     def __post_init__(self) -> None:
         if self.attempts < 1:
@@ -79,10 +87,11 @@ class RunResult:
     skipped: list[str] = field(default_factory=list)
     errors: dict[str, str] = field(default_factory=dict)
     notes: list[str] = field(default_factory=list)
+    stopped: str | None = None  # why the run stopped before asking everything, when it did
 
     @property
     def complete(self) -> bool:
-        return not self.errors
+        return not self.errors and self.stopped is None
 
     def summary(self) -> str:
         parts = [f"execução {self.run_id}", f"modelo {self.model}", f"{len(self.answers)} respostas"]
@@ -90,6 +99,8 @@ class RunResult:
             parts.append(f"{len(self.skipped)} já existentes")
         if self.errors:
             parts.append(f"{len(self.errors)} por responder")
+        if self.stopped:
+            parts.append("parada antes do fim")
         return ", ".join(parts)
 
 
@@ -202,6 +213,7 @@ def run(
     config: RunConfig | None = None,
     repetitions: int = 1,
     progress: Callable[[Case, Answer | None, str], None] | None = None,
+    paid: PaidCalls | None = None,
 ) -> RunResult:
     """Ask every case and keep what came back.
 
@@ -213,6 +225,10 @@ def run(
 
     Resuming onto answers of this model obtained under other conditions
     raises `ConditionsMismatch` before anything is asked.
+
+    `paid` is given for a model that costs money. Each attempt then goes through it (ledger, ceiling, provenance,
+    served-model check), and a `RunStopped` ends the run cleanly: `result.stopped` says why, and every answer
+    already kept stays. Without it nothing changes.
     """
     config = config or RunConfig()
     temperature = provider.temperature
@@ -237,7 +253,16 @@ def run(
                 continue
 
             try:
-                reply, latency_ms = _ask_with_retry(provider, prompt, config)
+                if paid is None:
+                    reply, latency_ms = _ask_with_retry(provider, prompt, config)
+                else:
+                    reply, latency_ms = paid.ask_with_retry(
+                        provider, prompt, case_id=case.case_id, sample=sample, run_id=result.run_id,
+                        config=config, check_reply=_check_reply,
+                    )
+            except RunStopped as stop:
+                result.stopped = str(stop)
+                break
             except ProviderError as error:
                 message = f"amostra {sample}: {error}"
                 previous = result.errors.get(case.case_id)
@@ -266,6 +291,8 @@ def run(
             result.answers.append(answer)
             if progress:
                 progress(case, answer, "ok")
+        if result.stopped:
+            break
 
     return result
 

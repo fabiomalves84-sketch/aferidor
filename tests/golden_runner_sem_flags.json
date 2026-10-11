@@ -1,0 +1,460 @@
+{
+  "cli": {
+    "codigo": 0,
+    "ficheiro": [
+      {
+        "amostra": 1,
+        "caso": "ATB-PAC-001",
+        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "execucao": "<id>",
+        "fim": "stop",
+        "latencia_ms": 0,
+        "modelo": "falso",
+        "perguntada_em": "T",
+        "prompt_sha256": "5f6fd889be24bee9d1483c404f0c74e336c6d61745c93ebb31b31fc4e6a0ee8c",
+        "temperatura": 1.0,
+        "texto": "sem resposta",
+        "tokens_max": null,
+        "versao": "B"
+      },
+      {
+        "amostra": 2,
+        "caso": "ATB-PAC-001",
+        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "execucao": "<id>",
+        "fim": "stop",
+        "latencia_ms": 0,
+        "modelo": "falso",
+        "perguntada_em": "T",
+        "prompt_sha256": "5f6fd889be24bee9d1483c404f0c74e336c6d61745c93ebb31b31fc4e6a0ee8c",
+        "temperatura": 1.0,
+        "texto": "sem resposta",
+        "tokens_max": null,
+        "versao": "B"
+      },
+      {
+        "amostra": 1,
+        "caso": "ATB-DPOC-002",
+        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "execucao": "<id>",
+        "fim": "stop",
+        "latencia_ms": 0,
+        "modelo": "falso",
+        "perguntada_em": "T",
+        "prompt_sha256": "bf419232e11a75f075c74cb9fe9df09b403e4b0c13cbd19b8f73c079f8ae7aa1",
+        "temperatura": 1.0,
+        "texto": "sem resposta",
+        "tokens_max": null,
+        "versao": "B"
+      },
+      {
+        "amostra": 2,
+        "caso": "ATB-DPOC-002",
+        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "execucao": "<id>",
+        "fim": "stop",
+        "latencia_ms": 0,
+        "modelo": "falso",
+        "perguntada_em": "T",
+        "prompt_sha256": "bf419232e11a75f075c74cb9fe9df09b403e4b0c13cbd19b8f73c079f8ae7aa1",
+        "temperatura": 1.0,
+        "texto": "sem resposta",
+        "tokens_max": null,
+        "versao": "B"
+      },
+      {
+        "amostra": 1,
+        "caso": "ATB-CIST-003",
+        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "execucao": "<id>",
+        "fim": "stop",
+        "latencia_ms": 0,
+        "modelo": "falso",
+        "perguntada_em": "T",
+        "prompt_sha256": "839f7ab3799387e486ee793cedd40ba1e59fb8ff6b29004d5b9fdfdde35b828b",
+        "temperatura": 1.0,
+        "texto": "sem resposta",
+        "tokens_max": null,
+        "versao": "B"
+      },
+      {
+        "amostra": 2,
+        "caso": "ATB-CIST-003",
+        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "execucao": "<id>",
+        "fim": "stop",
+        "latencia_ms": 0,
+        "modelo": "falso",
+        "perguntada_em": "T",
+        "prompt_sha256": "839f7ab3799387e486ee793cedd40ba1e59fb8ff6b29004d5b9fdfdde35b828b",
+        "temperatura": 1.0,
+        "texto": "sem resposta",
+        "tokens_max": null,
+        "versao": "B"
+      }
+    ],
+    "pasta": [
+      "cli.jsonl",
+      "respostas.jsonl"
+    ],
+    "stderr": "",
+    "stdout": "3 casos x 2 amostra(s), modelo falso\n  . ATB-PAC-001\n  . ATB-PAC-001\n  . ATB-DPOC-002\n  . ATB-DPOC-002\n  . ATB-CIST-003\n  . ATB-CIST-003\nexecução <id>, modelo falso, 6 respostas\nrespostas em <saida>\n"
+  },
+  "ficheiro": [
+    {
+      "amostra": 1,
+      "caso": "C1",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 2,
+      "caso": "C1",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 1,
+      "caso": "C2",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 2,
+      "caso": "C2",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 1,
+      "caso": "C3",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 2,
+      "caso": "C3",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    }
+  ],
+  "ficheiro_retoma": [
+    {
+      "amostra": 1,
+      "caso": "C1",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 2,
+      "caso": "C1",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 1,
+      "caso": "C2",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 2,
+      "caso": "C2",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 1,
+      "caso": "C3",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 2,
+      "caso": "C3",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "Amoxicilina 1000 mg de 8 em 8 horas",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 3,
+      "caso": "C1",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "outra",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 3,
+      "caso": "C2",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "outra",
+      "tokens_max": 8192,
+      "versao": "B"
+    },
+    {
+      "amostra": 3,
+      "caso": "C3",
+      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "execucao": "<id>",
+      "fim": "stop",
+      "latencia_ms": 0,
+      "modelo": "falso:g",
+      "perguntada_em": "T",
+      "prompt_sha256": "979e33975ee595ff5cf76dc702d2644fca187c2bafd8f6313fe9e73cc82e8e69",
+      "temperatura": 1.0,
+      "texto": "outra",
+      "tokens_max": 8192,
+      "versao": "B"
+    }
+  ],
+  "primeira": {
+    "answers": [
+      [
+        "C1",
+        1,
+        "Amoxicilina 1000 mg de 8 em 8 horas",
+        1.0,
+        8192,
+        "stop"
+      ],
+      [
+        "C1",
+        2,
+        "Amoxicilina 1000 mg de 8 em 8 horas",
+        1.0,
+        8192,
+        "stop"
+      ],
+      [
+        "C2",
+        1,
+        "Amoxicilina 1000 mg de 8 em 8 horas",
+        1.0,
+        8192,
+        "stop"
+      ],
+      [
+        "C2",
+        2,
+        "Amoxicilina 1000 mg de 8 em 8 horas",
+        1.0,
+        8192,
+        "stop"
+      ],
+      [
+        "C3",
+        1,
+        "Amoxicilina 1000 mg de 8 em 8 horas",
+        1.0,
+        8192,
+        "stop"
+      ],
+      [
+        "C3",
+        2,
+        "Amoxicilina 1000 mg de 8 em 8 horas",
+        1.0,
+        8192,
+        "stop"
+      ]
+    ],
+    "complete": true,
+    "errors": {},
+    "model": "falso:g",
+    "notes": [],
+    "run_id": "g1",
+    "skipped": []
+  },
+  "prompts": [
+    "Responde em português europeu a esta pergunta clínica, dirigida a um médico.\nSe a resposta envolver um fármaco, indica a dose, o intervalo e a duração.\nAssinala as interações, as contraindicações e os ajustes relevantes.\nNão inventes referências. Se não souberes, di-lo.\n\nPergunta: Que dose de amoxicilina?",
+    "Responde em português europeu a esta pergunta clínica, dirigida a um médico.\nSe a resposta envolver um fármaco, indica a dose, o intervalo e a duração.\nAssinala as interações, as contraindicações e os ajustes relevantes.\nNão inventes referências. Se não souberes, di-lo.\n\nPergunta: Que dose de amoxicilina?"
+  ],
+  "retoma": {
+    "answers": [
+      [
+        "C1",
+        3,
+        "outra",
+        1.0,
+        8192,
+        "stop"
+      ],
+      [
+        "C2",
+        3,
+        "outra",
+        1.0,
+        8192,
+        "stop"
+      ],
+      [
+        "C3",
+        3,
+        "outra",
+        1.0,
+        8192,
+        "stop"
+      ]
+    ],
+    "complete": true,
+    "errors": {},
+    "model": "falso:g",
+    "notes": [],
+    "run_id": "g2",
+    "skipped": [
+      "C1",
+      "C1",
+      "C2",
+      "C2",
+      "C3",
+      "C3"
+    ]
+  },
+  "sempre_a_falhar": {
+    "answers": [],
+    "complete": false,
+    "errors": {
+      "C1": "amostra 1: falha simulada"
+    },
+    "model": "falso:f",
+    "notes": [],
+    "run_id": "g4",
+    "skipped": []
+  },
+  "so_o_ficheiro_de_respostas": [
+    "respostas.jsonl"
+  ],
+  "truncada": {
+    "answers": [],
+    "complete": false,
+    "errors": {
+      "C1": "amostra 1: resposta truncada no limite de tokens"
+    },
+    "model": "falso:t",
+    "notes": [],
+    "run_id": "g3",
+    "skipped": []
+  }
+}

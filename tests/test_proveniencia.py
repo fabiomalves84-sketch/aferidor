@@ -48,7 +48,7 @@ def setUpModule() -> None:
 def record(**over) -> ProvenanceRecord:
     base = dict(
         run_id="r1", model="falso", case_id="C1", sample=1, attempt=1, catalog_key="pago", requested_model="modelo-falso",
-        served_model="modelo-falso", requested_params={"temperatura": 1.0, "tokens_max": 8192, "campo_tokens": "max_tokens"},
+        served_model="modelo-falso", served_check="igual", requested_params={"temperatura": 1.0, "tokens_max": 8192, "campo_tokens": "max_tokens"},
         applied_params={"temperatura": 1.0, "tokens_max": 8192, "campo_tokens": "max_tokens"},
         input_tokens=120, output_tokens=900, reasoning_tokens=None, finish_reason="stop", finish_reason_original="end_turn",
         started_at="2026-10-11T10:00:00+00:00", ended_at="2026-10-11T10:00:04+00:00", latency_s=4.2,
@@ -70,7 +70,7 @@ class WithAFolder(unittest.TestCase):
 class TestTheLines(WithAFolder):
     def test_a_line_keeps_everything_the_call_needs_to_be_audited(self):
         raw = record().to_dict()
-        for field in ("id_pedido", "id_servido", "parametros_pedidos", "parametros_aplicados", "tokens_entrada", "tokens_saida",
+        for field in ("id_pedido", "id_servido", "verificacao_servido", "parametros_pedidos", "parametros_aplicados", "tokens_entrada", "tokens_saida",
                       "tokens_raciocinio", "finish_reason", "finish_reason_original", "inicio", "fim", "latencia_s", "tentativa",
                       "custo_usd", "custo_eur", "modo_contagem", "estado", "catalogo_sha256", "periodo_preco", "taxa_usd_eur",
                       "run_id", "modelo", "caso", "amostra", "build", "grader"):
@@ -118,7 +118,7 @@ class TestTheLines(WithAFolder):
 
     def test_invalid_values_are_refused_when_the_record_is_made(self):
         for over in ({"state": "talvez"}, {"count_mode": "adivinhado"}, {"sample": 0}, {"attempt": 0}, {"latency_s": -1},
-                     {"catalog_sha256": ""}):
+                     {"catalog_sha256": ""}, {"served_check": "talvez"}):
             with self.subTest(**over), self.assertRaises(ProvenanceError):
                 record(**over)
 

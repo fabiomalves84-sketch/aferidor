@@ -28,6 +28,7 @@ flowchart LR
 | `chaves.py` | A leitura das chaves de API, do ambiente e, na falta, do `.env` da raiz, só das variáveis que o catálogo declara; o valor nunca entra numa mensagem, num `repr` nem numa exceção |
 | `custos.py` | O custo de uma corrida paga: a estimativa a seco (zero pedidos), o livro `custos.jsonl` que só acrescenta (uma intenção com o pior caso antes de cada chamada, um resultado depois) e o teto, verificado com o ficheiro bloqueado e somado sobre todos os modelos do ensaio. Sem resultado, uma intenção conta pelo pior caso; sem o catálogo dizer como se contam os tokens de raciocínio, também o resultado conta pelo pior caso |
 | `proveniencia.py` | O ficheiro lateral `respostas.proveniencia.jsonl`, uma linha por chamada: id pedido e servido, parâmetros pedidos e aplicados, tokens como o fornecedor os deu, custo e modo de contagem, estado, o sha256 do `catalogo.json` e o período de preço usados. Vive à parte de `Answer` porque `models.py` e `storage.py` pertencem ao `grader_id` |
+| `pago.py` | A guarda que o `runner` põe à volta de cada chamada a um modelo que custa dinheiro (um modelo que o catálogo lista): reservar, chamar, liquidar, escrever a proveniência, conferir o modelo servido. O `runner` só lhe entrega a tentativa; não sabe de preços |
 | `runner.py` | Execução dos casos, com repetições, novas tentativas e retoma |
 | `checks.py` | Avaliação de uma resposta contra um critério |
 | `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |
@@ -126,6 +127,38 @@ peso. Um teste gera um ensaio real nas cinco línguas e exige que nenhum texto
 fique sem tradução. O teste que procura cadeias sem uso lê os módulos à mão, em
 `interface_strings()` (`tests/test_traducao.py`): um módulo novo com cadeias de
 interface tem de ser acrescentado a essa lista, como `condicoes.py` foi.
+
+## Chamadas pagas: reservar, liquidar, conferir
+
+Um modelo é pago quando o `aferidor/catalogo.json` o lista, com o mesmo fornecedor e o mesmo identificador. Sem
+`--modelo`, o identificador é o do próprio fornecedor, por isso um `--fornecedor gemini` simples é o modelo do
+catálogo e pede `--teto-eur`. Os modelos que o catálogo não lista (os locais, o falso, os Gemma e o Gemini Flash Lite
+dos ensaios guardados) correm como sempre: sem livro, sem proveniência, sem teto, e o resultado é o mesmo byte a byte
+(`tests/golden_runner_sem_flags.json`, gravado antes desta ligação e comparado por um teste).
+
+Para um modelo pago, cada tentativa percorre o mesmo caminho, em `pago.py`:
+
+1. **`reserve`** escreve a intenção no `custos.jsonl`, com o pior caso da chamada, sob um bloqueio do ficheiro. É aqui
+   que o teto (do ensaio inteiro, todos os modelos somados) e a regra «esta amostra já foi pedida» são decididos, antes
+   da chamada. Se recusar, a corrida pára limpa (`RunStopped`, `resultado.stopped`, código de saída 3) e nada do que já
+   estava guardado é apagado.
+2. A chamada ao fornecedor.
+3. **`settle`** escreve o resultado: quanto custou, pela regra do pior caso enquanto o catálogo não disser como se
+   contam os tokens de raciocínio. Uma falha em que o fornecedor respondeu com um erro não cobra e deixa repetir; um
+   tempo limite ou uma ligação cortada a meio pode ter sido cobrado, conta o pior caso e não se repete sozinho.
+4. A linha de proveniência, em `respostas.proveniencia.jsonl` ao lado das respostas.
+5. **`check_served`**, estrito: se o modelo servido não é o pedido nem um dos `ids_servidos_aceites` do catálogo, a
+   corrida pára nessa chamada e a resposta não é guardada (a chamada foi paga e fica no livro). Um fornecedor que não
+   declara o modelo servido fica registado como «não declarado» e a corrida segue.
+
+Um 429 espera o `Retry-After` do servidor, ou o recuo habitual, dentro de uma espera máxima por tentativa (60 s) e de um
+total por chamada (300 s); um pedido de espera maior do que o permitido desiste da chamada. Uma resposta truncada, recusada
+ou vazia foi paga, fica escrita e não se repete (decisão pendente do Fábio). `--a-seco` estima e sai sem escrever nada;
+`--piloto` pergunta três casos duas vezes e grava tudo numa subpasta `piloto/`, com o seu próprio livro.
+
+**Tempos limite.** Vêm do catálogo (`tempo_limite_s`) para os modelos pagos, e são os que os fornecedores já tinham:
+60 s para a OpenAI e a Anthropic, 300 s para o Gemini. Os 60 s herdados podem ser curtos para modelos que raciocinam
+antes de responder; o piloto deve rever este valor, no catálogo, antes do ensaio completo.
 
 ## Sem dependências externas
 

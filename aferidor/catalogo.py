@@ -78,6 +78,7 @@ class Model:
     min_interval_s: float
     key_variable: str | None
     base_url: str | None
+    accepted_served_ids: tuple[str, ...]  # served ids a person looked at and allowed, besides the requested one
     note: str
 
     def price_on(self, day: date, prompt_tokens: int = 0) -> PricePeriod:
@@ -102,6 +103,13 @@ class Catalog:
             return self.models[key]
         except KeyError:
             raise CatalogError(f"modelo {key!r} não está no catálogo; há: {', '.join(sorted(self.models))}") from None
+
+    def find(self, provider: str, requested_id: str) -> Model | None:
+        """The model served by `provider` under this requested id, or None if the catalogue does not list it."""
+        for found in self.models.values():
+            if found.provider == provider and found.requested_id == requested_id:
+                return found
+        return None
 
     def key_variables(self) -> frozenset[str]:
         """The environment variables the catalogue declares for keys, and the only ones `chaves` may read."""
@@ -264,6 +272,9 @@ def _model(key: str, raw: object) -> Model:
     if variable is not None and not _ENV_NAME.match(variable):
         raise _fail(where, "'chave_env' tem de ser o nome de uma variável de ambiente")
     note = raw.get("nota", "")
+    accepted = raw.get("ids_servidos_aceites", [])
+    if not isinstance(accepted, list) or not all(isinstance(a, str) and a.strip() for a in accepted):
+        raise _fail(where, "'ids_servidos_aceites' tem de ser uma lista de textos")
     return Model(
         key=key,
         provider=provider,
@@ -279,6 +290,7 @@ def _model(key: str, raw: object) -> Model:
         min_interval_s=float(interval),
         key_variable=variable,
         base_url=_optional_text(raw, "base_url", where),
+        accepted_served_ids=tuple(accepted),
         note=note if isinstance(note, str) else "",
     )
 

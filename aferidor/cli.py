@@ -9,11 +9,16 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
 import json
 import sys
+from datetime import date
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from . import build_id, fontes, grader_id, html_report, manifesto, protocolo, report, revisao
+from .catalogo import Catalog, Model, load_catalog
+from .custos import Ledger, estimate, format_estimate
 from .grading import (
     grade_all,
     met_by_the_question,
@@ -32,7 +37,9 @@ from .providers import (
     Provider,
     ProviderError,
 )
-from .runner import ConditionsMismatch, RunConfig, run
+from .pago import PaidCalls
+from .proveniencia import provenance_path
+from .runner import ConditionsMismatch, RunConfig, build_prompt, run
 from .storage import read_answers, read_cases, write_answers, write_verdicts
 from .traducao import LANGS
 
@@ -42,6 +49,12 @@ DEFAULT_VERDICTS = Path("data/vereditos.json")
 DEFAULT_REPORT = Path("relatorios/relatorio.md")
 DEFAULT_REPORT_HTML = Path("relatorios/relatorio.html")
 DEFAULT_TOKENS_MAX = 4096
+# The cases the pilot run asks, in order. A tuple is a set of alternatives: the first one the bank has is used.
+PILOT_CASES = (("ATB-PAC-001",), ("PED-OMA-021", "ATB-FAR-004"), ("GRA-VPA-024",))
+PILOT_SAMPLES = 2
+PILOT_FOLDER = "piloto"
+STOPPED = 3  # exit code of a run that stopped on purpose (ceiling, or another model served the call)
+_PAID_KINDS = {"openai": OpenAIProvider, "anthropic": AnthropicProvider, "gemini": GeminiProvider}
 # The program does not check when a protocol was written, so the text does not claim it was early.
 PROTOCOL_HELP = (
     "protocolo com o critério de aprovação, que deve ser escrito antes do ensaio; "
@@ -50,13 +63,16 @@ PROTOCOL_HELP = (
 
 
 def build_provider(
-    kind: str, model: str | None, temperature: float = 0.0, max_tokens: int | None = None
+    kind: str, model: str | None, temperature: float = 0.0, max_tokens: int | None = None,
+    timeout: float | None = None,
 ) -> Provider:
     if kind == "falso":
         return FakeProvider(name=f"falso:{model}" if model else "falso", temperature=temperature)
     kwargs: dict = {"temperature": temperature}
     if max_tokens is not None:
         kwargs["max_tokens"] = max_tokens
+    if timeout is not None:
+        kwargs["timeout"] = timeout
     if kind == "openai":
         return OpenAIProvider(model=model, **kwargs) if model else OpenAIProvider(**kwargs)
     if kind == "anthropic":
@@ -66,6 +82,46 @@ def build_provider(
     if kind == "gemini":
         return GeminiProvider(model=model, **kwargs) if model else GeminiProvider(**kwargs)
     raise ValueError(f"fornecedor desconhecido {kind!r}")
+
+
+def _euros(text: str) -> Decimal:
+    try:
+        amount = Decimal(text.replace(",", "."))
+    except InvalidOperation:
+        amount = Decimal(0)
+    if not amount.is_finite() or amount <= 0:
+        raise argparse.ArgumentTypeError("--teto-eur tem de ser um valor em euros maior que zero, por exemplo 25 ou 12,5")
+    return amount
+
+
+def _paid_model(kind: str, model: str | None) -> tuple[Catalog, Model] | None:
+    """The catalogue entry of a model that costs money, or None for one that does not (or that it does not list).
+
+    A model is paid when the catalogue lists it under this provider and id. Without `--modelo` the id is the
+    provider's own default, so a bare `--fornecedor gemini` is the catalogue's Gemini model.
+    """
+    if kind not in _PAID_KINDS:
+        return None
+    catalog = load_catalog()
+    requested = model or inspect.signature(_PAID_KINDS[kind].__init__).parameters["model"].default
+    found = catalog.find(kind, requested)
+    return (catalog, found) if found else None
+
+
+def _pilot_cases(cases: list[Case]) -> tuple[list[Case], list[str]]:
+    """The pilot's cases and a line saying which were chosen and which alternatives the bank did not have."""
+    by_id = {c.case_id: c for c in cases}
+    chosen: list[Case] = []
+    said: list[str] = []
+    for options in PILOT_CASES:
+        present = [o for o in options if o in by_id]
+        if present:
+            chosen.append(by_id[present[0]])
+            absent = [o for o in options if o not in by_id]
+            said.append(present[0] + (f" (e não {', '.join(absent)}, que o banco não tem)" if absent else ""))
+        else:
+            said.append(f"nenhum de {' ou '.join(options)} existe neste banco")
+    return chosen, said
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -97,6 +153,20 @@ def build_parser() -> argparse.ArgumentParser:
     run_options.add_argument(
         "--tokens-max", type=int, default=DEFAULT_TOKENS_MAX,
         help="limite de tokens da resposta; um modelo que raciocina antes de responder precisa de mais",
+    )
+    run_options.add_argument(
+        "--teto-eur", type=_euros, default=None, metavar="EUROS",
+        help="gasto máximo do ensaio em euros, somando todos os modelos; obrigatório para um modelo pago, "
+             "sem valor por omissão",
+    )
+    run_options.add_argument(
+        "--a-seco", action="store_true",
+        help="estimar o custo e sair, sem chamar nenhum fornecedor nem escrever nada",
+    )
+    run_options.add_argument(
+        "--piloto", action="store_true",
+        help=f"só 3 casos ({', '.join('/'.join(o) for o in PILOT_CASES)}), {PILOT_SAMPLES} amostras cada, "
+             f"gravados à parte, numa subpasta '{PILOT_FOLDER}' ao lado de --saida",
     )
     run_options.add_argument(
         "--recomecar",
@@ -230,6 +300,7 @@ def comando_executar(args: argparse.Namespace) -> int:
     return _executar(
         args.casos, args.fornecedor, args.modelo, args.saida, args.limite, args.tentativas,
         args.repeticoes, args.temperatura, args.tokens_max, args.recomecar,
+        teto_eur=args.teto_eur, a_seco=args.a_seco, piloto=args.piloto,
     )
 
 
@@ -237,16 +308,57 @@ def _executar(
     casos: Path, fornecedor: str, modelo: str | None, saida: Path, limite: int, tentativas: int,
     repeticoes: int, temperatura: float, tokens_max: int, recomecar: bool,
     errors_out: dict[str, str] | None = None,
+    *, teto_eur: Decimal | None = None, a_seco: bool = False, piloto: bool = False,
 ) -> int:
     cases = read_cases(casos)
-    if limite > 0:
+    if piloto:
+        if limite > 0:
+            print("erro: --piloto escolhe os casos e não se combina com --limite", file=sys.stderr)
+            return 2
+        cases, chosen = _pilot_cases(cases)
+        if not cases:
+            print(f"erro: {'; '.join(chosen)}", file=sys.stderr)
+            return 2
+        repeticoes = PILOT_SAMPLES
+        saida = saida.parent / PILOT_FOLDER / saida.name
+        print(f"piloto: {'; '.join(chosen)}; {PILOT_SAMPLES} amostras cada; tudo gravado em {saida.parent}")
+    elif limite > 0:
         cases = cases[:limite]
 
+    paid_info = _paid_model(fornecedor, modelo)
+    if a_seco:
+        return _a_seco(paid_info, cases, repeticoes, tokens_max, teto_eur)
+    if paid_info is not None and teto_eur is None:
+        print(
+            f"erro: {paid_info[1].requested_id} é um modelo pago (está em aferidor/catalogo.json) e não arranca sem "
+            "--teto-eur, o gasto máximo do ensaio em euros; sem valor por omissão. Para ver o custo antes, "
+            "usar --a-seco",
+            file=sys.stderr,
+        )
+        return 2
+
     try:
-        provider = build_provider(fornecedor, modelo, temperature=temperatura, max_tokens=tokens_max)
+        provider = build_provider(
+            fornecedor, modelo, temperature=temperatura, max_tokens=tokens_max,
+            timeout=paid_info[1].timeout_s if paid_info else None,
+        )
     except ProviderError as error:
         print(f"erro: {error}", file=sys.stderr)
         return 2
+
+    paid: PaidCalls | None = None
+    if paid_info is not None:
+        catalog, entry = paid_info
+        preview = estimate(
+            catalog, [entry.key], [build_prompt(c) for c in cases], day=date.today(), samples=repeticoes,
+            tokens_max=tokens_max, ceiling_eur=teto_eur,
+        )
+        print(format_estimate(preview))
+        ensaio = (f"{saida.resolve().parent.parent.name}/{PILOT_FOLDER}" if piloto else saida.resolve().parent.name)
+        paid = PaidCalls(
+            catalog=catalog, model_key=entry.key, ledger=Ledger(saida.with_name("custos.jsonl")),
+            provenance_file=provenance_path(saida), ensaio=ensaio, ceiling_eur=teto_eur,
+        )
 
     if recomecar and saida.exists():
         existing = read_answers(saida)
@@ -271,6 +383,7 @@ def _executar(
             config=RunConfig(attempts=tentativas),
             repetitions=repeticoes,
             progress=progress,
+            paid=paid,
         )
     except ConditionsMismatch as error:
         print(f"erro: {error}", file=sys.stderr)
@@ -289,7 +402,31 @@ def _executar(
         print(f"  por responder {case_id}: {message}", file=sys.stderr)
     if errors_out is not None:
         errors_out.update(result.errors)
+    if paid is not None:
+        spent = paid.ledger.summary(paid.ensaio)
+        print(
+            f"gasto contado neste ensaio: {spent['gasto_eur']:.4f} EUR de um teto de {teto_eur} EUR, "
+            f"em {spent['chamadas']} chamadas (o pior caso conta onde não se sabe)"
+        )
+    if result.stopped:
+        print(f"parada: {result.stopped}", file=sys.stderr)
+        return STOPPED
     return 0 if result.complete else 1
+
+
+def _a_seco(
+    paid_info: tuple[Catalog, Model] | None, cases: list[Case], samples: int, tokens_max: int, ceiling: Decimal | None
+) -> int:
+    """The dry run: the estimate on the screen, no request, no file."""
+    if paid_info is None:
+        print("este modelo não está no catálogo de modelos pagos: não há custo a estimar")
+        return 0
+    catalog, entry = paid_info
+    print(format_estimate(estimate(
+        catalog, [entry.key], [build_prompt(c) for c in cases], day=date.today(), samples=samples,
+        tokens_max=tokens_max, ceiling_eur=ceiling,
+    )))
+    return 0
 
 
 def comando_classificar(args: argparse.Namespace) -> int:
@@ -638,6 +775,15 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     answer passes, and a wrong answer built for each criterion fails. Asking
     a model costs money; finding a broken case afterwards costs it again.
     """
+    if args.a_seco:
+        return _executar(
+            args.casos, args.fornecedor, args.modelo, args.saida, args.limite, args.tentativas,
+            args.repeticoes, args.temperatura, args.tokens_max, args.recomecar,
+            teto_eur=args.teto_eur, a_seco=True,
+        )
+    if args.piloto:
+        print("erro: o piloto corre-se com 'executar --piloto'; 'ensaio' classificaria e escreveria o relatório de 3 casos", file=sys.stderr)
+        return 2
     # The protocol is read before anything is asked: a wrong path or a broken
     # file found only at the report would already have paid for the run.
     if args.protocolo is not None:
@@ -668,8 +814,9 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     codigo = _executar(
         args.casos, args.fornecedor, args.modelo, args.saida, args.limite, args.tentativas,
         args.repeticoes, args.temperatura, args.tokens_max, args.recomecar, errors_out=errors,
+        teto_eur=args.teto_eur,
     )
-    if codigo == 2:
+    if codigo in (2, STOPPED):
         return codigo
 
     codigo_classificar = _classificar(args.casos, args.saida, args.vereditos, args.limite)

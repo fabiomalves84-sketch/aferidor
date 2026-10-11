@@ -36,6 +36,7 @@
       "ritmo_min_s": 0,
       "chave_env": "ANTHROPIC_API_KEY",
       "base_url": null,
+      "ids_servidos_aceites": [],
       "nota": "Candidato de topo da Anthropic."
     },
     "claude-opus-5-5": {
@@ -66,6 +67,7 @@
       "ritmo_min_s": 0,
       "chave_env": "ANTHROPIC_API_KEY",
       "base_url": null,
+      "ids_servidos_aceites": [],
       "nota": "Alternativa mais barata da Anthropic."
     },
     "gpt-6-astra": {
@@ -97,6 +99,7 @@
       "ritmo_min_s": 0,
       "chave_env": "OPENAI_API_KEY",
       "base_url": null,
+      "ids_servidos_aceites": [],
       "nota": "Candidato de topo da OpenAI."
     },
     "gpt-6.1-sol": {
@@ -128,6 +131,7 @@
       "ritmo_min_s": 0,
       "chave_env": "OPENAI_API_KEY",
       "base_url": null,
+      "ids_servidos_aceites": [],
       "nota": "Alternativa intermédia da OpenAI."
     },
     "gpt-6-luna": {
@@ -159,6 +163,7 @@
       "ritmo_min_s": 0,
       "chave_env": "OPENAI_API_KEY",
       "base_url": null,
+      "ids_servidos_aceites": [],
       "nota": "Alternativa económica da OpenAI."
     },
     "gemini-3.1-pro-preview": {
@@ -190,6 +195,7 @@
       "ritmo_min_s": 13,
       "chave_env": "GEMINI_API_KEY",
       "base_url": null,
+      "ids_servidos_aceites": [],
       "nota": "Candidato de topo da Google, em preview."
     },
     "gemini-3.8-flash": {
@@ -232,6 +238,7 @@
       "ritmo_min_s": 13,
       "chave_env": "GEMINI_API_KEY",
       "base_url": null,
+      "ids_servidos_aceites": [],
       "nota": "Alternativa estável da Google; o preço dobra a partir de 2027-01-01."
     },
     "amalia-9b-0626-dpo": {
@@ -262,6 +269,7 @@
       "ritmo_min_s": 0,
       "chave_env": null,
       "base_url": null,
+      "ids_servidos_aceites": [],
       "nota": "Pesos abertos; sem API pública. Corre num servidor próprio compatível com OpenAI (vLLM, por exemplo); o base_url está por configurar e a chave, se o servidor a exigir, ainda não tem variável declarada."
     }
   }

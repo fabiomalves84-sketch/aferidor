@@ -119,9 +119,15 @@ class ProviderError(RuntimeError):
     asked to wait, in seconds, when it said so.
     """
 
-    def __init__(self, message: str, *, retryable: bool = False, retry_after: float | None = None) -> None:
+    def __init__(
+        self, message: str, *, retryable: bool = False, retry_after: float | None = None, maybe_billed: bool = True
+    ) -> None:
         super().__init__(message)
         self.retryable = retryable
+        # Whether the provider may have processed, and so charged for, the request that failed. False only
+        # when it is certain it did not: an error status came back, or the request never left. A timeout, a
+        # connection cut mid-reply or an unreadable reply may have been paid for, so that is the default.
+        self.maybe_billed = maybe_billed
         # Seconds the server asked to wait (`Retry-After`), when it said; the runner does not read it yet.
         self.retry_after = retry_after
 
@@ -228,13 +234,14 @@ def _request_json(
             f"{url} respondeu {error.code}: {detail}",
             retryable=error.code == 429 or error.code >= 500,
             retry_after=_retry_after(waited),
+            maybe_billed=False,
         ) from None
     except urllib.error.URLError as error:
         if isinstance(error.reason, ssl.SSLCertVerificationError):
-            raise ProviderError(f"{url}: certificado recusado: {error.reason}", retryable=False) from None
-        raise ProviderError(f"{url} inacessível: {error.reason}", retryable=True) from None
+            raise ProviderError(f"{url}: certificado recusado: {error.reason}", retryable=False, maybe_billed=False) from None
+        raise ProviderError(f"{url} inacessível: {error.reason}", retryable=True, maybe_billed=False) from None
     except ssl.SSLCertVerificationError as error:
-        raise ProviderError(f"{url}: certificado recusado: {error}", retryable=False) from None
+        raise ProviderError(f"{url}: certificado recusado: {error}", retryable=False, maybe_billed=False) from None
     except TimeoutError:
         raise ProviderError(f"{url} excedeu {timeout}s", retryable=True) from None
     except (OSError, http.client.HTTPException) as error:

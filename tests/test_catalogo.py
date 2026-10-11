@@ -87,6 +87,20 @@ class TestAValidCatalogue(unittest.TestCase):
         data = catalog(modelos={"a": model(chave_env="UMA"), "b": model(chave_env="OUTRA"), "c": model(chave_env=None)})
         self.assertEqual(parse(data).key_variables(), frozenset({"UMA", "OUTRA"}))
 
+    def test_a_model_is_found_by_provider_and_requested_id_and_only_by_both(self):
+        found = parse(catalog())
+        self.assertEqual(found.find("openai", "modelo-falso").key, "m")
+        self.assertIsNone(found.find("anthropic", "modelo-falso"))
+        self.assertIsNone(found.find("openai", "outro"))
+
+    def test_the_served_ids_a_person_accepted_are_read_and_default_to_none(self):
+        self.assertEqual(parse(catalog()).model("m").accepted_served_ids, ())
+        data = catalog(modelos={"m": model(ids_servidos_aceites=["modelo-falso-20261001"])})
+        self.assertEqual(parse(data).model("m").accepted_served_ids, ("modelo-falso-20261001",))
+        for bad in ("modelo", [1], [""], {"a": 1}):
+            with self.subTest(valor=bad), self.assertRaisesRegex(CatalogError, "ids_servidos_aceites"):
+                parse(catalog(modelos={"m": model(ids_servidos_aceites=bad)}))
+
     def test_an_unknown_model_says_which_ones_exist(self):
         with self.assertRaisesRegex(CatalogError, "não está no catálogo.*m"):
             parse(catalog()).model("outro")
@@ -260,6 +274,11 @@ class TestTheShippedCatalogue(unittest.TestCase):
             sorted(["claude-fable-5-1", "claude-opus-5-5", "gpt-6-astra", "gpt-6.1-sol", "gpt-6-luna",
                     "gemini-3.1-pro-preview", "gemini-3.8-flash", "amalia-9b-0626-dpo"]),
         )
+
+    def test_none_of_them_has_an_accepted_served_id_yet(self):
+        for key, found in self.catalog.models.items():
+            with self.subTest(modelo=key):
+                self.assertEqual(found.accepted_served_ids, ())
 
     def test_none_of_them_is_confirmed_at_run_time_yet(self):
         for key, found in self.catalog.models.items():

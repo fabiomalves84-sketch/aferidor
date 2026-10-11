@@ -94,7 +94,7 @@ def check_served(requested: str, served: str | None, accepted: Iterable[str] = (
 
 _FIELDS = (
     "run_id", "modelo", "caso", "amostra", "tentativa", "modelo_catalogo", "id_pedido", "id_servido",
-    "servido_declarado", "parametros_pedidos", "parametros_aplicados", "tokens_entrada", "tokens_saida",
+    "servido_declarado", "verificacao_servido", "parametros_pedidos", "parametros_aplicados", "tokens_entrada", "tokens_saida",
     "tokens_raciocinio", "finish_reason", "finish_reason_original", "inicio", "fim", "latencia_s", "custo_usd",
     "custo_eur", "modo_contagem", "motivo_contagem", "estado", "catalogo_sha256", "periodo_preco", "taxa_usd_eur",
     "taxa_fonte", "build", "grader",
@@ -113,6 +113,7 @@ class ProvenanceRecord:
     catalog_key: str
     requested_model: str
     served_model: str
+    served_check: str  # "igual", "diferente" or "nao_declarado"; what `check_served` said of this call
     requested_params: dict[str, Any]
     applied_params: dict[str, Any]
     input_tokens: int | None
@@ -140,6 +141,8 @@ class ProvenanceRecord:
             raise ProvenanceError(f"estado {self.state!r} desconhecido; os estados são {', '.join(STATES)}")
         if self.count_mode not in COUNT_MODES:
             raise ProvenanceError(f"modo de contagem {self.count_mode!r} desconhecido")
+        if self.served_check not in SERVED_STATUSES:
+            raise ProvenanceError(f"verificação do modelo servido {self.served_check!r} desconhecida")
         if self.sample < 1 or self.attempt < 1:
             raise ProvenanceError("a amostra e a tentativa começam em 1")
         if self.latency_s < 0:
@@ -160,6 +163,7 @@ class ProvenanceRecord:
             "run_id": self.run_id, "modelo": self.model, "caso": self.case_id, "amostra": self.sample,
             "tentativa": self.attempt, "modelo_catalogo": self.catalog_key, "id_pedido": self.requested_model,
             "id_servido": self.served_model, "servido_declarado": self.served_declared,
+            "verificacao_servido": self.served_check,
             "parametros_pedidos": self.requested_params, "parametros_aplicados": self.applied_params,
             "tokens_entrada": self.input_tokens, "tokens_saida": self.output_tokens,
             "tokens_raciocinio": self.reasoning_tokens, "finish_reason": self.finish_reason,
@@ -180,7 +184,7 @@ class ProvenanceRecord:
             return cls(
                 run_id=raw["run_id"], model=raw["modelo"], case_id=raw["caso"], sample=raw["amostra"],
                 attempt=raw["tentativa"], catalog_key=raw["modelo_catalogo"], requested_model=raw["id_pedido"],
-                served_model=raw["id_servido"], requested_params=raw["parametros_pedidos"],
+                served_model=raw["id_servido"], served_check=raw["verificacao_servido"], requested_params=raw["parametros_pedidos"],
                 applied_params=raw["parametros_aplicados"], input_tokens=raw["tokens_entrada"],
                 output_tokens=raw["tokens_saida"], reasoning_tokens=raw["tokens_raciocinio"],
                 finish_reason=raw["finish_reason"], finish_reason_original=raw["finish_reason_original"],
