@@ -26,27 +26,38 @@ diferença de tratamento é deliberada.
 
 | Modelo | Banco principal (27 casos): casos com falha crítica (IC 95%) | Banco de consulta (30 casos à data dos ensaios): casos com falha crítica (IC 95%) | Protocolo |
 |---|---|---|---|
-| Gemma 4 31B (Google, aberto, API)¹ | 8 (16% a 48%) | 4 (5% a 30%) | reprovado |
+| Gemma 4 31B (Google, aberto, API)¹ | 8 (16% a 48%); à data: 10 (22% a 56%) | 4 (5% a 30%) | reprovado |
 | Gemma 4 26B A4B (Google, aberto, API), corretor congelado² | 12 (28% a 63%) | 5 de 31 (7% a 33%) | reprovado |
-| Gemini 3.5 Flash Lite (Google, comercial, API)¹ | 11 (25% a 59%) | 4 (5% a 30%) | reprovado |
-| Gemma 3 12B (Google, aberto, local)¹ | 16 (41% a 75%) | — | reprovado |
+| Gemini 3.5 Flash Lite (Google, comercial, API)¹ | 11 (25% a 59%) | 4 (5% a 30%); à data: 6 (10% a 37%) | reprovado |
+| Gemma 3 12B (Google, aberto, local)¹ | 16 (41% a 75%); à data: 17 (44% a 78%) | — | reprovado |
 | Phi-4 14B (Microsoft, aberto, local)¹ | 22 (63% a 92%) | — | reprovado |
 
-¹ Corretor atual: o das afinações dos commits `83d951b`, `f202e37`, `3fa7e65`
-e `886f637`, cada uma com a razão escrita na mensagem do commit. Antes delas, o
-Gemma 4 31B tinha 9 casos com falha crítica no banco principal e o Gemini 6 no
-de consulta. Os outros números desta coluna não mudam com o corretor atual.
+¹ Sem corretor congelado: corrigido agora, com o corretor
+`0.1.0+corretor.8edda161bd4e` e o banco de casos atual. Onde o número difere do
+publicado no dia do ensaio, o publicado vem a seguir como «à data», com o
+intervalo desse relatório (fontes: o `README.md` e o `relatorio.md` da pasta do
+ensaio e as mensagens dos commits que os publicaram, `4c497e5`, `1753180`,
+`dad4350` e `dfe1aa2`). Três números mudaram desde então, todos por afinações
+feitas depois dos ensaios, cada uma com a razão escrita no commit. Nos critérios
+do banco de casos: `5037d3b` (30/09, às 13:54, cerca de sete minutos depois de
+`4c497e5` publicar o Gemma 4 31B) baixou o 31B de 10 para 9 e o Gemma 3 12B de 17
+para 16, e `3fa7e65` (09/10) baixou o 31B de 9 para 8. No código do corretor:
+`3fa7e65` baixou o Gemini no banco de consulta de 6 para 4. Os outros três (Gemini
+e Phi-4 no banco principal, Gemma 4 31B no de consulta) não mudaram.
 
 ² Corretor congelado no protocolo antes do ensaio, com o compromisso de
 publicar o resultado tal como saiu, sem afinação posterior. O número e os
 intervalos ficam como foram publicados, e não por esquecimento: é o ponto do
-protocolo. Com o corretor atual o resultado seria diferente.
+protocolo. O corretor atual dá os mesmos números sobre os bancos do ensaio (12 e
+5); com o banco principal atual, o 26B daria 11.
 
 Os protocolos exigem zero casos com falha crítica. Entre os dois melhores
 (Gemma 4 31B e Gemini 3.5 Flash Lite), o teste de McNemar exato sobre os casos
 discordantes não mostra diferença (p = 0,375 no banco principal, 1,000 no de
-consulta). Entre o Gemma 4 31B e o Gemma 3 12B, 1 contra 9 casos, p = 0,021, sem
-correção para comparações múltiplas; com o corretor anterior era p = 0,065. Os
+consulta; à data, 1,000 e 0,500, segundo a mensagem do commit `4c497e5`). Entre o
+Gemma 4 31B e o Gemma 3 12B, 1 contra 9 casos, p = 0,021, sem correção para
+comparações múltiplas; antes da afinação `3fa7e65` (09/10) era 2 contra 9,
+p = 0,065. Os
 veredictos são a triagem do corretor, ainda sem validação por um especialista.
 Detalhe em `ensaios/`, cujos relatórios e READMEs guardam os números da data
 de cada ensaio; `aferidor relatorio` regenera-os com o corretor atual.
@@ -64,7 +75,7 @@ Requer Python 3.10 ou superior. Não tem dependências externas.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 748 testes
+python3 -m unittest discover -s tests          # 749 testes
 python3 -m aferidor verificar                  # coerência dos casos e do corretor
 python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
@@ -142,7 +153,7 @@ documentos públicos ou são sintéticos.
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar`: 27/27 e 31/31 casos coerentes; 319/319 e 140/140 controlos
-  negativos detetados. 748 testes, em Python 3.10 a 3.14 na integração
+  negativos detetados. 749 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 10 de 58 confirmadas por uma pessoa, caso a caso, nos PDF da DGS; 24
   declaradas confirmadas em grupo, sem registo de página por caso; as 24

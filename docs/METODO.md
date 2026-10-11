@@ -464,13 +464,23 @@ Nas tabelas do `README.md` e nesta, um só critério decide: o ensaio tinha, ou
 não, um compromisso escrito de congelar o corretor no protocolo
 (`versao_corretor`). Os ensaios sem esse compromisso (Gemma 4 31B, Gemini 3.5
 Flash Lite, Gemma 3 12B, Phi-4 14B) mostram os números com o corretor atual,
-marcados com ¹, e quando diferem da data do ensaio a data vem entre parênteses.
-O ensaio com compromisso (Gemma 4 26B A4B, 01/10) mostra o número tal como foi
+marcados com ¹, e quando diferem do publicado no dia do ensaio este vem a seguir
+como «à data do ensaio». O ensaio com compromisso (Gemma 4 26B A4B, 01/10) mostra o número tal como foi
 publicado, com os seus intervalos, e isso não é uma inconsistência: reclassificá-lo
 tiraria o sentido ao congelamento. A diferença fica sempre dita na nota, e `ensaios/` guarda os relatórios com os números da data.
 
-¹ Corretor atual: o das afinações `83d951b`, `f202e37`, `3fa7e65` e `886f637`;
-a razão de cada uma está na mensagem do respetivo commit.
+¹ Sem corretor congelado: corrigido agora, com o corretor
+`0.1.0+corretor.8edda161bd4e` e o banco de casos atual. Onde o número difere do
+publicado no dia do ensaio, o publicado vem a seguir como «à data», com o
+intervalo desse relatório (fontes: o `README.md` e o `relatorio.md` da pasta do
+ensaio e as mensagens dos commits que os publicaram, `4c497e5`, `1753180`,
+`dad4350` e `dfe1aa2`). Três números mudaram desde então, todos por afinações
+feitas depois dos ensaios, cada uma com a razão escrita no commit. Nos critérios
+do banco de casos: `5037d3b` (30/09, às 13:54, cerca de sete minutos depois de
+`4c497e5` publicar o Gemma 4 31B) baixou o 31B de 10 para 9 e o Gemma 3 12B de 17
+para 16, e `3fa7e65` (09/10) baixou o 31B de 9 para 8. No código do corretor:
+`3fa7e65` baixou o Gemini no banco de consulta de 6 para 4. Os outros três (Gemini
+e Phi-4 no banco principal, Gemma 4 31B no de consulta) não mudaram.
 
 ## Roteiro
 
