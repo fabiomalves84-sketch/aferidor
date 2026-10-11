@@ -581,7 +581,7 @@ def _start_page(
             _t("cada caso repetido {n} vez", n=samples) if samples == 1 else _t("cada caso repetido {n} vezes", n=samples)
         )
     elements: list[tuple[str, str]] = [
-        ("titulo", f'<h1 id="titulo-relatorio">{_t("Relatório do Aferidor")}</h1>'),
+        ("titulo", f'<h1 id="titulo-relatorio" tabindex="-1">{_t("Relatório do Aferidor")}</h1>'),
         ("subtitulo", f'<p class="subtitulo">{_t("Faz perguntas clínicas a assistentes de inteligência artificial (os modelos) e compara as respostas com documentos clínicos públicos.")}</p>'),
         ("porque", f'<p class="porque">{_t("Um médico pode perguntar a um destes assistentes que antibiótico dar, ou se pode dar um medicamento a um doente alérgico. Uma resposta errada pode fazer mal, e uma média de respostas certas esconde esses erros. O Aferidor só mede: não aconselha nem diz que assistente usar.")}</p>'),
         ("sobre", f'<p class="saber-mais"><a href="#sobre">{_t("Saber mais sobre o Aferidor.")}</a></p>'),
@@ -1641,6 +1641,11 @@ def _translation_notice() -> str:
     return f'<p class="traducao" role="note">{_esc(_t(UNREVIEWED_NOTICE))}</p>'
 
 
+def _heading_id(ident: str) -> str:
+    """The id of the heading of a page: the Início has the title of the report, the others their `<h2>`."""
+    return "titulo-relatorio" if ident == "inicio" else f"t-{ident}"
+
+
 def _panel(ident: str, heading: str, *content: str) -> str:
     """One page of the report: a section with its own `<h2>`, shown alone by the CSS.
 
@@ -1648,7 +1653,7 @@ def _panel(ident: str, heading: str, *content: str) -> str:
     """
     return (
         f'<section class="painel" id="{ident}" aria-labelledby="t-{ident}">'
-        f'{_translation_notice()}<h2 id="t-{ident}">{_esc(heading)}</h2>{"".join(content)}</section>'
+        f'{_translation_notice()}<h2 id="t-{ident}" tabindex="-1">{_esc(heading)}</h2>{"".join(content)}</section>'
     )
 
 
@@ -1827,7 +1832,9 @@ def _head_html(data: _ReportData, subpages: dict[str, tuple[tuple[str, str], ...
         f'<html lang="{HTML_LANG[_LANG.get()]}"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{title}</title>{_preview_meta(title)}<style>{STYLE}</style></head><body>"
-        '<header class="topo"><div class="topo-linha">'
+        '<header class="topo">'
+        + "".join(f'<a class="saltar" href="#{_heading_id(a)}">{_esc(_t("Saltar para o conteúdo"))}</a>' for a, _ in present)
+        + '<div class="topo-linha">'
         # The controls come first in the markup because they come first on the page, in both layouts:
         # the order the focus follows is the order the reader sees.
         '<div class="controlos">' + menu

@@ -165,7 +165,7 @@ class TestEightPages(unittest.TestCase):
         self.assertIn('<section class="painel" id="inicio" aria-labelledby="titulo-relatorio">', text)
         for ident in PAGES[1:]:
             with self.subTest(page=ident):
-                self.assertEqual(text.count(f'<h2 id="t-{ident}">'), 1)
+                self.assertEqual(text.count(f'<h2 id="t-{ident}" tabindex="-1">'), 1)
                 self.assertIn(f'aria-labelledby="t-{ident}"', text)
 
     def test_every_page_has_its_own_content_in_every_language(self):
@@ -318,7 +318,7 @@ class TestTheTranslationNotice(unittest.TestCase):
         text = self.page("de")
         for ident in PAGES[1:]:
             at = text.index(f'<section class="painel" id="{ident}"')
-            self.assertLess(text.index('class="traducao"', at), text.index(f'<h2 id="t-{ident}">', at))
+            self.assertLess(text.index('class="traducao"', at), text.index(f'<h2 id="t-{ident}" tabindex="-1">', at))
 
     def test_portuguese_is_the_only_reference(self):
         from aferidor.traducao import UNREVIEWED

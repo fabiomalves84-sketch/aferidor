@@ -324,6 +324,7 @@ _ROWS: tuple[tuple[str, str, str, str, str], ...] = (
      "Traducción automática, no revisada por un hablante nativo; en caso de duda, vale el portugués.",
      "Traduction automatique, non relue par un locuteur natif ; en cas de doute, le portugais fait foi.",
      "Maschinelle Übersetzung, nicht von einer Muttersprachlerin oder einem Muttersprachler geprüft; im Zweifel gilt das Portugiesische."),
+    ("Saltar para o conteúdo", "Skip to content", "Saltar al contenido", "Aller au contenu", "Zum Inhalt springen"),
     ("Relatório do Aferidor", "Aferidor report", "Informe del Aferidor", "Rapport de l'Aferidor", "Aferidor-Bericht"),
     ("Aferidor · banco de ensaio para respostas clínicas", "Aferidor · test bench for clinical answers", "Aferidor · banco de pruebas para respuestas clínicas", "Aferidor · banc d'essai pour réponses cliniques", "Aferidor · Prüfstand für klinische Antworten"),
     ("Respostas clínicas de modelos de linguagem, medidas contra casos de referência com fonte pública.",

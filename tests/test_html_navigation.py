@@ -167,5 +167,58 @@ class TestTheSideColumn(unittest.TestCase):
         self.assertIn("body { max-width: 72rem; padding-left: 1rem; }", printing)
 
 
+class TestTheSkipLink(unittest.TestCase):
+    """One link per page that takes the focus to that page's heading: the address decides which page is
+    shown, so a single link to "the content" would reopen the first page."""
+
+    def test_the_skip_links_are_the_first_things_in_the_page_to_take_the_focus(self):
+        page = _Example.page()
+        header = page[page.index('<header class="topo">'):page.index("</header>")]
+        self.assertTrue(header.startswith('<header class="topo"><a class="saltar"'))
+        self.assertLess(header.index('class="saltar"'), header.index('class="controlos"'))
+        self.assertLess(header.rindex('class="saltar"'), header.index('<nav class="indice"'))
+
+    def test_there_is_one_per_page_and_each_points_to_the_heading_of_its_page(self):
+        page = _Example.page()
+        links = re.findall(r'<a class="saltar" href="#([^"]+)">([^<]*)</a>', page)
+        # The first page has the title of the report for a heading; the others an <h2> of their own.
+        expected = ["titulo-relatorio"] + [f"t-{p}" for p in PAGES[1:]]
+        self.assertEqual([a for a, _ in links], expected)
+        for anchor, label in links:
+            with self.subTest(pagina=anchor):
+                self.assertEqual(label, "Saltar para o conteúdo")
+                self.assertEqual(len(re.findall(rf'<h[12] id="{anchor}" tabindex="-1">', page)), 1)
+
+    def test_a_report_without_verdicts_skips_only_to_the_pages_it_has(self):
+        page = build([a_case()], [])
+        self.assertEqual(len(re.findall(r'class="saltar"', page)), len(navigation(page)))
+
+    def test_it_hides_itself_without_ever_taking_itself_out_of_the_tab_order_when_it_is_the_current_one(self):
+        css = html_estilo.STYLE
+        rule = css[css.index(".saltar { position: absolute;"):css.index(".saltar:focus")]
+        self.assertNotIn("visibility", css[css.index(".saltar {"):css.index("@supports selector(:has(*)) {\n  .saltar")])
+        self.assertIn("clip: rect(0 0 0 0)", rule)
+        shown = css[css.index("@supports selector(:has(*)) {\n  .saltar"):]
+        shown = shown[:shown.index("}\n}") + 1]
+        self.assertIn('body:not(:has(main :target)) .saltar[href="#titulo-relatorio"]', shown)
+        self.assertIn("{ display: block; }", shown)
+        self.assertNotIn("visibility", shown)
+
+    def test_the_heading_can_take_the_focus_but_is_not_a_stop_of_the_tab_key(self):
+        self.assertEqual(_Example.page().count('tabindex="-1"'), len(PAGES))
+
+    def test_it_does_not_print(self):
+        css = html_estilo.STYLE
+        printing = css[css.index("@media print {", css.index("@media (min-width: 62rem)")):]
+        self.assertIn(".saltar { display: none !important; }", printing)
+
+    def test_the_text_is_in_the_catalogue_in_every_language_without_dashes(self):
+        entry = CATALOG["Saltar para o conteúdo"]
+        self.assertEqual(sorted(entry), ["de", "en", "es", "fr"])
+        for text in [*entry.values(), "Saltar para o conteúdo"]:
+            self.assertNotIn("\u2014", text)
+            self.assertNotIn("\u2013", text)
+
+
 if __name__ == "__main__":
     unittest.main()

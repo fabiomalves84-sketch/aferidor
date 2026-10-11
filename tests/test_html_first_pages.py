@@ -126,7 +126,9 @@ class TestFirstPageWordBudget(unittest.TestCase):
         page = _Example.page()
         bar = re.search(r'<p class="faixa"[^>]*>(.*?)</p>', page, flags=re.S).group(1)
         footer = page[page.index('<footer class="rodape">'):page.index("</footer>")]
-        total = words(visible(bar)) + words(visible(footer))
+        # Every page has a skip link, all with the same words and only one reachable at a time: it counts once.
+        skip = re.search(r'<a class="saltar"[^>]*>(.*?)</a>', page, flags=re.S).group(1)
+        total = words(visible(bar)) + words(visible(footer)) + words(visible(skip))
         self.assertLessEqual(total, FRAME_WORDS)
         self.assertNotIn('class="traducao"', page)
 

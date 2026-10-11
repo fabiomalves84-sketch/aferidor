@@ -66,6 +66,24 @@ SUBPAGES_SHOWN = ", ".join(
     f'body:has(main #{ident}{inside}) nav.indice li:has(> a[href="#{ident}"]) > ul.sub'
     for ident in SUBPAGE_IDS for inside in (":target", " :target")
 )
+# The link that skips the bar and goes to the page being read, one per page: an address that only said
+# "content" would open the first page, because the address decides which page is shown. Only the link of
+# the current page can be reached, and only while it has the focus does it show.
+SKIP_SHOWN = ", ".join(
+    [f'body:has(main #{ident}{inside}) .saltar[href="#t-{ident}"]' for ident in PANEL_IDS[1:] for inside in (":target", " :target")]
+    + ['body:not(:has(main :target)) .saltar[href="#titulo-relatorio"]']
+    + [f'body:has(main #inicio{inside}) .saltar[href="#titulo-relatorio"]' for inside in (":target", " :target")]
+)
+SKIP = """.saltar { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; display: none; }
+.saltar[href="#titulo-relatorio"] { display: block; }
+.saltar:focus { position: fixed; top: 0.5rem; left: 0.5rem; width: auto; height: auto; overflow: visible; clip: auto;
+  z-index: 40; padding: 0.5rem 0.9rem; border-radius: 6px; border: 2px solid var(--accent);
+  background: var(--surface); color: var(--ink); font-size: 0.9rem; font-weight: 650; text-decoration: none; }
+@supports selector(:has(*)) {
+  .saltar[href] { display: none; }
+  """ + SKIP_SHOWN + """ { display: block; }
+}
+"""
 # From 62rem the pages are a column fixed on the left, 14rem wide, with the controls on top of it, and
 # the bar over the text only carries the notice. It is the same markup as the phone menu; only what
 # is shown changes. The text keeps 17rem on the left (the margin, the column and a gap of 2rem).
@@ -112,7 +130,7 @@ section { margin-top: 2.5rem; }
    is --barra, which the scroll padding uses so a page opens just below it. */
 .topo { position: sticky; top: 0; z-index: 5; box-sizing: border-box; height: var(--barra); background: var(--page);
   border-bottom: 1px solid var(--grid); padding-top: 0.4rem; }
-.topo-linha { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem 1rem; }
+""" + SKIP + """.topo-linha { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem 1rem; }
 .controlos { display: flex; gap: 0.5rem; align-items: flex-start; }
 .linguas { position: relative; }
 .linguas > summary { list-style: none; cursor: pointer; padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.85rem;
@@ -409,6 +427,7 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
   .comp-lista li, .comp-eixo { grid-template-columns: 6rem 1fr 6.5rem; }
 }
 """ + SIDEBAR + """@media print {
+  .saltar { display: none !important; }
   .topo { position: static; }
   .topo-linha { display: none; }
   body { max-width: 72rem; padding-left: 1rem; }
