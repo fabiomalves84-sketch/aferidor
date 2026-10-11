@@ -59,6 +59,12 @@ CURRENT_PAGE = "".join(
     f'body:has(main #{ident} :target) nav.indice a[href="#{ident}"], '
     for ident in PANEL_IDS[1:]
 ) + 'body:not(:has(main :target)) nav.indice a[href="#inicio"], body:has(main #inicio:target) nav.indice a[href="#inicio"], body:has(main #inicio :target) nav.indice a[href="#inicio"]'
+# The `li` of the current page in the phone menu, which scrolls sideways. Same rule as CURRENT_PAGE, one level up.
+CURRENT_ITEM = "".join(
+    f'body:has(main #{ident}:target) nav.indice li:has(> a[href="#{ident}"]), '
+    f'body:has(main #{ident} :target) nav.indice li:has(> a[href="#{ident}"]), '
+    for ident in PANEL_IDS[1:]
+) + 'body:not(:has(main :target)) nav.indice li:has(> a[href="#inicio"]), body:has(main #inicio:target) nav.indice li:has(> a[href="#inicio"]), body:has(main #inicio :target) nav.indice li:has(> a[href="#inicio"])'
 # The pages that list subsections under them in the side navigation (html_report.SUBPAGES has the same keys).
 SUBPAGE_IDS = ("casos", "metodo")
 # The list of a page is shown when that page, or something inside it, is the target of the address.
@@ -184,7 +190,13 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); }
 /* The subsections of Casos and Método are in the page and hidden; they show only with the side navigation. */
 nav.indice ul.sub { display: none; }
 .faixa { margin: 0; padding: 0.25rem 0 0.4rem; font-size: 0.8rem; line-height: 1.35; color: var(--ink-2); }
-.faixa a { color: var(--accent); }
+/* The pointer to the sources still to confirm stands out from the sentence before it: a little larger, bold, in
+   the page ink and underlined, on the amber tint of the other notices, with a neutral outline. The line height is the sentence's own
+   (0.8rem x 1.35), so the bar keeps the height it declares. */
+.faixa a { color: var(--ink); font-size: 0.9rem; line-height: 1.2; font-weight: 650; text-decoration: underline; text-underline-offset: 2px;
+  padding: 0.05rem 0.45rem; border: 1px solid var(--muted); border-radius: 999px; background: var(--warning-bg);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.faixa a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @supports selector(:has(*)) {
   """ + CURRENT_PAGE + """ { color: var(--ink); font-weight: 650; border-bottom-color: var(--accent); }
 }
@@ -414,6 +426,12 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 @media (max-width: 61.99rem) {
   .topo-linha { flex-wrap: wrap; justify-content: flex-start; }
   nav.indice { flex: 1 1 100%; }
+  /* The menu scrolls sideways and opens at its start, so the current page could be out of sight. Sticky on both
+     sides keeps it inside the visible part: pinned to the right edge when it lies beyond it, to the left when it
+     has been scrolled past. CSS cannot scroll the menu to an item by itself; this keeps the item in view. */
+  @supports selector(:has(*)) {
+    """ + CURRENT_ITEM + """ { position: sticky; left: 0; right: 0; z-index: 1; background: var(--page); box-shadow: 0 0 0.35rem 0.25rem var(--page); }
+  }
 }
 @media (max-width: 46rem) {
   nav.indice ul { gap: 0.25rem 0.9rem; }
@@ -426,7 +444,11 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
   .erro-par { grid-template-columns: 1fr; }
   .comp-lista li, .comp-eixo { grid-template-columns: 6rem 1fr 6.5rem; }
 }
-""" + SIDEBAR + """@media print {
+""" + SIDEBAR + """/* Smooth scrolling is motion; whoever asks for less of it gets none. Nothing else on the page moves. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+@media print {
   .saltar { display: none !important; }
   .topo { position: static; }
   .topo-linha { display: none; }

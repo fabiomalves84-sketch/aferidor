@@ -134,7 +134,13 @@ nav.indice a:hover, nav.indice a:focus-visible { color: var(--accent); }
 /* The subsections of Casos and Método are in the page and hidden; they show only with the side navigation. */
 nav.indice ul.sub { display: none; }
 .faixa { margin: 0; padding: 0.25rem 0 0.4rem; font-size: 0.8rem; line-height: 1.35; color: var(--ink-2); }
-.faixa a { color: var(--accent); }
+/* The pointer to the sources still to confirm stands out from the sentence before it: a little larger, bold, in
+   the page ink and underlined, on the amber tint of the other notices, with a neutral outline. The line height is the sentence's own
+   (0.8rem x 1.35), so the bar keeps the height it declares. */
+.faixa a { color: var(--ink); font-size: 0.9rem; line-height: 1.2; font-weight: 650; text-decoration: underline; text-underline-offset: 2px;
+  padding: 0.05rem 0.45rem; border: 1px solid var(--muted); border-radius: 999px; background: var(--warning-bg);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.faixa a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @supports selector(:has(*)) {
   body:has(main #sobre:target) nav.indice a[href="#sobre"], body:has(main #sobre :target) nav.indice a[href="#sobre"], body:has(main #fontes:target) nav.indice a[href="#fontes"], body:has(main #fontes :target) nav.indice a[href="#fontes"], body:has(main #resultados:target) nav.indice a[href="#resultados"], body:has(main #resultados :target) nav.indice a[href="#resultados"], body:has(main #areas:target) nav.indice a[href="#areas"], body:has(main #areas :target) nav.indice a[href="#areas"], body:has(main #casos:target) nav.indice a[href="#casos"], body:has(main #casos :target) nav.indice a[href="#casos"], body:has(main #conclusoes:target) nav.indice a[href="#conclusoes"], body:has(main #conclusoes :target) nav.indice a[href="#conclusoes"], body:has(main #metodo:target) nav.indice a[href="#metodo"], body:has(main #metodo :target) nav.indice a[href="#metodo"], body:not(:has(main :target)) nav.indice a[href="#inicio"], body:has(main #inicio:target) nav.indice a[href="#inicio"], body:has(main #inicio :target) nav.indice a[href="#inicio"] { color: var(--ink); font-weight: 650; border-bottom-color: var(--accent); }
 }
@@ -364,6 +370,12 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
 @media (max-width: 61.99rem) {
   .topo-linha { flex-wrap: wrap; justify-content: flex-start; }
   nav.indice { flex: 1 1 100%; }
+  /* The menu scrolls sideways and opens at its start, so the current page could be out of sight. Sticky on both
+     sides keeps it inside the visible part: pinned to the right edge when it lies beyond it, to the left when it
+     has been scrolled past. CSS cannot scroll the menu to an item by itself; this keeps the item in view. */
+  @supports selector(:has(*)) {
+    body:has(main #sobre:target) nav.indice li:has(> a[href="#sobre"]), body:has(main #sobre :target) nav.indice li:has(> a[href="#sobre"]), body:has(main #fontes:target) nav.indice li:has(> a[href="#fontes"]), body:has(main #fontes :target) nav.indice li:has(> a[href="#fontes"]), body:has(main #resultados:target) nav.indice li:has(> a[href="#resultados"]), body:has(main #resultados :target) nav.indice li:has(> a[href="#resultados"]), body:has(main #areas:target) nav.indice li:has(> a[href="#areas"]), body:has(main #areas :target) nav.indice li:has(> a[href="#areas"]), body:has(main #casos:target) nav.indice li:has(> a[href="#casos"]), body:has(main #casos :target) nav.indice li:has(> a[href="#casos"]), body:has(main #conclusoes:target) nav.indice li:has(> a[href="#conclusoes"]), body:has(main #conclusoes :target) nav.indice li:has(> a[href="#conclusoes"]), body:has(main #metodo:target) nav.indice li:has(> a[href="#metodo"]), body:has(main #metodo :target) nav.indice li:has(> a[href="#metodo"]), body:not(:has(main :target)) nav.indice li:has(> a[href="#inicio"]), body:has(main #inicio:target) nav.indice li:has(> a[href="#inicio"]), body:has(main #inicio :target) nav.indice li:has(> a[href="#inicio"]) { position: sticky; left: 0; right: 0; z-index: 1; background: var(--page); box-shadow: 0 0 0.35rem 0.25rem var(--page); }
+  }
 }
 @media (max-width: 46rem) {
   nav.indice ul { gap: 0.25rem 0.9rem; }
@@ -397,6 +409,10 @@ footer.rodape h2 { font-size: 1rem; color: var(--ink); }
     body:has(main #sobre:target) nav.indice a[href="#sobre"], body:has(main #sobre :target) nav.indice a[href="#sobre"], body:has(main #fontes:target) nav.indice a[href="#fontes"], body:has(main #fontes :target) nav.indice a[href="#fontes"], body:has(main #resultados:target) nav.indice a[href="#resultados"], body:has(main #resultados :target) nav.indice a[href="#resultados"], body:has(main #areas:target) nav.indice a[href="#areas"], body:has(main #areas :target) nav.indice a[href="#areas"], body:has(main #casos:target) nav.indice a[href="#casos"], body:has(main #casos :target) nav.indice a[href="#casos"], body:has(main #conclusoes:target) nav.indice a[href="#conclusoes"], body:has(main #conclusoes :target) nav.indice a[href="#conclusoes"], body:has(main #metodo:target) nav.indice a[href="#metodo"], body:has(main #metodo :target) nav.indice a[href="#metodo"], body:not(:has(main :target)) nav.indice a[href="#inicio"], body:has(main #inicio:target) nav.indice a[href="#inicio"], body:has(main #inicio :target) nav.indice a[href="#inicio"] { border-left-color: var(--accent); }
     body:has(main #casos:target) nav.indice li:has(> a[href="#casos"]) > ul.sub, body:has(main #casos :target) nav.indice li:has(> a[href="#casos"]) > ul.sub, body:has(main #metodo:target) nav.indice li:has(> a[href="#metodo"]) > ul.sub, body:has(main #metodo :target) nav.indice li:has(> a[href="#metodo"]) > ul.sub { display: block; }
   }
+}
+/* Smooth scrolling is motion; whoever asks for less of it gets none. Nothing else on the page moves. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }
 @media print {
   .saltar { display: none !important; }
