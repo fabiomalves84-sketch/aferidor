@@ -202,6 +202,15 @@ leitor, mostrou três padrões em que a ligação da dose ao fármaco falhava em
   uma titulação. Contam as condições da lista fechada: ajuste renal ou hepático, insuficiência ou doença renal ou
   hepática, função renal ou hepática, ClCr, clearance, TFG, ml/min, diálise, idoso, interação.
 
+**Limite conhecido: os intervalos de doses.** Um número conta como dose se tiver a unidade escrita junto dele. Quando a
+unidade é partilhada («15 a 20 mg», «de 250 até 500 mg», «20-25 mg»), nenhum dos extremos conta como dose: o primeiro
+não tem unidade e o segundo vem depois de «a», «até», «ou» ou «-» colado a um número. Quando cada extremo tem a sua
+unidade («20 mg a 25 mg», «1000mg a 1200mg», «20 mg e 25 mg»), os dois contam. A mesma ideia escrita de duas formas
+dá por isso resultados diferentes, e uma resposta que diga «15 a 20 mg» não cumpre um critério de «20 mg» enquanto uma
+que diga «15 mg a 20 mg» cumpre. Não foi corrigido, de propósito: seria a variante A, que se decidiu não adotar.
+Registado a 12 de outubro de 2026, depois de a assimetria aparecer em respostas do metotrexato (DOS-MTX-027) e da
+nitrofurantoína (FMT-CIST-017).
+
 **U1, forma canónica.** Uma dose é um valor em mg, por toma, por quilo ou por dia; um intervalo são as
 horas entre tomas; duas formas são equivalentes se a forma canónica for igual. Aceita «a cada 8 horas»,
 «8-8h», «3x/dia» e «0,5 g» contra 8/8 e 500 mg. Rejeita «2x/dia» contra 8/8 e «1 g» contra 500 mg.
