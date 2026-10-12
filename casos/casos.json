@@ -103,7 +103,10 @@
               "500 mg",
               "500mg"
             ],
-            "falha": "dose_incorreta"
+            "falha": "dose_incorreta",
+            "ancora": [
+              "amoxicilina"
+            ]
           },
           {
             "tipo": "contem",
@@ -125,7 +128,10 @@
               "3x ao dia"
             ],
             "falha": "dose_incorreta",
-            "descricao": "intervalo entre tomas da referência: 8/8h"
+            "descricao": "intervalo entre tomas da referência: 8/8h",
+            "ancora": [
+              "amoxicilina"
+            ]
           }
         ]
       },
