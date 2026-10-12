@@ -366,7 +366,9 @@ def check(criterion: Criterion, text: str, restating: bool = False) -> Criterion
     raise ValueError(f"critério de tipo desconhecido {criterion.kind!r}")
 
 
-def _is_excluded_at(haystack: str, position: int, length: int, restating: bool = False) -> bool:
+def _is_excluded_at(
+    haystack: str, position: int, length: int, restating: bool = False, markers: tuple[str, ...] | None = None
+) -> bool:
     """Whether the text around this mention reads as excluding the drug.
 
     A window either side is searched for an explicit exclusion phrase. Text
@@ -400,8 +402,9 @@ def _is_excluded_at(haystack: str, position: int, length: int, restating: bool =
     end = min(sentence_end, position + length + EXCLUSION_AFTER)
     # Markdown emphasis is layout, not content: "deve ser **evitado**" excludes.
     around = NEGATED_EXCLUSION.sub(" ", haystack[start:end].replace("*", ""))
-    markers = EXCLUSION_MARKERS + HISTORY_MARKERS if restating else EXCLUSION_MARKERS
-    return _markers_pattern(markers).search(around) is not None
+    chosen = EXCLUSION_MARKERS if markers is None else markers
+    chosen = chosen + HISTORY_MARKERS if restating else chosen
+    return _markers_pattern(chosen).search(around) is not None
 
 
 @lru_cache(maxsize=None)
@@ -474,7 +477,7 @@ KNOWN_DRUGS = (
 # Stems of what makes a value conditional rather than the dose of the case (rule U3): an adjustment, a kidney
 # or liver problem, dialysis, the elderly, an interaction. A list closed on purpose, like `EXCLUSION_MARKERS`.
 CONDITION_MARKERS = (
-    "ajuste de dose", "ajuste da dose", "ajuste renal", "ajuste hepatico", "ajustar a dose", "ajustada a funcao",
+    "ajuste renal", "ajuste hepatico", "ajustada a funcao",
     "insuficiencia renal", "insuficiencia hepatica", "doenca renal", "doenca hepatica", "funcao renal",
     "funcao hepatica", "clcr", "clearance", "tfg", "filtracao glomerular", "egfr", "dialise", "ml/min", "ml / min",
     "idoso", "interac",
@@ -508,37 +511,69 @@ def _units(text: str) -> list[tuple[int, int, bool]]:
     return units
 
 
+# Where a drug is named without being the one that is dosed (rule U2, post hoc of 12 October 2026): in a comparison
+# ("em detrimento de", "em vez de", "ao invés de") or as what the patient is allergic to ("alergia a", "alérgico a").
+# Exactly these five phrases, with the article or the gender and number they take; no others, so a drug named after
+# "hipersensibilidade a" still takes the dose over. Applied to the text before a mention, folded.
+_NOT_DOSED = re.compile(
+    r"(?:em\s+detrimento\s+d[aeo]s?|em\s+vez\s+d[aeo]s?|ao\s+inves\s+d[aeo]s?|alergi[ac]s?\s+(?:a|ao|aos|as)|alergic[oa]s?\s+(?:a|ao|aos|as))"
+    r"\s+(?:(?:a|o|as|os|um|uma)\s+)?$"
+)
+# "amoxicilina com ácido clavulânico", "amoxicilina + clavulanato": two names joined by these are one entity (post hoc).
+_COMPOUND_JOIN = re.compile(r"^\s*(?:\+|com)\s*(?:(?:o|a)\s+)?(?:acido\s+)?$")
+# The exclusion markers the anchor uses: those of `nao_prescreve` without the bare stem "evit" (post hoc).
+_ANCHOR_EXCLUSION = tuple(m for m in EXCLUSION_MARKERS if m != "evit")
+
+
+def _mentions_of(segment: str, names: list[str], lexicon: list[str]) -> list[tuple[int, int, bool]]:
+    """The drugs named in one unit, as (start, end, is_anchor), the compound names merged into one entity."""
+    found = [(m.start(), m.end(), True) for n in names for m in re.finditer(r"(?<![a-z0-9])" + re.escape(n), segment)]
+    found += [
+        (m.start(), m.end(), False) for d in lexicon for m in re.finditer(r"(?<![a-z0-9])" + re.escape(d), segment)
+        if not any(a <= m.start() < b for a, b, _ in found)
+    ]
+    found = sorted(found)
+    merged: list[tuple[int, int, bool]] = []
+    for start, end, is_anchor in found:
+        if merged and _COMPOUND_JOIN.match(segment[merged[-1][1]:start]):
+            first = merged.pop()
+            start, is_anchor = first[0], first[2] or is_anchor
+        merged.append((start, end, is_anchor))
+    return [m for m in merged if not _NOT_DOSED.search(segment[max(0, m[0] - 40):m[0]])]
+
+
 def _anchored(text: str, anchors: tuple[str, ...], found: list, in_adjustment: bool) -> list:
     """The found doses or intervals that belong to one of the `anchors` and are not inside a condition.
 
-    A value belongs to the nearest drug named before it in its line or sentence; with none before it, to the
-    first named after it ("500 mg de amoxicilina"); with none in the unit, to the drug named last above,
-    so "Fármaco: amoxicilina" followed by "Dose: 1 g" is amoxicillin's dose. An anchor named in order to exclude
-    it (`nao_prescreve`'s reading) is not the owner of anything.
+    A value belongs to the nearest drug named before it in its line or sentence; with none before it in the unit, to the
+    first named after it in the unit ("500 mg de amoxicilina"); with none in the unit, to the drug named last above,
+    so "Fármaco: amoxicilina" followed by "Dose: 1 g" is amoxicillin's dose; and with no drug named above it
+    anywhere in the answer, to the first drug named after it. An anchor named in order to exclude it
+    (`nao_prescreve`'s reading, without "evit") owns nothing; nor does a drug named in a comparison or an allergy;
+    and "amoxicilina com ácido clavulânico" is one drug.
     """
     names = [fold(a).strip() for a in anchors]
     lexicon = [d for d in KNOWN_DRUGS if not any(d in n or n in d for n in names)]
-    owner_is_anchor = False
-    in_condition = False
-    kept = []
+    units = []
     for start, end, fresh in _units(text):
         segment = fold(text[start:end])
-        if fresh:
-            in_condition = False
-        mentions = [(m.start(), m.end(), True) for n in names for m in re.finditer(r"(?<![a-z0-9])" + re.escape(n), segment)]
-        mentions += [
-            (m.start(), m.end(), False) for d in lexicon for m in re.finditer(r"(?<![a-z0-9])" + re.escape(d), segment)
-            if not any(a <= m.start() < b for a, b, _ in mentions)
-        ]
+        mentions = _mentions_of(segment, names, lexicon)
         if any(m[2] for m in mentions):
             normal = normalize(text[start:end])
             excluded = any(
-                _is_excluded_at(normal, found_at.start(), len(found_at.group()))
+                _is_excluded_at(normal, found_at.start(), len(found_at.group()), markers=_ANCHOR_EXCLUSION)
                 for n in names for found_at in re.finditer(_term_pattern(normalize(n)), normal)
             )
             if excluded:
                 mentions = [(a, b, False) for a, b, _ in mentions]
-        mentions.sort()
+        units.append((start, end, fresh, segment, mentions))
+    first_named = next((m[2] for *_, mentions in units for m in mentions[:1]), False)
+    owner_is_anchor = first_named
+    in_condition = False
+    kept = []
+    for start, end, fresh, segment, mentions in units:
+        if fresh:
+            in_condition = False
         marker = _CONDITION.search(segment)
         for item in found:
             if not start <= item.start < end:

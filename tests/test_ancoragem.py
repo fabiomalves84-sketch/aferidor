@@ -136,6 +136,53 @@ class TestBeforeThereWasAnAnchor(unittest.TestCase):
         self.assertTrue(passes(word, "Amoxicilina."))
 
 
+class TestPostHocCorrectionsOfTheAnchoring(unittest.TestCase):
+    """The six decisions written in docs/METODO.md as post hoc: made after seeing 9 of 23 false failures, by principle
+    and not by effect. Every sentence is invented for the test; none is an answer of a model."""
+
+    def test_a_compound_name_is_one_entity_and_owns_the_dose(self):
+        c = dose(terms=("1000 mg",))
+        self.assertTrue(passes(c, "Amoxicilina com ácido clavulânico:\n**Dose:** 1000 mg, de 8 em 8 horas"))
+        self.assertTrue(passes(c, "Amoxicilina + clavulanato:\n**Dose:** 1000 mg"))
+        self.assertTrue(passes(c, "Amoxicilina com Ácido Clavulânico 1000 mg de 8 em 8 horas."))
+        self.assertFalse(passes(c, "Paracetamol com ibuprofeno:\n**Dose:** 1000 mg"))
+        self.assertFalse(passes(c, "Amoxicilina 500 mg. Paracetamol, ibuprofeno e clavulânico 1000 mg."))
+
+    def test_a_drug_named_in_a_comparison_owns_no_dose(self):
+        c = dose()
+        for phrase in ("em detrimento da penicilina V", "em vez de claritromicina", "ao invés de paracetamol"):
+            with self.subTest(frase=phrase):
+                self.assertTrue(passes(c, f"A amoxicilina é a escolha {phrase}.\n**Dose:** 500 mg"))
+        self.assertFalse(passes(c, "A escolha é a claritromicina.\n**Dose:** 500 mg"))
+
+    def test_a_drug_named_in_an_allergy_owns_no_dose(self):
+        c = dose()
+        self.assertTrue(passes(c, "Amoxicilina.\nEm caso de alergia a paracetamol, outra via.\n**Dose:** 500 mg"))
+        self.assertTrue(passes(c, "Amoxicilina.\nUm doente alérgico a claritromicina.\n**Dose:** 500 mg"))
+        self.assertFalse(passes(c, "Amoxicilina.\nUm doente com hipersensibilidade a claritromicina.\n**Dose:** 500 mg"))  # not in the list
+
+    def test_a_dose_with_no_drug_before_it_belongs_to_the_first_drug_named_after_it(self):
+        c = dose()
+        self.assertTrue(passes(c, "**Dose:** 500 mg\n**Intervalo:** de 8 em 8 horas\n\nNo caso da amoxicilina, mantém-se."))
+        self.assertFalse(passes(c, "**Dose:** 500 mg\n\nO paracetamol não interfere. Amoxicilina em jejum."))
+
+    def test_a_range_of_doses_is_still_no_dose_at_either_end(self):
+        self.assertFalse(passes(dose(), "Amoxicilina, de 250 a 500 mg."))
+
+    def test_the_word_avoid_alone_does_not_exclude_the_anchor(self):
+        c = dose()
+        self.assertTrue(passes(c, "Amoxicilina 500 mg de 8 em 8 horas, para evitar recaídas."))
+        self.assertFalse(passes(c, "Não usar amoxicilina 500 mg de 8 em 8 horas."))
+
+    def test_the_heading_adjustment_of_the_dose_is_no_condition_and_a_listed_condition_still_is(self):
+        c = dose()
+        self.assertTrue(passes(c, "Amoxicilina.\n**Ajuste da Dose:**\n- 500 mg de 8 em 8 horas."))
+        self.assertTrue(passes(c, "Amoxicilina.\n### Ajuste de dose\n500 mg de 8 em 8 horas."))
+        for marker in ("Ajuste renal", "Insuficiência hepática grave", "ClCr < 30", "Nos idosos", "Interações:"):
+            with self.subTest(condicao=marker):
+                self.assertFalse(passes(c, f"Amoxicilina 1 g.\n**{marker}:**\n- 500 mg"))
+
+
 class TestTheAnchorsOfTheBank(unittest.TestCase):
     def cases(self):
         return read_cases(ROOT / "casos" / "casos.json") + read_cases(ROOT / "casos" / "consulta.json")

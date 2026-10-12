@@ -180,6 +180,28 @@ sem âncora e só ganha a U1. Os fármacos que fazem de dono de uma dose são os
 a uma condição (ajuste de dose, insuficiência renal ou hepática, diálise, idoso, interação) conta como
 condicionado até ao fim do parágrafo, e a palavra «ajustado» sozinha não é condição.
 
+**Correção pós-hoc da U2, da U3 e da U5, a 12 de outubro de 2026.** Decidida depois de ver 9 de 23 falsos falhanços,
+por princípio e não pelo efeito num modelo, e escrita aqui como pós-hoc: as seis regras acima foram escritas antes de
+qualquer veredicto, e estas seis decisões não. Uma só leitura das 25 respostas que mudaram de veredicto, com um único
+leitor, mostrou três padrões em que a ligação da dose ao fármaco falhava embora ambos estivessem na resposta. Decidiu-se:
+
+- **Nome composto (P3).** «Amoxicilina com ácido clavulânico» e «amoxicilina + clavulanato» são uma só entidade, e é
+  ela a dona da dose. Só os conectores «com» e «+» (com o «ácido» e um artigo, se os houver) juntam nomes.
+- **Fármaco em comparação ou em alergia (P2).** Um fármaco nomeado a seguir a «em detrimento de», «em vez de», «ao
+  invés de», «alergia a» ou «alérgico a» (com a contração e o género que a frase leva: «da», «às», «alérgica») não é
+  dono de uma dose. É esta lista e só esta: «hipersensibilidade à penicilina», «em comparação com» ou «superiores às
+  da claritromicina» não entram, e o fármaco assim nomeado continua a tomar a dose.
+- **Dose sem fármaco antes (P1).** Uma dose sem nenhum fármaco nomeado antes dela, em toda a resposta, pertence ao
+  primeiro fármaco nomeado depois dela; se esse não for o da âncora, não conta.
+- **Não se adota** que os dois extremos de um intervalo de doses («15 a 20 mg») contem como doses: a U1 não diz nada
+  sobre intervalos de doses, e o extremo de um intervalo não é a dose que o critério pede.
+- **U5.** Deixa de se usar o marcador «evit» para dizer que o fármaco da âncora está excluído: a frase «para evitar
+  toxicidade» excluía o metotrexato. Mantém-se o resto da lógica que já existia para `nao_prescreve`, e é só a âncora
+  que deixa de usar esse marcador, o `nao_prescreve` fica como estava.
+- **U3.** «Ajuste da dose» e «ajuste de dose» deixam de ser condição por si: um cabeçalho com essas palavras pode ser
+  uma titulação. Contam as condições da lista fechada: ajuste renal ou hepático, insuficiência ou doença renal ou
+  hepática, função renal ou hepática, ClCr, clearance, TFG, ml/min, diálise, idoso, interação.
+
 **U1, forma canónica.** Uma dose é um valor em mg, por toma, por quilo ou por dia; um intervalo são as
 horas entre tomas; duas formas são equivalentes se a forma canónica for igual. Aceita «a cada 8 horas»,
 «8-8h», «3x/dia» e «0,5 g» contra 8/8 e 500 mg. Rejeita «2x/dia» contra 8/8 e «1 g» contra 500 mg.
