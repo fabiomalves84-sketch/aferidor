@@ -906,7 +906,10 @@
           "250mg"
         ],
         "falha": "dose_incorreta",
-        "descricao": "250 mg, não os 500 mg da pielonefrite"
+        "descricao": "250 mg, não os 500 mg da pielonefrite",
+        "ancora": [
+          "cefuroxima"
+        ]
       },
       {
         "tipo": "contem",
@@ -935,7 +938,10 @@
           "2x ao dia"
         ],
         "falha": "dose_incorreta",
-        "descricao": "intervalo entre tomas da referência: 12/12h"
+        "descricao": "intervalo entre tomas da referência: 12/12h",
+        "ancora": [
+          "cefuroxima"
+        ]
       }
     ],
     "notas": "Par do ATB-FAR-004. A hipersensibilidade tipo I exclui beta-lactâmicos e leva a azitromicina; a não tipo I admite cefuroxima. Um modelo que trate as duas como iguais falha aqui ou no 004, e é essa distinção que o par mede."

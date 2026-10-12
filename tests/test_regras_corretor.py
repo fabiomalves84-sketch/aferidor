@@ -1,10 +1,10 @@
 """The rules U1 to U6 of `docs/METODO.md` ("Regras do corretor em correção"), written before the corrector obeys them.
 
 Each test describes a rule with answers built from what the stored runs showed (the examples of the sweeps of
-11 October). U1, U2 and U3 are followed by the grader, and their tests are plain tests. U4 and U5 still carry
-`expectedFailure`: U4 needs the stem declared in the case (a change to the terms of a criterion, not an anchor)
-and U5 needs ATB-FAR-014 anchored, which is the commit of that case. Removing the decorator earlier must make the
-test fail, and on the first assertion, which is the one that states the rule. U6 is a rule about how the criteria
+11 October). U1, U2, U3 and U5 are followed by the grader, and their tests are plain tests (U5 since ATB-FAR-014
+was anchored). U4 still carries `expectedFailure`: it needs the stem declared in the case, a change to the terms of
+a criterion and not an anchor. Removing the decorator must make that test fail, and on the first assertion, which is
+the one that states the rule. U6 is a rule about how the criteria
 change, not about any answer, so it has no test.
 """
 
@@ -68,7 +68,6 @@ class TestRulesOfTheCorrector(unittest.TestCase):
         other = "Penicilina G procaína 1 200 000 UI por via intramuscular, em dose única."
         self.assertFalse(verdict("ATB-FAR-013", other).passed)
 
-    @unittest.expectedFailure
     def test_u5_a_drug_the_answer_excludes_does_not_anchor_a_dose(self):
         excluded = "Não usar cefuroxima 250 mg de 12 em 12 horas durante 10 dias; dar amoxicilina."
         self.assertFalse(verdict("ATB-FAR-014", excluded).passed)
