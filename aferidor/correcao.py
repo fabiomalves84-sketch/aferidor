@@ -12,8 +12,15 @@ import json
 from datetime import date
 from pathlib import Path
 
-from . import __version__, build_id, grader_id, report
-from .grading import grade_all, match_answers
+import dataclasses
+import hashlib
+import re
+from dataclasses import dataclass
+
+from . import build_id, grader_id, report
+from .checks import _excluded_in_its_clause, _units, fold
+from .grading import grade_all, match_answers, mcnemar_exact
+from .risk import Risk
 from .storage import read_answers, read_cases, verdict_to_dict
 
 BANK_FILES = {"principal": "casos/casos.json", "consulta": "casos/consulta.json"}
@@ -67,3 +74,190 @@ def reclassify(folder: Path, root: Path, today: date) -> tuple[str, str, str]:
     body = text.split("\n", 1)
     markdown = body[0] + "\n\n" + note + "\n" + (body[1] if len(body) > 1 else "")
     return today.isoformat(), json.dumps(entries, ensure_ascii=False, indent=2) + "\n", markdown
+
+
+# --- What the page shows: the published corrector against the current one --------------------------------------------
+
+# The trials whose models the page puts side by side. A trial that is invalid, older or not a comparison of models the
+# page talks about (the 14 and 16 September ones) still counts for how many criteria changed, but has no row in the table.
+TABLE_TRIALS = (
+    "2026-09-27-locais-12-14b", "2026-09-28-gemini-flash", "2026-09-29-gemma4-31b-casos",
+    "2026-10-01-gemma4-26b-casos", "2026-09-29-gemini-consulta", "2026-09-29-gemma4-31b-consulta",
+    "2026-10-01-gemma4-26b-consulta",
+)
+# The case about which the cited standard is silent on cephalexin, and the stem the page counts.
+CEPHALEXIN_CASE = "ATB-FAR-014"
+CEPHALEXIN = "cefalexin"
+
+
+def is_after_the_protocol(trial: str) -> bool:
+    """The 26B trials had a protocol with the corrector frozen; what the page shows for them is a later reclassification."""
+    return "26b" in trial
+
+
+@dataclass(frozen=True)
+class Row:
+    """One model of one bank: cases with a critical failure under the published corrector and under the current one."""
+
+    bank: str
+    trial: str
+    model: str
+    cases: int
+    before: int
+    after: int
+    frozen: bool
+
+
+@dataclass(frozen=True)
+class BestPair:
+    """The two models with the fewest critical cases, and the exact McNemar test between them."""
+
+    first: str
+    second: str
+    first_critical: int
+    cases: int
+    only_first: int
+    only_second: int
+    p_value: float
+
+
+@dataclass(frozen=True)
+class Correction:
+    """Everything the page says about the correction, worked out from the stored answers and `antes-8edda161.json`."""
+
+    before_grader: str
+    before_commit: str
+    after_grader: str
+    rows: tuple[Row, ...]
+    best_before: BestPair | None
+    best_after: BestPair | None
+    cephalexin: tuple[tuple[str, int, int], ...]  # model, answers that name it without excluding it, answers
+    equivalent_forms: tuple[int, int]  # criteria changed by U1 alone, cases touched
+    all_corrections: tuple[int, int]  # criteria changed by every correction, cases touched
+    trials_counted: int
+
+    @property
+    def fell(self) -> tuple[Row, ...]:
+        """The rows where the count of critical cases went down with the correction."""
+        return tuple(row for row in self.rows if row.after < row.before)
+
+    @property
+    def rose(self) -> tuple[Row, ...]:
+        return tuple(row for row in self.rows if row.after > row.before)
+
+
+def names_without_excluding(text: str, stem: str = CEPHALEXIN) -> bool:
+    """Whether an answer names a drug (by the stem of its name) somewhere the answer does not exclude it.
+
+    A mention is excluded when an exclusion marker stands in the same clause (rule U5: a clause ends at a colon, a
+    semicolon or the end of a line or list item). Naming it is not recommending it: this counts mentions, and says so.
+    """
+    for start, end, _fresh in _units(text):
+        segment = fold(text[start:end])
+        for match in re.finditer(r"(?<![a-z0-9])" + re.escape(stem), segment):
+            if not _excluded_in_its_clause(segment, match.start(), match.end()):
+                return True
+    return False
+
+
+def _critical_by_case(rows: list[tuple[str, str, bool]]) -> dict[str, dict[str, bool]]:
+    """{model: {case: has a critical failure in some sample}} from (model, case, critical) triples."""
+    out: dict[str, dict[str, bool]] = {}
+    for model, case, critical in rows:
+        out.setdefault(model, {})[case] = out.get(model, {}).get(case, False) or critical
+    return out
+
+
+def best_pair(by_model: dict[str, dict[str, bool]]) -> BestPair | None:
+    """The two best models by critical cases (the lowest share first, the name to break a tie) and McNemar between them."""
+    ranked = sorted(
+        ((sum(cases.values()), len(cases), model) for model, cases in by_model.items() if cases),
+        key=lambda r: (r[0] / r[1], r[2]),
+    )
+    if len(ranked) < 2:
+        return None
+    (first_n, total, first), (_second_n, _t, second) = ranked[0], ranked[1]
+    both = set(by_model[first]) & set(by_model[second])
+    only_first = sum(1 for c in both if by_model[first][c] and not by_model[second][c])
+    only_second = sum(1 for c in both if by_model[second][c] and not by_model[first][c])
+    return BestPair(first, second, first_n, total, only_first, only_second, mcnemar_exact(only_first, only_second))
+
+
+def _strip_anchors(cases):
+    def bare(criteria):
+        return tuple(dataclasses.replace(c, ancora=(), em_ajuste=False) if c.ancora else c for c in criteria)
+
+    return [
+        dataclasses.replace(c, criteria=bare(c.criteria), alternatives=tuple(dataclasses.replace(a, criteria=bare(a.criteria)) for a in c.alternatives))
+        for c in cases
+    ]
+
+
+def _changes(saved_rows, verdicts_and_answers) -> set[tuple[int, int | None, str]]:
+    """The criteria whose result differs, as (answer position, criterion position, case); a change of alternative or of
+    structure counts once, for the answer, when the verdict itself differs."""
+    out = set()
+    for position, (row, (answer, verdict)) in enumerate(zip(saved_rows, verdicts_and_answers)):
+        flags = row[5]
+        results = verdict.results
+        if len(flags) != len(results) or row[6] != verdict.alternative:
+            if bool(row[3]) != verdict.passed:
+                out.add((position, None, answer.case_id))
+            continue
+        for index, (flag, result) in enumerate(zip(flags, results)):
+            if (flag == "1") != result.passed:
+                out.add((position, index, answer.case_id))
+    return out
+
+
+def load_before(path: Path) -> dict:
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def compute(before_path: Path, ensaios: Path, root: Path) -> Correction:
+    """The correction as the page shows it. Refuses a file of the published corrector whose answers files have changed."""
+    before = load_before(before_path)
+    banks = {name: read_cases(Path(root) / path) for name, path in BANK_FILES.items()}
+    rows: list[Row] = []
+    before_cases: dict[str, list[tuple[str, str, bool]]] = {}
+    after_cases: dict[str, list[tuple[str, str, bool]]] = {}
+    cephalexin: dict[str, list[int]] = {}
+    u1, everything = set(), set()
+    for trial, entry in sorted(before["ensaios"].items()):
+        path = Path(ensaios) / trial / "respostas.jsonl"
+        if hashlib.sha256(path.read_bytes()).hexdigest() != entry["respostas_sha256"]:
+            raise ValueError(f"{trial}: o ficheiro de respostas já não é o que o ficheiro do corretor publicado leu")
+        answers = read_answers(path)
+        cases = banks[entry["banco"]]
+        verdicts, _missing = grade_all(cases, answers)
+        paired = match_answers(cases, answers, verdicts)
+        bare_verdicts, _ = grade_all(_strip_anchors(cases), answers)
+        everything |= {(trial, *c) for c in _changes(entry["respostas"], paired)}
+        u1 |= {(trial, *c) for c in _changes(entry["respostas"], match_answers(cases, answers, bare_verdicts))}
+        if trial not in TABLE_TRIALS:
+            continue
+        triples_after = [(a.model, a.case_id, any(f.risk is Risk.CRITICO for f in v.failures)) for a, v in paired]
+        triples_before = [(r[0], r[1], bool(r[4])) for r in entry["respostas"]]
+        after_by, before_by = _critical_by_case(triples_after), _critical_by_case(triples_before)
+        for model in sorted(after_by):
+            rows.append(Row(entry["banco"], trial, model, len(after_by[model]), sum(before_by[model].values()),
+                            sum(after_by[model].values()), is_after_the_protocol(trial)))
+        if entry["banco"] == "principal" and not is_after_the_protocol(trial):
+            before_cases.setdefault("all", []).extend(triples_before)
+            after_cases.setdefault("all", []).extend(triples_after)
+        if entry["banco"] == "principal":
+            for answer in answers:
+                if answer.case_id == CEPHALEXIN_CASE:
+                    slot = cephalexin.setdefault(answer.model, [0, 0])
+                    slot[1] += 1
+                    slot[0] += int(names_without_excluding(answer.text))
+    def counted(changes):
+        return len(changes), len({change[3] for change in changes})
+
+    return Correction(
+        before_grader=before["grader_id"], before_commit=before["commit"], after_grader=grader_id(), rows=tuple(rows),
+        best_before=best_pair(_critical_by_case(before_cases.get("all", []))),
+        best_after=best_pair(_critical_by_case(after_cases.get("all", []))),
+        cephalexin=tuple((m, v[0], v[1]) for m, v in sorted(cephalexin.items())),
+        equivalent_forms=counted(u1), all_corrections=counted(everything), trials_counted=len(before["ensaios"]),
+    )
