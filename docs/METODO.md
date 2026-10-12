@@ -167,8 +167,18 @@ O corretor tem dois defeitos medidos nas respostas guardadas (varreduras de 11 d
 critério `contem` de dose passa quando o termo aparece em qualquer parte da resposta, e uma forma
 equivalente de escrever o mesmo valor ou a mesma palavra faz o critério falhar. Estas seis regras estão
 escritas antes de qualquer veredicto novo e valem nos dois sentidos: a mesma regra tem de poder apertar
-e alargar. Os testes que as descrevem estão em `tests/test_regras_corretor.py`, marcados como falha
-esperada até o corretor as cumprir. Ainda não as cumpre.
+e alargar. Os testes que as descrevem estão em `tests/test_regras_corretor.py`. O corretor cumpre a U1, a U2
+e a U3 desde que os critérios de dose e de intervalo ganharam a âncora (`ancora` no ficheiro dos casos, tirada
+da resposta de referência e verificada por `verificar`); a U5 está implementada e falta a âncora do caso que a
+testa (ATB-FAR-014), e a U4 falta. Os testes dessas duas continuam marcados como falha esperada.
+
+Três limites da implementação. A âncora só existe onde todos os termos do critério são doses ou intervalos que a
+função lê e a unidade do critério é a da referência: um critério que pede «1000 mg» onde a referência diz «1000
+mg/dia», ou «85 ± 5 mg/kg/dia» onde diz «80 a 90 mg/kg/dia», ou que mistura «dose diária única» com «24/24», fica
+sem âncora e só ganha a U1. Os fármacos que fazem de dono de uma dose são os de uma lista fechada
+(`checks.KNOWN_DRUGS`), e um fármaco que lá não esteja deixa a sua dose ao fármaco nomeado acima. Um valor ligado
+a uma condição (ajuste de dose, insuficiência renal ou hepática, diálise, idoso, interação) conta como
+condicionado até ao fim do parágrafo, e a palavra «ajustado» sozinha não é condição.
 
 **U1, forma canónica.** Uma dose é um valor em mg, por toma, por quilo ou por dia; um intervalo são as
 horas entre tomas; duas formas são equivalentes se a forma canónica for igual. Aceita «a cada 8 horas»,

@@ -25,6 +25,16 @@ import re
 import unicodedata
 from functools import lru_cache
 
+from .equivalencia import (
+    DoseFound,
+    IntervalFound,
+    find_doses,
+    find_intervals,
+    fold,
+    parse_dose,
+    parse_interval,
+    same_quantity,
+)
 from .models import Criterion, CriterionResult
 from .risk import FailureType
 
@@ -316,10 +326,15 @@ def check(criterion: Criterion, text: str, restating: bool = False) -> Criterion
     haystack = normalize(text)
 
     if criterion.kind == "contem":
+        if criterion.ancora:
+            return _check_anchored(criterion, text)
         for term in criterion.terms:
             at = find_term(haystack, term)
             if at >= 0:
                 return CriterionResult(criterion, True, f"{term!r} em: {snippet(haystack, at)}")
+        equivalent = _equivalent_form(criterion, text)
+        if equivalent is not None:
+            return CriterionResult(criterion, True, f"{equivalent.written!r} (a mesma forma) em: {_around(text, equivalent)}")
         wanted = ", ".join(repr(t) for t in criterion.terms)
         return CriterionResult(criterion, False, f"nenhum de: {wanted}")
 
@@ -344,6 +359,8 @@ def check(criterion: Criterion, text: str, restating: bool = False) -> Criterion
         return _check_not_prescribed(criterion, haystack, restating)
 
     if criterion.kind == "valor_numerico":
+        if criterion.ancora:
+            return _check_anchored(criterion, text)
         return _check_number(criterion, haystack)
 
     raise ValueError(f"critério de tipo desconhecido {criterion.kind!r}")
@@ -435,6 +452,164 @@ def _sentence_bounds(haystack: str, position: int, length: int) -> tuple[int, in
         start = boundary.end()
     following = _SENTENCE_END.search(haystack, position + length)
     return start, following.start() + 1 if following else len(haystack)
+
+
+# Drug names an answer may dose next to the one a criterion is anchored to (rule U2). A closed list of stems:
+# a dose belongs to the nearest drug named before it, so a drug missing here leaves its dose with the drug
+# named above it. It was gathered while sweeping the stored answers of 11 October 2026, which is a reason to
+# read it as vocabulary and not as a rule: it decides nothing about a criterion, only whose dose a number is.
+KNOWN_DRUGS = (
+    "amoxicilina", "apixabano", "rivaroxabano", "dabigatrano", "atorvastatina", "sinvastatina", "lovastatina",
+    "azitromicina", "bupropiona", "ceftriaxona", "cefuroxima", "cefalexina", "cefadroxil", "cefradina",
+    "claritromicina", "colquicina", "cotrimoxazol", "dapagliflozina", "empagliflozina", "dexametasona",
+    "doxiciclina", "eritromicina", "fosfomicina", "lisinopril", "ramipril", "metformina", "metotrexato",
+    "metronidazol", "nicotina", "paracetamol", "ibuprofeno", "penicilina", "valproato", "vareniclina",
+    "varfarina", "levofloxacin", "ciprofloxacin", "clindamicina", "nitrofurantoina", "tocilizumab",
+    "aspirina", "acetilsalicilic", "fluconazol", "prednisolona", "prednisona", "insulina", "digoxina",
+    "amiodarona", "atenolol", "enalapril", "losartan", "cloranfenicol", "rifampicina", "isoniazida",
+    "trimetoprim", "sulfametoxazol", "norfloxacin", "ofloxacin", "gentamicina", "vancomicina",
+    "flucloxacilina", "cefixima", "cefpodoxima", "ampicilina", "sultamicilina", "espiramicina",
+    "josamicina", "roxitromicina", "clavulan", "acido folico", "folato", "ivermectina", "oseltamivir",
+)
+# Stems of what makes a value conditional rather than the dose of the case (rule U3): an adjustment, a kidney
+# or liver problem, dialysis, the elderly, an interaction. A list closed on purpose, like `EXCLUSION_MARKERS`.
+CONDITION_MARKERS = (
+    "ajuste de dose", "ajuste da dose", "ajuste renal", "ajuste hepatico", "ajustar a dose", "ajustada a funcao",
+    "insuficiencia renal", "insuficiencia hepatica", "doenca renal", "doenca hepatica", "funcao renal",
+    "funcao hepatica", "clcr", "clearance", "tfg", "filtracao glomerular", "egfr", "dialise", "ml/min", "ml / min",
+    "idoso", "interac",
+)
+_CONDITION = re.compile(r"(?<![a-z0-9])(?:" + "|".join(re.escape(m) for m in CONDITION_MARKERS) + ")")
+
+
+def _units(text: str) -> list[tuple[int, int, bool]]:
+    """The lines and sentences of the raw text as (start, end, fresh), none empty.
+
+    `fresh` marks a unit after a blank line or on a heading or a rule, where a condition ends. Positions are
+    those of `text`, which `fold` keeps.
+    """
+    units: list[tuple[int, int, bool]] = []
+    offset = 0
+    after_blank = True
+    for line in text.split("\n"):
+        folded = fold(line)
+        stripped = folded.strip()
+        heading = stripped.startswith(("#", "---", "***", "___"))
+        start = 0
+        first = True
+        for boundary in [*_SENTENCE_END.finditer(folded), None]:
+            end = boundary.end() if boundary else len(line)
+            if line[start:end].strip():
+                units.append((offset + start, offset + end, first and (after_blank or heading)))
+                first = False
+            start = end
+        after_blank = not stripped
+        offset += len(line) + 1
+    return units
+
+
+def _anchored(text: str, anchors: tuple[str, ...], found: list, in_adjustment: bool) -> list:
+    """The found doses or intervals that belong to one of the `anchors` and are not inside a condition.
+
+    A value belongs to the nearest drug named before it in its line or sentence; with none before it, to the
+    first named after it ("500 mg de amoxicilina"); with none in the unit, to the drug named last above,
+    so "Fármaco: amoxicilina" followed by "Dose: 1 g" is amoxicillin's dose. An anchor named in order to exclude
+    it (`nao_prescreve`'s reading) is not the owner of anything.
+    """
+    names = [fold(a).strip() for a in anchors]
+    lexicon = [d for d in KNOWN_DRUGS if not any(d in n or n in d for n in names)]
+    owner_is_anchor = False
+    in_condition = False
+    kept = []
+    for start, end, fresh in _units(text):
+        segment = fold(text[start:end])
+        if fresh:
+            in_condition = False
+        mentions = [(m.start(), m.end(), True) for n in names for m in re.finditer(r"(?<![a-z0-9])" + re.escape(n), segment)]
+        mentions += [
+            (m.start(), m.end(), False) for d in lexicon for m in re.finditer(r"(?<![a-z0-9])" + re.escape(d), segment)
+            if not any(a <= m.start() < b for a, b, _ in mentions)
+        ]
+        if any(m[2] for m in mentions):
+            normal = normalize(text[start:end])
+            excluded = any(
+                _is_excluded_at(normal, found_at.start(), len(found_at.group()))
+                for n in names for found_at in re.finditer(_term_pattern(normalize(n)), normal)
+            )
+            if excluded:
+                mentions = [(a, b, False) for a, b, _ in mentions]
+        mentions.sort()
+        marker = _CONDITION.search(segment)
+        for item in found:
+            if not start <= item.start < end:
+                continue
+            at = item.start - start
+            before = [m for m in mentions if m[1] <= at]
+            after = [m for m in mentions if m[0] >= at]
+            belongs = before[-1][2] if before else after[0][2] if after else owner_is_anchor
+            conditional = (marker is not None and marker.start() < at) or (in_condition and not mentions)
+            if belongs and (in_adjustment or not conditional):
+                kept.append(item)
+        if mentions:
+            owner_is_anchor = mentions[-1][2]
+        in_condition = marker is not None or (in_condition and not mentions)
+    return kept
+
+
+def _wanted(criterion: Criterion) -> tuple[list, list[float]]:
+    """The doses and the intervals a criterion asks for, in canonical form."""
+    if criterion.kind == "valor_numerico":
+        value, unit = criterion.terms[0], criterion.terms[1]
+        dose = parse_dose(f"{value} {unit}")
+        return ([dose] if dose is not None else []), []
+    doses = [d for d in (parse_dose(t) for t in criterion.terms) if d is not None]
+    hours = [h for h in (parse_interval(t) for t in criterion.terms) if h is not None]
+    return doses, hours
+
+
+def _matching(criterion: Criterion, text: str) -> list[DoseFound | IntervalFound]:
+    """Every dose or interval in `text` equal to one the criterion asks for, wherever it sits."""
+    doses, hours = _wanted(criterion)
+    tolerance = 0.0
+    if criterion.kind == "valor_numerico" and len(criterion.terms) > 2 and doses:
+        value = float(criterion.terms[0].replace(",", "."))
+        tolerance = float(criterion.terms[2].replace(",", ".")) * (doses[0].amount / value if value else 1.0)
+    found: list[DoseFound | IntervalFound] = []
+    if doses:
+        found += [
+            d for d in find_doses(text)
+            if any(same_quantity(d.dose, w) or (tolerance and d.dose.unit == w.unit and abs(d.dose.amount - w.amount) <= tolerance) for w in doses)
+        ]
+    if hours:
+        found += [i for i in find_intervals(text) if any(abs(i.hours - h) <= 1e-9 * max(1.0, h) for h in hours)]
+    return sorted(found, key=lambda item: item.start)
+
+
+def _equivalent_form(criterion: Criterion, text: str) -> DoseFound | IntervalFound | None:
+    """Rule U1 for a criterion with no anchor: the dose or interval it asks for, written another way."""
+    found = _matching(criterion, text)
+    return found[0] if found else None
+
+
+def _around(text: str, item: DoseFound | IntervalFound, width: int = 60) -> str:
+    return snippet(fold(text).replace("\n", " "), item.start, width)
+
+
+def _check_anchored(criterion: Criterion, text: str) -> CriterionResult:
+    """Rules U1 to U3 for a criterion with `ancora`: the value must be there, in a form equal to what it asks
+    for, belonging to the anchor drug, and outside an adjustment (unless the criterion says the case is one)."""
+    matching = _matching(criterion, text)
+    kept = _anchored(text, criterion.ancora, matching, criterion.em_ajuste)
+    anchors = ", ".join(repr(a) for a in criterion.ancora)
+    if kept:
+        return CriterionResult(criterion, True, f"{kept[0].written!r} de {anchors} em: {_around(text, kept[0])}")
+    if matching:
+        return CriterionResult(
+            criterion, False,
+            f"{matching[0].written!r} está na resposta mas não é de {anchors} ou está num ajuste: {_around(text, matching[0])}",
+        )
+    wanted = ", ".join(repr(t) for t in criterion.terms)
+    return CriterionResult(criterion, False, f"nenhum de: {wanted}")
 
 
 def _check_number(criterion: Criterion, haystack: str) -> CriterionResult:

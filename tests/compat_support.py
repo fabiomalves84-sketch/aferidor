@@ -14,7 +14,7 @@ import re
 import tempfile
 from pathlib import Path
 
-from aferidor import cli
+from aferidor import cli, grader_id
 from aferidor.providers import FakeProvider
 from aferidor.runner import RunConfig, run
 from tests.helpers import a_case
@@ -30,6 +30,8 @@ def _lines(path: Path) -> list[dict]:
         data["perguntada_em"] = "T"
         data["latencia_ms"] = 0
         data["versao"] = "B"
+        if data.get("corretor") == grader_id():
+            data["corretor"] = "G"  # the grader id, which changes whenever the grader does; it must be the live one
         data["execucao"] = "<id>"
         found.append(data)
     return found

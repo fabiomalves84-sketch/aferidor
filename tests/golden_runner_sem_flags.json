@@ -5,7 +5,7 @@
       {
         "amostra": 1,
         "caso": "ATB-PAC-001",
-        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "corretor": "G",
         "execucao": "<id>",
         "fim": "stop",
         "latencia_ms": 0,
@@ -20,7 +20,7 @@
       {
         "amostra": 2,
         "caso": "ATB-PAC-001",
-        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "corretor": "G",
         "execucao": "<id>",
         "fim": "stop",
         "latencia_ms": 0,
@@ -35,7 +35,7 @@
       {
         "amostra": 1,
         "caso": "ATB-DPOC-002",
-        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "corretor": "G",
         "execucao": "<id>",
         "fim": "stop",
         "latencia_ms": 0,
@@ -50,7 +50,7 @@
       {
         "amostra": 2,
         "caso": "ATB-DPOC-002",
-        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "corretor": "G",
         "execucao": "<id>",
         "fim": "stop",
         "latencia_ms": 0,
@@ -65,7 +65,7 @@
       {
         "amostra": 1,
         "caso": "ATB-CIST-003",
-        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "corretor": "G",
         "execucao": "<id>",
         "fim": "stop",
         "latencia_ms": 0,
@@ -80,7 +80,7 @@
       {
         "amostra": 2,
         "caso": "ATB-CIST-003",
-        "corretor": "0.1.0+corretor.8edda161bd4e",
+        "corretor": "G",
         "execucao": "<id>",
         "fim": "stop",
         "latencia_ms": 0,
@@ -104,7 +104,7 @@
     {
       "amostra": 1,
       "caso": "C1",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -119,7 +119,7 @@
     {
       "amostra": 2,
       "caso": "C1",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -134,7 +134,7 @@
     {
       "amostra": 1,
       "caso": "C2",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -149,7 +149,7 @@
     {
       "amostra": 2,
       "caso": "C2",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -164,7 +164,7 @@
     {
       "amostra": 1,
       "caso": "C3",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -179,7 +179,7 @@
     {
       "amostra": 2,
       "caso": "C3",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -196,7 +196,7 @@
     {
       "amostra": 1,
       "caso": "C1",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -211,7 +211,7 @@
     {
       "amostra": 2,
       "caso": "C1",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -226,7 +226,7 @@
     {
       "amostra": 1,
       "caso": "C2",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -241,7 +241,7 @@
     {
       "amostra": 2,
       "caso": "C2",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -256,7 +256,7 @@
     {
       "amostra": 1,
       "caso": "C3",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -271,7 +271,7 @@
     {
       "amostra": 2,
       "caso": "C3",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -286,7 +286,7 @@
     {
       "amostra": 3,
       "caso": "C1",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -301,7 +301,7 @@
     {
       "amostra": 3,
       "caso": "C2",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,
@@ -316,7 +316,7 @@
     {
       "amostra": 3,
       "caso": "C3",
-      "corretor": "0.1.0+corretor.8edda161bd4e",
+      "corretor": "G",
       "execucao": "<id>",
       "fim": "stop",
       "latencia_ms": 0,

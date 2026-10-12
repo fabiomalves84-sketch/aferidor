@@ -88,6 +88,14 @@ class TestDoses(unittest.TestCase):
         self.assertFalse(same_dose("2,5 mg", "25 mg"))
         self.assertFalse(same_dose("2,5 mg", "5 mg"))
 
+    def test_a_unit_written_out_is_the_unit(self):
+        self.assertTrue(same_dose("3 g", "3 gramas"))
+        self.assertTrue(same_dose("500 mg", "500 miligramas"))
+        self.assertTrue(same_dose("0,5 g", "500 miligramas"))
+        self.assertTrue(same_dose("100 mcg", "100 microgramas"))
+        self.assertFalse(same_dose("3 g", "3 miligramas"))
+        self.assertEqual([d.dose.amount for d in find_doses("Uma dose única de 3 gramas é eficaz")], [3000.0])
+
     def test_a_dose_per_kilo_per_day_or_per_volume_is_never_the_plain_dose(self):
         for other in ("500 mg/kg", "500 mg/dia", "500 mg/5 ml", "500 mg/ml", "500 mg/kg/dia"):
             with self.subTest(outro=other):

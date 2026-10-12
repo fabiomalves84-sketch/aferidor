@@ -335,6 +335,10 @@ class TestNothingNewWhenThereIsNoNewData(unittest.TestCase):
             with self.subTest(ensaio=folder.name):
                 self.assertIsNone(execucao.load(folder / "respostas.jsonl"))
 
+    # Until docs/exemplo is regenerated, in the commit that publishes the reclassification, the stored answers graded
+    # by the anchored corrector (rules U1 to U3) no longer come out as the committed page. Nothing is regenerated
+    # before the table of verdicts has been seen, so this is the one test that is expected to fail meanwhile.
+    @unittest.expectedFailure
     def test_the_published_example_comes_out_the_same_through_the_command_line_with_the_new_code(self):
         """The recipe of docs/COMO_CORRER.md section 14, with the day it was written. The only line that differs from
         the committed file is the one that copies the test count from the README, which moves with every commit."""

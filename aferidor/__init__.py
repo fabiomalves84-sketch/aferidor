@@ -11,11 +11,12 @@ __version__ = "0.1.0"
 
 # The files that decide how an answer is corrected and whether a model is approved: the criteria and
 # the checks (`checks`), the verdict and the cases (`grading`, `models`, `risk`), the reading of the
-# criteria from the case files (`storage`) and the approval rule (`protocolo`). A protocol that
+# criteria from the case files (`storage`), the reading of doses and intervals (`equivalencia`) and the
+# approval rule (`protocolo`). A protocol that
 # freezes the correction (`corretor_id`) is judged against these and nothing else. The criteria
 # themselves are data, covered by the case file's SHA-256, and the text of the question by the
 # SHA-256 of the prompt of each answer.
-GRADER_FILES = ("checks.py", "grading.py", "models.py", "protocolo.py", "risk.py", "storage.py")
+GRADER_FILES = ("checks.py", "equivalencia.py", "grading.py", "models.py", "protocolo.py", "risk.py", "storage.py")
 
 
 def _digest_of(package: Path, names: list[str] | tuple[str, ...]) -> str:

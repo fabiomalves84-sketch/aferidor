@@ -1,10 +1,11 @@
 """The rules U1 to U6 of `docs/METODO.md` ("Regras do corretor em correção"), written before the corrector obeys them.
 
-Every test here describes behaviour the grader does NOT have yet, with answers built from what the stored runs
-showed (the examples of the sweeps of 11 October), and carries `expectedFailure` until the commit that makes the
-grader follow the rule removes the decorator. Removing it earlier must make the test fail, and on the first
-assertion, which is the one that states the rule. U6 is a rule about how the criteria change, not about any
-answer, so it has no test.
+Each test describes a rule with answers built from what the stored runs showed (the examples of the sweeps of
+11 October). U1, U2 and U3 are followed by the grader, and their tests are plain tests. U4 and U5 still carry
+`expectedFailure`: U4 needs the stem declared in the case (a change to the terms of a criterion, not an anchor)
+and U5 needs ATB-FAR-014 anchored, which is the commit of that case. Removing the decorator earlier must make the
+test fail, and on the first assertion, which is the one that states the rule. U6 is a rule about how the criteria
+change, not about any answer, so it has no test.
 """
 
 from __future__ import annotations
@@ -30,7 +31,6 @@ def verdict(case_id: str, text: str):
 
 
 class TestRulesOfTheCorrector(unittest.TestCase):
-    @unittest.expectedFailure
     def test_u1_an_interval_written_another_way_is_the_same_interval(self):
         for written in ("a cada 8 horas", "8-8h", "3x/dia", "3 vezes por dia"):
             with self.subTest(escrito=written):
@@ -39,19 +39,16 @@ class TestRulesOfTheCorrector(unittest.TestCase):
                 )
         self.assertFalse(verdict("ATB-PAC-001", "Amoxicilina 500 mg por via oral, durante 5 dias, 2x/dia.").passed)
 
-    @unittest.expectedFailure
     def test_u1_a_dose_in_grams_is_the_same_dose_and_a_different_dose_is_not(self):
         self.assertTrue(verdict("ATB-PAC-001", "Amoxicilina 0,5 g por via oral, de 8 em 8 horas, durante 5 dias.").passed)
         self.assertFalse(verdict("ATB-PAC-001", "Amoxicilina 1 g por via oral, de 8 em 8 horas, durante 5 dias.").passed)
 
-    @unittest.expectedFailure
     def test_u2_a_dose_counts_only_if_it_belongs_to_the_drug_of_the_criterion(self):
         wrong = "Amoxicilina 1 g por via oral, de 8 em 8 horas, durante 5 dias. Para a febre, paracetamol 500 mg."
         self.assertFalse(verdict("ATB-PAC-001", wrong).passed)
         right = "Amoxicilina 500 mg por via oral, de 8 em 8 horas, durante 5 dias. Para a febre, paracetamol 1 g."
         self.assertTrue(verdict("ATB-PAC-001", right).passed)
 
-    @unittest.expectedFailure
     def test_u3_a_value_inside_a_renal_adjustment_is_not_the_dose_of_the_case(self):
         hidden = (
             "Amoxicilina. Dose: 1 g por via oral, de 8 em 8 horas, durante 5 dias. "

@@ -780,6 +780,26 @@ def negative_controls(case: Case) -> list[NegativeControl]:
     return controls
 
 
+def anchors_missing(cases: list[Case]) -> list[tuple[Case, Criterion, str]]:
+    """Anchored criteria whose anchor drug the reference answer does not name (rule U2).
+
+    The anchor is read from the reference of the case, or of the alternative the criterion belongs to, never
+    from an answer: a criterion anchored to a drug the reference does not mention could only be met by luck.
+    The reference passing its own criteria (`self_check`) proves the dose sits next to the anchor; this proves
+    the anchor is written there at all, and says which.
+    """
+    missing: list[tuple[Case, Criterion, str]] = []
+    for case in cases:
+        scopes = [(case.criteria, case.reference)] + [(a.criteria, a.reference) for a in case.alternatives]
+        for criteria, reference in scopes:
+            written = normalize(reference)
+            for criterion in criteria:
+                for name in criterion.ancora:
+                    if find_term(written, name) < 0:
+                        missing.append((case, criterion, name))
+    return missing
+
+
 def met_by_the_question(cases: list[Case]) -> list[tuple[Case, Criterion]]:
     """Positive criteria that the question alone, repeated back, already meets.
 
@@ -923,6 +943,7 @@ __all__ = [
     "negative_controls",
     "uncaught_controls",
     "met_by_the_question",
+    "anchors_missing",
     "VerdictChange",
     "verdict_changes",
 ]

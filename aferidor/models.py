@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date, datetime
 
+from .equivalencia import parse_dose, parse_interval
 from .risk import FailureType, Risk
 
 
@@ -41,6 +42,8 @@ class Criterion:
     terms: tuple[str, ...]
     failure: FailureType
     description: str = ""
+    ancora: tuple[str, ...] = ()
+    em_ajuste: bool = False
 
     KINDS = ("contem", "nao_contem", "contem_todos", "valor_numerico", "nao_prescreve")
 
@@ -51,6 +54,29 @@ class Criterion:
             raise ValueError(f"o critério {self.kind!r} precisa de pelo menos um termo")
         if self.kind == "valor_numerico":
             self._check_numeric_terms()
+        if self.ancora or self.em_ajuste:
+            self._check_anchor()
+
+    def _check_anchor(self) -> None:
+        """`ancora` names the drug a dose or an interval has to belong to (rule U2 of docs/METODO.md).
+
+        Only a `contem` or a `valor_numerico` can be anchored, and only when every term is a dose or an
+        interval that `equivalencia` reads: a term it cannot read could not be told apart from a bare
+        number, and the criterion would silently stop matching. `em_ajuste` says the case is about an
+        adjustment, so a value inside one (rule U3) is the dose of the case.
+        """
+        if self.kind not in ("contem", "valor_numerico"):
+            raise ValueError(f"só um critério contem ou valor_numerico pode ter âncora, não {self.kind!r}")
+        if self.em_ajuste and not self.ancora:
+            raise ValueError("em_ajuste só faz sentido num critério com âncora")
+        if not all(isinstance(a, str) and a.strip() for a in self.ancora):
+            raise ValueError(f"a âncora tem de ser fármacos escritos, recebeu {self.ancora!r}")
+        if self.kind == "contem":
+            unreadable = [t for t in self.terms if parse_dose(t) is None and parse_interval(t) is None]
+            if unreadable:
+                raise ValueError(
+                    f"um critério com âncora só aceita doses e intervalos; não consigo ler {unreadable!r}"
+                )
 
     def _check_numeric_terms(self) -> None:
         """A `valor_numerico` is (value, unit) or (value, unit, tolerance).

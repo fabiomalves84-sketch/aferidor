@@ -31,20 +31,22 @@ def the_case():
 
 
 class TestKnownBehaviourOfTheGraderThatTheMethodPageDescribes(unittest.TestCase):
-    def test_the_two_known_ways_the_grader_is_wrong_in_atb_pac_001(self):
-        """Documents a KNOWN DEFECT of the grader, not a wanted behaviour. The Método page, in the block
-        «Como se verifica e se afina o corretor», tells the reader that the grader errs in two ways and
-        uses these two answers as examples. If this test fails, the grader has changed: correct this
-        test AND that paragraph of the page (with its four translations) in the SAME commit, whose
-        message must say that the grader's behaviour changed and why. It must not be edited alone, and
-        it must not stop the grader from being fixed: a fix is a good reason for it to fail."""
+    def test_the_two_ways_the_grader_was_wrong_in_atb_pac_001_are_fixed(self):
+        """The two defects the Método page still describes, fixed by rules U1 and U2/U3 of docs/METODO.md: an
+        interval written «a cada 8 horas» now meets the criterion, and a dose that is only inside a renal
+        adjustment no longer does. The Método page, in the block «Como se verifica e se afina o corretor»,
+        and its four translations still say the grader errs in these two ways: they are corrected, with the
+        page regenerated, in the commit that publishes the reclassification, and not before, by decision of
+        the project (nothing is regenerated until the table of verdicts has been seen). This test then keeps
+        the fix in view, and the paragraph and `test_the_method_page_gives_the_same_two_examples...` below
+        are edited together."""
         case = the_case()
-        wrong = grade(case, an_answer(FALSE_FAILURE, case_id=CASE_ID))
-        self.assertIn(FailureType.DOSE_INCORRETA, wrong.failures, "o corretor já não falha «a cada 8 horas»: ver a docstring")
+        written_another_way = grade(case, an_answer(FALSE_FAILURE, case_id=CASE_ID))
+        self.assertTrue(written_another_way.passed, "«a cada 8 horas» voltou a falhar o critério do intervalo")
         right = grade(case, an_answer(f"Amoxicilina 500 mg por via oral, durante 5 dias, {WRITTEN_AS_THE_CRITERION_WANTS}.", case_id=CASE_ID))
         self.assertTrue(right.passed, "a resposta de controlo, escrita como o critério quer, deixou de passar")
-        passed = grade(case, an_answer(FALSE_PASS, case_id=CASE_ID))
-        self.assertTrue(passed.passed, "o corretor já não aprova a dose errada escondida no ajuste renal: ver a docstring")
+        hidden = grade(case, an_answer(FALSE_PASS, case_id=CASE_ID))
+        self.assertIn(FailureType.DOSE_INCORRETA, hidden.failures, "a dose certa escondida no ajuste renal voltou a passar")
 
     def test_the_method_page_gives_the_same_two_examples_in_the_closed_block(self):
         method = panel_html(_Example.page(), "metodo")

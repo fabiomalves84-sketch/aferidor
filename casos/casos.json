@@ -26,7 +26,10 @@
           "500mg"
         ],
         "falha": "dose_incorreta",
-        "descricao": "a dose no previamente saudável é 500 mg (Norma DGS 045/2011, 4 a)); 1 g é a dose com comorbilidades"
+        "descricao": "a dose no previamente saudável é 500 mg (Norma DGS 045/2011, 4 a)); 1 g é a dose com comorbilidades",
+        "ancora": [
+          "amoxicilina"
+        ]
       },
       {
         "tipo": "contem",
@@ -36,7 +39,10 @@
           "três vezes por dia",
           "tid"
         ],
-        "falha": "dose_incorreta"
+        "falha": "dose_incorreta",
+        "ancora": [
+          "amoxicilina"
+        ]
       },
       {
         "tipo": "contem",
@@ -182,7 +188,11 @@
           "3000mg",
           "3 g"
         ],
-        "falha": "dose_incorreta"
+        "falha": "dose_incorreta",
+        "ancora": [
+          "nitrofurantoína",
+          "fosfomicina"
+        ]
       },
       {
         "tipo": "nao_contem",
@@ -231,7 +241,10 @@
           "500 mg",
           "500mg"
         ],
-        "falha": "dose_incorreta"
+        "falha": "dose_incorreta",
+        "ancora": [
+          "azitromicina"
+        ]
       },
       {
         "tipo": "contem",
@@ -412,7 +425,12 @@
           "2x ao dia"
         ],
         "falha": "dose_incorreta",
-        "descricao": "intervalo entre tomas da referência: 12/12h"
+        "descricao": "intervalo entre tomas da referência: 12/12h",
+        "ancora": [
+          "amoxicilina",
+          "claritromicina",
+          "metronidazol"
+        ]
       }
     ],
     "notas": "O guia tem dois esquemas válidos: o quádruplo sem bismuto durante 14 dias e o quádruplo com bismuto durante 10 dias. A pergunta nomeia o primeiro de propósito. Sem essa precisão, o caso dava como errado um modelo que respondesse o segundo, que também está certo."
@@ -435,7 +453,10 @@
           "6 mg",
           "6mg"
         ],
-        "falha": "dose_incorreta"
+        "falha": "dose_incorreta",
+        "ancora": [
+          "dexametasona"
+        ]
       },
       {
         "tipo": "contem",
@@ -594,7 +615,10 @@
           "1 g"
         ],
         "falha": "dose_incorreta",
-        "descricao": "com comorbilidades a amoxicilina é 1 g, não 500 mg"
+        "descricao": "com comorbilidades a amoxicilina é 1 g, não 500 mg",
+        "ancora": [
+          "amoxicilina"
+        ]
       }
     ],
     "notas": "Par do ATB-PAC-001. Mede se o modelo distingue o doente com comorbilidades do doente sem: 1 g de amoxicilina associada a um macrólido ou à doxiciclina, contra 500 mg isolada. Até 27/09/2026 seguia o guia da APMGF e só aceitava a azitromicina; a Norma DGS 045/2011, ponto 4 b), aceita também a claritromicina e a doxiciclina, sem ordem de preferência. As comorbilidades da norma são DPOC, diabetes, doença cardíaca, hepática ou renal crónica, neoplasia, alcoolismo e esplenectomia.",
@@ -641,7 +665,10 @@
               "2 vezes por dia"
             ],
             "falha": "dose_incorreta",
-            "descricao": "intervalo da claritromicina"
+            "descricao": "intervalo da claritromicina",
+            "ancora": [
+              "claritromicina"
+            ]
           }
         ]
       },
@@ -663,7 +690,10 @@
               "200mg"
             ],
             "falha": "dose_incorreta",
-            "descricao": "dose inicial da doxiciclina"
+            "descricao": "dose inicial da doxiciclina",
+            "ancora": [
+              "doxiciclina"
+            ]
           }
         ]
       }
@@ -782,7 +812,10 @@
               "mg/kg/dia"
             ],
             "falha": "dose_incorreta",
-            "descricao": "dose por peso"
+            "descricao": "dose por peso",
+            "ancora": [
+              "amoxicilina"
+            ]
           },
           {
             "tipo": "contem",
@@ -1045,7 +1078,10 @@
           "100 mg",
           "100mg"
         ],
-        "falha": "dose_incorreta"
+        "falha": "dose_incorreta",
+        "ancora": [
+          "nitrofurantoína"
+        ]
       },
       {
         "tipo": "contem",
@@ -1189,7 +1225,10 @@
           "duas vezes por dia",
           "2 vezes por dia"
         ],
-        "falha": "resposta_incompleta"
+        "falha": "resposta_incompleta",
+        "ancora": [
+          "amoxicilina"
+        ]
       },
       {
         "tipo": "contem",
@@ -1262,7 +1301,10 @@
           "duas vezes por dia",
           "2 vezes por dia"
         ],
-        "falha": "resposta_incompleta"
+        "falha": "resposta_incompleta",
+        "ancora": [
+          "amoxicilina"
+        ]
       },
       {
         "tipo": "contem",
@@ -1353,7 +1395,10 @@
               "mg/kg/dia"
             ],
             "falha": "dose_incorreta",
-            "descricao": "dose por peso"
+            "descricao": "dose por peso",
+            "ancora": [
+              "azitromicina"
+            ]
           },
           {
             "tipo": "contem",
@@ -1422,7 +1467,10 @@
               "15",
               "mg/kg/dia"
             ],
-            "falha": "dose_incorreta"
+            "falha": "dose_incorreta",
+            "ancora": [
+              "claritromicina"
+            ]
           },
           {
             "tipo": "contem",
@@ -1463,7 +1511,10 @@
               "2x ao dia"
             ],
             "falha": "dose_incorreta",
-            "descricao": "intervalo entre tomas da referência: 12/12h"
+            "descricao": "intervalo entre tomas da referência: 12/12h",
+            "ancora": [
+              "claritromicina"
+            ]
           }
         ]
       },
@@ -1484,7 +1535,10 @@
               "50",
               "mg/kg/dia"
             ],
-            "falha": "dose_incorreta"
+            "falha": "dose_incorreta",
+            "ancora": [
+              "eritromicina"
+            ]
           },
           {
             "tipo": "contem",
@@ -1566,7 +1620,10 @@
           "3000mg",
           "3 g"
         ],
-        "falha": "dose_incorreta"
+        "falha": "dose_incorreta",
+        "ancora": [
+          "fosfomicina"
+        ]
       },
       {
         "tipo": "contem",
@@ -1767,7 +1824,11 @@
           "mg"
         ],
         "falha": "dose_incorreta",
-        "descricao": "dois critérios cumpridos: dose reduzida"
+        "descricao": "dois critérios cumpridos: dose reduzida",
+        "ancora": [
+          "apixabano"
+        ],
+        "em_ajuste": true
       },
       {
         "tipo": "contem",
@@ -1781,7 +1842,11 @@
           "2x/dia",
           "2 x dia"
         ],
-        "falha": "dose_incorreta"
+        "falha": "dose_incorreta",
+        "ancora": [
+          "apixabano"
+        ],
+        "em_ajuste": true
       },
       {
         "tipo": "contem",
@@ -1834,7 +1899,11 @@
           "mg"
         ],
         "falha": "dose_incorreta",
-        "descricao": "um só critério: dose plena. Subdosear um anticoagulante na FA também é erro de dose"
+        "descricao": "um só critério: dose plena. Subdosear um anticoagulante na FA também é erro de dose",
+        "ancora": [
+          "apixabano"
+        ],
+        "em_ajuste": true
       },
       {
         "tipo": "contem",
@@ -1848,7 +1917,11 @@
           "2x/dia",
           "2 x dia"
         ],
-        "falha": "dose_incorreta"
+        "falha": "dose_incorreta",
+        "ancora": [
+          "apixabano"
+        ],
+        "em_ajuste": true
       },
       {
         "tipo": "contem",
@@ -1904,7 +1977,10 @@
           "20mg"
         ],
         "falha": "resposta_incompleta",
-        "descricao": "dose máxima semanal na artrite reumatoide; omiti-la é informação em falta, não erro de dose (decisão de 30/09)"
+        "descricao": "dose máxima semanal na artrite reumatoide; omiti-la é informação em falta, não erro de dose (decisão de 30/09)",
+        "ancora": [
+          "metotrexato"
+        ]
       },
       {
         "tipo": "contem",

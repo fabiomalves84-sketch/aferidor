@@ -54,7 +54,18 @@ def criterion_from_dict(data: dict, where: str) -> Criterion:
         terms=tuple(str(t) for t in terms),
         failure=failure_from_label(str(_require(data, "falha", where))),
         description=str(data.get("descricao", "")),
+        ancora=_anchor_from(data, where),
+        em_ajuste=bool(data.get("em_ajuste", False)),
     )
+
+
+def _anchor_from(data: dict, where: str) -> tuple[str, ...]:
+    anchor = data.get("ancora", [])
+    if isinstance(anchor, str):
+        anchor = [anchor]
+    if not isinstance(anchor, list):
+        raise ValueError(f"{where}: 'ancora' tem de ser um texto ou uma lista")
+    return tuple(str(a) for a in anchor)
 
 
 def criterion_to_dict(criterion: Criterion) -> dict:
@@ -65,6 +76,10 @@ def criterion_to_dict(criterion: Criterion) -> dict:
     }
     if criterion.description:
         out["descricao"] = criterion.description
+    if criterion.ancora:
+        out["ancora"] = list(criterion.ancora)
+    if criterion.em_ajuste:
+        out["em_ajuste"] = True
     return out
 
 

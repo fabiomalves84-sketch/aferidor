@@ -104,19 +104,26 @@ class TestSourcesPage(unittest.TestCase):
 
 
 class TestConclusionsPage(unittest.TestCase):
-    """What the numbers allow saying and what they do not, all of it calculated from the report's data."""
+    """What the numbers allow saying and what they do not, all of it calculated from the report's data.
+
+    The numbers of the example are those of the stored answers graded by the current corrector. They changed
+    when rules U1 to U3 began to be followed (anchored doses and intervals): the best model went from 8 to 10 of 27
+    critical failures (McNemar p from 0,375 to 0,453, interval 16% to 48% becomes 22% to 56%) and the Gemini
+    alone from 11 to 13 (25% to 59% becomes 31% to 66%). The sentences that do not read the example (the tests
+    with explicit counts, such as 8 of 27 below) are unchanged.
+    """
 
     def test_the_example_says_what_can_and_cannot_be_concluded(self):
         text = conclusions_text(_Example.page())
         for sentence in (
             "Pode concluir-se",
-            "Nenhum dos 4 modelos cumpre o limiar de referência (que não é um protocolo prévio). O melhor tem 8 de 27 casos com falha crítica.",
-            "Entre os dois melhores, a diferença pode ser acaso (teste de McNemar exato, p = 0,375).",
+            "Nenhum dos 4 modelos cumpre o limiar de referência (que não é um protocolo prévio). O melhor tem 10 de 27 casos com falha crítica.",
+            "Entre os dois melhores, a diferença pode ser acaso (teste de McNemar exato, p = 0,453).",
             "Não se pode concluir",
             "Que os modelos locais representem os comerciais.",
             "Que um veredicto seja validação clínica: é triagem, sem revisão por especialista.",
             "Que uma falha crítica seja sempre um erro real do modelo: o corretor é heurístico, com falsos passes e falsos falhanços conhecidos (ver Método).",
-            "Nada de firme sobre outros casos: com 27 casos os intervalos são largos (8 de 27 é compatível com 16% a 48%).",
+            "Nada de firme sobre outros casos: com 27 casos os intervalos são largos (10 de 27 é compatível com 22% a 56%).",
             "Que as fontes estejam confirmadas: neste banco, uma a uma 9, em grupo 11, por confirmar 7 (ver Fontes).",
             "Este relatório não recomenda nenhum modelo: mede, não aconselha.",
         ):
@@ -139,7 +146,7 @@ class TestConclusionsPage(unittest.TestCase):
 
     def test_if_the_best_model_changes_with_the_data_the_sentence_follows(self):
         text = conclusions_text(example_page_of((GEMINI,)))
-        self.assertIn("(11 de 27 é compatível com 25% a 59%)", text)
+        self.assertIn("(13 de 27 é compatível com 31% a 66%)", text)
 
     def test_the_sources_line_names_the_three_categories_read_by_fontes(self):
         page = _Example.page()
@@ -180,7 +187,7 @@ class TestConclusionsPage(unittest.TestCase):
         self.assertIn("Entre os dois melhores, a diferença é estatisticamente significativa (teste de McNemar exato, p < 0,001).", text)
         single = conclusions_text(example_page_of((GEMINI,)))
         self.assertNotIn("McNemar", single)
-        self.assertIn("O modelo não cumpre o limiar de referência (que não é um protocolo prévio). Tem 11 de 27 casos com falha crítica.", single)
+        self.assertIn("O modelo não cumpre o limiar de referência (que não é um protocolo prévio). Tem 13 de 27 casos com falha crítica.", single)
 
     def test_without_local_models_there_is_no_line_about_them(self):
         text = conclusions_text(example_page_of((GEMMA, GEMINI)))

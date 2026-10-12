@@ -9,7 +9,8 @@ Two limits are deliberate. "N times a day" is read as 24 / N hours, which is ari
 the case bank already accepts "três vezes por dia" for 8/8. And only a form that says "every": a bare "8 horas"
 is a duration and is not an interval, nor is a range such as "8-12h".
 
-Nothing here is wired into the grader yet.
+`checks` uses it to read a `contem` criterion that asks for a dose or an interval, and to find the doses and
+intervals an answer writes, with the places where they sit.
 """
 
 from __future__ import annotations
@@ -24,7 +25,8 @@ _TOLERANCE = 1e-9
 _NUMBER = r"(?:[1-9]\d{0,2}(?:[.\ ]\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)"
 
 _MASS = {"mg": 1.0, "g": 1000.0, "mcg": 0.001, "ug": 0.001, "µg": 0.001}
-_UNIT = r"(?:mg|mcg|ug|µg|g|ui|u)"
+_UNIT = r"(?:miligramas?|microgramas?|gramas?|mg|mcg|ug|µg|g|ui|u)"
+_SPELLED_UNIT = {"miligrama": "mg", "miligramas": "mg", "micrograma": "mcg", "microgramas": "mcg", "grama": "g", "gramas": "g"}
 # What may follow the unit: per kilo, per kilo per day, per day, or a concentration (per ml), which is none of them.
 _PER = r"(?:\s*/\s*kg(?:\s*/\s*(?:dia|d))?|\s*/\s*dia|\s*/\s*(?:\d+(?:[.,]\d+)?\s*)?ml)?"
 _DOSE = re.compile(rf"(?<![\d.,/])(?P<number>{_NUMBER})\s*(?P<unit>{_UNIT})(?P<per>{_PER})(?![a-z0-9])")
@@ -37,7 +39,7 @@ _SPELLED_HOURS = {
 _ACRONYMS = {"qd": 24, "od": 24, "bid": 12, "tid": 8, "qid": 6}
 
 _EVERY = r"(?<![a-z0-9])(?:a\s+)?cada\s+(?P<every>\d+(?:[.,]\d+)?)\s*(?:horas?|hs?)(?![a-z])"
-_SLASH = r"(?<![\d.,/])(?P<n1>\d+)\s*(?:/|-|\\)\s*(?P<n2>\d+)\s*(?:horas?|hs?)?(?![\d/])"
+_SLASH = r"(?<![\d.,/-])(?P<n1>\d+)\s*(?:/|-|\\)\s*(?P<n2>\d+)\s*(?:horas?|hs?)?(?![\d/])"
 _IN = r"(?<![a-z0-9])(?:de\s+)?(?P<m1>\d+)\s+em\s+(?P<m2>\d+)(?:\s*(?:horas?|hs?))?(?![\d])"
 _SPELLED = (
     r"(?<![a-z])(?:de\s+)?(?P<s1>seis|oito|doze|vinte e quatro|quarenta e oito|setenta e duas)\s+em\s+"
@@ -101,7 +103,7 @@ def _number(raw: str) -> float:
 
 def _dose_of(match: re.Match[str]) -> Dose | None:
     amount = _number(match.group("number"))
-    unit = match.group("unit")
+    unit = _SPELLED_UNIT.get(match.group("unit"), match.group("unit"))
     per = re.sub(r"\s+", "", match.group("per") or "")
     if unit in _MASS:
         amount, base = amount * _MASS[unit], "mg"
@@ -136,9 +138,12 @@ def parse_dose(text: str) -> Dose | None:
 def same_dose(a: str, b: str) -> bool:
     """Whether two written doses are the same quantity of the same thing. Unparseable text is never the same."""
     first, second = parse_dose(a), parse_dose(b)
-    if first is None or second is None or first.unit != second.unit:
-        return False
-    return abs(first.amount - second.amount) <= _TOLERANCE * max(1.0, abs(first.amount))
+    return first is not None and second is not None and same_quantity(first, second)
+
+
+def same_quantity(a: Dose, b: Dose) -> bool:
+    """Whether two parsed doses are the same amount of the same unit."""
+    return a.unit == b.unit and abs(a.amount - b.amount) <= _TOLERANCE * max(1.0, abs(a.amount))
 
 
 def _hours_of(match: re.Match[str]) -> float | None:
@@ -189,6 +194,6 @@ def same_interval(a: str, b: str) -> bool:
 
 
 __all__ = [
-    "Dose", "DoseFound", "IntervalFound", "fold", "find_doses", "parse_dose", "same_dose",
+    "Dose", "DoseFound", "IntervalFound", "fold", "find_doses", "parse_dose", "same_dose", "same_quantity",
     "find_intervals", "parse_interval", "same_interval",
 ]

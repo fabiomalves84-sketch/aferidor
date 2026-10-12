@@ -21,6 +21,7 @@ from .catalogo import FIXED_TEMPERATURES, Catalog, Model, load_catalog
 from .custos import JsonlError, Ledger, estimate, format_estimate
 from .grading import (
     grade_all,
+    anchors_missing,
     met_by_the_question,
     self_check,
     tally_by_model,
@@ -649,6 +650,14 @@ def comando_verificar(args: argparse.Namespace) -> int:
             found = ", ".join(f.value for f in verdict.failures) or "nenhuma falha"
             print(f"  o veredicto deu: {found}", file=sys.stderr)
 
+    unanchored = anchors_missing(cases)
+    for case, criterion, name in unanchored:
+        print(
+            f"\n{case.case_id}: a âncora {name!r} do critério {criterion.kind} {list(criterion.terms)}"
+            " não aparece na resposta de referência",
+            file=sys.stderr,
+        )
+
     echoes = met_by_the_question(cases)
     if echoes:
         print(
@@ -658,7 +667,7 @@ def comando_verificar(args: argparse.Namespace) -> int:
         )
         for case, criterion in echoes:
             print(f"  {case.case_id}: {criterion.kind} {list(criterion.terms)}", file=sys.stderr)
-    return 1 if broken or uncaught else 0
+    return 1 if broken or uncaught or unanchored else 0
 
 
 def comando_comparar(args: argparse.Namespace) -> int:
@@ -957,7 +966,10 @@ def comando_ensaio(args: argparse.Namespace) -> int:
     cases = read_cases(args.casos)
     broken = self_check(cases)
     _, uncaught = uncaught_controls(cases)
-    if broken or uncaught:
+    unanchored = anchors_missing(cases)
+    if broken or uncaught or unanchored:
+        for case, _, name in unanchored:
+            print(f"erro: {case.case_id} tem a âncora {name!r} que a referência não nomeia", file=sys.stderr)
         for case, _ in broken:
             print(f"erro: {case.case_id} não passa nos próprios critérios", file=sys.stderr)
         for control, _ in uncaught:
