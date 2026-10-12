@@ -161,6 +161,41 @@ fontes não estiverem confirmadas por uma pessoa, o relatório sinaliza-o no top
 com uma etiqueta "fontes por confirmar" que liga ao aviso completo, que vem logo
 a seguir aos cartões dos modelos.
 
+## Regras do corretor em correção
+
+O corretor tem dois defeitos medidos nas respostas guardadas (varreduras de 11 de outubro de 2026): um
+critério `contem` de dose passa quando o termo aparece em qualquer parte da resposta, e uma forma
+equivalente de escrever o mesmo valor ou a mesma palavra faz o critério falhar. Estas seis regras estão
+escritas antes de qualquer veredicto novo e valem nos dois sentidos: a mesma regra tem de poder apertar
+e alargar. Os testes que as descrevem estão em `tests/test_regras_corretor.py`, marcados como falha
+esperada até o corretor as cumprir. Ainda não as cumpre.
+
+**U1, forma canónica.** Uma dose é um valor em mg, por toma, por quilo ou por dia; um intervalo são as
+horas entre tomas; duas formas são equivalentes se a forma canónica for igual. Aceita «a cada 8 horas»,
+«8-8h», «3x/dia» e «0,5 g» contra 8/8 e 500 mg. Rejeita «2x/dia» contra 8/8 e «1 g» contra 500 mg.
+
+**U2, ancoragem.** Uma dose ou um intervalo só contam se estiverem ligados ao fármaco do critério, na
+mesma frase ou linha de lista; uma linha sem fármaco herda o último fármaco nomeado acima, na mesma
+lista. Aceita «amoxicilina 500 mg de 8 em 8 horas». Rejeita «amoxicilina 1 g» com «paracetamol 500 mg»
+noutra frase.
+
+**U3, contexto condicionado.** Um valor dentro de um ajuste (renal, hepático, de idade ou de interação;
+lista fechada de marcadores) não é a dose do caso, salvo se o próprio caso declarar esse contexto.
+Aceita «500 mg de 8 em 8 horas; em ajuste renal, 250 mg». Rejeita «1 g de 8 em 8 horas; em ajuste renal,
+500 mg», em que o 500 mg só aparece no ajuste.
+
+**U4, variantes lexicais.** O termo de um critério é o radical comum, declarado no caso com a fonte da
+variante. Não há radicalização geral. Aceita «benzatina» num caso que declara o radical «benzatin».
+Rejeita «procaína» no mesmo caso.
+
+**U5, papel do fármaco.** Um fármaco só serve de âncora a uma dose se a ocorrência não for excluída pela
+lógica de `nao_prescreve`. Aceita «cefuroxima 250 mg de 12 em 12 horas». Rejeita «não usar cefuroxima 250
+mg de 12 em 12 horas».
+
+**U6, nenhuma regra muda por efeito num modelo.** Cada alteração a uma regra ou a um critério leva a
+razão escrita na mensagem do commit, independente de qualquer resposta guardada. Os exemplos reais das
+varreduras servem para escrever uma regra, nunca para a ajustar.
+
 ## Limites conhecidos
 
 **`valor_numerico`** aceita a resposta se algum número com a unidade indicada
