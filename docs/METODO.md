@@ -211,6 +211,40 @@ que diga «15 mg a 20 mg» cumpre. Não foi corrigido, de propósito: seria a va
 Registado a 12 de outubro de 2026, depois de a assimetria aparecer em respostas do metotrexato (DOS-MTX-027) e da
 nitrofurantoína (FMT-CIST-017).
 
+### Limitações conhecidas do corretor (12/10/2026)
+
+Depois das correções pós-hoc acima, três padrões continuam a dar veredictos errados. Foram medidos e estão aqui
+escritos, não escondidos.
+
+**(i) Outro fármaco na frase que abre a secção.** A U2 só deixa de dar a dose a um fármaco nomeado em comparação ou em
+alergia, com a lista fechada da P2. Um fármaco nomeado noutra frase, entre o cabeçalho e a dose, continua a ficar com
+ela. Exemplo: ATB-FAR-004, Gemma 3 12B, amostra 1, critério «500 mg» ancorado à azitromicina. A secção diz «Azitromicina:
+É uma alternativa, especialmente se a clindamicina estiver contraindicada» e a seguir «dose: 500 mg, oral, dose única
+diária». A dose é da azitromicina e o corretor dá-a à clindamicina, e a resposta passa a falhar. Mesma coisa em FAR-004,
+Gemma 3 12B, amostra 5 («inferior à da clindamicina»). **Decisão:** não corrigido.
+
+**(ii) Texto de contraindicação numa linha de tabela, antes da dose.** A U3 toma «ClCr», «insuficiência renal» e afins
+como condição, e numa linha só o que vem antes da dose condiciona-a. Exemplo: FMT-CIST-017, Gemma 4 26B, amostras 1, 2 e 4,
+critério «100 mg» ancorado à nitrofurantoína: «NITROFURANTOÍNA (Contraindicações: Insuficiência renal grave [ClCr < 30
+mL/min] ...) | 100 mg | 12/12h | 5 dias». A dose é a da nitrofurantoína e o corretor tem-na por condicionada, e a
+resposta passa a falhar. **Decisão:** não corrigido.
+
+**(iii) Critério sem âncora que passa por forma equivalente no sítio errado.** Um critério sem `ancora` aceita agora a
+forma equivalente em qualquer parte da resposta. Exemplo: ATB-FAR-014, Phi-4, amostra 4, critério «12/12»: a
+recomendação é cefalexina de 6 em 6 horas e o corretor aceita «500 mg q12h» que vem num ajuste renal da cefalexina.
+Falso passe novo. **Decisão:** resolve-se com a âncora do caso, que se escreve no commit do FAR-014, e não com uma regra.
+
+**Porque (i) e (ii) não se corrigem.** Alargar a lista da P2 ou estreitar a lista da U3 para estes casos seria acertar
+listas fechadas a poucos casos que se viram, e essa é a afinação pelo efeito que a U6 proíbe. O erro residual fica
+medido e reportado: ver a seguir.
+
+**O que se mediu, e com que limites.** Leitura de 23 mudanças de veredicto ao nível do critério (18 critérios críticos
+dentro de respostas que já falhavam e 5 respostas em que mudou a alternativa escolhida): (a) correta 15, (b) errada 6,
+(c) ambígua 2. Amostra aleatória de 40 respostas que passam sem mudança e têm pelo menos um critério ancorado (semente
+20261012): 38 passes corretos, 0 falsos passes, 2 ambíguos. **O leitor é um só**, sem revisão por mais ninguém, e os
+critérios sem âncora **não foram amostrados**, por isso a taxa de falsos passes deles não está medida (o exemplo (iii)
+mostra que existe). Com 40 respostas, 0 falsos passes é compatível com uma taxa de falsos passes até cerca de 7 %.
+
 **U1, forma canónica.** Uma dose é um valor em mg, por toma, por quilo ou por dia; um intervalo são as
 horas entre tomas; duas formas são equivalentes se a forma canónica for igual. Aceita «a cada 8 horas»,
 «8-8h», «3x/dia» e «0,5 g» contra 8/8 e 500 mg. Rejeita «2x/dia» contra 8/8 e «1 g» contra 500 mg.
