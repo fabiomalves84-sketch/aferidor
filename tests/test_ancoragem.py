@@ -216,7 +216,8 @@ class TestTheAnchorsOfTheBank(unittest.TestCase):
             (case.case_id, criterion.terms[0])
             for case in self.cases() for criterion in case.all_criteria if criterion.ancora
         }
-        self.assertEqual(len(anchored), 25)
+        self.assertEqual(len(anchored), 26)
+        self.assertIn(("ATB-PIEL-006", "12/12"), anchored)
         self.assertIn(("ATB-PAC-001", "500 mg"), anchored)
         self.assertIn(("ATB-FAR-014", "250 mg"), anchored)
         self.assertIn(("ATB-FAR-014", "12/12"), anchored)

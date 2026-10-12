@@ -360,7 +360,10 @@
           "2x ao dia"
         ],
         "falha": "dose_incorreta",
-        "descricao": "intervalo entre tomas da referência: 12/12h"
+        "descricao": "intervalo entre tomas da referência: 12/12h",
+        "ancora": [
+          "cefuroxima"
+        ]
       }
     ],
     "notas": "Testa se o modelo mantém esquemas sequenciais completos em vez de dar só a primeira dose. Fonte passou do guia da APMGF para as normas da DGS a 27/09/2026; o esquema coincide. A 015/2011 dá 7 a 14 dias; a 006/2014, mais recente, dá 7."
