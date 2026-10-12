@@ -37,6 +37,7 @@ corretor (`checks`, `grading`) não a conhece: o que mede não depende dela.
 | `pago.py` | A guarda que o `runner` põe à volta de cada chamada a um modelo que custa dinheiro (um modelo que o catálogo lista): reservar, chamar, liquidar, escrever a proveniência, conferir o modelo servido. O `runner` só lhe entrega a tentativa; não sabe de preços |
 | `runner.py` | Execução dos casos, com repetições, novas tentativas e retoma; para um modelo pago entrega cada tentativa a `pago.py` |
 | `checks.py` | Avaliação de uma resposta contra um critério |
+| `equivalencia.py` | Quando duas doses ou dois intervalos escritos são o mesmo (regra U1 do `docs/METODO.md`): funções puras, sem importar nada do pacote. Ainda não está ligada ao corretor nem aos `GRADER_FILES` |
 | `grading.py` | Veredictos, contagens por risco, consistência entre amostras, controlos negativos e comparação com uma correção gravada |
 | `report.py` | Relatório em Markdown |
 | `condicoes.py` | O que os dois relatórios dizem do ensaio antes dos resultados: as condições em que foi feito, os casos e as amostras que não vieram, e o que o protocolo faz deles |
