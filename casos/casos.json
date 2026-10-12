@@ -738,7 +738,9 @@
         ],
         "falha": "dose_incorreta",
         "ancora": [
-          "amoxicilina"
+          "amoxicilina",
+          "clavulânico",
+          "clavulanico"
         ]
       },
       {
@@ -775,7 +777,9 @@
         "falha": "dose_incorreta",
         "descricao": "intervalo entre tomas da referência: 8/8h",
         "ancora": [
-          "amoxicilina"
+          "amoxicilina",
+          "clavulânico",
+          "clavulanico"
         ]
       }
     ],
