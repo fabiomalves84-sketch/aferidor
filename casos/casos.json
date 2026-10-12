@@ -730,7 +730,10 @@
           "500 mg",
           "500mg"
         ],
-        "falha": "dose_incorreta"
+        "falha": "dose_incorreta",
+        "ancora": [
+          "amoxicilina"
+        ]
       },
       {
         "tipo": "contem",
@@ -764,7 +767,10 @@
           "3x ao dia"
         ],
         "falha": "dose_incorreta",
-        "descricao": "intervalo entre tomas da referência: 8/8h"
+        "descricao": "intervalo entre tomas da referência: 8/8h",
+        "ancora": [
+          "amoxicilina"
+        ]
       }
     ],
     "notas": "Par do ATB-DPOC-002. Mede se o modelo separa a exacerbação ligeira da grave. A 27/09/2026 a duração passou a 5 a 7 dias, pela Norma DGS 005/2019, que coincide no fármaco e não dá dose."

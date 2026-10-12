@@ -247,13 +247,13 @@ class TestTheAnchorsOfTheBank(unittest.TestCase):
             (case.case_id, criterion.terms[0])
             for case in self.cases() for criterion in case.all_criteria if criterion.ancora
         }
-        self.assertEqual(len(anchored), 26)
+        self.assertEqual(len(anchored), 28)
+        self.assertIn(("ATB-DPOC-012", "500 mg"), anchored)
         self.assertIn(("ATB-PIEL-006", "12/12"), anchored)
         self.assertIn(("ATB-PAC-001", "500 mg"), anchored)
         self.assertIn(("ATB-FAR-014", "250 mg"), anchored)
         self.assertIn(("ATB-FAR-014", "12/12"), anchored)
-        for case_id in ("ATB-DPOC-012", "ATB-DPOC-002"):  # the two cases that come in their own commits
-            self.assertFalse({c for c, _ in anchored} & {case_id}, case_id)
+        self.assertFalse({c for c, _ in anchored} & {"ATB-DPOC-002"})  # the last case, in its own commit
 
     def test_the_reference_of_an_anchored_case_still_passes_and_the_controls_still_catch_a_wrong_dose(self):
         case = next(c for c in self.cases() if c.case_id == "ATB-PAC-001")
