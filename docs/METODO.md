@@ -221,6 +221,19 @@ Só vale para a âncora: o `nao_prescreve` fica como estava. **A U3 não leva es
 sempre um rótulo antes de «:» («ClCr 10-30: 500 mg»), a estrutura inversa, e acabar o âmbito nos dois pontos fazia passar o
 valor condicionado, o que dava 5 falsos passes em ATB-PAC-001 (medidos e não adotados).
 
+**Divergência entre implementação e documento, achada na leitura de ATB-DPOC-002, pós-hoc de 12 de outubro de 2026.** A P1 acima
+diz que uma dose sem nenhum fármaco nomeado antes dela, em toda a resposta, pertence ao primeiro fármaco nomeado depois; o código
+dava a dose ao fármaco à direita na mesma linha antes de olhar para o último fármaco nomeado acima, e o docstring dizia o mesmo.
+O documento é a autoridade e o código foi conformado a ele: com um fármaco nomeado acima, a dose fica com o último nomeado, seja
+o que for que a linha nomeie mais à direita. Razão: «1. Amoxicilina ⏎ - Dose: 500 mg 3 vezes ao dia (em caso de penicilina alergia
+usar outro)» dava a dose à penicilina, e a mesma linha com «Azitromicina ⏎ Dose: 500 mg (amoxicilina)» dava-a à amoxicilina.
+Corrigir só isto deixava um falso falhanço, «Dose: 500 mg de amoxicilina + 125 mg de clavulanato» logo abaixo de um nome em que o
+último fármaco é o clavulanato, por isso a ordem de ligação passou a ser, escrita como princípio e não como lista: (1) uma dose
+seguida logo de «de», «do» ou «da» e um fármaco liga-se a esse fármaco; (2) senão, ao fármaco mais próximo antes, na linha; (3)
+senão, ao último nomeado acima; (4) senão, ao primeiro nomeado depois. Medido em todas as 1688 respostas guardadas, antes e
+depois: nenhum critério muda de passa para falha e uma resposta passa de falha a passa, a do falso falhanço atrás (ATB-DPOC-002,
+Qwen a3). Decidido depois de ler as mudanças, por princípio e não pelo efeito num modelo.
+
 ### Limitações conhecidas do corretor (12/10/2026)
 
 Depois das correções pós-hoc acima, três padrões continuam a dar veredictos errados. Foram medidos e estão aqui

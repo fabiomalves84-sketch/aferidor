@@ -567,14 +567,15 @@ def _excluded_in_its_clause(segment: str, start: int, end: int) -> bool:
 def _anchored(text: str, anchors: tuple[str, ...], found: list, in_adjustment: bool) -> list:
     """The found doses or intervals that belong to one of the `anchors` and are not inside a condition.
 
-    A value belongs to the nearest drug named before it in its line or sentence; with none before it in the unit, to the
-    first named after it in the unit ("500 mg de amoxicilina"); with none in the unit, to the drug named last above,
-    so "Fármaco: amoxicilina" followed by "Dose: 1 g" is amoxicillin's dose; and with no drug named above it
-    anywhere in the answer, to the first drug named after it. An anchor named in order to exclude it owns nothing, nor
-    does a drug named in a comparison or an allergy, and "amoxicilina com ácido clavulânico" is one drug. An
-    exclusion marker is worth what lies in its own clause: a colon, a semicolon or the start of a new line or list
-    item ends it. A condition marker is not given that scope: it is usually a label before a colon ("ClCr 10-30:
-    500 mg"), which is the inverse structure, so it keeps reaching the rest of its line.
+    The order of binding: (1) a value straight followed by "de", "do" or "da" and a drug ("500 mg de amoxicilina") belongs to
+    that drug; (2) else to the nearest drug named before it in its line or sentence; (3) else to the drug named last
+    above, so "Fármaco: amoxicilina" followed by "Dose: 1 g" is amoxicillin's dose, whatever else that line names
+    further to the right; (4) else, with no drug named above it anywhere in the answer (rule P1 of docs/METODO.md), to
+    the first drug named after it. An anchor named in order to exclude it owns nothing, nor does a drug named in a
+    comparison or an allergy, and "amoxicilina com ácido clavulânico" is one drug. An exclusion marker is worth what lies
+    in its own clause: a colon, a semicolon or the start of a new line or list item ends it. A condition marker is not
+    given that scope: it is usually a label before a colon ("ClCr 10-30: 500 mg"), which is the inverse structure, so it
+    keeps reaching the rest of its line.
     """
     names = [fold(a).strip() for a in anchors]
     lexicon = [d for d in KNOWN_DRUGS if not any(d in n or n in d for n in names)]
@@ -586,7 +587,8 @@ def _anchored(text: str, anchors: tuple[str, ...], found: list, in_adjustment: b
             for a, b, is_anchor in _mentions_of(segment, names, lexicon)
         ]
         units.append((start, end, fresh, segment, mentions))
-    owner_is_anchor = next((m[2] for *_, mentions in units for m in mentions[:1]), False)
+    owner_is_anchor = next((m[2] for *_, mentions in units for m in mentions[:1]), False)  # the first drug named
+    named_above = False
     in_condition = False
     kept = []
     for start, end, fresh, segment, mentions in units:
@@ -599,12 +601,22 @@ def _anchored(text: str, anchors: tuple[str, ...], found: list, in_adjustment: b
             at = item.start - start
             before = [m for m in mentions if m[1] <= at]
             after = [m for m in mentions if m[0] >= at]
-            belongs = before[-1][2] if before else after[0][2] if after else owner_is_anchor
+            of_a_drug = re.match(r"\s*d[eao]s?\s+", segment[item.end - start:])
+            bound = of_a_drug and next((m for m in mentions if m[0] == item.end - start + of_a_drug.end()), None)
+            if bound:  # "500 mg de amoxicilina": the drug the dose is straight said to be "of"
+                belongs = bound[2]
+            elif before:
+                belongs = before[-1][2]
+            elif named_above:
+                belongs = owner_is_anchor
+            else:  # no drug before it in the whole answer: the first one named after it
+                belongs = after[0][2] if after else owner_is_anchor
             conditional = (marker is not None and marker.start() < at) or (in_condition and not mentions)
             if belongs and (in_adjustment or not conditional):
                 kept.append(item)
         if mentions:
             owner_is_anchor = mentions[-1][2]
+            named_above = True
         in_condition = marker is not None or (in_condition and not mentions)
     return kept
 

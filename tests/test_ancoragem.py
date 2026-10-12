@@ -152,6 +152,54 @@ class TestTheScopeOfTheExclusionEndsWithItsClause(unittest.TestCase):
         self.assertTrue(passes(dose(terms=("250 mg",), anchors=("cefuroxima",)), "Evitar cefuroxima 250 mg 12/12 h"))
 
 
+class TestTheDoseWithNoDrugBeforeItFollowsTheDocument(unittest.TestCase):
+    """P1 as docs/METODO.md writes it: a dose with no drug named before it, in the whole answer, belongs to the first
+    drug named after it. With a drug named above, the dose keeps the drug named last above, whatever else its line
+    names further to the right. Invented sentences."""
+
+    def test_a_line_under_the_drug_keeps_it_even_if_the_line_names_another_drug_after_the_dose(self):
+        c = dose()
+        self.assertTrue(passes(c, "1. Amoxicilina\n- Dose: 500 mg 3 vezes ao dia (em caso de penicilina alergia usar outro)"))
+        self.assertTrue(passes(c, "Amoxicilina\nDose: 500 mg (penicilina)"))
+
+    def test_a_dose_after_another_drug_is_still_that_drugs(self):
+        c = dose()
+        self.assertFalse(passes(c, "Azitromicina 500 mg; amoxicilina 250 mg"))
+        self.assertFalse(passes(c, "Azitromicina\nDose: 500 mg (amoxicilina)"))
+
+    def test_a_dose_with_no_drug_before_it_in_the_answer_goes_to_the_first_drug_after_it(self):
+        c = dose()
+        self.assertTrue(passes(c, "500 mg de amoxicilina"))
+        self.assertTrue(passes(c, "Dose: 500 mg\nFármaco: amoxicilina"))
+        self.assertFalse(passes(c, "500 mg de azitromicina e de amoxicilina"))
+        self.assertFalse(passes(c, "Dose: 500 mg\nFármaco: azitromicina\nOu amoxicilina"))
+
+
+class TestADoseFollowedByOfAndADrugBelongsToThatDrug(unittest.TestCase):
+    """Order of binding, post hoc of 12 October 2026, stated as a principle: (1) a dose straight followed by «de», «do» or
+    «da» and a drug belongs to that drug; (2) else the nearest drug before it in its line; (3) else the drug named
+    last above; (4) else the first named after it. Invented sentences."""
+
+    def test_a_dose_of_the_anchor_after_a_line_that_ends_in_another_drug_still_goes_to_the_anchor(self):
+        c = dose()
+        self.assertTrue(passes(c, "Amoxicilina/clavulanato\n### Dose:\n- 500 mg de amoxicilina + 125 mg de clavulanato duas vezes ao dia"))
+        self.assertTrue(passes(c, "1. Amoxicilina/Ácido Clavulânico\n- Dose: 875/125 mg (ou 500 mg de amoxicilina associada a 125 mg de ácido clavulânico)"))
+        self.assertTrue(passes(c, "Paracetamol 1 g. Depois: 500 mg do amoxicilina"))
+
+    def test_a_dose_of_another_drug_goes_to_that_drug_even_under_the_anchor(self):
+        c = dose()
+        self.assertFalse(passes(c, "Amoxicilina\nDose: 500 mg de azitromicina"))
+        self.assertFalse(passes(c, "500 mg de azitromicina e de amoxicilina"))
+        self.assertFalse(passes(c, "Amoxicilina 1 g. Tomar 500 mg da claritromicina"))
+
+    def test_the_other_steps_of_the_order_are_unchanged(self):
+        c = dose()
+        self.assertFalse(passes(c, "Azitromicina\nDose: 500 mg (amoxicilina)"))
+        self.assertFalse(passes(c, "Azitromicina 500 mg; amoxicilina 250 mg"))
+        self.assertTrue(passes(c, "Amoxicilina\nDose: 500 mg (penicilina)"))
+        self.assertTrue(passes(c, "500 mg de amoxicilina"))
+
+
 class TestBeforeThereWasAnAnchor(unittest.TestCase):
     def test_a_criterion_without_an_anchor_still_matches_anywhere_and_now_in_every_form(self):
         plain = Criterion(kind="contem", terms=("500 mg", "500mg"), failure=FailureType.DOSE_INCORRETA)
