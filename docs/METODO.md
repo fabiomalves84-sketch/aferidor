@@ -211,6 +211,16 @@ que diga «15 mg a 20 mg» cumpre. Não foi corrigido, de propósito: seria a va
 Registado a 12 de outubro de 2026, depois de a assimetria aparecer em respostas do metotrexato (DOS-MTX-027) e da
 nitrofurantoína (FMT-CIST-017).
 
+**Âmbito da exclusão da âncora (U5), pós-hoc de 12 de outubro de 2026.** Um marcador de exclusão vale para o que está na
+mesma oração, e uma oração acaba em «:», em «;» ou no fim da linha ou do item de lista. Razão: falso falhanço em «Alternativas
+quando as quinolonas não são adequadas: cefuroxima-axetil 500 mg 12/12 h», onde o «não são adequadas» da oração anterior
+excluía a cefuroxima que vem depois dos dois pontos (resposta de `ensaios/2026-09-14-agente` ao caso ATB-PIEL-006). É um
+princípio estrutural e não uma lista: não se acrescentou nenhum termo. Medido em todas as 1688 respostas guardadas, nos dez
+ensaios: muda um só critério, de falha para passa, o do intervalo desse caso, que está certo; nenhum critério passa a falhar.
+Só vale para a âncora: o `nao_prescreve` fica como estava. **A U3 não leva esta regra**: o marcador de condição é quase
+sempre um rótulo antes de «:» («ClCr 10-30: 500 mg»), a estrutura inversa, e acabar o âmbito nos dois pontos fazia passar o
+valor condicionado, o que dava 5 falsos passes em ATB-PAC-001 (medidos e não adotados).
+
 ### Limitações conhecidas do corretor (12/10/2026)
 
 Depois das correções pós-hoc acima, três padrões continuam a dar veredictos errados. Foram medidos e estão aqui
@@ -233,6 +243,17 @@ resposta passa a falhar. **Decisão:** não corrigido.
 forma equivalente em qualquer parte da resposta. Exemplo: ATB-FAR-014, Phi-4, amostra 4, critério «12/12»: a
 recomendação é cefalexina de 6 em 6 horas e o corretor aceita «500 mg q12h» que vem num ajuste renal da cefalexina.
 Falso passe novo. **Decisão:** resolve-se com a âncora do caso, que se escreve no commit do FAR-014, e não com uma regra.
+
+**(iv) Um «não» na oração anterior excluía o fármaco depois dos dois pontos.** Exemplo: ATB-PIEL-006, claude-opus-5 (via
+agente), critério do intervalo ancorado à cefuroxima: «Alternativas quando as quinolonas não são adequadas:
+cefuroxima-axetil 500 mg 12/12 h». **Corrigido** em 12/10/2026: o âmbito da exclusão da âncora acaba em «:», em «;» ou no fim
+da linha ou do item (ver acima).
+
+**(v) ATB-PIEL-006 passa com a ciprofloxacina como primeira linha.** A mesma resposta do agente dá a ciprofloxacina como
+primeira linha e a cefuroxima só como alternativa, e passa o caso, porque os critérios não penalizam a primeira linha: há
+um `contem_todos` (ceftriaxona e cefuroxima citadas) e o intervalo. A penalização da ciprofloxacina existe só através do
+intervalo ancorado à cefuroxima, que uma resposta com cefuroxima só como alternativa ainda cumpre. **Decisão:** o caso não
+se altera.
 
 **Porque (i) e (ii) não se corrigem.** Alargar a lista da P2 ou estreitar a lista da U3 para estes casos seria acertar
 listas fechadas a poucos casos que se viram, e essa é a afinação pelo efeito que a U6 proíbe. O erro residual fica

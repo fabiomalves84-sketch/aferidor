@@ -121,6 +121,37 @@ class TestADrugTheAnswerExcludes(unittest.TestCase):
         self.assertFalse(passes(c, "Não usar cefuroxima 250 mg de 12 em 12 horas."))
 
 
+class TestTheScopeOfTheExclusionEndsWithItsClause(unittest.TestCase):
+    """U5, post hoc of 12 October 2026: an exclusion marker is worth what lies in its own clause, and a colon, a
+    semicolon or the start of a new line or list item ends the clause. Invented sentences, none of them an answer."""
+
+    def interval(self):
+        return dose(terms=("12/12", "12 em 12", "duas vezes por dia"), anchors=("cefuroxima",))
+
+    def test_a_no_in_the_clause_before_a_colon_does_not_exclude_the_drug_after_it(self):
+        self.assertTrue(passes(self.interval(), "Alternativas quando X não é adequado: cefuroxima 500 mg 12/12 h"))
+        self.assertTrue(passes(self.interval(), "Alternativas quando as quinolonas não são adequadas: cefuroxima-axetil 500 mg 12/12 h"))
+
+    def test_nor_does_one_before_a_semicolon(self):
+        self.assertTrue(passes(self.interval(), "Alternativas quando X não é adequado; cefuroxima 500 mg 12/12 h"))
+
+    def test_nor_does_one_on_the_line_or_list_item_before(self):
+        self.assertTrue(passes(self.interval(), "Quando X não é adequado\n* cefuroxima 500 mg 12/12 h"))
+        self.assertTrue(passes(self.interval(), "- Se a quinolona não for adequada\n- Cefuroxima 500 mg 12/12 h"))
+
+    def test_a_marker_before_the_drug_in_the_same_clause_still_excludes_it(self):
+        self.assertFalse(passes(self.interval(), "Não usar cefuroxima 500 mg 12/12 h"))
+        self.assertFalse(passes(self.interval(), "Alternativas: não usar cefuroxima 500 mg 12/12 h"))
+        self.assertFalse(passes(self.interval(), "Para a infeção; não é recomendada cefuroxima 500 mg 12/12 h"))
+
+    def test_a_marker_after_the_drug_in_the_same_clause_still_excludes_it(self):
+        self.assertFalse(passes(self.interval(), "A cefuroxima está contraindicada: 500 mg 12/12 h"))
+        self.assertFalse(passes(self.interval(), "A cefuroxima está contraindicada, 500 mg 12/12 h"))
+
+    def test_the_bare_word_avoid_is_still_no_exclusion_since_the_post_hoc_of_the_first_correction(self):
+        self.assertTrue(passes(dose(terms=("250 mg",), anchors=("cefuroxima",)), "Evitar cefuroxima 250 mg 12/12 h"))
+
+
 class TestBeforeThereWasAnAnchor(unittest.TestCase):
     def test_a_criterion_without_an_anchor_still_matches_anywhere_and_now_in_every_form(self):
         plain = Criterion(kind="contem", terms=("500 mg", "500mg"), failure=FailureType.DOSE_INCORRETA)

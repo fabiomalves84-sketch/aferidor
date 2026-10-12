@@ -525,6 +525,19 @@ _COMPOUND_JOIN = re.compile(r"^\s*(?:\+|com)\s*(?:(?:o|a)\s+)?(?:acido\s+)?$")
 _ANCHOR_EXCLUSION = tuple(m for m in EXCLUSION_MARKERS if m != "evit")
 
 
+_CLAUSE_END = re.compile(r"[:;]")
+
+
+def _clause_bounds(segment: str, position: int) -> tuple[int, int]:
+    """The clause of a unit that `position` sits in: a unit is already one line or one sentence, and a colon or a
+    semicolon ends a clause inside it."""
+    start = 0
+    for boundary in _CLAUSE_END.finditer(segment, 0, position):
+        start = boundary.end()
+    following = _CLAUSE_END.search(segment, position)
+    return start, following.start() if following else len(segment)
+
+
 def _mentions_of(segment: str, names: list[str], lexicon: list[str]) -> list[tuple[int, int, bool]]:
     """The drugs named in one unit, as (start, end, is_anchor), the compound names merged into one entity."""
     found = [(m.start(), m.end(), True) for n in names for m in re.finditer(r"(?<![a-z0-9])" + re.escape(n), segment)]
@@ -542,33 +555,38 @@ def _mentions_of(segment: str, names: list[str], lexicon: list[str]) -> list[tup
     return [m for m in merged if not _NOT_DOSED.search(segment[max(0, m[0] - 40):m[0]])]
 
 
+def _excluded_in_its_clause(segment: str, start: int, end: int) -> bool:
+    """Whether an exclusion marker stands in the same clause as the mention (rule U5). The clause is what lies
+    between two colons, semicolons or line starts: "quando as quinolonas não são adequadas: cefuroxima" does not
+    exclude the cefuroxima, which is in the next clause."""
+    clause_start, clause_end = _clause_bounds(segment, start)
+    clause = NEGATED_EXCLUSION.sub(" ", segment[clause_start:clause_end].replace("*", ""))
+    return _markers_pattern(_ANCHOR_EXCLUSION).search(clause) is not None
+
+
 def _anchored(text: str, anchors: tuple[str, ...], found: list, in_adjustment: bool) -> list:
     """The found doses or intervals that belong to one of the `anchors` and are not inside a condition.
 
     A value belongs to the nearest drug named before it in its line or sentence; with none before it in the unit, to the
     first named after it in the unit ("500 mg de amoxicilina"); with none in the unit, to the drug named last above,
     so "Fármaco: amoxicilina" followed by "Dose: 1 g" is amoxicillin's dose; and with no drug named above it
-    anywhere in the answer, to the first drug named after it. An anchor named in order to exclude it
-    (`nao_prescreve`'s reading, without "evit") owns nothing; nor does a drug named in a comparison or an allergy;
-    and "amoxicilina com ácido clavulânico" is one drug.
+    anywhere in the answer, to the first drug named after it. An anchor named in order to exclude it owns nothing, nor
+    does a drug named in a comparison or an allergy, and "amoxicilina com ácido clavulânico" is one drug. An
+    exclusion marker is worth what lies in its own clause: a colon, a semicolon or the start of a new line or list
+    item ends it. A condition marker is not given that scope: it is usually a label before a colon ("ClCr 10-30:
+    500 mg"), which is the inverse structure, so it keeps reaching the rest of its line.
     """
     names = [fold(a).strip() for a in anchors]
     lexicon = [d for d in KNOWN_DRUGS if not any(d in n or n in d for n in names)]
     units = []
     for start, end, fresh in _units(text):
         segment = fold(text[start:end])
-        mentions = _mentions_of(segment, names, lexicon)
-        if any(m[2] for m in mentions):
-            normal = normalize(text[start:end])
-            excluded = any(
-                _is_excluded_at(normal, found_at.start(), len(found_at.group()), markers=_ANCHOR_EXCLUSION)
-                for n in names for found_at in re.finditer(_term_pattern(normalize(n)), normal)
-            )
-            if excluded:
-                mentions = [(a, b, False) for a, b, _ in mentions]
+        mentions = [
+            (a, b, is_anchor and not _excluded_in_its_clause(segment, a, b))
+            for a, b, is_anchor in _mentions_of(segment, names, lexicon)
+        ]
         units.append((start, end, fresh, segment, mentions))
-    first_named = next((m[2] for *_, mentions in units for m in mentions[:1]), False)
-    owner_is_anchor = first_named
+    owner_is_anchor = next((m[2] for *_, mentions in units for m in mentions[:1]), False)
     in_condition = False
     kept = []
     for start, end, fresh, segment, mentions in units:
