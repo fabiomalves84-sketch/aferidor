@@ -1,4 +1,4 @@
-"""Two known defects of the grader, kept in view because the Method page tells the reader about them."""
+"""Two defects of the grader that were corrected on 12 October 2026, kept in view because the Method page tells the reader about them."""
 
 from __future__ import annotations
 
@@ -48,20 +48,23 @@ class TestKnownBehaviourOfTheGraderThatTheMethodPageDescribes(unittest.TestCase)
         hidden = grade(case, an_answer(FALSE_PASS, case_id=CASE_ID))
         self.assertIn(FailureType.DOSE_INCORRETA, hidden.failures, "a dose certa escondida no ajuste renal voltou a passar")
 
-    def test_the_method_page_gives_the_same_two_examples_in_the_closed_block(self):
+    def test_the_method_page_now_says_the_two_defects_were_corrected_and_by_which_rules(self):
+        """The paragraph that described the two defects as still there was rewritten on 12 October 2026, as the commit
+        that regenerated the example said it would."""
         method = panel_html(_Example.page(), "metodo")
         block = method[method.index('id="verificacao-corretor"'):]
         block = block[:block.index("</details>")]
-        for quoted in (WRITTEN_ANOTHER_WAY, WRITTEN_AS_THE_CRITERION_WANTS, WHERE_THE_RIGHT_DOSE_HIDES):
+        for quoted in (WRITTEN_ANOTHER_WAY, "0,5 g", "12/10/2026", "U1:", "U2:", "U3:", "U5:", "P1,", "P2,", "P3,", "docs/METODO.md",
+                       "não foi escolhida nem ajustada pelo efeito num modelo"):
             with self.subTest(citado=quoted):
                 self.assertIn(quoted, block)
-        self.assertIn("num caso de dose, isso conta como falha crítica", block)
-        self.assertIn("Ainda não se mediu com que frequência", block)
+        for gone in ("erra nos dois sentidos", "Ainda não se mediu com que frequência"):
+            self.assertNotIn(gone, block)
 
     def test_the_paragraph_is_in_every_language(self):
         from aferidor.traducao_catalogo import CATALOG
 
-        pt = next(k for k in CATALOG if k.startswith("O corretor procura palavras e erra nos dois sentidos."))
+        pt = next(k for k in CATALOG if k.startswith("Em 12/10/2026 corrigiu-se o corretor"))
         for lang in ("en", "es", "fr", "de"):
             with self.subTest(lingua=lang):
                 self.assertNotEqual(CATALOG[pt][lang], pt)

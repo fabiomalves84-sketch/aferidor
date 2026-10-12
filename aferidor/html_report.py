@@ -24,6 +24,7 @@ changes it; the switch is CSS alone, so the no-script promise holds.
 from __future__ import annotations
 
 import contextvars
+import dataclasses
 import html as _html
 import re
 from dataclasses import dataclass, field
@@ -63,7 +64,7 @@ from .comparacao import (
     same_proportion,
     top_tie,
 )
-from . import execucao
+from . import correcao, execucao
 from .condicoes import (
     HEADER_NOTE,
     conditions_rows,
@@ -700,11 +701,24 @@ def _verification_block() -> str:
             "O corretor foi afinado depois de alguns ensaios, com cada afinação registada e a razão "
             "escrita; por isso os números dependem da versão do corretor."
         ) + "</p><p>" + _t(
-            "O corretor procura palavras e erra nos dois sentidos. Pode dar como errada uma resposta certa "
-            "escrita de outra forma, como «a cada 8 horas» em vez de «de 8 em 8 horas»; num caso de dose, "
-            "isso conta como falha crítica. E pode dar como certa uma dose errada quando a dose certa "
-            "aparece noutra parte da resposta, por exemplo num ajuste renal. Ainda não se mediu com que "
-            "frequência, porque nenhum especialista reviu uma amostra das respostas."
+            "Em 12/10/2026 corrigiu-se o corretor em dois defeitos medidos nas respostas guardadas: uma dose passava se o "
+            "valor aparecesse em qualquer parte da resposta (a dose certa dentro de um ajuste renal salvava uma dose errada), e uma forma "
+            "equivalente («a cada 8 horas», «0,5 g») fazia falhar a forma certa."
+        ) + "</p><p>" + _t(
+            "As regras estão escritas em {metodo}, antes de se ver um único veredicto novo, e valem nos dois sentidos. U1: "
+            "duas formas do mesmo valor, na dose ou no intervalo, são o mesmo. U2: uma dose só conta se estiver ligada ao "
+            "fármaco do critério, a âncora, tirada do texto de referência do caso e nunca de uma resposta. U3: um valor dentro "
+            "de um ajuste (renal, hepático, de idade ou de interação) não é a dose do caso. U5: um fármaco que a resposta "
+            "exclui não é dono de uma dose, e o âmbito de uma exclusão acaba no fim da oração.",
+            metodo="<code>docs/METODO.md</code>",
+        ) + "</p><p>" + _t(
+            "Depois de ler as respostas que mudaram de veredicto, decidiram-se correções com data, em 12/10/2026, por princípio "
+            "e não pelo efeito num modelo: P1, uma dose sem fármaco antes dela pertence ao primeiro nomeado depois; P2, um "
+            "fármaco nomeado em comparação ou em alergia não é dono de uma dose; P3, um nome composto («amoxicilina com ácido "
+            "clavulânico») é uma só entidade; e uma dose seguida de «de» e um fármaco liga-se a esse fármaco."
+        ) + "</p><p>" + _t(
+            "A decisão de cada regra não foi escolhida nem ajustada pelo efeito num modelo: cada alteração a uma regra ou a um "
+            "critério leva a razão escrita, com a data, no método e na mensagem do commit."
         ) + "</p></details>"
     )
 
@@ -1577,13 +1591,15 @@ def build(
     alternates: dict[str, str] | None = None,
     confirmation: "_fontes.Confirmation | None" = None,
     execution: "execucao.Files | None" = None,
+    correction: "correcao.Correction | None" = None,
 ) -> str:
     """Write the whole report as one self contained HTML file.
 
     `lingua` is the language of the interface; the cases and the answers are
     always shown in the original Portuguese. `alternates` maps each language
     to the address of the same report in it, for the language menu; without
-    it, the page has no menu. `execution` is what the files of a paid run say (provenance, cost
+    it, the page has no menu. `correction` is the published corrector set against the current one (`correcao`); with it
+    the Results page shows the two side by side and the Method page counts what the correction touched. `execution` is what the files of a paid run say (provenance, cost
     ledger); without it, or when no model of the report has any, nothing is added to the page.
     """
     if lingua not in HTML_LANG:
@@ -1593,7 +1609,7 @@ def build(
     try:
         return _build(
             cases, answers, verdicts, missing, reasons, sources_verified, today,
-            cases_source, protocol, alternates, confirmation, execution,
+            cases_source, protocol, alternates, confirmation, execution, correction,
         )
     finally:
         _SHORT.reset(names)
@@ -1625,6 +1641,8 @@ SUBPAGES = {
     "metodo": (
         ("como-ler-texto", "Como interpretar este relatório"),
         ("como-se-verifica-o-corretor", "Como se verifica e se afina o corretor"),
+        ("limitacoes", "Limitações conhecidas do corretor"),
+        ("normas-citadas", "Cefalexina e ciprofloxacina"),
         ("fontes-por-organismo", "Fontes por organismo"),
         ("criterio", "Critério de aprovação"),
         ("condicoes", "Condições do ensaio"),
@@ -1787,6 +1805,7 @@ class _ReportData:
     protocol_warnings: list[str] | None = None
     protocol_html: str = ""
     approved: dict[str, bool] = field(default_factory=dict)
+    correction: "correcao.Correction | None" = None
 
 
 def _prepare(
@@ -1939,7 +1958,7 @@ def _results_panel(data: _ReportData) -> str:
     return _panel(
         "resultados", _t("Resultados"), *data.early,
         _reference_note() if data.protocol is None else "",
-        _comparison(summaries, data.consistency), *cards,
+        _correction_results(data), _comparison(summaries, data.consistency), *cards,
     )
 
 
@@ -1994,6 +2013,155 @@ def _conclusions_panel(data: _ReportData) -> str:
     )
 
 
+
+def _model_sized(model: str) -> str:
+    """A model's name with its size, so that two of one family (Gemma 4, 31B and 26B) are not mistaken for each other."""
+    name = re.sub(r"\s+a\d+b$", "", model_label(model)[0], flags=re.IGNORECASE)  # "26b-a4b": the active size is not the name
+    size = re.search(r"(?<![\d.])(\d+(?:\.\d+)?)b(?![a-z])", model.lower())
+    return f"{name} {size.group(1)}B" if size and f"{size.group(1)}b" not in name.lower() else name
+
+
+def _correction_table(correction: "correcao.Correction") -> str:
+    """The published corrector's count of cases with a critical failure beside the current one, per model, per bank."""
+    banks = (("principal", _t("Banco principal")), ("consulta", _t("Banco de consulta")))
+    body = []
+    for bank, label in banks:
+        rows = sorted((r for r in correction.rows if r.bank == bank), key=lambda r: (r.frozen, _model_sized(r.model)))
+        for row in rows:
+            name = _esc(_model_sized(row.model))
+            if row.frozen:
+                name += f' <span class="nota-linha">({_t("reclassificação posterior, fora do protocolo")})</span>'
+            body.append(
+                f"<tr><th scope=\"row\">{_esc(label)}</th><td>{name}</td><td>{row.cases}</td>"
+                f"<td>{row.before}</td><td><strong>{row.after}</strong></td></tr>"
+            )
+            label = ""
+    head = (
+        f'<tr><th scope="col">{_t("Banco")}</th><th scope="col">{_t("Modelo")}</th><th scope="col">{_t("Casos")}</th>'
+        f'<th scope="col">{_t("Publicado até 12/10")}</th><th scope="col">{_t("Corrigido")}</th></tr>'
+    )
+    caption = _t("Casos com falha crítica em alguma amostra, por modelo, com o corretor publicado e com o corrigido.")
+    return f'<div class="grade-wrap"><table class="areas tabela-correcao"><caption>{caption}</caption><thead>{head}</thead><tbody>{"".join(body)}</tbody></table></div>'
+
+
+def _correction_results(data: _ReportData) -> str:
+    """Resultados: the two numbers, side by side, and what the correction did to them. Empty without a correction."""
+    c = data.correction
+    if c is None:
+        return ""
+    parts = [
+        f'<div class="correcao" id="publicado-e-corrigido"><h3>{_t("Publicado e corrigido")}</h3>',
+        "<p>" + _t(
+            "Há dois números: os casos com falha crítica que o corretor publicado até 12/10 ({antes}) dava às "
+            "respostas e os que o corretor corrigido ({depois}) lhes dá. Medem a concordância com a norma citada, "
+            "não a correção clínica.",
+            antes=f"<code>{_esc(c.before_grader)}</code>", depois=f"<code>{_esc(c.after_grader)}</code>",
+        ) + "</p>",
+        _correction_table(c),
+    ]
+    if c.best_before is not None and c.best_after is not None:
+        b, a = c.best_before, c.best_after
+        parts.append("<p>" + _t(
+            "No banco principal, o melhor modelo é {modelo_antes} no publicado, com {n_antes} de {total} casos com falha "
+            "crítica, e {modelo_depois} no corrigido, com {n_depois} de {total}. O teste de McNemar exato entre os dois "
+            "melhores dá {p_antes} no publicado e {p_depois} no corrigido.",
+            modelo_antes=f"<strong>{_esc(_model_sized(b.first))}</strong>", modelo_depois=f"<strong>{_esc(_model_sized(a.first))}</strong>",
+            n_antes=b.first_critical, n_depois=a.first_critical, total=a.cases, p_antes=_p_value(b.p_value), p_depois=_p_value(a.p_value),
+        ) + "</p>")
+    if not c.fell:
+        parts.append("<p>" + _t(
+            "O corretor publicado deixava passar demais: com a correção, {n} das {m} linhas da tabela têm mais casos com "
+            "falha crítica e nenhuma tem menos.",
+            n=len(c.rose), m=len(c.rows),
+        ) + "</p>")
+    else:
+        parts.append("<p>" + _t(
+            "Com a correção, {n} das {m} linhas da tabela têm mais casos com falha crítica e {k} têm menos.",
+            n=len(c.rose), m=len(c.rows), k=len(c.fell),
+        ) + "</p>")
+    if any(r.frozen for r in c.rows):
+        names = ", ".join(sorted({_model_sized(r.model) for r in c.rows if r.frozen}))
+        parts.append("<p>" + _t(
+            "{modelo} teve um protocolo com o corretor congelado: o número corrigido é uma reclassificação posterior, fora "
+            "do protocolo, e não se lhe aplica o limiar do protocolo. O resultado tal como saiu está no relatório do ensaio.",
+            modelo=_esc(names),
+        ) + "</p>")
+    parts.append("</div>")
+    return "".join(parts)
+
+
+def _limitations_block() -> str:
+    """The known limits of the corrector, plainly, on the Method page. True of every report."""
+    items = [
+        _t(
+            "Um fármaco nomeado na frase que abre a secção («Azitromicina: é uma alternativa se a clindamicina estiver "
+            "contraindicada») fica com a dose que vem a seguir, porque a exceção da comparação só cobre «em detrimento de», "
+            "«em vez de», «ao invés de», «alergia a» e «alérgico a». Não se corrigiu: alargar listas fechadas a poucos casos "
+            "que se viram é afinar pelo efeito."
+        ),
+        _t(
+            "Texto de contraindicação numa linha de tabela, antes da dose («Nitrofurantoína (Contraindicações: insuficiência renal, ClCr) "
+            "| 100 mg»), faz o corretor tomar a dose por condicionada. Não se corrigiu, pelo mesmo motivo."
+        ),
+        _t(
+            "Um critério sem âncora aceita a forma equivalente em qualquer parte da resposta, por isso pode passar no sítio "
+            "errado. Ainda estão por ancorar ATB-FAR-013, PED-OMA-019, 020 e 021, COV-TOC-009, PED-02, 03 e 08 e "
+            "AJU-MET-018, e os critérios de intervalo que misturam formas que o corretor não lê."
+        ),
+        _t(
+            "O caso ATB-PIEL-006 passa com a ciprofloxacina em primeira linha se a cefuroxima aparecer como alternativa: "
+            "só o intervalo ancorado à cefuroxima penaliza a ciprofloxacina."
+        ),
+        _t("«Evitar cefuroxima 250 mg 12/12 h» passa, porque «evit» deixou de excluir a âncora. É raro e não se corrigiu."),
+        _t("Os controlos negativos «dose certa e dose concorrente» ainda não existem."),
+        _t(
+            "A lista de fármacos que decide de quem é uma dose é fechada e não os tem todos: uma dose de cefaclor foi dada à "
+            "amoxicilina com ácido clavulânico."
+        ),
+        _t(
+            "Um intervalo de doses com a unidade partilhada («15 a 20 mg») não conta como dose em nenhum extremo; com uma "
+            "unidade em cada extremo («15 mg a 20 mg») contam os dois."
+        ),
+        _t(
+            "Quem leu e classificou as mudanças foi uma só pessoa, sem revisão. A taxa de falsos falhanços mede-se nas "
+            "respostas que mudaram; os falsos passes só se mediram numa amostra de 40 respostas com critério ancorado "
+            "(nenhum em 40, o que é compatível com até cerca de 7%). Os falsos passes dos critérios sem âncora não foram "
+            "amostrados."
+        ),
+    ]
+    return (
+        f'<div class="limitacoes" id="limitacoes"><h3>{_t("Limitações conhecidas do corretor")}</h3>'
+        f'<p class="seccao-intro">{_t("Estão medidas e escritas aqui, não escondidas. O corretor é automático, sem validação clínica.")}</p>'
+        f'<ul>{"".join(f"<li>{item}</li>" for item in items)}</ul></div>'
+    )
+
+
+def _standards_block(data: _ReportData) -> str:
+    """What the correction did to the cases it touched, cephalexin, and ciprofloxacin. Needs a correction for the counts."""
+    c = data.correction
+    parts = [f'<div class="normas" id="normas-citadas"><h3>{_t("Cefalexina e ciprofloxacina")}</h3>']
+    if c is not None:
+        parts.append("<p>" + _t(
+            "A forma equivalente (U1) sozinha altera {n1} critérios em {c1} casos; todas as correções, {n2} critérios em "
+            "{c2} casos, contados nos {t} ensaios registados.",
+            n1=c.equivalent_forms[0], c1=c.equivalent_forms[1], n2=c.all_corrections[0], c2=c.all_corrections[1], t=c.trials_counted,
+        ) + "</p>")
+        parts.append("<p>" + _t(
+            "Cefalexina (ATB-FAR-014): a norma citada, o Guia de Bolso de Antibioterapia em Ambulatório da APMGF, não a "
+            "inclui para este caso. O caso ficou ancorado à cefuroxima, que a norma lista, e continua no total. Mencionar não "
+            "é recomendar: contam-se as respostas que nomeiam a cefalexina em algum sítio onde a resposta não a exclui."
+        ) + "</p><ul>" + "".join(
+            "<li>" + _t("{modelo}: {n} de {total} respostas", modelo=_esc(_model_sized(m)), n=n, total=total) + "</li>"
+            for m, n, total in c.cephalexin
+        ) + "</ul>")
+    parts.append("<p>" + _t(
+        "Ciprofloxacina (ATB-PIEL-006 e ATB-CIST-003): a norma citada, a Norma 015/2011 da DGS, de 2011, não a lista e diz "
+        "que as quinolonas não são terapêutica empírica recomendada. Uma resposta que a dê como tratamento discorda da norma "
+        "citada; isto mede a concordância com um documento de 2011, não a correção clínica."
+    ) + "</p></div>")
+    return "".join(parts)
+
+
 def _execution_html(analysis: "execucao.Analysis") -> str:
     """Under what conditions each paid model ran, and what it cost: read from the provenance, shown beside the
     conditions of the trial."""
@@ -2017,7 +2185,7 @@ def _method_panel(data: _ReportData, before: str) -> str:
     """
     method: list[str] = [
         f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(data.samples_n, data.rule) if data.models else ""),
-        _verification_block(), _sources_by_body(data.cases),
+        _verification_block(), _limitations_block(), _standards_block(data), _sources_by_body(data.cases),
     ]
     if data.models:
         method.append(data.protocol_html)
@@ -2100,12 +2268,13 @@ def _build(
     reasons: dict[str, str] | None, sources_verified: bool, today: date | None,
     cases_source: tuple[str, str] | None, protocol: Protocol | None,
     alternates: dict[str, str] | None, confirmation: "_fontes.Confirmation | None" = None,
-    execution: "execucao.Files | None" = None,
+    execution: "execucao.Files | None" = None, correction: "correcao.Correction | None" = None,
 ) -> str:
     data = _prepare(
         cases, answers, verdicts, missing, reasons, sources_verified, today, cases_source,
         protocol, alternates, confirmation, execution,
     )
+    data = dataclasses.replace(data, correction=correction)
     # The pages first, so the side navigation lists only the subsections that are in the report. The
     # glossary is worked out over the head without them: they hold no glossary term.
     head = _head_html(data)

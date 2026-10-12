@@ -335,6 +335,9 @@ footer.rodape .traducao { margin-top: 0.9rem; }
 table.areas { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
 table.areas th, table.areas td { border-bottom: 1px solid var(--grid); padding: 0.5rem 0.75rem; text-align: left; }
 table.areas thead th { font-size: 0.85rem; }
+table.tabela-correcao caption { text-align: left; font-size: 0.85rem; color: var(--ink-2); padding: 0.6rem 0.75rem 0; }
+.nota-linha { color: var(--ink-2); font-size: 0.85rem; }
+.correcao, .limitacoes, .normas { margin-bottom: 1.25rem; }
 table.areas tbody th { font-weight: 500; }
 .area-cel { background: rgba(208, 59, 59, var(--a)); font-variant-numeric: tabular-nums; min-width: 7rem; }
 .area-cel.vazio { background: var(--neutral-bg); color: var(--ink-2); }

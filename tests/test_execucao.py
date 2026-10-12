@@ -335,13 +335,10 @@ class TestNothingNewWhenThereIsNoNewData(unittest.TestCase):
             with self.subTest(ensaio=folder.name):
                 self.assertIsNone(execucao.load(folder / "respostas.jsonl"))
 
-    # Until docs/exemplo is regenerated, in the commit that publishes the reclassification, the stored answers graded
-    # by the anchored corrector (rules U1 to U3) no longer come out as the committed page. Nothing is regenerated
-    # before the table of verdicts has been seen, so this is the one test that is expected to fail meanwhile.
-    @unittest.expectedFailure
     def test_the_published_example_comes_out_the_same_through_the_command_line_with_the_new_code(self):
         """The recipe of docs/COMO_CORRER.md section 14, with the day it was written. The only line that differs from
-        the committed file is the one that copies the test count from the README, which moves with every commit."""
+        the committed file is the one that copies the test count from the README, which moves with every commit. The
+        published corrector's side of the page is read from `docs/exemplo/antes-8edda161.json`, as the recipe says."""
         written = re.search(r"Relatório escrito em (\d{4})-(\d{2})-(\d{2})", (ROOT / "docs" / "exemplo" / "index.html").read_text(encoding="utf-8"))
         day = date(*map(int, written.groups()))
         with tempfile.TemporaryDirectory() as folder:
@@ -355,7 +352,8 @@ class TestNothingNewWhenThereIsNoNewData(unittest.TestCase):
                 with mock.patch.object(html_report, "build", functools.partial(real, today=day)), \
                         contextlib.redirect_stdout(io.StringIO()):
                     code = cli.main(["relatorio", "--formato", "html", "--linguas", "pt,en,es,fr,de", "--casos", "casos/casos.json",
-                                     "--respostas", str(joined), "--saida", str(Path(folder) / "index.html")])
+                                     "--respostas", str(joined), "--antes", "docs/exemplo/antes-8edda161.json",
+                                     "--saida", str(Path(folder) / "index.html")])
             finally:
                 os.chdir(before)
             self.assertEqual(code, 0)

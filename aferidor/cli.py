@@ -16,7 +16,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
-from . import build_id, execucao, fontes, grader_id, html_report, manifesto, protocolo, report, revisao
+from . import build_id, correcao, execucao, fontes, grader_id, html_report, manifesto, protocolo, report, revisao
 from .catalogo import FIXED_TEMPERATURES, Catalog, Model, load_catalog
 from .custos import JsonlError, Ledger, estimate, format_estimate
 from .grading import (
@@ -368,6 +368,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--fontes-confirmadas",
         action="store_true",
         help="omitir o aviso de fontes por confirmar (apenas depois de confirmadas)",
+    )
+    relatorio.add_argument(
+        "--antes", type=Path, default=None,
+        help="ficheiro com os veredictos do corretor publicado (docs/exemplo/antes-8edda161.json): o relatório HTML "
+        "passa a mostrar o publicado e o corrigido lado a lado, com as contas feitas sobre ensaios/",
     )
 
     return parser
@@ -764,13 +769,14 @@ def _protocol_mismatches(path: Path, repeticoes: int, temperatura: float, casos:
 def comando_relatorio(args: argparse.Namespace) -> int:
     return _relatorio(
         args.casos, args.respostas, args.saida, args.formato, args.linguas, args.limite,
-        args.protocolo, args.fontes_confirmadas,
+        args.protocolo, args.fontes_confirmadas, antes=args.antes,
     )
 
 
 def _relatorio(
     casos: Path, respostas: Path, saida: Path | None, formato: str, linguas: str, limite: int,
     protocolo_path: Path | None, fontes_confirmadas: bool, reasons: dict[str, str] | None = None,
+    antes: Path | None = None,
 ) -> int:
     cases = read_cases(casos)
     if limite > 0:
@@ -807,6 +813,16 @@ def _relatorio(
     except JsonlError as error:
         print(f"erro: {error}", file=sys.stderr)
         return 2
+    correction = None
+    if antes is not None:
+        if formato != "html":
+            print("erro: --antes só se aplica ao formato html", file=sys.stderr)
+            return 2
+        try:
+            correction = correcao.compute(antes, Path("ensaios"), Path("."))
+        except (OSError, ValueError, KeyError) as error:
+            print(f"erro: {error}", file=sys.stderr)
+            return 2
     common = dict(
         missing=missing, reasons=reasons, sources_verified=fontes_confirmadas,
         cases_source=_cases_source(casos), protocol=protocol, execution=execution,
@@ -824,7 +840,7 @@ def _relatorio(
     alternates = {lang: path.name for lang, path in paths.items()} if len(langs) > 1 else None
     for lang, path in paths.items():
         text = html_report.build(
-            cases, answers, verdicts, lingua=lang, alternates=alternates,
+            cases, answers, verdicts, lingua=lang, alternates=alternates, correction=correction,
             confirmation=fontes.read_confirmation(casos, [c.case_id for c in cases]), **common
         )
         path.write_text(text, encoding="utf-8")
