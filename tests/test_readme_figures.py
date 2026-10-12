@@ -15,14 +15,14 @@ TRIAL_OF = {
     ("Gemma 3 12B", 1): ("2026-09-27-locais-12-14b", 27),
 }
 
-DATED = re.compile(r"(\d+) \((\d+)% a (\d+)%\); à data: (\d+) \((\d+)% a (\d+)%\)")
+DATED = re.compile(r"(\d+) → (\d+) \((\d+)% a (\d+)%\); à data: (\d+) \((\d+)% a (\d+)%\)")
 
 
 class TestTheDatedFiguresOfTheReadme(unittest.TestCase):
     def test_every_dated_figure_in_the_readme_is_in_the_report_of_its_trial(self):
         """Only reads files. The "à data" number and its interval must be written in the `relatorio.md`
         of the trial folder, as that report published them; nothing is recomputed here, so a figure
-        cannot be corrected by recalculating it. The current figure of the same cell has to differ,
+        cannot be corrected by recalculating it. The figure of the corrector published until 12 October has to differ,
         or there would be nothing to say "à data" about."""
         rows = [
             line for line in (ROOT / "README.md").read_text(encoding="utf-8").splitlines()
@@ -40,8 +40,8 @@ class TestTheDatedFiguresOfTheReadme(unittest.TestCase):
                 found = DATED.search(cells[column])
                 self.assertIsNotNone(found, cells[column])
                 g = [int(x) for x in found.groups()]
-                now, then, low, high = g[0], g[3], g[4], g[5]
-                self.assertNotEqual(now, then)
+                published, then, low, high = g[0], g[4], g[5], g[6]
+                self.assertNotEqual(published, then)  # what the corrector of the example said and what the trial said that day
                 report = (ROOT / "ensaios" / trial / "relatorio.md").read_text(encoding="utf-8")
                 published = f"**{then} de {cases} casos com falha de risco crítico em pelo menos uma amostra** (IC 95% {low}% a {high}%)"
                 self.assertIn(published, report)

@@ -90,6 +90,12 @@ Limitações conhecidas:
   parâmetros.
 - **A correção é textual.** A distinção entre prescrever um fármaco e
   mencioná-lo para o excluir é heurística; `docs/METODO.md` descreve onde falha.
+- **O corretor foi corrigido a 12/10/2026**, e a página de exemplo mostra o
+  publicado e o corrigido lado a lado: nenhum dos cinco modelos desceu. As
+  correções estão escritas, com a razão e a data, e as limitações que ficam
+  também (comparador que abre a secção, texto de contraindicação antes da dose,
+  critérios por ancorar, controlos negativos «dose certa e dose concorrente» por
+  fazer, leitor único, falsos passes sem âncora por amostrar).
 
 ## Relação com normas de qualidade
 

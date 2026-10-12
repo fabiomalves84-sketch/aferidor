@@ -54,6 +54,11 @@ aconteceu os documentos dizerem 181 com a bateria em 211. Qualquer tarefa que
 acrescente ou remova testes atualiza o número no README, no
 `docs/APRESENTACAO.md` e aqui, no mesmo commit que muda os testes.
 
+**O corretor foi corrigido a 12/10/2026.** As regras U1 a U6 e as correções pós-hoc
+estão em `docs/METODO.md`, com a razão e a data; uma regra nova ou ajustada leva a
+razão escrita, por princípio e não pelo efeito num modelo. A página de exemplo mostra o
+publicado (`docs/exemplo/antes-8edda161.json`) e o corrigido, e as limitações que ficam.
+
 **Um modelo pago só corre com `--teto-eur`, e antes se estima com `--a-seco`.**
 Um modelo é pago quando o `aferidor/catalogo.json` o lista.
 
