@@ -255,6 +255,11 @@ um `contem_todos` (ceftriaxona e cefuroxima citadas) e o intervalo. A penalizaç
 intervalo ancorado à cefuroxima, que uma resposta com cefuroxima só como alternativa ainda cumpre. **Decisão:** o caso não
 se altera.
 
+**(vi) «Evitar» deixou de excluir a âncora.** Exemplo: «Evitar cefuroxima 250 mg 12/12 h» passa um critério de dose ancorado à
+cefuroxima, porque o marcador «evit» deixou de contar como exclusão da âncora (correção pós-hoc de 12/10/2026, para que «para
+evitar toxicidade» não excluísse o metotrexato). Uma frase que só diga «evitar» o fármaco já não o exclui. É raro, e **não foi
+corrigido**.
+
 **Porque (i) e (ii) não se corrigem.** Alargar a lista da P2 ou estreitar a lista da U3 para estes casos seria acertar
 listas fechadas a poucos casos que se viram, e essa é a afinação pelo efeito que a U6 proíbe. O erro residual fica
 medido e reportado: ver a seguir.
