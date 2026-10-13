@@ -257,8 +257,8 @@ entra entre «o fármaco mais próximo antes, na sua frase» e «o último nomea
   tabela sem fármaco sob o cabeçalho (ligada à limitação (ii), a das linhas de tabela); (6) um parágrafo de prosa sobre outro
   fármaco depois do bloco, antes da dose. Antes da P4 estes quatro falhavam. O caso (5) é anterior à P4 e continua igual: uma
   frase que exclui o fármaco e acaba em dois pontos («Não se deve usar azitromicina em grávidas, pelo que a alternativa é:»)
-  dá a dose seguinte à azitromicina. **A direção destes erros favorece os modelos:** deixam passar uma resposta errada, por
-  isso dão menos falhas críticas e nunca mais. O efeito nas 1688 respostas guardadas está medido e lido: a P4 altera 3 critérios, os
+  dá a dose seguinte à azitromicina. **A direção destes erros favorece os modelos:** deixam passar uma resposta errada, e
+  por isso dão menos falhas críticas. O efeito nas 1688 respostas guardadas está medido e lido: a P4 altera 3 critérios, os
   três de classe (a). Em respostas novas a taxa destes falsos passes não foi medida. Os testes que os documentam estão em
   `tests/test_ancoragem.py` como `expectedFailure` (3, 4b, 5 e 6, afirmam o que o corretor devia fazer, que é falhar) e como
   consequência assumida (2).
