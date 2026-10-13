@@ -171,6 +171,19 @@ class TestTheFactualSentenceTheReadingAndTheLabel(unittest.TestCase):
                 self.assertTrue(numbers, text[-900:])
                 self.assertIn("docs/LEITURA_MUDANCAS_2026-10-12.md", text)
 
+    def test_the_sentence_of_the_sensitivity_has_the_numbers_of_the_data_in_the_five_languages(self):
+        s = CORRECTION.sensitivity
+        expected = [f"{html_report._model_sized(model)}: {after} → {without}" for _t, model, _b, after, without in s.items]
+        p_after, p_without = (f"{x.p_value:.3f}" for x in (s.pair_after, s.pair_without))
+        for lang, page in PAGES.items():
+            start = page.index('id="limitacoes"')
+            text = words(page[start:page.index("</ul>", start)])
+            with self.subTest(lingua=lang):
+                for item in expected:
+                    self.assertIn(item, text)
+                self.assertIn(p_without.replace(".", "," if lang != "en" else "."), text)
+                self.assertIn(p_after.replace(".", "," if lang != "en" else "."), text)
+
     def test_the_failure_type_of_a_dose_or_an_interval_has_a_neutral_label_in_every_language(self):
         new = {"pt": "Dose ou intervalo diferente da referência", "en": "Dose or interval different from the reference",
                "es": "Dosis o intervalo distintos de la referencia", "fr": "Dose ou intervalle différents de la référence",

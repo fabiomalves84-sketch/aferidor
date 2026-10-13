@@ -2089,8 +2089,39 @@ def _correction_results(data: _ReportData) -> str:
     return "".join(parts)
 
 
-def _limitations_block(reading: tuple[int, int, int, int] | None = None) -> str:
+def _sensitivity_text(sensitivity: "correcao.Sensitivity | None") -> str:
+    """What the table says without the changes the reading classed as false failures or false passes, worked out from the
+    reading and the data. Empty when none of them moves a number."""
+    if sensitivity is None:
+        return ""
+    banks = {bank for _t_, _m, bank, _a, _w in sensitivity.items}
+    names = {"principal": _t("Banco principal"), "consulta": _t("Banco de consulta")}
+    listing = "; ".join(
+        f"{_model_sized(model)}{', ' + names[bank] if len(banks) > 1 else ''}: {after} → {without}"
+        for _trial, model, bank, after, without in sensitivity.items
+    )
+    text = _t(
+        "Sem estes {k} casos lidos como falsos falhanços ou falsos passes, a tabela mudaria assim: {lista}.",
+        k=sensitivity.count, lista=_esc(listing),
+    )
+    after, without = sensitivity.pair_after, sensitivity.pair_without
+    if after is not None and without is not None:
+        if (after.first, after.second) != (without.first, without.second):
+            text += " " + _t(
+                "Sem eles, os dois melhores seriam {a} e {b}, e o teste de McNemar daria {p}.",
+                a=_esc(_model_sized(without.first)), b=_esc(_model_sized(without.second)), p=_p_value(without.p_value),
+            )
+        elif without.p_value != after.p_value:
+            text += " " + _t(
+                "O teste de McNemar entre os dois melhores daria {p} em vez de {p0}.",
+                p=_p_value(without.p_value), p0=_p_value(after.p_value),
+            )
+    return text
+
+
+def _limitations_block(correction: "correcao.Correction | None" = None) -> str:
     """The known limits of the corrector, plainly, on the Method page. True of every report."""
+    reading = correction.reading if correction is not None else None
     items = [
         _t(
             "Um fármaco nomeado na frase que abre a secção («Azitromicina: é uma alternativa se a clindamicina estiver "
@@ -2128,7 +2159,8 @@ def _limitations_block(reading: tuple[int, int, int, int] | None = None) -> str:
             "critério ancorado (nenhum em 40, o que é compatível com até cerca de 7%), e os dos critérios sem âncora não "
             "foram amostrados.",
             n=reading[0], a=reading[1], b=reading[2], c=reading[3], leitura="<code>docs/LEITURA_MUDANCAS_2026-10-12.md</code>",
-        ) if reading is not None else _t(
+        ) + (" " + _sensitivity_text(correction.sensitivity) if correction.sensitivity is not None else "")
+        if reading is not None else _t(
             "Quem leu e classificou as mudanças foi uma só pessoa, sem revisão. A taxa de falsos falhanços mede-se nas "
             "respostas que mudaram; os falsos passes só se mediram numa amostra de 40 respostas com critério ancorado "
             "(nenhum em 40, o que é compatível com até cerca de 7%). Os falsos passes dos critérios sem âncora não foram "
@@ -2191,7 +2223,7 @@ def _method_panel(data: _ReportData, before: str) -> str:
     """
     method: list[str] = [
         f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(data.samples_n, data.rule) if data.models else ""),
-        _verification_block(), _limitations_block(data.correction.reading if data.correction else None), _standards_block(data), _sources_by_body(data.cases),
+        _verification_block(), _limitations_block(data.correction), _standards_block(data), _sources_by_body(data.cases),
     ]
     if data.models:
         method.append(data.protocol_html)

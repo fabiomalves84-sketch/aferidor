@@ -273,6 +273,19 @@ cefuroxima, porque o marcador «evit» deixou de contar como exclusão da âncor
 evitar toxicidade» não excluísse o metotrexato). Uma frase que só diga «evitar» o fármaco já não o exclui. É raro, e **não foi
 corrigido**.
 
+**Resultado da leitura das mudanças de falha crítica (12/10/2026).** Li as 11 mudanças de estado de falha crítica entre o corretor
+publicado e o corrigido (`docs/LEITURA_MUDANCAS_2026-10-12.md`), uma a uma: 9 corretas, 2 falsos falhanços ou falsos passes e 0
+ambíguas. Sem estes 2 casos lidos como falsos falhanços ou falsos passes, a tabela mudaria assim: Gemini 3.5 Flash Lite: 14 → 13;
+Gemma 4 26B: 13 → 12. O teste de McNemar entre os dois melhores daria p = 0,250 em vez de p = 0,125. Estes números saem do ficheiro
+da leitura e dos dados, não são escritos à mão, e um teste confere-os.
+
+**O padrão (i) é o próximo a tratar.** O princípio, decidido a 12/10/2026 antes de se medir o seu efeito e ainda não implementado: numa
+secção cujo cabeçalho (uma linha de título, de item numerado ou de campo «Fármaco:») nomeia um fármaco, a dose e o intervalo que vêm a
+seguir pertencem a esse fármaco até ao cabeçalho seguinte, seja o que for que as frases entre o cabeçalho e a dose nomeiem. É uma regra
+de estrutura, não uma lista de palavras. Os dois casos lidos como falsos falhanços (ATB-FAR-004, Gemini e Gemma 4 26B) são os exemplos a
+que a regra tem de responder e não a razão dela; quando se implementar, mede-se como as outras: antes e depois, em todas as respostas
+guardadas, e lendo todas as mudanças.
+
 **Porque (i) e (ii) não se corrigem.** Alargar a lista da P2 ou estreitar a lista da U3 para estes casos seria acertar
 listas fechadas a poucos casos que se viram, e essa é a afinação pelo efeito que a U6 proíbe. O erro residual fica
 medido e reportado: ver a seguir.

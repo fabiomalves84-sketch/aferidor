@@ -137,6 +137,38 @@ class TestTheReadingOfTheChanges(unittest.TestCase):
             self.assertEqual(len(lines), 1)
             self.assertIn(", ".join(map(str, change.samples)), lines[0], (change.model, change.case))
 
+    def test_the_sensitivity_is_worked_out_from_the_reading_and_says_which_numbers_depend_on_the_false_failures(self):
+        s = self.correction.sensitivity
+        bad = [(m, k) for m, k, c in correcao.read_rows(READING) if c == "b"]
+        self.assertEqual(s.count, len(bad))
+        moved = {(c.model, c.case) for c in self.correction.changes} & set(bad)
+        self.assertEqual(len(moved), len(bad))
+        by_model = {model: (after, without) for _t, model, _b, after, without in s.items}
+        rows = {(r.trial, r.model): r.after for r in self.correction.rows}
+        for trial, model, _bank, after, without in s.items:
+            self.assertEqual(after, rows[(trial, model)])
+            self.assertEqual(without, after - 1)  # each false failure is the only cause of its case
+        self.assertEqual(set(by_model), {model for model, _k in bad})
+        self.assertGreaterEqual(s.pair_without.p_value, s.pair_after.p_value)
+
+    def test_without_a_false_failure_that_moves_the_table_there_is_no_sensitivity(self):
+        text = READING.read_text(encoding="utf-8").replace("| b |", "| a |")
+        with tempfile.TemporaryDirectory() as folder:
+            all_right = Path(folder) / "leitura.md"
+            all_right.write_text(text, encoding="utf-8")
+            self.assertIsNone(correcao.compute(BEFORE, ROOT / "ensaios", ROOT, all_right).sensitivity)
+
+    def test_the_method_document_gives_the_same_sentence_as_the_data(self):
+        from aferidor import html_report
+
+        s = self.correction.sensitivity
+        listing = "; ".join(f"{html_report._model_sized(model)}: {after} → {without}" for _t, model, _b, after, without in s.items)
+        method = (ROOT / "docs" / "METODO.md").read_text(encoding="utf-8").replace("\n", " ")
+        self.assertIn(f"Sem estes {s.count} casos lidos como falsos falhanços ou falsos passes, a tabela mudaria assim: {listing}.", " ".join(method.split()))
+        p_after, p_without = (f"p = {x.p_value:.3f}".replace(".", ",") for x in (s.pair_after, s.pair_without))
+        self.assertIn(f"daria {p_without} em vez de {p_after}", " ".join(method.split()))
+        self.assertIn("O padrão (i) é o próximo a tratar", method)
+
     def test_a_reading_that_no_longer_matches_the_data_is_refused(self):
         text = READING.read_text(encoding="utf-8").replace("`local:phi4:14b` | ATB-PIEL-006", "`local:phi4:14b` | ATB-PAC-001")
         with tempfile.TemporaryDirectory() as folder:

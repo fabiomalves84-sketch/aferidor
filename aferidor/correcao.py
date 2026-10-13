@@ -134,6 +134,21 @@ class Change:
 
 
 @dataclass(frozen=True)
+class Sensitivity:
+    """What the table says without the changes the reading classed as (b), a false failure or a false pass.
+
+    Reverting one of them gives the case back the state it had under the published corrector. `items` are the rows
+    of the table that depend on them, as (trial, model, bank, corrected, without them); the best pair is worked out
+    again on the main bank without them.
+    """
+
+    count: int
+    items: tuple[tuple[str, str, str, int, int], ...]
+    pair_after: BestPair | None
+    pair_without: BestPair | None
+
+
+@dataclass(frozen=True)
 class Correction:
     """Everything the page says about the correction, worked out from the stored answers and `antes-8edda161.json`."""
 
@@ -149,6 +164,7 @@ class Correction:
     trials_counted: int
     changes: tuple[Change, ...] = ()
     reading: tuple[int, int, int, int] | None = None  # changes read, then how many (a), (b), (c)
+    sensitivity: Sensitivity | None = None  # only with a reading, and only if some (b) moves a number of the table
 
     @property
     def fell(self) -> tuple[Row, ...]:
@@ -285,7 +301,31 @@ def compute(before_path: Path, ensaios: Path, root: Path, reading_path: Path | N
         cephalexin=tuple((m, v[0], v[1]) for m, v in sorted(cephalexin.items())),
         equivalent_forms=counted(u1), all_corrections=counted(everything), trials_counted=len(before["ensaios"]),
         changes=tuple(changes), reading=read_summary(reading_path, changes) if reading_path is not None else None,
+        sensitivity=_sensitivity(reading_path, changes, rows, _critical_by_case(after_cases.get("all", []))) if reading_path is not None else None,
     )
+
+
+def _sensitivity(path: Path, changes: list[Change], rows: list[Row], after_main: dict[str, dict[str, bool]]) -> Sensitivity | None:
+    """The table, and the best pair of the main bank, without the changes the reading classes as (b). None if none of them
+    moves a number of the table."""
+    classes = {(m, k): c for m, k, c in read_rows(path)}
+    bad = [c for c in changes if classes[(c.model, c.case)] == "b"]
+    if not bad:
+        return None
+    moved: dict[tuple[str, str], int] = {}
+    for change in bad:
+        moved[(change.trial, change.model)] = moved.get((change.trial, change.model), 0) + (1 if change.now_critical else -1)
+    items = tuple(
+        (row.trial, row.model, row.bank, row.after, row.after - moved[(row.trial, row.model)])
+        for row in rows if (row.trial, row.model) in moved and moved[(row.trial, row.model)] != 0
+    )
+    if not items:
+        return None
+    without = {model: dict(cases) for model, cases in after_main.items()}
+    for change in bad:
+        if change.bank == "principal" and not is_after_the_protocol(change.trial) and change.model in without:
+            without[change.model][change.case] = not change.now_critical
+    return Sensitivity(len(bad), items, best_pair(after_main), best_pair(without))
 
 
 READING_ROW = re.compile(r"^\|\s*`([^`]+)`\s*\|\s*([A-Z0-9-]+)\s*\|[^|]*\|[^|]*\|[^|]*\|\s*([abc])\b[^|]*\|\s*$")
