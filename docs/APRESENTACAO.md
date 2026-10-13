@@ -71,7 +71,7 @@ julgamento clínico.
   português europeu independente das falhas clínicas.
 - Adaptadores para OpenAI, Anthropic, Google Gemini e modelos locais através
   do Ollama.
-- 1270 testes automáticos, sem dependências externas.
+- 1278 testes automáticos, sem dependências externas.
 
 Limitações conhecidas:
 
@@ -90,10 +90,10 @@ Limitações conhecidas:
   parâmetros.
 - **A correção é textual.** A distinção entre prescrever um fármaco e
   mencioná-lo para o excluir é heurística; `docs/METODO.md` descreve onde falha.
-- **O corretor foi corrigido a 12/10/2026**, e a página de exemplo mostra o
+- **O corretor foi corrigido a 12/10/2026, com uma regra a mais a 13/10/2026**, e a página de exemplo mostra o
   publicado e o corrigido lado a lado: nenhum dos cinco modelos desceu. As
   correções estão escritas, com a razão e a data, e as limitações que ficam
-  também (comparador que abre a secção, texto de contraindicação antes da dose,
+  também (cabeçalho com mais de um fármaco que não abre secção, texto de contraindicação antes da dose,
   critérios por ancorar, controlos negativos «dose certa e dose concorrente» por
   fazer, leitor único, falsos passes sem âncora por amostrar).
 
@@ -131,7 +131,7 @@ não nos casos.
 ## Demonstração
 
 ```
-python3 -m unittest discover -s tests   # 1270 testes
+python3 -m unittest discover -s tests   # 1278 testes
 python3 -m aferidor verificar           # 27/27 casos, 319/319 controlos negativos
 python3 -m aferidor verificar --casos casos/consulta.json   # 31/31, 140/140
 python3 -m aferidor executar --fornecedor falso

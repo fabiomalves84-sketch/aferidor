@@ -353,7 +353,7 @@ class TestNothingNewWhenThereIsNoNewData(unittest.TestCase):
                         contextlib.redirect_stdout(io.StringIO()):
                     code = cli.main(["relatorio", "--formato", "html", "--linguas", "pt,en,es,fr,de", "--casos", "casos/casos.json",
                                      "--respostas", str(joined), "--antes", "docs/exemplo/antes-8edda161.json",
-                                     "--leitura", "docs/LEITURA_MUDANCAS_2026-10-12.md",
+                                     "--leitura", "docs/LEITURA_MUDANCAS_2026-10-13.md",
                                      "--saida", str(Path(folder) / "index.html")])
             finally:
                 os.chdir(before)

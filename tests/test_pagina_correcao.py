@@ -15,7 +15,7 @@ from tests.html_support import ROOT
 EXAMPLE = ROOT / "docs" / "exemplo"
 FILES = {"pt": "index.html", "en": "index.en.html", "es": "index.es.html", "fr": "index.fr.html", "de": "index.de.html"}
 PAGES = {lang: (EXAMPLE / name).read_text(encoding="utf-8") for lang, name in FILES.items()}
-READING = ROOT / "docs" / "LEITURA_MUDANCAS_2026-10-12.md"
+READING = ROOT / "docs" / "LEITURA_MUDANCAS_2026-10-13.md"
 CORRECTION = correcao.compute(EXAMPLE / "antes-8edda161.json", ROOT / "ensaios", ROOT, READING)
 
 
@@ -60,7 +60,7 @@ class TestTheTableIsTheComputedOne(unittest.TestCase):
 
         reference = figures(PAGES["pt"])
         self.assertIn("0.375", reference)
-        self.assertIn("0.125", reference)
+        self.assertIn("0.250", reference)
         for lang in LANGS:
             with self.subTest(lingua=lang):
                 self.assertEqual(figures(PAGES[lang]), reference)
@@ -125,7 +125,7 @@ class TestWhatTheTextSaysAndDoesNotSay(unittest.TestCase):
             with self.subTest(lingua=lang):
                 self.assertEqual(listing.count("<li>"), 9)
         text = words(PAGES["pt"][PAGES["pt"].index('id="limitacoes"'):][:6500])
-        for expected in ("frase que abre a secção", "ClCr", "sem âncora", "ATB-PIEL-006 passa com a ciprofloxacina", "«Evitar cefuroxima 250 mg 12/12 h» passa",
+        for expected in ("nomeia mais de um fármaco", "ClCr", "sem âncora", "ATB-PIEL-006 passa com a ciprofloxacina", "«Evitar cefuroxima 250 mg 12/12 h» passa",
                          "controlos negativos", "cefaclor", "uma só pessoa", "não foram amostrados", "ATB-FAR-013, PED-OMA-019, 020 e 021, COV-TOC-009"):
             with self.subTest(limite=expected):
                 self.assertIn(expected, text)
@@ -169,20 +169,27 @@ class TestTheFactualSentenceTheReadingAndTheLabel(unittest.TestCase):
             numbers = re.findall(rf"(?<!\d){n}(?!\d)[^.]*?(?<!\d){a}(?!\d)[^.]*?(?<!\d){b}(?!\d)[^.]*?(?<!\d){c}(?!\d)", text)
             with self.subTest(lingua=lang):
                 self.assertTrue(numbers, text[-900:])
-                self.assertIn("docs/LEITURA_MUDANCAS_2026-10-12.md", text)
+                self.assertIn("docs/LEITURA_MUDANCAS_2026-10-13.md", text)
 
-    def test_the_sentence_of_the_sensitivity_has_the_numbers_of_the_data_in_the_five_languages(self):
-        s = CORRECTION.sensitivity
-        expected = [f"{html_report._model_sized(model)}: {after} → {without}" for _t, model, _b, after, without in s.items]
-        p_after, p_without = (f"{x.p_value:.3f}" for x in (s.pair_after, s.pair_without))
+    def test_without_a_false_failure_there_is_no_sentence_about_what_the_table_would_be_without_it(self):
+        self.assertIsNone(CORRECTION.sensitivity)
         for lang, page in PAGES.items():
             start = page.index('id="limitacoes"')
             text = words(page[start:page.index("</ul>", start)])
             with self.subTest(lingua=lang):
-                for item in expected:
-                    self.assertIn(item, text)
-                self.assertIn(p_without.replace(".", "," if lang != "en" else "."), text)
-                self.assertIn(p_after.replace(".", "," if lang != "en" else "."), text)
+                self.assertNotIn("→", text)
+
+    def test_the_sentence_of_the_sensitivity_is_worked_out_from_the_data_when_a_false_failure_moves_the_table(self):
+        import dataclasses
+
+        moved = correcao.Sensitivity(
+            2, (("t", "gemini:gemini-3.5-flash-lite", "principal", 13, 12), ("t", "gemini:gemma-4-31b-it", "principal", 10, 9)),
+            CORRECTION.best_after, dataclasses.replace(CORRECTION.best_after, p_value=0.5),
+        )
+        text = words(html_report._limitations_block(dataclasses.replace(CORRECTION, sensitivity=moved)))
+        self.assertIn("Sem estes 2 casos lidos como falsos falhanços ou falsos passes, a tabela mudaria assim", text)
+        self.assertIn("Gemini 3.5 Flash Lite: 13 → 12", text)
+        self.assertIn("daria p = 0,500 em vez de p = 0,250", text)
 
     def test_the_failure_type_of_a_dose_or_an_interval_has_a_neutral_label_in_every_language(self):
         new = {"pt": "Dose ou intervalo diferente da referência", "en": "Dose or interval different from the reference",

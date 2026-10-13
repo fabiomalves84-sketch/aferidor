@@ -234,17 +234,33 @@ senão, ao último nomeado acima; (4) senão, ao primeiro nomeado depois. Medido
 depois: nenhum critério muda de passa para falha e uma resposta passa de falha a passa, a do falso falhanço atrás (ATB-DPOC-002,
 Qwen a3). Decidido depois de ler as mudanças, por princípio e não pelo efeito num modelo.
 
+**Correção pós-hoc da ligação da dose ao fármaco, a 13 de outubro de 2026 (P4).** Escrita aqui como pós-hoc, com a razão. A
+limitação (i) abaixo, o padrão em que um fármaco nomeado entre o cabeçalho e a dose ficava com ela, tinha o princípio decidido a
+12/10 antes de se medir o seu efeito: numa secção cujo cabeçalho nomeia um fármaco, a dose e o intervalo seguintes são desse
+fármaco até ao cabeçalho seguinte, seja o que for que as frases entre ambos nomeiem. Implementou-se assim, e na ordem de ligação
+entra entre «o fármaco mais próximo antes, na sua frase» e «o último nomeado acima».
+
+- **Cabeçalho** é um título (`###`), um item numerado, uma linha toda em negrito, o campo «Fármaco:», uma linha que acaba em dois
+  pontos, ou uma etiqueta em negrito que nomeia um fármaco («**Fosfomicina:** ...»), contada até aos dois pontos. «**Dose:**» não é.
+- **Cabeçalho com mais de um fármaco (P4, escolhido depois de ver o efeito).** A primeira medição deu um falso falhanço novo, em
+  PED-OMA-019 (Llama, amostra 4): «**Penicilina** (Amoxicilina ou Amoxiclav, por exemplo):» dava a secção a um fármaco que não é a
+  âncora. Um cabeçalho que nomeia vários fármacos não diz de quem é o valor seguinte, por isso **não abre secção** e a ordem de
+  ligação anterior continua. A razão é de princípio (onde o texto é ambíguo, o corretor não decide por ele e fica o comportamento já
+  medido e lido), não o efeito num modelo; mas a escolha foi feita depois de ver esse caso, e diz-se.
+- **Efeito**, sobre as 1688 respostas guardadas: 3 mudanças de critério, todas de falha para passa, 2 veredictos (os dois
+  falsos falhanços de ATB-FAR-004, no Gemini e no Gemma 4 26B), nenhum de passa para falha. Um ganho que a regra sem a P4 dava, o
+  de ATB-DPOC-012 no Phi-4 (amostra 4, «#### Amoxicilina/Ampicilina»), perde-se e fica como limitação.
+
 ### Limitações conhecidas do corretor (12/10/2026)
 
 Depois das correções pós-hoc acima, três padrões continuam a dar veredictos errados. Foram medidos e estão aqui
 escritos, não escondidos.
 
-**(i) Outro fármaco na frase que abre a secção.** A U2 só deixa de dar a dose a um fármaco nomeado em comparação ou em
-alergia, com a lista fechada da P2. Um fármaco nomeado noutra frase, entre o cabeçalho e a dose, continua a ficar com
-ela. Exemplo: ATB-FAR-004, Gemma 3 12B, amostra 1, critério «500 mg» ancorado à azitromicina. A secção diz «Azitromicina:
-É uma alternativa, especialmente se a clindamicina estiver contraindicada» e a seguir «dose: 500 mg, oral, dose única
-diária». A dose é da azitromicina e o corretor dá-a à clindamicina, e a resposta passa a falhar. Mesma coisa em FAR-004,
-Gemma 3 12B, amostra 5 («inferior à da clindamicina»). **Decisão:** não corrigido.
+**(i) Outro fármaco na frase que abre a secção.** Um fármaco nomeado noutra frase, entre o cabeçalho e a dose, ficava com ela
+(ATB-FAR-004, Gemma 3 12B, amostras 1 e 5, Gemini e Gemma 4 26B). **Tratado a 13/10/2026** pela P4 acima. **Fica:** um cabeçalho
+que nomeia mais de um fármaco não abre secção, por isso uma dose sob «#### Amoxicilina/Ampicilina» continua a ir para o último
+fármaco nomeado acima (ATB-DPOC-012, Phi-4, amostra 4, falha como falhava) e, na ordem contrária, uma dose pode ir ao fármaco
+errado de um cabeçalho do género «Macrolídeos (azitromicina ou eritromicina)».
 
 **(ii) Texto de contraindicação numa linha de tabela, antes da dose.** A U3 toma «ClCr», «insuficiência renal» e afins
 como condição, e numa linha só o que vem antes da dose condiciona-a. Exemplo: FMT-CIST-017, Gemma 4 26B, amostras 1, 2 e 4,
@@ -273,20 +289,13 @@ cefuroxima, porque o marcador «evit» deixou de contar como exclusão da âncor
 evitar toxicidade» não excluísse o metotrexato). Uma frase que só diga «evitar» o fármaco já não o exclui. É raro, e **não foi
 corrigido**.
 
-**Resultado da leitura das mudanças de falha crítica (12/10/2026).** Li as 11 mudanças de estado de falha crítica entre o corretor
-publicado e o corrigido (`docs/LEITURA_MUDANCAS_2026-10-12.md`), uma a uma: 9 corretas, 2 falsos falhanços ou falsos passes e 0
-ambíguas. Sem estes 2 casos lidos como falsos falhanços ou falsos passes, a tabela mudaria assim: Gemini 3.5 Flash Lite: 14 → 13;
-Gemma 4 26B: 13 → 12. O teste de McNemar entre os dois melhores daria p = 0,250 em vez de p = 0,125. Estes números saem do ficheiro
-da leitura e dos dados, não são escritos à mão, e um teste confere-os.
+**Resultado da leitura das mudanças de falha crítica (13/10/2026).** Li as 9 mudanças de estado de falha crítica entre o corretor
+publicado até 12/10 e o corrigido a 13/10 (`docs/LEITURA_MUDANCAS_2026-10-13.md`), uma a uma: 9 corretas, 0 falsos falhanços ou
+falsos passes e 0 ambíguas. A leitura de 12/10 (`docs/LEITURA_MUDANCAS_2026-10-12.md`) tinha 11, com 2 falsos falhanços (o padrão (i));
+a P4 trata-os, as outras 9 são as mesmas, com a mesma evidência nas 37 amostras, e nenhuma mudança nova apareceu. Com isto, a tabela já
+não depende de nenhum caso lido como falso falhanço ou falso passe (o Gemini tem 13 casos com falha crítica e o Gemma 4 26B 12).
 
-**O padrão (i) é o próximo a tratar.** O princípio, decidido a 12/10/2026 antes de se medir o seu efeito e ainda não implementado: numa
-secção cujo cabeçalho (uma linha de título, de item numerado ou de campo «Fármaco:») nomeia um fármaco, a dose e o intervalo que vêm a
-seguir pertencem a esse fármaco até ao cabeçalho seguinte, seja o que for que as frases entre o cabeçalho e a dose nomeiem. É uma regra
-de estrutura, não uma lista de palavras. Os dois casos lidos como falsos falhanços (ATB-FAR-004, Gemini e Gemma 4 26B) são os exemplos a
-que a regra tem de responder e não a razão dela; quando se implementar, mede-se como as outras: antes e depois, em todas as respostas
-guardadas, e lendo todas as mudanças.
-
-**Porque (i) e (ii) não se corrigem.** Alargar a lista da P2 ou estreitar a lista da U3 para estes casos seria acertar
+**Porque (ii) não se corrige, nem se alarga a lista da P2.** Alargar a lista da P2 ou estreitar a lista da U3 para estes casos seria acertar
 listas fechadas a poucos casos que se viram, e essa é a afinação pelo efeito que a U6 proíbe. O erro residual fica
 medido e reportado: ver a seguir.
 

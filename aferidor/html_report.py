@@ -715,7 +715,9 @@ def _verification_block() -> str:
             "Depois de ler as respostas que mudaram de veredicto, decidiram-se correções com data, em 12/10/2026, por princípio "
             "e não pelo efeito num modelo: P1, uma dose sem fármaco antes dela pertence ao primeiro nomeado depois; P2, um "
             "fármaco nomeado em comparação ou em alergia não é dono de uma dose; P3, um nome composto («amoxicilina com ácido "
-            "clavulânico») é uma só entidade; e uma dose seguida de «de» e um fármaco liga-se a esse fármaco."
+            "clavulânico») é uma só entidade; e uma dose seguida de «de» e um fármaco liga-se a esse fármaco. A 13/10/2026 juntou-se a "
+            "P4: numa secção cujo cabeçalho nomeia um só fármaco, a dose e o intervalo que vêm a seguir são desse fármaco até ao "
+            "cabeçalho seguinte, e um cabeçalho que nomeia vários fármacos não abre secção."
         ) + "</p><p>" + _t(
             "A decisão de cada regra não foi escolhida nem ajustada pelo efeito num modelo: cada alteração a uma regra ou a um "
             "critério leva a razão escrita, com a data, no método e na mensagem do commit."
@@ -2124,10 +2126,10 @@ def _limitations_block(correction: "correcao.Correction | None" = None) -> str:
     reading = correction.reading if correction is not None else None
     items = [
         _t(
-            "Um fármaco nomeado na frase que abre a secção («Azitromicina: é uma alternativa se a clindamicina estiver "
-            "contraindicada») fica com a dose que vem a seguir, porque a exceção da comparação só cobre «em detrimento de», "
-            "«em vez de», «ao invés de», «alergia a» e «alérgico a». Não se corrigiu: alargar listas fechadas a poucos casos "
-            "que se viram é afinar pelo efeito."
+            "Um cabeçalho que nomeia mais de um fármaco («Amoxicilina/Ampicilina», «Macrolídeos (azitromicina ou eritromicina)») "
+            "não abre secção, porque não diz de quem é o valor que vem a seguir, e a dose ou o intervalo ficam com o último "
+            "fármaco nomeado acima. Por isso uma dose da amoxicilina sob «Amoxicilina/Ampicilina» continua a falhar no "
+            "ATB-DPOC-012 do Phi-4. Foi uma decisão posterior a ver o efeito, escrita no método com a razão e a data."
         ),
         _t(
             "Texto de contraindicação numa linha de tabela, antes da dose («Nitrofurantoína (Contraindicações: insuficiência renal, ClCr) "
@@ -2158,7 +2160,7 @@ def _limitations_block(correction: "correcao.Correction | None" = None) -> str:
             "e {c} ambíguas (a lista está em {leitura}). Os falsos passes só se mediram numa amostra de 40 respostas com "
             "critério ancorado (nenhum em 40, o que é compatível com até cerca de 7%), e os dos critérios sem âncora não "
             "foram amostrados.",
-            n=reading[0], a=reading[1], b=reading[2], c=reading[3], leitura="<code>docs/LEITURA_MUDANCAS_2026-10-12.md</code>",
+            n=reading[0], a=reading[1], b=reading[2], c=reading[3], leitura="<code>docs/LEITURA_MUDANCAS_2026-10-13.md</code>",
         ) + (" " + _sensitivity_text(correction.sensitivity) if correction.sensitivity is not None else "")
         if reading is not None else _t(
             "Quem leu e classificou as mudanças foi uma só pessoa, sem revisão. A taxa de falsos falhanços mede-se nas "

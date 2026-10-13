@@ -371,7 +371,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     relatorio.add_argument(
         "--leitura", type=Path, default=None,
-        help="leitura das mudanças de falha crítica (docs/LEITURA_MUDANCAS_2026-10-12.md): com --antes, a página diz quantas "
+        help="leitura das mudanças de falha crítica (docs/LEITURA_MUDANCAS_2026-10-13.md): com --antes, a página diz quantas "
         "se leram e quantas são corretas; recusa-se uma leitura que não corresponda às mudanças que os dados dão hoje",
     )
     relatorio.add_argument(

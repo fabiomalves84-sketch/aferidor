@@ -22,21 +22,21 @@ dependem da versão do corretor, e o critério para saber qual vale em cada linh
 é um só: o ensaio tinha, ou não, um compromisso escrito de congelar o corretor
 (`versao_corretor` no protocolo). Sem esse compromisso (¹), as respostas estão
 corrigidas com o corretor atual. Com ele (²), o número é o que foi publicado. A
-diferença de tratamento é deliberada. Em 12/10/2026 o corretor foi corrigido (ver
-abaixo), pelo que cada célula tem dois números: o publicado até essa data, com o
-corretor `8edda161`, e o corrigido, com o `8404de4a7c95`.
+diferença de tratamento é deliberada. Em 12/10/2026 o corretor foi corrigido, e a 13/10/2026 acrescentou-se a regra P4 (ver
+abaixo), pelo que cada célula tem dois números: o publicado até 12/10, com o
+corretor `8edda161`, e o corrigido, com o `be194b638f32`.
 
 | Modelo | Banco principal (27 casos): casos com falha crítica, publicado → corrigido (IC 95% do corrigido) | Banco de consulta (30 casos à data dos ensaios): publicado → corrigido (IC 95% do corrigido) | Protocolo |
 |---|---|---|---|
 | Gemma 4 31B (Google, aberto, API)¹ | 8 → 10 (22% a 56%); à data: 10 (22% a 56%) | 4 → 4 (5% a 30%) | reprovado |
-| Gemma 4 26B A4B (Google, aberto, API), corretor congelado² | 12 (28% a 63%); reclassificação posterior, fora do protocolo: 13 (31% a 66%) | 5 de 31 (7% a 33%); reclassificação posterior: 5 | reprovado |
-| Gemini 3.5 Flash Lite (Google, comercial, API)¹ | 11 → 14 (34% a 69%) | 4 → 4 (5% a 30%); à data: 6 (10% a 37%) | reprovado |
+| Gemma 4 26B A4B (Google, aberto, API), corretor congelado² | 12 (28% a 63%); reclassificação posterior, fora do protocolo: 12 (28% a 63%) | 5 de 31 (7% a 33%); reclassificação posterior: 5 | reprovado |
+| Gemini 3.5 Flash Lite (Google, comercial, API)¹ | 11 → 13 (31% a 66%) | 4 → 4 (5% a 30%); à data: 6 (10% a 37%) | reprovado |
 | Gemma 3 12B (Google, aberto, local)¹ | 16 → 19 (52% a 84%); à data: 17 (44% a 78%) | — | reprovado |
 | Phi-4 14B (Microsoft, aberto, local)¹ | 22 → 23 (68% a 94%) | — | reprovado |
 
 ¹ Sem corretor congelado: o publicado é o do corretor
 `0.1.0+corretor.8edda161bd4e` (o do exemplo publicado até 12/10) e o corrigido o do
-`0.1.0+corretor.8404de4a7c95`, os dois sobre o banco de casos atual; nenhum modelo
+`0.1.0+corretor.be194b638f32`, os dois sobre o banco de casos atual; nenhum modelo
 desceu com a correção. Onde o número publicado difere do publicado no dia do ensaio, o publicado vem a seguir como «à data», com o
 intervalo desse relatório (fontes: o `README.md` e o `relatorio.md` da pasta do
 ensaio e as mensagens dos commits que os publicaram, `4c497e5`, `1753180`,
@@ -51,14 +51,14 @@ e Phi-4 no banco principal, Gemma 4 31B no de consulta) não mudaram.
 ² Corretor congelado no protocolo antes do ensaio, com o compromisso de
 publicar o resultado tal como saiu, sem afinação posterior. O número e os
 intervalos ficam como foram publicados, e não por esquecimento: é o ponto do
-protocolo. O corretor de 12/10 dá, sobre os mesmos bancos, 13 e 5: é uma
+protocolo. O corretor de 13/10 dá, sobre os mesmos bancos, 12 e 5: é uma
 reclassificação posterior, fora do protocolo, a que não se aplica o limiar do
 protocolo, e o publicado fica como saiu.
 
 Os protocolos exigem zero casos com falha crítica. Entre os dois melhores
 (Gemma 4 31B e Gemini 3.5 Flash Lite), o teste de McNemar exato sobre os casos
 discordantes não mostra diferença (p = 0,375 no banco principal com o corretor
-publicado e 0,125 com o corrigido, 1,000 no de consulta; à data, 1,000 e 0,500,
+publicado e 0,250 com o corrigido, 1,000 no de consulta; à data, 1,000 e 0,500,
 segundo a mensagem do commit `4c497e5`). Entre o
 Gemma 4 31B e o Gemma 3 12B, com o corretor publicado, 1 contra 9 casos,
 p = 0,021, sem correção para comparações múltiplas; antes da afinação `3fa7e65`
@@ -72,10 +72,11 @@ parte da resposta, e falhava uma forma equivalente («a cada 8 horas», «0,5 g�
 Corrigiu-se com seis regras escritas antes de ver um veredicto novo
 (`docs/METODO.md`), e a página de exemplo mostra o publicado e o corrigido lado a
 lado, com as limitações que ficam: a taxa de falsos falhanços, medida nas respostas
-que mudaram e lidas por uma só pessoa, foi de 2 em 13 passagens de certo a errado depois das correções pós-hoc, e os falsos
+que mudaram e lidas por uma só pessoa, foi de 0 em 9 mudanças de estado de falha crítica lidas, depois de a regra P4 (13/10/2026) tratar os dois
+falsos falhanços da leitura de 12/10, e os falsos
 passes só se mediram numa amostra de 40 respostas com critério ancorado (nenhum).
 A reclassificação de cada ensaio está em ficheiros novos ao lado dos originais
-(`vereditos-reclassificado-2026-10-12.json`). É triagem automática, sem validação.
+(`vereditos-reclassificado-2026-10-12.json` e, para o corretor de 13/10, `vereditos-reclassificado-2026-10-13.json`). É triagem automática, sem validação.
 
 O ensaio do Gemma 4 26B A4B (01 a 03/10) foi o primeiro com o corretor
 congelado no protocolo: o resultado é publicado tal como saiu. Lidas uma a
@@ -90,7 +91,7 @@ Requer Python 3.10 ou superior. Não tem dependências externas.
 ```
 git clone https://github.com/fabiomalves84-sketch/aferidor.git
 cd aferidor
-python3 -m unittest discover -s tests          # 1270 testes
+python3 -m unittest discover -s tests          # 1278 testes
 python3 -m aferidor verificar                  # coerência dos casos e do corretor
 python3 -m aferidor ensaio --fornecedor falso  # ensaio de demonstração, sem chave nem custo
 ```
@@ -171,7 +172,7 @@ documentos públicos ou são sintéticos.
   (`casos/casos.json`); consulta de adulto, criança e cessação tabágica
   (`casos/consulta.json`). Os casos de infeção seguem as normas da DGS.
 - `verificar`: 27/27 e 31/31 casos coerentes; 319/319 e 140/140 controlos
-  negativos detetados. 1270 testes, em Python 3.10 a 3.14 na integração
+  negativos detetados. 1278 testes, em Python 3.10 a 3.14 na integração
   contínua.
 - Fontes: 10 de 58 confirmadas por uma pessoa, caso a caso, nos PDF da DGS; 24
   declaradas confirmadas em grupo, sem registo de página por caso; as 24

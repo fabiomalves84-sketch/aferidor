@@ -12,7 +12,7 @@ from aferidor.grading import mcnemar_exact
 from tests.html_support import ROOT
 
 BEFORE = ROOT / "docs" / "exemplo" / "antes-8edda161.json"
-READING = ROOT / "docs" / "LEITURA_MUDANCAS_2026-10-12.md"
+READING = ROOT / "docs" / "LEITURA_MUDANCAS_2026-10-13.md"
 
 
 class TestNamingADrugIsNotRecommendingIt(unittest.TestCase):
@@ -86,7 +86,7 @@ class TestTheCorrectionOfThePage(unittest.TestCase):
 
     def test_the_cases_affected_are_counted_and_u1_alone_is_part_of_the_whole(self):
         (u1_criteria, u1_cases), (all_criteria, all_cases) = self.correction.equivalent_forms, self.correction.all_corrections
-        self.assertEqual((u1_criteria, u1_cases, all_criteria, all_cases), (40, 11, 200, 18))
+        self.assertEqual((u1_criteria, u1_cases, all_criteria, all_cases), (40, 11, 197, 18))
         self.assertLessEqual(u1_criteria, all_criteria)
         self.assertLessEqual(u1_cases, all_cases)
         self.assertEqual(self.correction.trials_counted, 10)
@@ -110,7 +110,7 @@ class TestTheCorrectionOfThePage(unittest.TestCase):
 
 
 class TestTheReadingOfTheChanges(unittest.TestCase):
-    """docs/LEITURA_MUDANCAS_2026-10-12.md says what each change of the state of critical failure is; it only counts if it matches the data."""
+    """docs/LEITURA_MUDANCAS_2026-10-13.md says what each change of the state of critical failure is; it only counts if it matches the data."""
 
     @classmethod
     def setUpClass(cls):
@@ -137,37 +137,34 @@ class TestTheReadingOfTheChanges(unittest.TestCase):
             self.assertEqual(len(lines), 1)
             self.assertIn(", ".join(map(str, change.samples)), lines[0], (change.model, change.case))
 
+    def test_the_reading_of_13_october_has_no_false_failure_so_the_table_depends_on_none(self):
+        self.assertEqual(self.correction.reading, (9, 9, 0, 0))
+        self.assertIsNone(self.correction.sensitivity)
+
     def test_the_sensitivity_is_worked_out_from_the_reading_and_says_which_numbers_depend_on_the_false_failures(self):
-        s = self.correction.sensitivity
-        bad = [(m, k) for m, k, c in correcao.read_rows(READING) if c == "b"]
-        self.assertEqual(s.count, len(bad))
-        moved = {(c.model, c.case) for c in self.correction.changes} & set(bad)
-        self.assertEqual(len(moved), len(bad))
-        by_model = {model: (after, without) for _t, model, _b, after, without in s.items}
+        with tempfile.TemporaryDirectory() as folder:
+            marked = Path(folder) / "leitura.md"
+            text = READING.read_text(encoding="utf-8")
+            for model, case in (("gemini:gemini-3.5-flash-lite", "ATB-FAR-014"), ("gemini:gemma-4-31b-it", "ATB-PAC-001")):
+                line = next(l for l in text.splitlines() if f"`{model}`" in l and case in l)
+                text = text.replace(line, line.replace("| a |", "| b |"))
+            marked.write_text(text, encoding="utf-8")
+            s = correcao.compute(BEFORE, ROOT / "ensaios", ROOT, marked).sensitivity
+        self.assertEqual(s.count, 2)
         rows = {(r.trial, r.model): r.after for r in self.correction.rows}
         for trial, model, _bank, after, without in s.items:
             self.assertEqual(after, rows[(trial, model)])
             self.assertEqual(without, after - 1)  # each false failure is the only cause of its case
-        self.assertEqual(set(by_model), {model for model, _k in bad})
+        self.assertEqual({model for _t, model, *_ in s.items}, {"gemini:gemini-3.5-flash-lite", "gemini:gemma-4-31b-it"})
         self.assertGreaterEqual(s.pair_without.p_value, s.pair_after.p_value)
 
-    def test_without_a_false_failure_that_moves_the_table_there_is_no_sensitivity(self):
-        text = READING.read_text(encoding="utf-8").replace("| b |", "| a |")
-        with tempfile.TemporaryDirectory() as folder:
-            all_right = Path(folder) / "leitura.md"
-            all_right.write_text(text, encoding="utf-8")
-            self.assertIsNone(correcao.compute(BEFORE, ROOT / "ensaios", ROOT, all_right).sensitivity)
-
-    def test_the_method_document_gives_the_same_sentence_as_the_data(self):
-        from aferidor import html_report
-
-        s = self.correction.sensitivity
-        listing = "; ".join(f"{html_report._model_sized(model)}: {after} → {without}" for _t, model, _b, after, without in s.items)
-        method = (ROOT / "docs" / "METODO.md").read_text(encoding="utf-8").replace("\n", " ")
-        self.assertIn(f"Sem estes {s.count} casos lidos como falsos falhanços ou falsos passes, a tabela mudaria assim: {listing}.", " ".join(method.split()))
-        p_after, p_without = (f"p = {x.p_value:.3f}".replace(".", ",") for x in (s.pair_after, s.pair_without))
-        self.assertIn(f"daria {p_without} em vez de {p_after}", " ".join(method.split()))
-        self.assertIn("O padrão (i) é o próximo a tratar", method)
+    def test_the_method_document_says_the_numbers_of_the_reading_and_the_rule_that_treated_the_pattern(self):
+        n, a, b, c = self.correction.reading
+        method = " ".join((ROOT / "docs" / "METODO.md").read_text(encoding="utf-8").split())
+        self.assertIn(f"Li as {n} mudanças de estado de falha crítica", method)
+        self.assertIn(f"{a} corretas, {b} falsos falhanços ou falsos passes e {c} ambíguas", method)
+        self.assertIn("(P4)", method)
+        self.assertNotIn("O padrão (i) é o próximo a tratar", method)
 
     def test_a_reading_that_no_longer_matches_the_data_is_refused(self):
         text = READING.read_text(encoding="utf-8").replace("`local:phi4:14b` | ATB-PIEL-006", "`local:phi4:14b` | ATB-PAC-001")

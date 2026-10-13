@@ -251,17 +251,17 @@ cat ensaios/2026-09-29-gemma4-31b-casos/respostas.jsonl \
 python3 -m aferidor relatorio --formato html --linguas pt,en,es,fr,de \
   --casos casos/casos.json --respostas /tmp/exemplo-respostas.jsonl \
   --antes docs/exemplo/antes-8edda161.json \
-  --leitura docs/LEITURA_MUDANCAS_2026-10-12.md --saida docs/exemplo/index.html
+  --leitura docs/LEITURA_MUDANCAS_2026-10-13.md --saida docs/exemplo/index.html
 ```
 
 O `--leitura` junta às limitações da página o resultado da leitura das mudanças de falha crítica
-(`docs/LEITURA_MUDANCAS_2026-10-12.md`), e recusa-se se a leitura já não corresponder às mudanças que os dados dão.
+(`docs/LEITURA_MUDANCAS_2026-10-13.md`), e recusa-se se a leitura já não corresponder às mudanças que os dados dão.
 O `--antes` põe o publicado e o corrigido lado a lado em Resultados e conta, em Método, o que a correção de
 12/10/2026 tocou: lê os veredictos do corretor publicado em `docs/exemplo/antes-8edda161.json` (que se gera com
 `scripts/antes_8edda161.py` num `git worktree` do commit `e272ab9`, só de leitura) e volta a corrigir, com o corretor de
 hoje, as respostas guardadas de `ensaios/` que esse ficheiro lista, recusando o ficheiro se o SHA-256 de alguma já não
 for o que ele leu. A reclassificação de cada ensaio, em ficheiros novos ao lado dos originais, faz-se com
-`python3 scripts/reclassificar.py 2026-10-12`.
+`python3 scripts/reclassificar.py 2026-10-13`.
 
 Cria `index.html` (português) e `index.en.html`, `index.es.html`,
 `index.fr.html` e `index.de.html` ao lado. En, es, fr e de levam o aviso de

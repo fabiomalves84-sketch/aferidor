@@ -54,7 +54,7 @@ aconteceu os documentos dizerem 181 com a bateria em 211. Qualquer tarefa que
 acrescente ou remova testes atualiza o número no README, no
 `docs/APRESENTACAO.md` e aqui, no mesmo commit que muda os testes.
 
-**O corretor foi corrigido a 12/10/2026.** As regras U1 a U6 e as correções pós-hoc
+**O corretor foi corrigido a 12/10/2026, e a regra P4 acrescentou-se a 13/10/2026.** As regras U1 a U6 e as correções pós-hoc
 estão em `docs/METODO.md`, com a razão e a data; uma regra nova ou ajustada leva a
 razão escrita, por princípio e não pelo efeito num modelo. A página de exemplo mostra o
 publicado (`docs/exemplo/antes-8edda161.json`) e o corrigido, e as limitações que ficam.
@@ -81,7 +81,7 @@ demonstra.
 ## Como correr
 
 ```
-python3 -m unittest discover -s tests   # 1270 testes
+python3 -m unittest discover -s tests   # 1278 testes
 python3 -m aferidor verificar           # 27/27 casos, 319/319 controlos negativos
 python3 -m aferidor verificar --casos casos/consulta.json   # 31/31, 140/140
 python3 -m aferidor ensaio --fornecedor falso

@@ -109,9 +109,10 @@ class TestConclusionsPage(unittest.TestCase):
     The numbers of the example are those of the stored answers graded by the current corrector. They changed
     four times from the 8, the 0,375 and the 11 (Gemini alone) of the corrector before the anchoring: with rules U1
     to U3 (10, 0,453, 13), with the post hoc corrections of 12 October 2026 (9, 0,375, 12), with the anchor of
-    ATB-FAR-014 (9, 0,125, 13) and with that of ATB-PIEL-006, whose interval is a critical criterion that every model
-    now fails, since none gives cefuroxima every 12 hours (best model 10 of 27, McNemar p = 0,125, interval 22% to
-    56%; the Gemini alone 14 of 27, 34% to 69%). The sentences that do not read the example (the
+    ATB-FAR-014 (9, 0,125, 13), with that of ATB-PIEL-006, whose interval is a critical criterion that every model
+    now fails, since none gives cefuroxima every 12 hours (10, 0,125, 14), and with the rule P4 of 13 October 2026 on the
+    headings that name one drug (best model 10 of 27, McNemar p = 0,25, interval 22% to 56%; the Gemini alone 13 of 27,
+    31% to 66%). The sentences that do not read the example (the
     tests with explicit counts, such as 8 of 27 below) are unchanged.
     """
 
@@ -120,7 +121,7 @@ class TestConclusionsPage(unittest.TestCase):
         for sentence in (
             "Pode concluir-se",
             "Nenhum dos 4 modelos cumpre o limiar de referência (que não é um protocolo prévio). O melhor tem 10 de 27 casos com falha crítica.",
-            "Entre os dois melhores, a diferença pode ser acaso (teste de McNemar exato, p = 0,125).",
+            "Entre os dois melhores, a diferença pode ser acaso (teste de McNemar exato, p = 0,250).",
             "Não se pode concluir",
             "Que os modelos locais representem os comerciais.",
             "Que um veredicto seja validação clínica: é triagem, sem revisão por especialista.",
@@ -148,7 +149,7 @@ class TestConclusionsPage(unittest.TestCase):
 
     def test_if_the_best_model_changes_with_the_data_the_sentence_follows(self):
         text = conclusions_text(example_page_of((GEMINI,)))
-        self.assertIn("(14 de 27 é compatível com 34% a 69%)", text)
+        self.assertIn("(13 de 27 é compatível com 31% a 66%)", text)
 
     def test_the_sources_line_names_the_three_categories_read_by_fontes(self):
         page = _Example.page()
@@ -189,7 +190,7 @@ class TestConclusionsPage(unittest.TestCase):
         self.assertIn("Entre os dois melhores, a diferença é estatisticamente significativa (teste de McNemar exato, p < 0,001).", text)
         single = conclusions_text(example_page_of((GEMINI,)))
         self.assertNotIn("McNemar", single)
-        self.assertIn("O modelo não cumpre o limiar de referência (que não é um protocolo prévio). Tem 14 de 27 casos com falha crítica.", single)
+        self.assertIn("O modelo não cumpre o limiar de referência (que não é um protocolo prévio). Tem 13 de 27 casos com falha crítica.", single)
 
     def test_without_local_models_there_is_no_line_about_them(self):
         text = conclusions_text(example_page_of((GEMMA, GEMINI)))
