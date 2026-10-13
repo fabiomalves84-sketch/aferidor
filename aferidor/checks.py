@@ -564,14 +564,24 @@ def _excluded_in_its_clause(segment: str, start: int, end: int) -> bool:
     return _markers_pattern(_ANCHOR_EXCLUSION).search(clause) is not None
 
 
+# A heading, as the Markdown of an answer writes one: a title line ("### Opção 1: Azitromicina"), a numbered item ("2. Azitromicina",
+# "**1. Amoxicilina**"), a line that is all bold ("**Amoxicilina**"), the field "Fármaco:", or a line that ends in a colon and is
+# not a list item, which introduces what follows. Seen in the folded text of a unit.
+_HEADING = re.compile(r"^\s*(?:#{1,6}\s|\d+[.)]\s|\*{2}\d+[.)]|(?:[*\-\u2022]\s+)?\*{0,2}farmaco\s*:?\*{0,2}\s*:|\*{2}[^*\n]+\*{2}\s*:?\s*$|(?![*\-\u2022]\s)[^\n]*:\s*$)")
+
+# A bold label that names a drug opens a section too, wherever the line goes on: "*   **Fosfomicina:** Alternativa válida." Only the
+# drug in the label counts, so "**Dose:** 3 g" is not a heading.
+_LABEL = re.compile(r"^\s*(?:[*\-\u2022]\s+)?\*\*[^*\n]+?\*\*|^\s*(?:[*\-\u2022]\s+)?\*\*[^*\n]+?:\*\*")
+
+
 def _anchored(text: str, anchors: tuple[str, ...], found: list, in_adjustment: bool) -> list:
     """The found doses or intervals that belong to one of the `anchors` and are not inside a condition.
 
     The order of binding: (1) a value straight followed by "de", "do" or "da" and a drug ("500 mg de amoxicilina") belongs to
-    that drug; (2) else to the nearest drug named before it in its line or sentence; (3) else to the drug named last
-    above, so "Fármaco: amoxicilina" followed by "Dose: 1 g" is amoxicillin's dose, whatever else that line names
-    further to the right; (4) else, with no drug named above it anywhere in the answer (rule P1 of docs/METODO.md), to
-    the first drug named after it. An anchor named in order to exclude it owns nothing, nor does a drug named in a
+    that drug; (2) else to the nearest drug named before it in its line or sentence; (3) else, in a section whose heading
+    names a drug, to that drug, until the next heading, whatever the sentences between the heading and the value name;
+    (4) else to the drug named last above, so "Fármaco: amoxicilina" followed by "Dose: 1 g" is amoxicillin's dose; (5) else,
+    with no drug named above it anywhere in the answer (rule P1 of docs/METODO.md), to the first drug named after it. An anchor named in order to exclude it owns nothing, nor does a drug named in a
     comparison or an allergy, and "amoxicilina com ácido clavulânico" is one drug. An exclusion marker is worth what lies
     in its own clause: a colon, a semicolon or the start of a new line or list item ends it. A condition marker is not
     given that scope: it is usually a label before a colon ("ClCr 10-30: 500 mg"), which is the inverse structure, so it
@@ -590,10 +600,22 @@ def _anchored(text: str, anchors: tuple[str, ...], found: list, in_adjustment: b
     owner_is_anchor = next((m[2] for *_, mentions in units for m in mentions[:1]), False)  # the first drug named
     named_above = False
     in_condition = False
+    section: bool | None = None  # whether the drug of the open heading is an anchor; None outside any heading with a drug
     kept = []
     for start, end, fresh, segment, mentions in units:
         if fresh:
             in_condition = False
+        # A heading that names more than one drug does not say whose the next value is, so it opens no section and the older
+        # order of binding goes on (rule P4 of docs/METODO.md).
+        if _HEADING.match(segment):
+            section = mentions[0][2] if len(mentions) == 1 else None
+        else:
+            label = _LABEL.match(segment)
+            if label:
+                colon = segment.find(":", label.start())
+                named = [m for m in mentions if m[0] < (colon if colon >= 0 else label.end())]
+                if named:
+                    section = named[0][2] if len(named) == 1 else None
         marker = _CONDITION.search(segment)
         for item in found:
             if not start <= item.start < end:
@@ -607,6 +629,8 @@ def _anchored(text: str, anchors: tuple[str, ...], found: list, in_adjustment: b
                 belongs = bound[2]
             elif before:
                 belongs = before[-1][2]
+            elif section is not None:  # the heading of the section names the drug, whatever came between it and the value
+                belongs = section
             elif named_above:
                 belongs = owner_is_anchor
             else:  # no drug before it in the whole answer: the first one named after it

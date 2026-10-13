@@ -200,6 +200,50 @@ class TestADoseFollowedByOfAndADrugBelongsToThatDrug(unittest.TestCase):
         self.assertTrue(passes(c, "500 mg de amoxicilina"))
 
 
+class TestTheDoseBelongsToTheDrugOfTheHeadingOfItsSection(unittest.TestCase):
+    """Pattern (i), by the principle written in docs/METODO.md before its effect was measured: in a section whose heading
+    (a title line, a numbered item or a "Fármaco:" field) names a drug, the dose and the interval that follow belong to
+    that drug until the next heading, whatever the sentences between the heading and the dose name. Invented sentences."""
+
+    def test_a_drug_named_in_a_sentence_between_the_heading_and_the_dose_takes_nothing(self):
+        c = dose(terms=("500 mg",), anchors=("azitromicina",))
+        self.assertTrue(passes(c, "### Opção 1: Azitromicina (Macrólido)\n*Mais segura em doentes com hipersensibilidade à penicilina.*\n* **Dose:** 500 mg"))
+        self.assertTrue(passes(c, "### 2. Azitromicina\nOpção simples, com mais resistências do que as da claritromicina.\n*   **Dose:** 500 mg."))
+        self.assertTrue(passes(c, "Fármaco: Azitromicina\nAlternativa quando a clindamicina não serve.\nDose: 500 mg"))
+        self.assertTrue(passes(c, "1. **Azitromicina**\nSe a clindamicina estiver contraindicada.\n- Dose: 500 mg"))
+
+    def test_the_next_heading_ends_the_section(self):
+        c = dose(terms=("500 mg",), anchors=("azitromicina",))
+        self.assertFalse(passes(c, "### Opção 1: Azitromicina\n- Dose: 250 mg\n### Opção 2: Claritromicina\nNota.\n- Dose: 500 mg"))
+        self.assertFalse(passes(c, "### Opção 1: Azitromicina\n- Dose: 250 mg\n2. Claritromicina\n- Dose: 500 mg"))
+
+    def test_a_heading_with_no_drug_ends_it_and_the_old_order_goes_on(self):
+        c = dose(terms=("500 mg",), anchors=("azitromicina",))
+        self.assertFalse(passes(c, "### Opção 1: Azitromicina\n- Dose: 250 mg\n### Interações\nParacetamol:\n- 500 mg"))
+
+    def test_a_drug_named_in_the_same_sentence_before_the_dose_still_owns_it(self):
+        c = dose(terms=("500 mg",), anchors=("azitromicina",))
+        self.assertFalse(passes(c, "### Opção 1: Azitromicina\nAssociar paracetamol 500 mg."))
+        self.assertTrue(passes(c, "### Opção 1: Claritromicina\nTrocar por azitromicina 500 mg."))
+
+    def test_a_bold_label_that_names_a_drug_opens_a_section_and_a_field_label_does_not(self):
+        c = dose(terms=("3 g",), anchors=("fosfomicina",))
+        text = "**3. Alternativas (se a amoxicilina não servir):**\n*   **Nitrofurantoína:** Evitar perto do termo.\n    *   **Dose:** 100 mg.\n*   **Fosfomicina:** Alternativa válida.\n    *   **Dose:** 3 g em dose única."
+        self.assertTrue(passes(c, text))
+        self.assertFalse(passes(c, text.replace("Fosfomicina", "Nitrofurantoína", 1).replace("**Nitrofurantoína:** Evitar", "**Fosfomicina:** Evitar", 1)))
+
+    def test_a_heading_that_names_more_than_one_drug_opens_no_section(self):
+        c = dose(terms=("2 vezes ao dia",), anchors=("amoxicilina",))
+        self.assertFalse(passes(c, "- **Penicilina** (Amoxicilina ou cefalexina, por exemplo):\n + Dose: 2 vezes ao dia"))
+        self.assertTrue(passes(c, "- **Amoxicilina**:\n + Dose: 2 vezes ao dia"))
+        d = dose(terms=("500 mg",), anchors=("azitromicina",))
+        self.assertFalse(passes(d, "### 3. Macrolídeos (azitromicina ou eritromicina)\nNota.\n- Dose: 500 mg"))  # the older order: the last one named above
+
+    def test_a_heading_that_excludes_the_drug_gives_it_no_section(self):
+        c = dose(terms=("500 mg",), anchors=("azitromicina",))
+        self.assertFalse(passes(c, "### Não usar azitromicina\nNota.\n- Dose: 500 mg"))
+
+
 class TestBeforeThereWasAnAnchor(unittest.TestCase):
     def test_a_criterion_without_an_anchor_still_matches_anywhere_and_now_in_every_form(self):
         plain = Criterion(kind="contem", terms=("500 mg", "500mg"), failure=FailureType.DOSE_INCORRETA)
