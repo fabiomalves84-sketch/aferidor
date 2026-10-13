@@ -15,7 +15,8 @@ from tests.html_support import ROOT
 EXAMPLE = ROOT / "docs" / "exemplo"
 FILES = {"pt": "index.html", "en": "index.en.html", "es": "index.es.html", "fr": "index.fr.html", "de": "index.de.html"}
 PAGES = {lang: (EXAMPLE / name).read_text(encoding="utf-8") for lang, name in FILES.items()}
-CORRECTION = correcao.compute(EXAMPLE / "antes-8edda161.json", ROOT / "ensaios", ROOT)
+READING = ROOT / "docs" / "LEITURA_MUDANCAS_2026-10-12.md"
+CORRECTION = correcao.compute(EXAMPLE / "antes-8edda161.json", ROOT / "ensaios", ROOT, READING)
 
 
 def block(page: str, ident: str) -> str:
@@ -142,6 +143,50 @@ class TestWhatTheTextSaysAndDoesNotSay(unittest.TestCase):
             with self.subTest(lingua=lang):
                 self.assertIn('href="#limitacoes"', page)
                 self.assertIn('href="#normas-citadas"', page)
+
+
+class TestTheFactualSentenceTheReadingAndTheLabel(unittest.TestCase):
+    def test_the_sentence_about_the_rows_is_only_a_count_and_the_count_is_computed(self):
+        text = words(PAGES["pt"])
+        expected = (f"Com o corretor corrigido, {len(CORRECTION.rose)} das {len(CORRECTION.rows)} linhas da tabela têm mais casos com falha "
+                    "crítica e nenhuma tem menos.")
+        self.assertIn(expected, text)
+        self.assertNotIn("deixava passar demais", text)
+
+    def test_the_sentence_has_the_same_numbers_in_the_five_languages(self):
+        for lang, page in PAGES.items():
+            start = page.index('id="publicado-e-corrigido"')
+            text = words(page[start:page.index('class="comparacao"', start)])
+            with self.subTest(lingua=lang):
+                self.assertIn(str(len(CORRECTION.rose)), text)
+                self.assertIn(str(len(CORRECTION.rows)), text)
+
+    def test_the_limitation_gives_the_numbers_of_the_reading_in_the_five_languages_and_points_to_the_file(self):
+        n, a, b, c = CORRECTION.reading
+        for lang, page in PAGES.items():
+            start = page.index('id="limitacoes"')
+            text = words(page[start:page.index("</ul>", start)])
+            numbers = re.findall(rf"(?<!\d){n}(?!\d)[^.]*?(?<!\d){a}(?!\d)[^.]*?(?<!\d){b}(?!\d)[^.]*?(?<!\d){c}(?!\d)", text)
+            with self.subTest(lingua=lang):
+                self.assertTrue(numbers, text[-900:])
+                self.assertIn("docs/LEITURA_MUDANCAS_2026-10-12.md", text)
+
+    def test_the_failure_type_of_a_dose_or_an_interval_has_a_neutral_label_in_every_language(self):
+        new = {"pt": "Dose ou intervalo diferente da referência", "en": "Dose or interval different from the reference",
+               "es": "Dosis o intervalo distintos de la referencia", "fr": "Dose ou intervalle différents de la référence",
+               "de": "Dosis oder Intervall weichen von der Referenz ab"}
+        old = {"pt": "Dose errada", "en": "Wrong dose", "es": "Dosis errónea", "fr": "Dose erronée", "de": "Falsche Dosis"}
+        for lang, page in PAGES.items():
+            with self.subTest(lingua=lang):
+                self.assertIn(new[lang], page)
+                self.assertNotIn(old[lang], page)
+
+    def test_the_case_of_ciprofloxacin_does_not_say_wrong_dose_and_the_standards_block_does_not_say_wrong(self):
+        page = PAGES["pt"]
+        start = page.index('id="corpo-ATB-PIEL-006"')
+        block = words(page[start:page.index("</section>", start)] if "</section>" in page[start:] else page[start:start + 20000])
+        self.assertNotIn("Dose errada", block)
+        self.assertNotIn("dose incorreta", block.lower())
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ from aferidor.grading import mcnemar_exact
 from tests.html_support import ROOT
 
 BEFORE = ROOT / "docs" / "exemplo" / "antes-8edda161.json"
+READING = ROOT / "docs" / "LEITURA_MUDANCAS_2026-10-12.md"
 
 
 class TestNamingADrugIsNotRecommendingIt(unittest.TestCase):
@@ -106,6 +107,43 @@ class TestTheCorrectionOfThePage(unittest.TestCase):
             altered.write_text(json.dumps(data), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "já não é o que o ficheiro do corretor publicado leu"):
                 correcao.compute(altered, ROOT / "ensaios", ROOT)
+
+
+class TestTheReadingOfTheChanges(unittest.TestCase):
+    """docs/LEITURA_MUDANCAS_2026-10-12.md says what each change of the state of critical failure is; it only counts if it matches the data."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.correction = correcao.compute(BEFORE, ROOT / "ensaios", ROOT, READING)
+
+    def test_the_changes_of_state_are_the_ones_the_data_give_and_each_is_in_the_file(self):
+        computed = sorted((c.model, c.case) for c in self.correction.changes)
+        written = sorted((m, k) for m, k, _c in correcao.read_rows(READING))
+        self.assertEqual(computed, written)
+        self.assertTrue(all(c.now_critical for c in self.correction.changes))  # none stopped having a critical failure
+
+    def test_the_counts_of_the_summary_are_those_of_the_lines(self):
+        n, a, b, c = self.correction.reading
+        classes = [k for _m, _c, k in correcao.read_rows(READING)]
+        self.assertEqual((n, a, b, c), (len(classes), classes.count("a"), classes.count("b"), classes.count("c")))
+        self.assertEqual(n, len(self.correction.changes))
+        text = READING.read_text(encoding="utf-8")
+        self.assertIn(f"Classes: (a) {a}, (b) {b}, (c) {c}", text)
+        self.assertIn(f"{n} mudanças de estado", text)
+
+    def test_the_samples_written_are_the_samples_that_cause_the_change(self):
+        for change in self.correction.changes:
+            lines = [line for line in READING.read_text(encoding="utf-8").splitlines() if f"`{change.model}`" in line and change.case in line]
+            self.assertEqual(len(lines), 1)
+            self.assertIn(", ".join(map(str, change.samples)), lines[0], (change.model, change.case))
+
+    def test_a_reading_that_no_longer_matches_the_data_is_refused(self):
+        text = READING.read_text(encoding="utf-8").replace("`local:phi4:14b` | ATB-PIEL-006", "`local:phi4:14b` | ATB-PAC-001")
+        with tempfile.TemporaryDirectory() as folder:
+            altered = Path(folder) / "leitura.md"
+            altered.write_text(text, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "não corresponde às mudanças que os dados dão hoje"):
+                correcao.compute(BEFORE, ROOT / "ensaios", ROOT, altered)
 
 
 if __name__ == "__main__":

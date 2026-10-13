@@ -370,6 +370,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="omitir o aviso de fontes por confirmar (apenas depois de confirmadas)",
     )
     relatorio.add_argument(
+        "--leitura", type=Path, default=None,
+        help="leitura das mudanças de falha crítica (docs/LEITURA_MUDANCAS_2026-10-12.md): com --antes, a página diz quantas "
+        "se leram e quantas são corretas; recusa-se uma leitura que não corresponda às mudanças que os dados dão hoje",
+    )
+    relatorio.add_argument(
         "--antes", type=Path, default=None,
         help="ficheiro com os veredictos do corretor publicado (docs/exemplo/antes-8edda161.json): o relatório HTML "
         "passa a mostrar o publicado e o corrigido lado a lado, com as contas feitas sobre ensaios/",
@@ -769,14 +774,14 @@ def _protocol_mismatches(path: Path, repeticoes: int, temperatura: float, casos:
 def comando_relatorio(args: argparse.Namespace) -> int:
     return _relatorio(
         args.casos, args.respostas, args.saida, args.formato, args.linguas, args.limite,
-        args.protocolo, args.fontes_confirmadas, antes=args.antes,
+        args.protocolo, args.fontes_confirmadas, antes=args.antes, leitura=args.leitura,
     )
 
 
 def _relatorio(
     casos: Path, respostas: Path, saida: Path | None, formato: str, linguas: str, limite: int,
     protocolo_path: Path | None, fontes_confirmadas: bool, reasons: dict[str, str] | None = None,
-    antes: Path | None = None,
+    antes: Path | None = None, leitura: Path | None = None,
 ) -> int:
     cases = read_cases(casos)
     if limite > 0:
@@ -819,7 +824,7 @@ def _relatorio(
             print("erro: --antes só se aplica ao formato html", file=sys.stderr)
             return 2
         try:
-            correction = correcao.compute(antes, Path("ensaios"), Path("."))
+            correction = correcao.compute(antes, Path("ensaios"), Path("."), leitura)
         except (OSError, ValueError, KeyError) as error:
             print(f"erro: {error}", file=sys.stderr)
             return 2

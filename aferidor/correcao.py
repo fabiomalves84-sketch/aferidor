@@ -122,6 +122,18 @@ class BestPair:
 
 
 @dataclass(frozen=True)
+class Change:
+    """A model and a case whose state of critical failure differs between the published corrector and the current one."""
+
+    trial: str
+    bank: str
+    model: str
+    case: str
+    now_critical: bool
+    samples: tuple[int, ...]  # the samples whose own state differs
+
+
+@dataclass(frozen=True)
 class Correction:
     """Everything the page says about the correction, worked out from the stored answers and `antes-8edda161.json`."""
 
@@ -135,6 +147,8 @@ class Correction:
     equivalent_forms: tuple[int, int]  # criteria changed by U1 alone, cases touched
     all_corrections: tuple[int, int]  # criteria changed by every correction, cases touched
     trials_counted: int
+    changes: tuple[Change, ...] = ()
+    reading: tuple[int, int, int, int] | None = None  # changes read, then how many (a), (b), (c)
 
     @property
     def fell(self) -> tuple[Row, ...]:
@@ -214,7 +228,7 @@ def load_before(path: Path) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def compute(before_path: Path, ensaios: Path, root: Path) -> Correction:
+def compute(before_path: Path, ensaios: Path, root: Path, reading_path: Path | None = None) -> Correction:
     """The correction as the page shows it. Refuses a file of the published corrector whose answers files have changed."""
     before = load_before(before_path)
     banks = {name: read_cases(Path(root) / path) for name, path in BANK_FILES.items()}
@@ -222,6 +236,7 @@ def compute(before_path: Path, ensaios: Path, root: Path) -> Correction:
     before_cases: dict[str, list[tuple[str, str, bool]]] = {}
     after_cases: dict[str, list[tuple[str, str, bool]]] = {}
     cephalexin: dict[str, list[int]] = {}
+    changes: list[Change] = []
     u1, everything = set(), set()
     for trial, entry in sorted(before["ensaios"].items()):
         path = Path(ensaios) / trial / "respostas.jsonl"
@@ -238,10 +253,19 @@ def compute(before_path: Path, ensaios: Path, root: Path) -> Correction:
             continue
         triples_after = [(a.model, a.case_id, any(f.risk is Risk.CRITICO for f in v.failures)) for a, v in paired]
         triples_before = [(r[0], r[1], bool(r[4])) for r in entry["respostas"]]
+        changed_samples: dict[tuple[str, str], list[int]] = {}
+        for row, (answer, verdict) in zip(entry["respostas"], paired):
+            if bool(row[4]) != any(f.risk is Risk.CRITICO for f in verdict.failures):
+                changed_samples.setdefault((answer.model, answer.case_id), []).append(answer.sample)
         after_by, before_by = _critical_by_case(triples_after), _critical_by_case(triples_before)
         for model in sorted(after_by):
             rows.append(Row(entry["banco"], trial, model, len(after_by[model]), sum(before_by[model].values()),
                             sum(after_by[model].values()), is_after_the_protocol(trial)))
+        for (model, case), samples in sorted(changed_samples.items()):
+            state_before = any(row[4] for row in entry["respostas"] if row[0] == model and row[1] == case)
+            state_after = any(c for m, k, c in triples_after if m == model and k == case)
+            if state_before != state_after:
+                changes.append(Change(trial, entry["banco"], model, case, state_after, tuple(sorted(samples))))
         if entry["banco"] == "principal" and not is_after_the_protocol(trial):
             before_cases.setdefault("all", []).extend(triples_before)
             after_cases.setdefault("all", []).extend(triples_after)
@@ -260,4 +284,23 @@ def compute(before_path: Path, ensaios: Path, root: Path) -> Correction:
         best_after=best_pair(_critical_by_case(after_cases.get("all", []))),
         cephalexin=tuple((m, v[0], v[1]) for m, v in sorted(cephalexin.items())),
         equivalent_forms=counted(u1), all_corrections=counted(everything), trials_counted=len(before["ensaios"]),
+        changes=tuple(changes), reading=read_summary(reading_path, changes) if reading_path is not None else None,
     )
+
+
+READING_ROW = re.compile(r"^\|\s*`([^`]+)`\s*\|\s*([A-Z0-9-]+)\s*\|[^|]*\|[^|]*\|[^|]*\|\s*([abc])\b[^|]*\|\s*$")
+
+
+def read_rows(path: Path) -> list[tuple[str, str, str]]:
+    """(model, case, class) of each line of the reading of the changes, as the Markdown file writes them."""
+    return [m.groups() for line in Path(path).read_text(encoding="utf-8").splitlines() if (m := READING_ROW.match(line))]
+
+
+def read_summary(path: Path, changes: list[Change]) -> tuple[int, int, int, int]:
+    """How many changes of the state of critical failure were read and how many are (a), (b), (c). Refuses a reading that
+    is not of exactly the changes the data give today: the file is only worth what it matches."""
+    rows = read_rows(path)
+    if sorted((m, k) for m, k, _c in rows) != sorted((c.model, c.case) for c in changes):
+        raise ValueError(f"{path}: a leitura das mudanças não corresponde às mudanças que os dados dão hoje")
+    classes = [c for _m, _k, c in rows]
+    return len(rows), classes.count("a"), classes.count("b"), classes.count("c")

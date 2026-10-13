@@ -6,11 +6,14 @@ principal (27 casos) e o de consulta (30 e 31 casos), para os cinco modelos. Um 
 ter, ou deixa de ter, uma falha crítica em alguma das amostras; cada mudança está numa linha, e li todas, sem amostrar. As
 respostas citadas são as originais; `ATB-PIEL-006` e os outros casos aqui são lidos contra a referência do caso.
 
-**Resultado: 11 mudanças de estado, todas de «passa a ter falha crítica»; nenhuma deixa de a ter. Classes: (a) 9, (b) 2, (c) 0.**
+**Resultado: 11 mudanças de estado, todas de «passa a ter falha crítica»; nenhuma deixa de a ter.**
+
+Classes: (a) 9, (b) 2, (c) 0.
+
 Quem leu foi uma só pessoa, sem revisão. É triagem automática, sem validação clínica. Os ensaios mais antigos (agente e 16 de setembro)
 não entram aqui.
 
-Classes: **a** mudança correta (a resposta dá a dose ou o intervalo de outro fármaco, de um ajuste, ou de um fármaco que a norma
+Significado das classes: **a** mudança correta (a resposta dá a dose ou o intervalo de outro fármaco, de um ajuste, ou de um fármaco que a norma
 citada não inclui); **b** falso falhanço ou falso passe; **c** ambígua.
 
 | Modelo | Caso | Amostras | Critério | Frase da resposta | Classe |

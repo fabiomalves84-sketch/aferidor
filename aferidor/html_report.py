@@ -124,7 +124,7 @@ _RISK_CLASS = {
 }
 _RISK_LABEL = {Risk.CRITICO: "crítico", Risk.ALTO: "alto", Risk.MEDIO: "médio", Risk.BAIXO: "baixo"}
 _FAILURE_LABEL = {
-    FailureType.DOSE_INCORRETA: "Dose errada",
+    FailureType.DOSE_INCORRETA: "Dose ou intervalo diferente da referência",
     FailureType.INTERACAO_OMITIDA: "Interação omitida",
     FailureType.CONTRAINDICACAO_OMITIDA: "Contraindicação omitida",
     FailureType.ALUCINACAO: "Facto ou fonte inventados",
@@ -2070,13 +2070,12 @@ def _correction_results(data: _ReportData) -> str:
         ) + "</p>")
     if not c.fell:
         parts.append("<p>" + _t(
-            "O corretor publicado deixava passar demais: com a correção, {n} das {m} linhas da tabela têm mais casos com "
-            "falha crítica e nenhuma tem menos.",
+            "Com o corretor corrigido, {n} das {m} linhas da tabela têm mais casos com falha crítica e nenhuma tem menos.",
             n=len(c.rose), m=len(c.rows),
         ) + "</p>")
     else:
         parts.append("<p>" + _t(
-            "Com a correção, {n} das {m} linhas da tabela têm mais casos com falha crítica e {k} têm menos.",
+            "Com o corretor corrigido, {n} das {m} linhas da tabela têm mais casos com falha crítica e {k} têm menos.",
             n=len(c.rose), m=len(c.rows), k=len(c.fell),
         ) + "</p>")
     if any(r.frozen for r in c.rows):
@@ -2090,7 +2089,7 @@ def _correction_results(data: _ReportData) -> str:
     return "".join(parts)
 
 
-def _limitations_block() -> str:
+def _limitations_block(reading: tuple[int, int, int, int] | None = None) -> str:
     """The known limits of the corrector, plainly, on the Method page. True of every report."""
     items = [
         _t(
@@ -2123,6 +2122,13 @@ def _limitations_block() -> str:
             "unidade em cada extremo («15 mg a 20 mg») contam os dois."
         ),
         _t(
+            "Quem leu e classificou as mudanças foi uma só pessoa, sem revisão. Li as {n} mudanças de estado de falha "
+            "crítica entre o corretor publicado e o corrigido, uma a uma: {a} corretas, {b} falsos falhanços ou falsos passes "
+            "e {c} ambíguas (a lista está em {leitura}). Os falsos passes só se mediram numa amostra de 40 respostas com "
+            "critério ancorado (nenhum em 40, o que é compatível com até cerca de 7%), e os dos critérios sem âncora não "
+            "foram amostrados.",
+            n=reading[0], a=reading[1], b=reading[2], c=reading[3], leitura="<code>docs/LEITURA_MUDANCAS_2026-10-12.md</code>",
+        ) if reading is not None else _t(
             "Quem leu e classificou as mudanças foi uma só pessoa, sem revisão. A taxa de falsos falhanços mede-se nas "
             "respostas que mudaram; os falsos passes só se mediram numa amostra de 40 respostas com critério ancorado "
             "(nenhum em 40, o que é compatível com até cerca de 7%). Os falsos passes dos critérios sem âncora não foram "
@@ -2185,7 +2191,7 @@ def _method_panel(data: _ReportData, before: str) -> str:
     """
     method: list[str] = [
         f'<p class="repo">{_repo_link()}</p>', _how_to_read(_how_counted(data.samples_n, data.rule) if data.models else ""),
-        _verification_block(), _limitations_block(), _standards_block(data), _sources_by_body(data.cases),
+        _verification_block(), _limitations_block(data.correction.reading if data.correction else None), _standards_block(data), _sources_by_body(data.cases),
     ]
     if data.models:
         method.append(data.protocol_html)
