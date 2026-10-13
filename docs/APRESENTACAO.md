@@ -55,9 +55,11 @@ julgamento clínico.
   uma distinção clínica (pneumonia com e sem comorbilidades; hipersensibilidade
   tipo I e não tipo I). Os casos de infeção seguem as normas da DGS; quando
   duas fontes reconhecidas divergem de forma defensável, o caso aceita ambas.
-- **Corretor verificado nos dois sentidos.** A resposta de referência de cada
-  caso tem de passar e uma resposta errada construída para cada critério tem
-  de falhar: 319 e 140 controlos negativos, todos detetados.
+- **Corretor verificado com uma resposta de referência que tem de passar e uma
+  resposta errada construída por critério que tem de falhar (319 e 140
+  controlos negativos).** A resposta errada é construída a partir da referência,
+  uma por critério: não mede a concordância com respostas reais de modelos, e as
+  limitações conhecidas estão em `docs/METODO.md`.
 - **Rastreabilidade.** Cada resposta regista o SHA-256 do texto enviado, a
   temperatura, o limite de tokens e a versão do código. Uma retoma recusa
   condições diferentes. O relatório indica o banco, as condições e as datas.

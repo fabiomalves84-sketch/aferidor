@@ -312,7 +312,8 @@ lidos um a um, e em respostas novas a taxa não está medida.
 publicado até 12/10 e o corrigido a 13/10 (`docs/LEITURA_MUDANCAS_2026-10-13.md`), uma a uma: 9 corretas, 0 falsos falhanços ou
 falsos passes e 0 ambíguas. A leitura de 12/10 (`docs/LEITURA_MUDANCAS_2026-10-12.md`) tinha 11, com 2 falsos falhanços (o padrão (i));
 a P4 trata-os, as outras 9 são as mesmas, com a mesma evidência nas 37 amostras, e nenhuma mudança nova apareceu. Com isto, a tabela já
-não depende de nenhum caso lido como falso falhanço ou falso passe (o Gemini tem 13 casos com falha crítica e o Gemma 4 26B 12).
+não depende de nenhuma das mudanças lidas como falso falhanço ou falso passe (o Gemini tem 13 casos com falha crítica e o Gemma 4 26B 12). Os
+casos com falha crítica que não mudaram entre os dois corretores não foram lidos.
 
 **Porque (ii) não se corrige, nem se alarga a lista da P2.** Alargar a lista da P2 ou estreitar a lista da U3 para estes casos seria acertar
 listas fechadas a poucos casos que se viram, e essa é a afinação pelo efeito que a U6 proíbe. O erro residual fica

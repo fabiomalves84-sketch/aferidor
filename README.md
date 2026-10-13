@@ -71,8 +71,8 @@ de cada ensaio; `aferidor relatorio` regenera-os com o corretor atual.
 parte da resposta, e falhava uma forma equivalente («a cada 8 horas», «0,5 g»).
 Corrigiu-se com seis regras escritas antes de ver um veredicto novo
 (`docs/METODO.md`), e a página de exemplo mostra o publicado e o corrigido lado a
-lado, com as limitações que ficam: a taxa de falsos falhanços, medida nas respostas
-que mudaram e lidas por uma só pessoa, foi de 0 em 9 mudanças de estado de falha crítica lidas, depois de a regra P4 (13/10/2026) tratar os dois
+lado, com as limitações que ficam: as respostas
+que mudaram foram lidas por uma só pessoa: nas 9 mudanças de estado de falha crítica lidas, nenhuma era falso falhanço, depois de a regra P4 (13/10/2026) tratar os dois
 falsos falhanços da leitura de 12/10, e os falsos
 passes mediram-se numa amostra de 40 respostas com critério ancorado, com o corretor anterior à P4 (nenhum), e a taxa da P4 em respostas novas não foi medida.
 A reclassificação de cada ensaio está em ficheiros novos ao lado dos originais
