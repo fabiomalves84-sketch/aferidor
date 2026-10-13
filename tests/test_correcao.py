@@ -166,6 +166,23 @@ class TestTheReadingOfTheChanges(unittest.TestCase):
         self.assertIn("(P4)", method)
         self.assertNotIn("O padrão (i) é o próximo a tratar", method)
 
+    def test_the_heading_rule_changes_three_criteria_in_the_stored_answers_and_the_documents_say_so(self):
+        changed = []
+        for new_path in sorted((ROOT / "ensaios").glob("*/vereditos-reclassificado-2026-10-13.json")):
+            new = json.loads(new_path.read_text(encoding="utf-8"))
+            old = json.loads(new_path.with_name("vereditos-reclassificado-2026-10-12.json").read_text(encoding="utf-8"))
+            self.assertEqual([(x["caso"], x["modelo"]) for x in new], [(x["caso"], x["modelo"]) for x in old])
+            for x, y in zip(new, old):
+                if x["alternativa"] != y["alternativa"] or len(x["criterios"]) != len(y["criterios"]):
+                    continue  # another alternative of the case was the one reported: the criteria are not the same ones
+                changed += [(p["passou"], q["passou"]) for p, q in zip(x["criterios"], y["criterios"]) if p["passou"] != q["passou"]]
+        self.assertEqual(len(changed), 3)
+        self.assertTrue(all(was_new and not was_old for was_new, was_old in changed))  # all three went from fail to pass
+        method = " ".join((ROOT / "docs" / "METODO.md").read_text(encoding="utf-8").split())
+        self.assertIn("a P4 altera 3 critérios", method)
+        self.assertIn("favorece os modelos", method)
+        self.assertIn("medida com o corretor `8404de4a7c95`, anterior à P4", method)
+
     def test_a_reading_that_no_longer_matches_the_data_is_refused(self):
         text = READING.read_text(encoding="utf-8").replace("`local:phi4:14b` | ATB-PIEL-006", "`local:phi4:14b` | ATB-PAC-001")
         with tempfile.TemporaryDirectory() as folder:

@@ -250,6 +250,18 @@ entra entre «o fármaco mais próximo antes, na sua frase» e «o último nomea
 - **Efeito**, sobre as 1688 respostas guardadas: 3 mudanças de critério, todas de falha para passa, 2 veredictos (os dois
   falsos falhanços de ATB-FAR-004, no Gemini e no Gemma 4 26B), nenhum de passa para falha. Um ganho que a regra sem a P4 dava, o
   de ATB-DPOC-012 no Phi-4 (amostra 4, «#### Amoxicilina/Ampicilina»), perde-se e fica como limitação.
+- **Falsos passes que a P4 passou a permitir.** Medidos em respostas sintéticas a 13/10/2026, com o critério «500 mg» ancorado à
+  azitromicina, e todos escritos como limitação: (2) uma frase sobre outro fármaco entre o cabeçalho e a dose («### Azitromicina»,
+  «Alternativa: claritromicina.», «Dose: 500 mg»), consequência assumida do princípio, que diz «seja o que for que as frases entre
+  ambos nomeiem»; (3) um item de lista com outro fármaco, sem negrito nem dois pontos, entre o cabeçalho e a dose; (4b) uma linha de
+  tabela sem fármaco sob o cabeçalho (ligada à limitação (ii), a das linhas de tabela); (6) um parágrafo de prosa sobre outro
+  fármaco depois do bloco, antes da dose. Antes da P4 estes quatro falhavam. O caso (5) é anterior à P4 e continua igual: uma
+  frase que exclui o fármaco e acaba em dois pontos («Não se deve usar azitromicina em grávidas, pelo que a alternativa é:»)
+  dá a dose seguinte à azitromicina. **A direção destes erros favorece os modelos:** deixam passar uma resposta errada, por
+  isso dão menos falhas críticas e nunca mais. O efeito nas 1688 respostas guardadas está medido e lido: a P4 altera 3 critérios, os
+  três de classe (a). Em respostas novas a taxa destes falsos passes não foi medida. Os testes que os documentam estão em
+  `tests/test_ancoragem.py` como `expectedFailure` (3, 4b, 5 e 6, afirmam o que o corretor devia fazer, que é falhar) e como
+  consequência assumida (2).
 
 ### Limitações conhecidas do corretor (12/10/2026)
 
@@ -289,6 +301,13 @@ cefuroxima, porque o marcador «evit» deixou de contar como exclusão da âncor
 evitar toxicidade» não excluísse o metotrexato). Uma frase que só diga «evitar» o fármaco já não o exclui. É raro, e **não foi
 corrigido**.
 
+**(vii) Falsos passes da P4.** A regra P4 (13/10/2026) dá a dose seguinte ao fármaco do cabeçalho, e por isso deixa passar uma
+dose de outro fármaco quando uma frase, um item de lista sem negrito nem dois pontos, ou um parágrafo de prosa o nomeia entre o
+cabeçalho e a dose, e quando uma linha de tabela sem fármaco aparece sob o cabeçalho (casos 2, 3, 6 e 4b da lista acima). O
+caso 5, uma frase que exclui o fármaco e acaba em dois pontos, dá a dose ao fármaco excluído e já era assim antes da P4. A
+direção favorece os modelos (menos falhas críticas). **Decisão:** não corrigido; a P4 altera 3 critérios nas respostas guardadas,
+lidos um a um, e em respostas novas a taxa não está medida.
+
 **Resultado da leitura das mudanças de falha crítica (13/10/2026).** Li as 9 mudanças de estado de falha crítica entre o corretor
 publicado até 12/10 e o corrigido a 13/10 (`docs/LEITURA_MUDANCAS_2026-10-13.md`), uma a uma: 9 corretas, 0 falsos falhanços ou
 falsos passes e 0 ambíguas. A leitura de 12/10 (`docs/LEITURA_MUDANCAS_2026-10-12.md`) tinha 11, com 2 falsos falhanços (o padrão (i));
@@ -304,7 +323,9 @@ dentro de respostas que já falhavam e 5 respostas em que mudou a alternativa es
 (c) ambígua 2. Amostra aleatória de 40 respostas que passam sem mudança e têm pelo menos um critério ancorado (semente
 20261012): 38 passes corretos, 0 falsos passes, 2 ambíguos. **O leitor é um só**, sem revisão por mais ninguém, e os
 critérios sem âncora **não foram amostrados**, por isso a taxa de falsos passes deles não está medida (o exemplo (iii)
-mostra que existe). Com 40 respostas, 0 falsos passes é compatível com uma taxa de falsos passes até cerca de 7 %.
+mostra que existe). Com 40 respostas, 0 falsos passes é compatível com uma taxa de falsos passes até cerca de 7 %. **Esta amostra
+foi medida com o corretor `8404de4a7c95`, anterior à P4**: a P4 altera 3 critérios nas respostas guardadas, lidos um a um, e a taxa
+de falsos passes da P4 em respostas novas não foi medida (ver a limitação (vii)). A amostra não se repetiu.
 
 **U1, forma canónica.** Uma dose é um valor em mg, por toma, por quilo ou por dia; um intervalo são as
 horas entre tomas; duas formas são equivalentes se a forma canónica for igual. Aceita «a cada 8 horas»,

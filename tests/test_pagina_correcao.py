@@ -123,10 +123,10 @@ class TestWhatTheTextSaysAndDoesNotSay(unittest.TestCase):
             start = page.index('id="limitacoes"')
             listing = page[start:page.index("</ul>", start)]
             with self.subTest(lingua=lang):
-                self.assertEqual(listing.count("<li>"), 9)
+                self.assertEqual(listing.count("<li>"), 10)
         text = words(PAGES["pt"][PAGES["pt"].index('id="limitacoes"'):][:6500])
         for expected in ("nomeia mais de um fármaco", "ClCr", "sem âncora", "ATB-PIEL-006 passa com a ciprofloxacina", "«Evitar cefuroxima 250 mg 12/12 h» passa",
-                         "controlos negativos", "cefaclor", "uma só pessoa", "não foram amostrados", "ATB-FAR-013, PED-OMA-019, 020 e 021, COV-TOC-009"):
+                         "controlos negativos", "cefaclor", "uma só pessoa", "não foram amostrados", "favorecem os modelos", "anterior à regra P4", "ATB-FAR-013, PED-OMA-019, 020 e 021, COV-TOC-009"):
             with self.subTest(limite=expected):
                 self.assertIn(expected, text)
         self.assertNotRegex(text.lower(), r"\bvalidad[oa]s?\b(?! clínica)")
@@ -190,6 +190,19 @@ class TestTheFactualSentenceTheReadingAndTheLabel(unittest.TestCase):
         self.assertIn("Sem estes 2 casos lidos como falsos falhanços ou falsos passes, a tabela mudaria assim", text)
         self.assertIn("Gemini 3.5 Flash Lite: 13 → 12", text)
         self.assertIn("daria p = 0,500 em vez de p = 0,250", text)
+
+    def test_the_sample_of_false_passes_is_dated_before_the_p4_and_the_p4_false_passes_are_listed_in_the_five_languages(self):
+        for lang, page in PAGES.items():
+            start = page.index('id="limitacoes"')
+            text = words(page[start:page.index("</ul>", start)])
+            with self.subTest(lingua=lang):
+                self.assertGreaterEqual(len(re.findall(r"\bP4\b", text)), 4, text)
+                self.assertRegex(text, r"\b3\b[^.]*P4|P4[^.]*\b3\b")
+                self.assertIn("13/10/2026", text)
+        pt = words(PAGES["pt"][PAGES["pt"].index('id="limitacoes"'):][:9000])
+        self.assertIn("com o corretor anterior à regra P4 de 13/10/2026 (nenhum em 40", pt)
+        self.assertIn("a taxa de falsos passes da P4 em respostas novas não foi medida", pt)
+        self.assertIn("favorecem os modelos (menos falhas críticas)", pt)
 
     def test_the_failure_type_of_a_dose_or_an_interval_has_a_neutral_label_in_every_language(self):
         new = {"pt": "Dose ou intervalo diferente da referência", "en": "Dose or interval different from the reference",

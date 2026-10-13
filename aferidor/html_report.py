@@ -2132,6 +2132,14 @@ def _limitations_block(correction: "correcao.Correction | None" = None) -> str:
             "ATB-DPOC-012 do Phi-4. Foi uma decisão posterior a ver o efeito, escrita no método com a razão e a data."
         ),
         _t(
+            "A regra P4 deixa passar a dose de um fármaco que o cabeçalho de outro nomeia: uma frase, um item de lista (sem "
+            "negrito nem dois pontos) ou um parágrafo de prosa sobre outro fármaco entre o cabeçalho e a dose não lhe tiram a "
+            "dose, e uma linha de tabela sem fármaco sob o cabeçalho fica com ele. Uma frase que acaba em dois pontos e exclui o "
+            "fármaco («não se deve usar a azitromicina, pelo que a alternativa é:») dá-lhe a dose seguinte, e isto já era assim "
+            "antes da P4. Estes erros deixam passar uma resposta errada, ou seja, favorecem os modelos (menos falhas críticas). "
+            "Nas respostas guardadas, a P4 altera 3 critérios, todos lidos e corretos; em respostas novas não está medido."
+        ),
+        _t(
             "Texto de contraindicação numa linha de tabela, antes da dose («Nitrofurantoína (Contraindicações: insuficiência renal, ClCr) "
             "| 100 mg»), faz o corretor tomar a dose por condicionada. Não se corrigiu, pelo mesmo motivo."
         ),
@@ -2157,15 +2165,17 @@ def _limitations_block(correction: "correcao.Correction | None" = None) -> str:
         _t(
             "Quem leu e classificou as mudanças foi uma só pessoa, sem revisão. Li as {n} mudanças de estado de falha "
             "crítica entre o corretor publicado e o corrigido, uma a uma: {a} corretas, {b} falsos falhanços ou falsos passes "
-            "e {c} ambíguas (a lista está em {leitura}). Os falsos passes só se mediram numa amostra de 40 respostas com "
-            "critério ancorado (nenhum em 40, o que é compatível com até cerca de 7%), e os dos critérios sem âncora não "
-            "foram amostrados.",
+            "e {c} ambíguas (a lista está em {leitura}). Os falsos passes mediram-se numa amostra de 40 respostas com "
+            "critério ancorado, com o corretor anterior à regra P4 de 13/10/2026 (nenhum em 40, o que é compatível com até "
+            "cerca de 7%); a P4 altera 3 critérios nas respostas guardadas, e esses foram lidos um a um; a taxa de falsos "
+            "passes da P4 em respostas novas não foi medida. Os dos critérios sem âncora não foram amostrados.",
             n=reading[0], a=reading[1], b=reading[2], c=reading[3], leitura="<code>docs/LEITURA_MUDANCAS_2026-10-13.md</code>",
         ) + (" " + _sensitivity_text(correction.sensitivity) if correction.sensitivity is not None else "")
         if reading is not None else _t(
             "Quem leu e classificou as mudanças foi uma só pessoa, sem revisão. A taxa de falsos falhanços mede-se nas "
-            "respostas que mudaram; os falsos passes só se mediram numa amostra de 40 respostas com critério ancorado "
-            "(nenhum em 40, o que é compatível com até cerca de 7%). Os falsos passes dos critérios sem âncora não foram "
+            "respostas que mudaram; os falsos passes mediram-se numa amostra de 40 respostas com critério ancorado, com o "
+            "corretor anterior à regra P4 de 13/10/2026 (nenhum em 40, o que é compatível com até cerca de 7%); a taxa de "
+            "falsos passes da P4 em respostas novas não foi medida. Os falsos passes dos critérios sem âncora não foram "
             "amostrados."
         ),
     ]

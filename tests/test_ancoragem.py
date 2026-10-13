@@ -244,6 +244,43 @@ class TestTheDoseBelongsToTheDrugOfTheHeadingOfItsSection(unittest.TestCase):
         self.assertFalse(passes(c, "### Não usar azitromicina\nNota.\n- Dose: 500 mg"))
 
 
+class TestTheFalsePassesTheHeadingRuleAllows(unittest.TestCase):
+    """Wrong answers that rule P4 lets through, found with invented answers on 13 October 2026 and written in docs/METODO.md
+    (limitation vii). The direction of the error favours the models: fewer critical failures. The `expectedFailure` ones say what
+    the grader ought to do (fail), as U4 does, so that the limit is documented without being fixed as correct; if one of them
+    starts to pass, the test fails and asks for the limitation to be rewritten. All invented, none from an answer of a model."""
+
+    def anchored(self):
+        return dose(terms=("500 mg",), anchors=("azitromicina",))
+
+    def test_a_sentence_about_another_drug_between_the_heading_and_the_dose_is_an_assumed_consequence_of_the_principle(self):
+        # Case 2: the principle says "whatever the sentences between the heading and the dose name". The dose here is
+        # perhaps the other drug's, and the grader gives it to the drug of the heading. Documented, not claimed correct.
+        self.assertTrue(passes(self.anchored(), "### Azitromicina\nAlternativa: claritromicina.\nDose: 500 mg"))
+
+    @unittest.expectedFailure
+    def test_a_list_item_naming_another_drug_without_bold_or_colon_ends_the_section_of_the_heading(self):
+        # Case 3: "- Claritromicina" is the heading of the next drug, but it is neither bold nor ends in a colon.
+        self.assertFalse(passes(self.anchored(), "### Azitromicina\n- Dose: 250 mg\n- Claritromicina\n- Dose: 500 mg"))
+
+    @unittest.expectedFailure
+    def test_a_table_row_that_names_no_drug_under_the_heading_is_not_given_to_the_drug_of_the_heading(self):
+        # Case 4b: the first row names clarithromycin, the second names no drug, and it is given to azithromycin.
+        text = "### Azitromicina\n| Opção | Dose |\n|---|---|\n| Claritromicina (alternativa) | 500 mg |\n| Outra | 500 mg |"
+        self.assertFalse(passes(self.anchored(), text))
+
+    @unittest.expectedFailure
+    def test_a_sentence_that_excludes_the_drug_and_ends_in_a_colon_does_not_give_it_the_next_dose(self):
+        # Case 5, older than the P4: the excluded drug owns the dose that follows the colon.
+        self.assertFalse(passes(self.anchored(), "Não se deve usar azitromicina em grávidas, pelo que a alternativa é:\n- Dose: 500 mg"))
+
+    @unittest.expectedFailure
+    def test_a_paragraph_of_prose_about_another_drug_after_the_block_ends_the_section_of_the_heading(self):
+        # Case 6: a new paragraph about clarithromycin, then "Dose: 500 mg", and the dose goes back to the heading above.
+        text = "### Azitromicina\n- Dose: 250 mg\n\nOutro doente: a claritromicina é preferível.\nDose: 500 mg"
+        self.assertFalse(passes(self.anchored(), text))
+
+
 class TestBeforeThereWasAnAnchor(unittest.TestCase):
     def test_a_criterion_without_an_anchor_still_matches_anywhere_and_now_in_every_form(self):
         plain = Criterion(kind="contem", terms=("500 mg", "500mg"), failure=FailureType.DOSE_INCORRETA)
