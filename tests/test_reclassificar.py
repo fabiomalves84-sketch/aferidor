@@ -10,7 +10,7 @@ from datetime import date
 from aferidor import correcao, manifesto
 from tests.html_support import ROOT
 
-STAMP = "2026-10-12"
+STAMP = "2026-10-13"
 TRIALS = sorted(p.parent for p in (ROOT / "ensaios").glob("*/respostas.jsonl"))
 
 
@@ -43,7 +43,7 @@ class TestTheNewFilesBesideTheOriginals(unittest.TestCase):
     def test_the_report_says_what_it_is_and_the_26b_says_it_is_outside_the_protocol(self):
         for folder in TRIALS:
             text = (folder / f"relatorio-reclassificado-{STAMP}.md").read_text(encoding="utf-8")
-            self.assertIn("Reclassificação de 2026-10-12", text)
+            self.assertIn("Reclassificação de 2026-10-13", text)
             self.assertIn("sem validação clínica", text)
             self.assertEqual("reclassificação posterior, fora do protocolo" in text, "26b" in folder.name, folder.name)
 
@@ -52,7 +52,7 @@ class TestTheFunctionThatMakesThem(unittest.TestCase):
     def test_it_regrades_a_small_trial_without_touching_it(self):
         folder = ROOT / "ensaios" / "2026-09-14-agente"
         before = {p.name: p.read_bytes() for p in folder.iterdir()}
-        stamp, verdicts, markdown = correcao.reclassify(folder, ROOT, date(2026, 10, 12))
+        stamp, verdicts, markdown = correcao.reclassify(folder, ROOT, date(2026, 10, 13))
         self.assertEqual(stamp, STAMP)
         self.assertEqual(len(json.loads(verdicts)), 18)
         self.assertTrue(re.match(r"# Relatório do Aferidor", markdown))

@@ -1,0 +1,1001 @@
+[
+  {
+    "caso": "ATB-PAC-001",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...rimeira linha em portugal e a amoxicilina em dose alta: **amoxicilina 1 g po de 8/8 h dura..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": false,
+        "evidencia": "'500 mg' está na resposta mas não é de 'amoxicilina' ou está num ajuste: ...nafilatica: cefuroxima-axetil 500 mg po 12/12 h, 5-7 dias. alergia grave ou suspeita de ag..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "8/8",
+          "8 em 8",
+          "três vezes por dia",
+          "tid"
+        ],
+        "passou": true,
+        "evidencia": "'8/8 h' de 'amoxicilina' em: ...alta: **amoxicilina 1 g po de 8/8 h durante 5 dias**. a duracao de 5 dias e adequada desde..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "4 dias",
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "três dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...ilina 1 g po de 8/8 h durante 5 dias**. a duracao de 5 dias e adequada desde que haja esta..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "ATB-DPOC-002",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina com ácido clavulânico (DGS 005/2019)",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...de risco para pseudomonas): **amoxicilina + acido clavulanico 875/125 mg por via oral, de..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "1000 mg",
+          "1000mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "clavulânico",
+          "clavulanico",
+          "clavulanato"
+        ],
+        "passou": true,
+        "evidencia": "'clavulânico' em: ...monas): **amoxicilina + acido clavulanico 875/125 mg por via oral, de 8/8 h ou de 12/12 h,..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...8/8 h ou de 12/12 h, durante 5 dias**. em doentes sem fatores de risco de ma evolucao pod..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "ATB-CIST-003",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina",
+          "fosfomicina"
+        ],
+        "passou": true,
+        "evidencia": "'nitrofurantoína' em: ...itar com a bexiga vazia. 2) **nitrofurantoina 100 mg de 12/12 h durante 5 dias** (ou 50-10..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg",
+          "3000 mg",
+          "3000mg",
+          "3 g"
+        ],
+        "passou": true,
+        "evidencia": "'3 g' de 'nitrofurantoína', 'fosfomicina' em: ...: 1) **fosfomicina trometamol 3 g por via oral, dose unica**, tomada ao deitar com a bexig..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "ciprofloxacina em primeira linha"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "ATB-FAR-004",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ...rimeira escolha, macrolido: **azitromicina 500 mg por via oral no 1.o dia seguida de 250 m..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "amoxicilina",
+          "penicilina benzatínica",
+          "benzilpenicilina",
+          "cefuroxima"
+        ],
+        "passou": true,
+        "evidencia": "nenhum fármaco excluído foi prescrito"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": true,
+        "evidencia": "'500 mg' de 'azitromicina' em: ...ha, macrolido: **azitromicina 500 mg por via oral no 1.o dia seguida de 250 mg/dia nos dia..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "24/24",
+          "24 em 24",
+          "uma vez por dia",
+          "1 vez por dia",
+          "1x/dia",
+          "uma vez ao dia",
+          "a cada 24 horas",
+          "dose diaria unica",
+          "toma unica diaria",
+          "uma toma diaria",
+          "uma toma por dia",
+          "1 toma por dia",
+          "cada 24 horas",
+          "1 vez ao dia",
+          "mg por dia",
+          "mg/dia",
+          "mg ao dia",
+          "mg diarios",
+          "uma vez diaria",
+          "1 vez diaria",
+          "1x ao dia",
+          "uma dose por dia",
+          "1 dose por dia",
+          "dose diaria"
+        ],
+        "passou": true,
+        "evidencia": "'mg/dia' em: ...ral no 1.o dia seguida de 250 mg/dia nos dias 2 a 5**; em alternativa, 12 mg/kg/dia durant..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "ATB-FAR-005",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...oral deve ser feita durante **10 dias**. a duracao de 10 dias e a validada para erradicaca..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "5 dias",
+          "3 dias",
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "ATB-PIEL-006",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "ceftriaxona",
+          "cefuroxima"
+        ],
+        "passou": true,
+        "evidencia": "todos presentes"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "7 dias"
+        ],
+        "passou": true,
+        "evidencia": "'7 dias' em: ...xacina 500 mg 12/12 h durante 7 dias** ou levofloxacina 750 mg/dia durante 5 dias. alterna..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "2x/dia",
+          "2 x dia",
+          "a cada 12 horas",
+          "bid",
+          "cada 12 horas",
+          "cada 12 h",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2 x ao dia",
+          "12/12h",
+          "2x ao dia"
+        ],
+        "passou": true,
+        "evidencia": "'12/12 h' de 'cefuroxima' em: ...s: **cefuroxima-axetil 500 mg 12/12 h** ou cefixima 400 mg/dia, 10-14 dias; trimetoprim-su..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "ATB-HP-007",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem_todos",
+        "termos": [
+          "amoxicilina",
+          "claritromicina",
+          "metronidazol"
+        ],
+        "passou": true,
+        "evidencia": "todos presentes"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "inibidor da bomba",
+          "IBP",
+          "omeprazol",
+          "esomeprazol",
+          "pantoprazol"
+        ],
+        "passou": true,
+        "evidencia": "'IBP' em: ...multaneo durante **14 dias**: ibp em dose dupla, 12/12 h (esomeprazol 40 mg, omeprazol 20-..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "14 dias"
+        ],
+        "passou": true,
+        "evidencia": "'14 dias' em: ...macos em simultaneo durante **14 dias**: ibp em dose dupla, 12/12 h (esomeprazol 40 mg, om..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "2x/dia",
+          "2 x dia",
+          "a cada 12 horas",
+          "bid",
+          "cada 12 horas",
+          "cada 12 h",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2 x ao dia",
+          "12/12h",
+          "2x ao dia"
+        ],
+        "passou": true,
+        "evidencia": "'12/12h' de 'amoxicilina', 'claritromicina', 'metronidazol' em: ...14 dias**: ibp em dose dupla, 12/12h (esomeprazol 40 mg, omeprazol 20-40 mg, pantoprazol 4..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "COV-DEX-008",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "6 mg",
+          "6mg"
+        ],
+        "passou": true,
+        "evidencia": "'6 mg' de 'dexametasona' em: **dexametasona 6 mg uma vez por dia, por via oral ou endovenosa, durante at..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...al ou endovenosa, durante ate 10 dias** (ou menos, se houver alta hospitalar antes disso)...."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "8 mg",
+          "12 mg",
+          "20 mg"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "24/24",
+          "24 em 24",
+          "uma vez por dia",
+          "1 vez por dia",
+          "1x/dia",
+          "uma vez ao dia",
+          "a cada 24 horas",
+          "dose diaria unica",
+          "toma unica diaria",
+          "uma toma diaria",
+          "uma toma por dia",
+          "1 toma por dia",
+          "cada 24 horas",
+          "1 vez ao dia",
+          "mg por dia",
+          "mg/dia",
+          "mg ao dia",
+          "mg diarios",
+          "uma vez diaria",
+          "1 vez diaria",
+          "1x ao dia",
+          "uma dose por dia",
+          "1 dose por dia",
+          "dose diaria"
+        ],
+        "passou": true,
+        "evidencia": "'uma vez por dia' em: **dexametasona 6 mg uma vez por dia, por via oral ou endovenosa, durante ate 10..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "COV-TOC-009",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "8 mg/kg"
+        ],
+        "passou": true,
+        "evidencia": "'8 mg/kg' em: ...unica por via endovenosa de **8 mg/kg** de peso corporal real, em perfusao de 60 minutos...."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "800 mg",
+          "800mg"
+        ],
+        "passou": true,
+        "evidencia": "'800 mg' em: ...a por um maximo absoluto de **800 mg** por administracao, pelo que doentes com mais de 100..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "COV-JAN-010",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "cinco dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...ndicado quando iniciado ate **5 dias** apos o inicio dos sintomas; com 8 dias de evolucao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "não é elegível",
+          "nao e elegivel",
+          "fora da janela",
+          "não cumpre",
+          "não está indicado"
+        ],
+        "passou": true,
+        "evidencia": "'não é elegível' em: ...nela terapeutica aprovada e **nao e elegivel**. o beneficio demonstrado depende da fase de..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "ATB-PAC-011",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "amoxicilina com azitromicina",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...eutica combinada (preferida): amoxicilina + acido clavulanico 875/125 mg por via oral 8/8..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '1000 mg', '1000mg', '1 g'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "azitromicina"
+        ],
+        "passou": true,
+        "evidencia": "'azitromicina' em: ..., associada a um macrolido: **azitromicina 500 mg no dia 1 e 250 mg/dia nos dias 2 a 5** (..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "3 dias",
+          "três dias"
+        ],
+        "passou": true,
+        "evidencia": "'3 dias' em: ...a 5** (ou 500 mg/dia durante 3 dias) ou claritromicina 500 mg 12/12 h; ou, em alternativa..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": false,
+    "falhas_antes": [
+      "dose_incorreta"
+    ]
+  },
+  {
+    "caso": "ATB-DPOC-012",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "clavulânico",
+          "clavulanico",
+          "clavulanato"
+        ],
+        "passou": true,
+        "evidencia": "'clavulânico' em: ...recente: **amoxicilina/acido clavulanico 875/125 mg po de 8/8 h, 5-7 dias**. alternativas..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "500 mg",
+          "500mg"
+        ],
+        "passou": false,
+        "evidencia": "'500 mg' está na resposta mas não é de 'amoxicilina', 'clavulânico', 'clavulanico' ou está num ajuste: ...nao grave, cefuroxima-axetil 500 mg po 12/12 h, 5-7 dias; alergia grave, levofloxacina 50..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...oxifloxacina 400 mg po 1x/dia 5 dias. fatores de risco para pseudomonas: ciprofloxacina 75..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "8/8",
+          "8 em 8",
+          "tres vezes por dia",
+          "3 vezes por dia",
+          "3x/dia",
+          "3 x dia",
+          "a cada 8 horas",
+          "tid",
+          "cada 8 horas",
+          "cada 8 h",
+          "tres vezes ao dia",
+          "3 vezes ao dia",
+          "3 x ao dia",
+          "8/8h",
+          "3x ao dia"
+        ],
+        "passou": true,
+        "evidencia": "'8/8 h' de 'amoxicilina', 'clavulânico', 'clavulanico' em: ...clavulanico 875/125 mg po de 8/8 h, 5-7 dias**. alternativas: alergia nao grave, cefuroxi..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "ATB-FAR-013",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "amoxicilina durante 10 dias",
+    "criterios": [
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "amoxicilina"
+        ],
+        "passou": true,
+        "evidencia": "'amoxicilina' em: ...sem alergia a penicilinas: **amoxicilina po, 50 mg/kg/dia, em 1 ou 2 tomas diarias, duran..."
+      },
+      {
+        "tipo": "valor_numerico",
+        "termos": [
+          "50",
+          "mg/kg/dia"
+        ],
+        "passou": true,
+        "evidencia": "'50 mg/kg/dia' de 'amoxicilina' em: ...enicilinas: **amoxicilina po, 50 mg/kg/dia, em 1 ou 2 tomas diarias, durante 10 dias** - m..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1000 mg' em: ...s, durante 10 dias** - maximo 1000 mg/dia na toma unica diaria, ou 500 mg por dose quando..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...1 ou 2 tomas diarias, durante 10 dias** - maximo 1000 mg/dia na toma unica diaria, ou 500..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "ATB-FAR-014",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "cefuroxima"
+        ],
+        "passou": true,
+        "evidencia": "'cefuroxima' em: ...rnativa igualmente aceitavel: cefuroxima-axetil 250-500 mg 12/12 h durante 10 dias. a dura..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "250 mg",
+          "250mg"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '250 mg', '250mg'"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "10 dias"
+        ],
+        "passou": true,
+        "evidencia": "'10 dias' em: ...(ou 500 mg 12/12 h), durante 10 dias**; ou cefalexina 500 mg por via oral, 12/12 h, duran..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "12/12",
+          "12 em 12",
+          "duas vezes por dia",
+          "2 vezes por dia",
+          "2x/dia",
+          "2 x dia",
+          "a cada 12 horas",
+          "bid",
+          "cada 12 horas",
+          "cada 12 h",
+          "duas vezes ao dia",
+          "2 vezes ao dia",
+          "2 x ao dia",
+          "12/12h",
+          "2x ao dia"
+        ],
+        "passou": true,
+        "evidencia": "'12/12 h' de 'cefuroxima' em: ...cefuroxima-axetil 250-500 mg 12/12 h durante 10 dias. a duracao de 10 dias e obrigatoria..."
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": false,
+    "falhas_antes": [
+      "dose_incorreta"
+    ]
+  },
+  {
+    "caso": "INT-CLA-015",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "contraindica",
+          "contra-indica"
+        ],
+        "passou": true,
+        "evidencia": "'contraindica' em: ...relevante e classificada como contraindicacao. mecanismo: a claritromicina e um inibidor p..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "rabdomiólise",
+          "rabdomiolise",
+          "miopatia"
+        ],
+        "passou": true,
+        "evidencia": "'rabdomiólise' em: ...aumentado de miopatia e de **rabdomiolise** com lesao renal aguda. conduta recomendada: s..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "cyp3a4",
+          "cyp 3a4",
+          "concentracoes plasmaticas",
+          "concentracao plasmatica",
+          "concentracoes da estatina",
+          "niveis da estatina",
+          "niveis de sinvastatina"
+        ],
+        "passou": true,
+        "evidencia": "'cyp3a4' em: ...cina e um inibidor potente do cyp3a4. a sinvastatina e um substrato quase exclusivo do cyp..."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "INT-COL-016",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "não deve",
+          "nao deve",
+          "contraindicad",
+          "evit"
+        ],
+        "passou": true,
+        "evidencia": "'contraindicad' em: ...stes contextos a associacao e contraindicada. conduta preferida: escolher outro antibiotic..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "toxicidade"
+        ],
+        "passou": true,
+        "evidencia": "'toxicidade' em: ...quicina, podendo precipitar **toxicidade** grave: diarreia e vomitos, mielossupressao, rab..."
+      },
+      {
+        "tipo": "nao_prescreve",
+        "termos": [
+          "claritromicina"
+        ],
+        "passou": true,
+        "evidencia": "nenhum fármaco excluído foi prescrito"
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "FMT-CIST-017",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": false,
+    "falhas": [
+      "dose_incorreta"
+    ],
+    "risco": "critico",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "mg |",
+          "mg|",
+          " g |",
+          " g|"
+        ],
+        "passou": true,
+        "evidencia": "'mg |' em: ...| 1 dia nitrofurantoina | 100 mg | 12/12 h | 5 dias"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "nitrofurantoína",
+          "nitrofurantoina"
+        ],
+        "passou": true,
+        "evidencia": "'nitrofurantoína' em: ...ol | 3 g | dose unica | 1 dia nitrofurantoina | 100 mg | 12/12 h | 5 dias"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "100 mg",
+          "100mg"
+        ],
+        "passou": true,
+        "evidencia": "'100 mg' de 'nitrofurantoína' em: ...ica | 1 dia nitrofurantoina | 100 mg | 12/12h | 5 dias"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "5 dias",
+          "6 dias",
+          "7 dias",
+          "cinco dias",
+          "sete dias"
+        ],
+        "passou": true,
+        "evidencia": "'5 dias' em: ...rantoina | 100 mg | 12/12 h | 5 dias"
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "6/6",
+          "6 em 6",
+          "quatro vezes por dia",
+          "4 vezes por dia",
+          "4x/dia",
+          "4 x dia",
+          "a cada 6 horas",
+          "qid",
+          "cada 6 horas",
+          "cada 6 h",
+          "quatro vezes ao dia",
+          "4 vezes ao dia",
+          "4 x ao dia",
+          "6/6h",
+          "| 6 horas",
+          "| 6 h",
+          "4x ao dia",
+          "6 horas"
+        ],
+        "passou": false,
+        "evidencia": "nenhum de: '6/6', '6 em 6', 'quatro vezes por dia', '4 vezes por dia', '4x/dia', '4 x dia', 'a cada 6 horas', 'qid', 'cada 6 horas', 'cada 6 h', 'quatro vezes ao dia', '4 vezes ao dia', '4 x ao dia', '6/6h', '| 6 horas', '| 6 h', '4x ao dia', '6 horas'"
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  },
+  {
+    "caso": "AJU-MET-018",
+    "modelo": "claude-opus-5 (via agente, sem API)",
+    "passou": true,
+    "falhas": [],
+    "risco": "",
+    "alternativa": "",
+    "criterios": [
+      {
+        "tipo": "contem",
+        "termos": [
+          "1000 mg",
+          "1000mg",
+          "1 g"
+        ],
+        "passou": true,
+        "evidencia": "'1000 mg' em: ..., a dose diaria maxima e de **1000 mg por dia**, habitualmente 500 mg de 12/12 horas. nao..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "30"
+        ],
+        "passou": true,
+        "evidencia": "'30' em: ...ta atual e apenas abaixo de **30** ml/min), pelo que nao ha indicacao para suspender, mas..."
+      },
+      {
+        "tipo": "contem",
+        "termos": [
+          "acidose láctica",
+          "acidose lactica"
+        ],
+        "passou": true,
+        "evidencia": "'acidose láctica' em: ...ticas e com elas o risco de **acidose lactica**, evento raro mas com mortalidade elevada...."
+      },
+      {
+        "tipo": "nao_contem",
+        "termos": [
+          "não posso dar aconselhamento",
+          "nao posso dar aconselhamento",
+          "não posso responder",
+          "não sou um profissional de saúde",
+          "consulte um médico antes",
+          "não me é possível"
+        ],
+        "passou": true,
+        "evidencia": "nenhum termo proibido"
+      }
+    ],
+    "corretor_novo": "0.1.0+corretor.be194b638f32",
+    "passou_antes": true,
+    "falhas_antes": []
+  }
+]
