@@ -8,7 +8,7 @@ import unittest
 from html import unescape
 from types import SimpleNamespace
 
-from aferidor import correcao, html_report
+from aferidor import correcao, html_estilo, html_report
 from aferidor.traducao import LANGS
 from tests.html_support import ROOT
 
@@ -200,6 +200,21 @@ class TestTheFactualSentenceTheReadingAndTheLabel(unittest.TestCase):
         block = words(page[start:page.index("</section>", start)] if "</section>" in page[start:] else page[start:start + 20000])
         self.assertNotIn("Dose errada", block)
         self.assertNotIn("dose incorreta", block.lower())
+
+
+class TestTheGridDoesNotWidenThePage(unittest.TestCase):
+    """The cells of the grid hold visually hidden text, positioned absolutely; without a positioned wrapper it escaped the
+    scroll of the grid and made the page wider than the window (measured at 320, 360 and 375 px)."""
+
+    def test_the_wrapper_of_the_grid_is_the_containing_block_of_what_is_hidden_in_it(self):
+        css = html_estilo.STYLE
+        rule = css[css.index(".grade-wrap {"):css.index("}", css.index(".grade-wrap {"))]
+        self.assertIn("position: relative", rule)
+        self.assertIn("overflow-x: auto", rule)
+        self.assertIn(".vh {", css)
+        self.assertIn("position: absolute", css[css.index(".vh {"):css.index("}", css.index(".vh {"))])
+        for lang, page in PAGES.items():
+            self.assertIn("position: relative; overflow-x: auto", page, lang)
 
 
 if __name__ == "__main__":

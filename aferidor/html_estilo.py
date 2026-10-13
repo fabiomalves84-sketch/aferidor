@@ -353,7 +353,9 @@ table.areas tbody th { font-weight: 500; }
 .valor { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.9rem; text-align: right; }
 .r-critico { --c: var(--critical); } .r-alto { --c: var(--serious); } .r-medio { --c: var(--warning); } .r-baixo { --c: var(--neutral); }
 .fill, .swatch.r-critico, .swatch.r-alto, .swatch.r-medio, .swatch.r-baixo { background: var(--c); }
-.grade-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+/* position: relative, so the visually hidden text of the cells (position: absolute) is clipped by the scroll of the grid
+   and does not widen the page. */
+.grade-wrap { position: relative; overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
 table.grade { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
 table.grade th, table.grade td { border-bottom: 1px solid var(--grid); padding: 0.55rem 0.75rem; text-align: left; vertical-align: top; }
 table.grade thead th { font-size: 0.82rem; color: var(--ink); background: var(--surface); min-width: 12rem; }
