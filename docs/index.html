@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aferidor</title>
+<meta name="description" content="Banco de ensaio que mede respostas de modelos de linguagem a casos clínicos de referência, em português europeu. Triagem automática, sem validação clínica.">
+<style>
+:root { color-scheme: light dark;
+  --page: #f3f7f7; --surface: #ffffff; --ink: #0c1f24; --ink-2: #435a60; --border: rgba(12,31,36,0.10); --accent: #0e6b78; }
+@media (prefers-color-scheme: dark) {
+  :root { --page: #0e191b; --surface: #152225; --ink: #e9f2f2; --ink-2: #b7cacc; --border: rgba(233,242,242,0.12); --accent: #5cc1d0; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); line-height: 1.55;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+main { max-width: 42rem; margin: 0 auto; padding: 2.5rem 16px 3rem; }
+h1 { font-size: 2rem; margin: 0 0 0.25rem; }
+.sub { color: var(--ink-2); margin: 0 0 1.5rem; }
+.aviso { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+  border-radius: 8px; padding: 0.9rem 1rem; margin: 0 0 1.75rem; }
+h2 { font-size: 1.1rem; margin: 1.75rem 0 0.5rem; }
+ul { padding-left: 1.2rem; margin: 0; }
+li { margin: 0.35rem 0; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.nota { color: var(--ink-2); font-size: 0.92rem; }
+</style>
+</head>
+<body>
+<main>
+<h1>Aferidor</h1>
+<p class="sub">Banco de ensaio para respostas clínicas de modelos de linguagem, em português europeu.</p>
+
+<p class="aviso"><strong>Triagem automática, sem validação clínica.</strong> Mede, não aconselha. Não é dispositivo médico e não contém dados de doentes.</p>
+
+<p>O Aferidor põe a modelos de linguagem perguntas clínicas com resposta de referência de fonte pública, corrige cada resposta contra critérios escritos em código e ordena as falhas por risco. A correção é textual e determinista, e os limites conhecidos estão escritos junto dos resultados.</p>
+
+<h2>Ver os resultados</h2>
+<ul>
+<li><a href="exemplo/index.html">Página de exemplo, em português</a></li>
+</ul>
+<p class="nota">Também em <a href="exemplo/index.en.html" hreflang="en">English</a>, <a href="exemplo/index.es.html" hreflang="es">Español</a>, <a href="exemplo/index.fr.html" hreflang="fr">Français</a> e <a href="exemplo/index.de.html" hreflang="de">Deutsch</a>. Estas quatro traduções não foram revistas.</p>
+
+<h2>Perceber como se mede</h2>
+<ul>
+<li><a href="https://github.com/fabiomalves84-sketch/aferidor/blob/main/docs/METODO.md">Método e limitações conhecidas do corretor</a></li>
+<li><a href="https://github.com/fabiomalves84-sketch/aferidor/blob/main/docs/APRESENTACAO.md">Apresentação do projeto</a></li>
+<li><a href="https://github.com/fabiomalves84-sketch/aferidor">Código e ensaios registados</a></li>
+</ul>
+
+<p class="nota">Os números dependem da versão do corretor. A página de exemplo mostra o corretor publicado até 12/10/2026 e o corrigido, lado a lado.</p>
+</main>
+</body>
+</html>
