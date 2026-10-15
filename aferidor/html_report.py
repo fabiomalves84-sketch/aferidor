@@ -2291,10 +2291,10 @@ def _method_panel(data: _ReportData, before: str) -> str:
         f'<div class="metodo" id="metodo-texto"><h3>{_t("Método")}</h3>'
         "<p>" + _t(
             "A correção é textual e determinista: cada critério procura termos e valores na "
-            "resposta, e o mesmo texto dá sempre o mesmo veredicto. O próprio corretor é "
-            "ensaiado nos dois sentidos: a resposta de referência de cada caso tem de passar, e "
-            "uma resposta errada construída para cada critério tem de falhar. O modelo nunca vê "
-            "a resposta de referência nem os critérios."
+            "resposta, e o mesmo texto dá sempre o mesmo veredicto. Cada critério é ensaiado com a "
+            "resposta de referência do caso, que tem de passar, e com uma resposta errada construída "
+            "por critério, que tem de falhar; isto não mede a concordância com respostas reais de "
+            "modelos. O modelo nunca vê a resposta de referência nem os critérios."
         ) + "</p><p>" + _t(
             "O método completo, os limites conhecidos e a confirmação das fontes estão no "
             "repositório do Aferidor, em {metodo} e {verificacao}.",
